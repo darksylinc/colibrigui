@@ -43,4 +43,15 @@ namespace Crystal
 			NumBorders
 		};
 	}
+	/*namespace Corners
+	{
+		enum NumCorners
+		{
+			TopLeft,
+			BottomLeft,
+			BottomRight,
+			TopRight,
+			NumCorners
+		};
+	}*/
 }

@@ -11,6 +11,9 @@ namespace Crystal
 	{
 		friend class CrystalManager;
 
+		Ogre::Vector2 m_currentScroll;
+		Ogre::Vector2 m_scrollArea;
+
 		/// In range [0; m_children.size())
 		uint16_t	m_defaultChildWidget;
 		/// When true, all of our immediate children widgets are dirty and need to be recalculated
@@ -60,6 +63,10 @@ namespace Crystal
 		void setDefault( Widget * crystalgui_nullable widget );
 
 		Widget* crystalgui_nullable getDefaultWidget() const;
+
+		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+												  const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot );
 	};
 }
 

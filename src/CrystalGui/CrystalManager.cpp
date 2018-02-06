@@ -220,4 +220,18 @@ namespace Crystal
 	{
 		m_childrenNavigationDirty = true;
 	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::update()
+	{
+		autosetNavigation();
+
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+//			(*itor)->fillBuffersAndCommands( , Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );
+			++itor;
+		}
+	}
 }

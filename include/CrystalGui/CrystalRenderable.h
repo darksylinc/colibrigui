@@ -17,14 +17,29 @@ namespace Crystal
 		Ogre::HlmsDatablock	*material;
 	};
 
+	struct UiVertex
+	{
+		float x;
+		float y;
+		float clipDistance[Borders::NumBorders];
+		uint8_t rgbaColour[4];
+		uint16_t u;
+		uint16_t v;
+	};
+
 	class Renderable : public Widget
 	{
+	protected:
 		StateInformation m_stateInformation[States::NumStates];
 
 		Ogre::ColourValue	m_colour;
 
 	public:
 		Renderable( CrystalManager *manager );
+
+		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+												  const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot );
 	};
 }
 

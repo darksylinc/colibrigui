@@ -10,6 +10,7 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
+	struct UiVertex;
 	typedef std::vector<Widget*> WidgetVec;
 	typedef std::vector<Window*> WindowVec;
 
@@ -53,10 +54,23 @@ namespace Crystal
 
 		WidgetListenerPairVec::iterator findListener( WidgetListener *listener );
 
+		static Ogre::Vector2 mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos );
+
+		void updateDerivedTransform( const Ogre::Vector2 &parentPos, const Ogre::Matrix3 &parentRot );
+
+		/// Asumes:
+		///		1. Parent is already up to date
+		///		2. m_parent is non-null (i.e. Window breaks this assumption)
+		void updateDerivedTransformFromParent();
+
 	public:
 		Ogre::Vector2   m_position;
 		Ogre::Vector2   m_size;
 		Ogre::Matrix3   m_orientation;
+
+		Ogre::Vector2   m_derivedTopLeft;
+		Ogre::Vector2   m_derivedBottomRight;
+		Ogre::Matrix3   m_derivedOrientation;
 
 		Widget( CrystalManager *manager );
 		virtual ~Widget();
@@ -98,7 +112,11 @@ namespace Crystal
 		@return
 			True if the given widget is partially intersecting or fully inside this, or viceversa.
 		*/
-		bool intesects( Widget *widget ) const;
+		bool intersects( Widget *widget ) const;
+
+		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+												  const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot );
 
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;

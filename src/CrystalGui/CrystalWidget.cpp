@@ -22,7 +22,10 @@ namespace Crystal
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( Ogre::Vector2::ZERO ),
-		m_orientation( Ogre::Matrix3::IDENTITY )
+		m_orientation( Ogre::Matrix3::IDENTITY ),
+		m_derivedTopLeft( Ogre::Vector2::ZERO ),
+		m_derivedBottomRight( Ogre::Vector2::ZERO ),
+		m_derivedOrientation( Ogre::Matrix3::IDENTITY )
 	{
 		memset( m_nextWidget, 0, sizeof(m_nextWidget) );
 		for( size_t i=0; i<Borders::NumBorders; ++i )
@@ -74,6 +77,27 @@ namespace Crystal
 		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(), widget );
 		if( itor != m_children.end() )
 			m_children.erase( itor );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos )
+	{
+		Ogre::Vector3 result = matrix * Ogre::Vector3( xyPos.x, xyPos.y, 0.0f );
+		return Ogre::Vector2( result.x, result.y );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::updateDerivedTransform( const Ogre::Vector2 &parentPos,
+										 const Ogre::Matrix3 &parentRot )
+	{
+		const Ogre::Matrix3 finalRot = parentRot * m_orientation;
+
+		m_derivedTopLeft		= mul( finalRot, m_position ) + parentPos;
+		m_derivedBottomRight	= m_derivedTopLeft + mul( finalRot, m_size );
+		m_derivedOrientation	= finalRot;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::updateDerivedTransformFromParent()
+	{
+		updateDerivedTransform( m_parent->m_derivedTopLeft, m_parent->m_derivedOrientation );
 	}
 	//-------------------------------------------------------------------------
 	WidgetListenerPairVec::iterator Widget::findListener( WidgetListener *listener )
@@ -161,12 +185,20 @@ namespace Crystal
 		return m_position.y + m_size.y;
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::intesects( Widget *widget ) const
+	bool Widget::intersects( Widget *widget ) const
 	{
 		return !( this->m_position.x > widget->m_position.x + widget->m_size.x	||
 				  this->m_position.y > widget->m_position.y + widget->m_size.y	||
 				  this->m_position.x + this->m_size.x < widget->m_position.x	||
 				  this->m_position.y + this->m_size.y < widget->m_position.y );
+	}
+	//-------------------------------------------------------------------------
+	UiVertex* Widget::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+											  const Ogre::Vector2 &parentPos,
+											  const Ogre::Matrix3 &parentRot )
+	{
+		updateDerivedTransform( parentPos, parentRot );
+		return vertexBuffer;
 	}
 	//-------------------------------------------------------------------------
 	States::States Widget::getCurrentState() const

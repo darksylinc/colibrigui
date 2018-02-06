@@ -64,6 +64,8 @@ namespace Crystal
 		void _setWindowNavigationDirty();
 		void _notifyChildWindowIsDirty();
 
+		void update();
+
 #if __clang__
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnullability-completeness"
