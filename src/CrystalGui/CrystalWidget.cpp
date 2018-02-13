@@ -66,6 +66,14 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_setParent( Widget *parent )
+	{
+		assert( !this->m_parent && parent );
+		this->m_parent = parent;
+		parent->m_children.push_back( parent );
+		parent->setWidgetNavigationDirty();
+	}
+	//-------------------------------------------------------------------------
 	Window* Widget::getFirstParentWindow()
 	{
 		if( isWindow() )

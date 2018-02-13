@@ -9,10 +9,16 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Ogre
 {
+	/** CrystalOgreRenderables receive the shared Vao from their parents
+		(when 'this' is not a window).
+		Only Windows have their own Vao, which they share with their
+		children (except child windows).
+	*/
 	class CrystalOgreRenderable : public MovableObject, public Renderable
 	{
 	protected:
 		void createBuffers( Ogre::IndexBufferPacked *indexBuffer );
+		void getSharedBuffersFromParent( CrystalOgreRenderable *parent );
 		void destroyBuffers( bool ownsVao );
 
 	public:

@@ -163,6 +163,14 @@ namespace Ogre
 		mVaoPerLod[1].push_back( vao );
 	}
 	//-----------------------------------------------------------------------------------
+	void CrystalOgreRenderable::getSharedBuffersFromParent( CrystalOgreRenderable *parent )
+	{
+		assert( mVaoPerLod[0].empty() && mVaoPerLod[1].empty() &&
+				"getBuffersFromParentWindow or createBuffers already called!" );
+		mVaoPerLod[0] = parent->mVaoPerLod[0];
+		mVaoPerLod[1] = parent->mVaoPerLod[1];
+	}
+	//-----------------------------------------------------------------------------------
 	void CrystalOgreRenderable::destroyBuffers( bool ownsVao )
 	{
 		if( ownsVao )

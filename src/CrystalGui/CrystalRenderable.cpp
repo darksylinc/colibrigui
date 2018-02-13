@@ -84,6 +84,17 @@ namespace Crystal
 		Widget::_destroy();
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::_setParent( Widget *parent )
+	{
+		Widget::_setParent( parent );
+
+		if( !isWindow() )
+		{
+			Window *window = parent->getFirstParentWindow();
+			getSharedBuffersFromParent( window );
+		}
+	}
+	//-------------------------------------------------------------------------
 	UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,
 												  const Ogre::Matrix3 &parentRot )

@@ -67,7 +67,11 @@ namespace Crystal
 	public:
 		Renderable( CrystalManager *manager, bool ownsVao=false );
 
+		/// See Widget::_destroy
 		virtual void _destroy();
+
+		/// See Widget::_setParent
+		virtual void _setParent( Widget *parent );
 
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,

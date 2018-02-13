@@ -77,6 +77,9 @@ namespace Crystal
 
 		virtual void _destroy();
 
+		/// Do not call directly
+		virtual void _setParent( Widget *parent );
+
 		virtual bool isWindow() const	{ return false; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns its

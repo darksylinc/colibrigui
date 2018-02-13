@@ -90,10 +90,7 @@ namespace Crystal
 
 			T *retVal = new T( this );
 
-			retVal->m_parent = parent;
-			parent->m_children.push_back( parent );
-
-			parent->setWidgetNavigationDirty();
+			retVal->_setParent( parent );
 
 			return retVal;
 		}
