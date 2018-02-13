@@ -4,7 +4,7 @@
 namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
-		Renderable( manager )
+		Renderable( manager, false )
 	{
 	}
 	//-------------------------------------------------------------------------

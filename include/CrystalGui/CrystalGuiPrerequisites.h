@@ -55,3 +55,8 @@ namespace Crystal
 		};
 	}*/
 }
+
+namespace Ogre
+{
+	class CrystalOgreRenderable;
+}

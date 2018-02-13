@@ -37,6 +37,11 @@ namespace Crystal
 		bool m_windowNavigationDirty;
 		bool m_childrenNavigationDirty;
 
+		Ogre::VaoManager			*m_vaoManager;
+		Ogre::ObjectMemoryManager	*m_objectMemoryManager;
+		Ogre::SceneManager			*m_sceneManager;
+		Ogre::IndexBufferPacked		*m_defaultIndexBuffer;
+
 		template <typename T>
 		void autosetNavigation( const std::vector<T> &container );
 
@@ -44,6 +49,12 @@ namespace Crystal
 
 	public:
 		CrystalManager();
+		~CrystalManager();
+
+		void setOgre( Ogre::VaoManager * crystalgui_nullable vaoManager );
+		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
+		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
+		Ogre::IndexBufferPacked* getIndexBuffer()					{ return m_defaultIndexBuffer; }
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 

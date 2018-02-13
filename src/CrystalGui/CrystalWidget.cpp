@@ -66,6 +66,17 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	Window* Widget::getFirstParentWindow()
+	{
+		if( isWindow() )
+		{
+			assert( dynamic_cast<Window*>( this ) );
+			return static_cast<Window*>( this );
+		}
+
+		return m_parent->getFirstParentWindow();
+	}
+	//-------------------------------------------------------------------------
 	void Widget::notifyWidgetDestroyed( Widget *widget )
 	{
 		for( size_t i=0; i<Borders::NumBorders; ++i )

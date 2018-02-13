@@ -6,13 +6,13 @@
 namespace Crystal
 {
 	Window::Window( CrystalManager *manager ) :
-		Renderable( manager ),
+		Renderable( manager, false ),
+		m_currentScroll( Ogre::Vector2::ZERO ),
+		m_scrollArea( Ogre::Vector2::ZERO ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
-		m_childrenNavigationDirty( false ),
-		m_currentScroll( Ogre::Vector2::ZERO ),
-		m_scrollArea( Ogre::Vector2::ZERO )
+		m_childrenNavigationDirty( false )
 	{
 	}
 	//-------------------------------------------------------------------------
@@ -44,7 +44,9 @@ namespace Crystal
 			m_childWindows.clear();
 		}
 
-		Widget::_destroy();
+		destroyBuffers( true );
+
+		Renderable::_destroy();
 	}
 	//-------------------------------------------------------------------------
 	void Window::notifyWidgetDestroyed( Widget *widget )
@@ -163,6 +165,7 @@ namespace Crystal
 
 		return retVal;
 	}
+	//-------------------------------------------------------------------------
 	UiVertex* Window::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Matrix3 &parentRot )

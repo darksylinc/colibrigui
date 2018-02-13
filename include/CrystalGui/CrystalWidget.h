@@ -79,6 +79,11 @@ namespace Crystal
 
 		virtual bool isWindow() const	{ return false; }
 
+		/// If 'this' is a window, it returns 'this'. Otherwise it returns its
+		/// parent (or its parent's parent) until we find a window. Cannot
+		/// return null
+		Window* getFirstParentWindow();
+
 		// WidgetListener overload
 		virtual void notifyWidgetDestroyed( Widget *widget );
 
