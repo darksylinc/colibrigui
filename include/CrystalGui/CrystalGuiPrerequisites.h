@@ -43,6 +43,22 @@ namespace Crystal
 			NumBorders
 		};
 	}
+	namespace GridLocations
+	{
+		enum GridLocations
+		{
+			TopLeft,
+			Top,
+			TopRight,
+			CenterLeft,
+			Center,
+			CenterRight,
+			BottomLeft,
+			Bottom,
+			BottomRight,
+			NumGridLocations
+		};
+	}
 	/*namespace Corners
 	{
 		enum NumCorners

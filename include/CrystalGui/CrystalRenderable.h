@@ -19,10 +19,10 @@ namespace Crystal
 {
 	struct StateInformation
 	{
-		Ogre::Vector2		uvPos;
-		Ogre::Vector2		uvSize;
-		Ogre::Vector2		borderUvStartSize[Borders::NumBorders];
-		Ogre::Vector2		borderStartSize[Borders::NumBorders];
+		//One set of UVs for each cell in the 3x3 grid.
+		Ogre::Vector4	uvTopLeftBottomRight[GridLocations::NumGridLocations];
+		float			borderSize[Borders::NumBorders];
+		float			borderRepeatSize[Borders::NumBorders]; /// 0 or negative means disable repeat
 		Ogre::HlmsDatablock	*material;
 	};
 
@@ -38,14 +38,18 @@ namespace Crystal
 
 	struct ApiEncapsulatedObjects
 	{
-		Ogre::HlmsCrystalGui		*hlms;
+		//Ogre::HlmsCrystalGui		*hlms;
+		Ogre::HlmsCache const		*lastHlmsCache;
+		const Ogre::HlmsCache		&passCache;
+		Ogre::Hlms					*hlms;
+		Ogre::uint32				lastVaoName;
 		Ogre::CommandBuffer			*commandBuffer;
 		Ogre::IndirectBufferPacked	*indirectBuffer;
 		uint8_t						*indirectDraw;
 		uint8_t						*startIndirectDraw;
 		int							baseInstanceAndIndirectBuffers;
 		Ogre::VertexArrayObject		*vao;
-		Ogre::CbDrawCallIndexed		*drawCmd;
+		Ogre::CbDrawCallStrip		*drawCmd;
 		Ogre::CbDrawIndexed			*drawCountPtr;
 		uint16_t primCount;
 	};
@@ -63,6 +67,15 @@ namespace Crystal
 
 		void addCommands( ApiEncapsulatedObjects &apiObject,
 						  Ogre::CrystalOgreRenderable *ogreRenderable );
+
+		inline void addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,
+							 Ogre::Vector2 topLeft,
+							 Ogre::Vector2 bottomRight,
+							 Ogre::Vector4 uvTopLeftBottomRight,
+							 uint8_t *rgbaColour,
+							 Ogre::Vector2 parentDerivedTL,
+							 Ogre::Vector2 parentDerivedBR,
+							 Ogre::Vector2 invSize );
 
 	public:
 		Renderable( CrystalManager *manager, bool ownsVao=false );
