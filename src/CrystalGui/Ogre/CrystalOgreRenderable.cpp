@@ -1,12 +1,14 @@
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
+#include "CrystalGui/CrystalManager.h"
 
 #include "OgreSceneManager.h"
 
 namespace Ogre
 {
 	CrystalOgreRenderable::CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
-												  SceneManager *manager, uint8 renderQueueId ) :
+												  SceneManager *manager, uint8 renderQueueId,
+												  Crystal::CrystalManager *crystalManager ) :
 		MovableObject( id, objectMemoryManager, manager, renderQueueId ),
 		Renderable()
 	{
@@ -30,6 +32,8 @@ namespace Ogre
 		//Tip: You can use this array as a rough way to show or hide Renderables
 		//that belong to this MovableObject.
 		mRenderables.push_back( this );
+
+		setVao( crystalManager->getVao() );
 
 		//If we don't set a datablock, we'll crash Ogre.
 //		this->setDatablock( Root::getSingleton().getHlmsManager()->

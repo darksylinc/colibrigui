@@ -39,11 +39,13 @@ namespace Crystal
 		bool m_windowNavigationDirty;
 		bool m_childrenNavigationDirty;
 
+		Ogre::Root					*m_root;
 		Ogre::VaoManager			*m_vaoManager;
 		Ogre::ObjectMemoryManager	*m_objectMemoryManager;
 		Ogre::SceneManager			*m_sceneManager;
 		Ogre::VertexArrayObject		*m_vao;
-//		Ogre::IndexBufferPacked		*m_defaultIndexBuffer;
+		Ogre::IndirectBufferPacked	*m_indirectBuffer;
+		Ogre::CommandBuffer			*m_commandBuffer;
 
 		void checkVertexBufferCapacity();
 
@@ -56,10 +58,12 @@ namespace Crystal
 		CrystalManager();
 		~CrystalManager();
 
-		void setOgre( Ogre::VaoManager * crystalgui_nullable vaoManager );
+		void setOgre( Ogre::Root * crystalgui_nullable root,
+					  Ogre::VaoManager * crystalgui_nullable vaoManager,
+					  Ogre::SceneManager * crystalgui_nullable sceneManager );
 		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
-//		Ogre::IndexBufferPacked* getIndexBuffer()					{ return m_defaultIndexBuffer; }
+		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 

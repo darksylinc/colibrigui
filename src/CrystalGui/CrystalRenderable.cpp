@@ -25,7 +25,7 @@ namespace Crystal
 		Widget( manager ),
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
-							   manager->getOgreSceneManager(), 0u ),
+							   manager->getOgreSceneManager(), 0u, manager ),
 		m_colour( Ogre::ColourValue::White )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
@@ -46,7 +46,7 @@ namespace Crystal
 		QueuedRenderable queuedRenderable( 0u, this, this );
 
 		uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
-		VertexArrayObject *vao = mVaoPerLod[VpNormal][0];
+		VertexArrayObject *vao = apiObject.vao;
 		const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
 																  *apiObject.passCache,
 																  queuedRenderable,

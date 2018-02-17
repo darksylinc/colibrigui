@@ -24,7 +24,8 @@ namespace Ogre
 
 	public:
 		CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
-							   SceneManager* manager, uint8 renderQueueId );
+							   SceneManager* manager, uint8 renderQueueId,
+							   Crystal::CrystalManager *crystalManager );
 		virtual ~CrystalOgreRenderable();
 
 		/** Creates a prefilled index buffer to be used & reused for rendering.

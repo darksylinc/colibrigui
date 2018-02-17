@@ -6,32 +6,50 @@
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "Vao/OgreVaoManager.h"
 #include "Vao/OgreVertexArrayObject.h"
+#include "Vao/OgreIndirectBufferPacked.h"
 #include "Math/Array/OgreObjectMemoryManager.h"
+#include "OgreHlmsManager.h"
+#include "OgreHlms.h"
+#include "OgreRoot.h"
+#include "CommandBuffer/OgreCommandBuffer.h"
+#include "CommandBuffer/OgreCbDrawCall.h"
 
 namespace Crystal
 {
 	static LogListener DefaultLogListener;
+	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX, Ogre::HlmsPso() );
 
 	CrystalManager::CrystalManager() :
 		m_numWidgets( 0 ),
 		m_logListener( &DefaultLogListener ),
 		m_windowNavigationDirty( false ),
 		m_childrenNavigationDirty( false ),
+		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
 		m_sceneManager( 0 ),
-		m_vao( 0 )
-//		m_defaultIndexBuffer( 0 )
+		m_vao( 0 ),
+		m_indirectBuffer( 0 ),
+		m_commandBuffer( 0 )
 	{
 	}
 	//-------------------------------------------------------------------------
 	CrystalManager::~CrystalManager()
 	{
-		setOgre( 0 );
+		setOgre( 0, 0, 0 );
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setOgre( Ogre::VaoManager * crystalgui_nullable vaoManager )
+	void CrystalManager::setOgre( Ogre::Root * crystalgui_nullable root,
+								  Ogre::VaoManager * crystalgui_nullable vaoManager,
+								  Ogre::SceneManager * crystalgui_nullable sceneManager )
 	{
+		delete m_commandBuffer;
+		m_commandBuffer = 0;
+		if( m_indirectBuffer )
+		{
+			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
+			m_indirectBuffer = 0;
+		}
 		if( m_vao )
 		{
 			Ogre::CrystalOgreRenderable::destroyVao( m_vao, vaoManager );
@@ -45,13 +63,20 @@ namespace Crystal
 		delete m_objectMemoryManager;
 		m_objectMemoryManager = 0;
 
+		m_root = root;
 		m_vaoManager = vaoManager;
+		m_sceneManager = sceneManager;
 
 		if( vaoManager )
 		{
 			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
 			//m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
 			m_vao = Ogre::CrystalOgreRenderable::createVao( 6u * 9u, vaoManager );
+			size_t requiredBytes = 1u * sizeof( Ogre::CbDrawStrip );
+			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
+																   Ogre::BT_DYNAMIC_PERSISTENT,
+																   0, false );
+			m_commandBuffer = new Ogre::CommandBuffer();
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -145,6 +170,14 @@ namespace Crystal
 				(*itor)->broadcastNewVao( m_vao );
 				++itor;
 			}
+
+			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
+				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
+			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
+			size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
+			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
+																   Ogre::BT_DYNAMIC_PERSISTENT,
+																   0, false );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -337,6 +370,31 @@ namespace Crystal
 	{
 		ApiEncapsulatedObjects apiObjects;
 
+		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
+
+		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
+
+		apiObjects.lastHlmsCache = &c_dummyCache;
+
+		Ogre::HlmsCache passCache = hlms->preparePassHash( 0, false, false, m_sceneManager );
+		apiObjects.passCache = &passCache;
+		apiObjects.hlms = hlms;
+		apiObjects.lastVaoName = 0;
+		apiObjects.commandBuffer = m_commandBuffer;
+		apiObjects.indirectBuffer = m_indirectBuffer;
+		apiObjects.indirectDraw = reinterpret_cast<uint8_t*>(
+									  m_indirectBuffer->map( 0, m_indirectBuffer->getNumElements() ) );
+		apiObjects.startIndirectDraw = apiObjects.indirectDraw;
+		apiObjects.baseInstanceAndIndirectBuffers = 0;
+		if( m_vaoManager->supportsIndirectBuffers() )
+			apiObjects.baseInstanceAndIndirectBuffers = 2;
+		else if( m_vaoManager->supportsBaseInstance() )
+			apiObjects.baseInstanceAndIndirectBuffers = 1;
+		apiObjects.vao = m_vao;
+		apiObjects.drawCmd = 0;
+		apiObjects.drawCountPtr = 0;
+		apiObjects.primCount = 0;
+
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
 
@@ -346,5 +404,6 @@ namespace Crystal
 			++itor;
 		}
 
+		m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
 	}
 }

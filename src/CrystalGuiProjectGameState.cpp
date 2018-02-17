@@ -41,7 +41,9 @@ namespace Demo
         mCameraController = new CameraController( mGraphicsSystem, false );
 
 		//crystalManager = new Crystal::CrystalManager();
-		crystalManager->setOgre( mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager() );
+		crystalManager->setOgre( mGraphicsSystem->getRoot(),
+								 mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager(),
+								 mGraphicsSystem->getSceneManager() );
 
 		mainWindow = crystalManager->createWindow( 0 );
 
