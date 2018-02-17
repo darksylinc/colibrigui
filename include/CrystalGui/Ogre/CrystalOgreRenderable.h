@@ -17,14 +17,13 @@ namespace Ogre
 	class CrystalOgreRenderable : public MovableObject, public Renderable
 	{
 	protected:
-		void createBuffers( Ogre::IndexBufferPacked *indexBuffer );
+		void createBuffers();
 		void getSharedBuffersFromParent( CrystalOgreRenderable *parent );
 		void destroyBuffers( bool ownsVao );
 
 	public:
 		CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
 							   SceneManager* manager, uint8 renderQueueId,
-							   Ogre::IndexBufferPacked *indexBuffer,
 							   bool ownsVao );
 		virtual ~CrystalOgreRenderable();
 
@@ -32,7 +31,7 @@ namespace Ogre
 		@param vaoManager
 		@return
 		*/
-		static Ogre::IndexBufferPacked* createIndexBuffer( VaoManager *vaoManager );
+		//static Ogre::IndexBufferPacked* createIndexBuffer( VaoManager *vaoManager );
 
 		//Overrides from MovableObject
 		virtual const String& getMovableType(void) const;

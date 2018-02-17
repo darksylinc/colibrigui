@@ -26,15 +26,13 @@ namespace Crystal
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u,
-							   manager->getIndexBuffer(),
 							   ownsVao ),
 		m_colour( Ogre::ColourValue::White )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject,
-								  Ogre::CrystalOgreRenderable *ogreRenderable )
+	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject )
 	{
 		using namespace Ogre;
 
@@ -59,7 +57,8 @@ namespace Crystal
 			apiObject.lastVaoName = 0;
 		}
 
-		//apiObject.hlms->fillBuffersFor( this, apiObject.commandBuffer );*/
+		apiObject.hlms->fillBuffersForV2( hlmsCache, queuedRenderable, false,
+										  lastHlmsCacheHash, apiObject.commandBuffer );
 
 		if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
 			apiObject.lastVaoName != vao->getVaoName() )

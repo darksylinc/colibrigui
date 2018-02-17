@@ -67,6 +67,7 @@ namespace Demo
             GraphicsSystem( gameState )
         {
             mResourcePath = "../Data/";
+			mAlwaysAskForConfig = false;
 
             //It's recommended that you set this path to:
             //	%APPDATA%/CrystalGui/ on Windows

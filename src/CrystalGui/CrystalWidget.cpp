@@ -167,7 +167,8 @@ namespace Crystal
 		m_parent->setWidgetNavigationDirty();
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setNextWidget( Widget *nextWidget, Borders::Borders direction, bool reciprocate )
+	void Widget::setNextWidget( Widget * crystalgui_nullable nextWidget,
+								Borders::Borders direction, bool reciprocate )
 	{
 		if( direction == Borders::NumBorders )
 		{
@@ -176,10 +177,12 @@ namespace Crystal
 				if( m_nextWidget[i] )
 					m_nextWidget[i]->removeListener( this );
 				m_nextWidget[i] = nextWidget;
-				nextWidget->addListener( this );
-
-				if( reciprocate )
-					nextWidget->setNextWidget( this, c_reciprocateBorders[i], false );
+				if( nextWidget )
+				{
+					nextWidget->addListener( this );
+					if( reciprocate )
+						nextWidget->setNextWidget( this, c_reciprocateBorders[i], false );
+				}
 			}
 		}
 		else
@@ -187,10 +190,12 @@ namespace Crystal
 			if( m_nextWidget[direction] )
 				m_nextWidget[direction]->removeListener( this );
 			m_nextWidget[direction] = nextWidget;
-			nextWidget->addListener( this );
-
-			if( reciprocate )
-				nextWidget->setNextWidget( this, c_reciprocateBorders[direction], false );
+			if( nextWidget )
+			{
+				nextWidget->addListener( this );
+				if( reciprocate )
+					nextWidget->setNextWidget( this, c_reciprocateBorders[direction], false );
+			}
 		}
 	}
 	//-------------------------------------------------------------------------

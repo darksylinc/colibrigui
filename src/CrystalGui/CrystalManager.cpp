@@ -5,6 +5,7 @@
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "Vao/OgreVaoManager.h"
+#include "Math/Array/OgreObjectMemoryManager.h"
 
 namespace Crystal
 {
@@ -16,8 +17,8 @@ namespace Crystal
 		m_childrenNavigationDirty( false ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
-		m_sceneManager( 0 ),
-		m_defaultIndexBuffer( 0 )
+		m_sceneManager( 0 )
+//		m_defaultIndexBuffer( 0 )
 	{
 	}
 	//-------------------------------------------------------------------------
@@ -28,13 +29,17 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::setOgre( Ogre::VaoManager * crystalgui_nullable vaoManager )
 	{
-		if( m_defaultIndexBuffer )
+		/*if( m_defaultIndexBuffer )
 		{
 			m_vaoManager->destroyIndexBuffer( m_defaultIndexBuffer );
 			m_defaultIndexBuffer = 0;
-		}
+		}*/
+		delete m_objectMemoryManager;
+		m_objectMemoryManager = 0;
+
 		m_vaoManager = vaoManager;
-		m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
+		m_objectMemoryManager = new Ogre::ObjectMemoryManager();
+		//m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )

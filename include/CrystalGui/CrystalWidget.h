@@ -111,7 +111,8 @@ namespace Crystal
 		@param reciprocate
 			Whether the other widget should also be set to target us in the opposite direction.
 		*/
-		void setNextWidget( Widget *nextWidget, Borders::Borders direction, bool reciprocate=true );
+		void setNextWidget( Widget * crystalgui_nullable nextWidget,
+							Borders::Borders direction, bool reciprocate=true );
 
 		float getRight() const;
 		float getBottom() const;

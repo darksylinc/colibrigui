@@ -65,8 +65,7 @@ namespace Crystal
 
 		Ogre::ColourValue	m_colour;
 
-		void addCommands( ApiEncapsulatedObjects &apiObject,
-						  Ogre::CrystalOgreRenderable *ogreRenderable );
+		void addCommands( ApiEncapsulatedObjects &apiObject );
 
 		inline void addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,

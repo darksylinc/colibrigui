@@ -21,10 +21,15 @@
 #include "OgreHlmsTextureManager.h"
 #include "OgreHlmsPbs.h"
 
+#include "CrystalGui/CrystalManager.h"
+
 using namespace Demo;
 
 namespace Demo
 {
+	Crystal::CrystalManager *crystalManager = 0;
+	Crystal::Window *mainWindow = 0;
+
     CrystalGuiGameState::CrystalGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
 	{
@@ -34,11 +39,17 @@ namespace Demo
     {
         mCameraController = new CameraController( mGraphicsSystem, false );
 
+		crystalManager = new Crystal::CrystalManager();
+		crystalManager->setOgre( mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager() );
+
+		mainWindow = crystalManager->createWindow( 0 );
+
         TutorialGameState::createScene01();
     }
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::update( float timeSinceLast )
 	{
+		crystalManager->update();
         TutorialGameState::update( timeSinceLast );
     }
     //-----------------------------------------------------------------------------------

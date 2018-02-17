@@ -7,7 +7,6 @@ namespace Ogre
 {
 	CrystalOgreRenderable::CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
 												  SceneManager *manager, uint8 renderQueueId,
-												  IndexBufferPacked *indexBuffer,
 												  bool ownsVao ) :
 		MovableObject( id, objectMemoryManager, manager, renderQueueId ),
 		Renderable()
@@ -27,7 +26,7 @@ namespace Ogre
 		mObjectData.mWorldRadius[mObjectData.mIndex] = std::numeric_limits<Real>::max();
 
 		if( ownsVao )
-			createBuffers( indexBuffer );
+			createBuffers();
 
 		//This is very important!!! A MovableObject must tell what Renderables to render
 		//through this array. Since we derive from both MovableObject & Renderable, add
@@ -46,7 +45,7 @@ namespace Ogre
 		assert( mVaoPerLod[VpNormal].empty() && "destroyBuffers not called!" );
 	}
 	//-----------------------------------------------------------------------------------
-	Ogre::IndexBufferPacked* CrystalOgreRenderable::createIndexBuffer( VaoManager *vaoManager )
+	/*Ogre::IndexBufferPacked* CrystalOgreRenderable::createIndexBuffer( VaoManager *vaoManager )
 	{
 		//6 indices per quad (3 indices per triangle)
 		//3x3 grid = 9 quads => 6 x 9 indices per widget.
@@ -126,9 +125,9 @@ namespace Ogre
 		}
 
 		return indexBuffer;
-	}
+	}*/
 	//-----------------------------------------------------------------------------------
-	void CrystalOgreRenderable::createBuffers( Ogre::IndexBufferPacked *indexBuffer )
+	void CrystalOgreRenderable::createBuffers()
 	{
 		VaoManager *vaoManager = mManager->getDestinationRenderSystem()->getVaoManager();
 
@@ -157,7 +156,7 @@ namespace Ogre
 		VertexBufferPackedVec vertexBuffers;
 		vertexBuffers.push_back( vertexBuffer );
 		Ogre::VertexArrayObject *vao = vaoManager->createVertexArrayObject(
-					vertexBuffers, indexBuffer, OT_TRIANGLE_LIST );
+					vertexBuffers, 0, OT_TRIANGLE_LIST );
 
 		mVaoPerLod[0].push_back( vao );
 		mVaoPerLod[1].push_back( vao );
