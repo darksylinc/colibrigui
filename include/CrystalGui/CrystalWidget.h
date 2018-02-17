@@ -39,7 +39,9 @@ namespace Crystal
 		/// Child and parent relationships are explicit, thus they're not tracked via
 		/// WidgetListener::notifyWidgetDestroyed
 		/// Can only be nullptr if 'this' is a Window.
+		/// Windows can only be children of Windows.
 		Widget * crystalgui_nonnull m_parent;
+		/// Does not include Windows
 		WidgetVec					m_children;
 
 		CrystalManager          *m_manager;
@@ -63,6 +65,14 @@ namespace Crystal
 		///		2. m_parent is non-null (i.e. Window breaks this assumption)
 		void updateDerivedTransformFromParent();
 
+		/** Notifies a parent that the input is about to be removed. It's similar to
+			notifyWidgetDestroyed, except this is explicitly about child-parent
+			relationships, as these relationships aren't tracked by listeners.
+		@return
+			Index to m_children where childWidgetBeingRemoved used to be.
+		*/
+		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
+
 	public:
 		Ogre::Vector2   m_position;
 		Ogre::Vector2   m_size;
@@ -77,7 +87,7 @@ namespace Crystal
 
 		virtual void _destroy();
 
-		/// Do not call directly
+		/// Do not call directly. 'this' cannot be a Window
 		virtual void _setParent( Widget *parent );
 
 		virtual bool isWindow() const	{ return false; }
@@ -122,6 +132,8 @@ namespace Crystal
 			True if the given widget is partially intersecting or fully inside this, or viceversa.
 		*/
 		bool intersects( Widget *widget ) const;
+
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,

@@ -5,9 +5,12 @@
 #include "OgreSceneManager.h"
 #include "OgreCamera.h"
 #include "OgreRoot.h"
-#include "OgreRenderWindow.h"
+#include "OgreWindow.h"
 #include "OgreConfigFile.h"
 #include "Compositor/OgreCompositorManager2.h"
+
+#include "CrystalGui/CrystalManager.h"
+#include "CrystalGui/Ogre/CompositorPassCrystalGuiProvider.h"
 
 //Declares WinMain / main
 #include "MainEntryPointHelper.h"
@@ -25,6 +28,8 @@
     #include "shlobj.h"
 #endif
 
+#define TODO_fix_leak
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 INT WINAPI WinMainApp( HINSTANCE hInst, HINSTANCE hPrevInstance, LPSTR strCmdLine, INT nCmdShow )
 #else
@@ -36,15 +41,26 @@ int mainApp( int argc, const char *argv[] )
 
 namespace Demo
 {
+	extern Crystal::CrystalManager *crystalManager;
+
     class CrystalGuiGraphicsSystem : public GraphicsSystem
-    {
-        virtual Ogre::CompositorWorkspace* setupCompositor()
-        {
-            return GraphicsSystem::setupCompositor();
-        }
+	{
+		virtual Ogre::CompositorWorkspace* setupCompositor()
+		{
+			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
+			return compositorManager->addWorkspace( mSceneManager, mRenderWindow->getTexture(), mCamera,
+													"CrystalGuiWorkspace", true );
+		}
 
         virtual void setupResources(void)
         {
+			TODO_fix_leak;
+			crystalManager = new Crystal::CrystalManager();
+			Ogre::CompositorPassCrystalGuiProvider *compoProvider =
+					OGRE_NEW Ogre::CompositorPassCrystalGuiProvider( crystalManager );
+			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
+			compositorManager->setCompositorPassProvider( compoProvider );
+
             GraphicsSystem::setupResources();
 
             Ogre::ConfigFile cf;

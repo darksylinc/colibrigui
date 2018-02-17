@@ -37,19 +37,50 @@ namespace Crystal
 		assert( m_children.empty() && "_destroy not called before deleting!" );
 	}
 	//-------------------------------------------------------------------------
+	size_t Widget::notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved )
+	{
+		//Remove ourselves from being our parent's child
+		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(),
+											  childWidgetBeingRemoved );
+		const size_t idx = itor - m_children.begin();
+		m_children.erase( itor );
+		return idx;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::_destroy()
 	{
+		setWidgetNavigationDirty();
+
+		for( size_t i=0; i<Borders::NumBorders; ++i )
 		{
-			WidgetVec::const_iterator itor = m_children.begin();
-			WidgetVec::const_iterator end  = m_children.end();
+			//Tell other widgets to not notify us anymore. Otherwise they'll call a dangling pointer
+			if( m_nextWidget[i] )
+			{
+				m_nextWidget[i]->removeListener( this );
+				m_nextWidget[i] = 0;
+			}
+		}
+
+		if( !isWindow() )
+		{
+			//Remove ourselves from being our parent's child
+			m_parent->notifyParentChildIsDestroyed( this );
+		}
+
+		{
+			//Move m_children to a temporary container; otherwise these children
+			//will try to alter m_children while we're iterating (to remove themselves
+			//from us) thus corrupting the iterators and wasting lots of cycles in
+			//linear searches.
+			WidgetVec children;
+			children.swap( m_children );
+			WidgetVec::const_iterator itor = children.begin();
+			WidgetVec::const_iterator end  = children.end();
 
 			while( itor != end )
-			{
-				(*itor)->_destroy();
-				delete *itor;
-				++itor;
-			}
+				m_manager->destroyWidget( *itor++ );
 
+			children.swap( m_children );
 			m_children.clear();
 		}
 		{
@@ -69,6 +100,7 @@ namespace Crystal
 	void Widget::_setParent( Widget *parent )
 	{
 		assert( !this->m_parent && parent );
+		assert( !this->isWindow() );
 		this->m_parent = parent;
 		parent->m_children.push_back( parent );
 		parent->setWidgetNavigationDirty();
@@ -93,9 +125,12 @@ namespace Crystal
 				m_nextWidget[i] = 0;
 		}
 
+		/* Do not remove it from m_children. It's unnecessary because the relationship
+		   is implicit (listeners are not added/removed when a widget is created/destroyed
+		   to notify their children & parents. We already do that as part of the normal process.
 		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(), widget );
 		if( itor != m_children.end() )
-			m_children.erase( itor );
+			m_children.erase( itor );*/
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos )
@@ -136,7 +171,6 @@ namespace Crystal
 
 		if( itor == m_listeners.end() )
 		{
-			WidgetListenerPair pair( listener );
 			m_listeners.push_back( listener );
 			itor = m_listeners.begin() + m_listeners.size() - 1u;
 		}
@@ -215,6 +249,18 @@ namespace Crystal
 				  this->m_position.y > widget->m_position.y + widget->m_size.y	||
 				  this->m_position.x + this->m_size.x < widget->m_position.x	||
 				  this->m_position.y + this->m_size.y < widget->m_position.y );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao )
+	{
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->broadcastNewVao( vao );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	UiVertex* Widget::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,

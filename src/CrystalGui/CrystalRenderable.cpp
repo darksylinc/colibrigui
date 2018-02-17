@@ -21,15 +21,20 @@
 
 namespace Crystal
 {
-	Renderable::Renderable( CrystalManager *manager, bool ownsVao ) :
+	Renderable::Renderable( CrystalManager *manager ) :
 		Widget( manager ),
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
-							   manager->getOgreSceneManager(), 0u,
-							   ownsVao ),
+							   manager->getOgreSceneManager(), 0u ),
 		m_colour( Ogre::ColourValue::White )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
+	}
+	//-------------------------------------------------------------------------
+	void Renderable::broadcastNewVao( Ogre::VertexArrayObject *vao )
+	{
+		setVao( vao );
+		Widget::broadcastNewVao( vao );
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject )
@@ -43,7 +48,7 @@ namespace Crystal
 		uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
 		VertexArrayObject *vao = mVaoPerLod[VpNormal][0];
 		const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
-																  apiObject.passCache,
+																  *apiObject.passCache,
 																  queuedRenderable,
 																  vao->getInputLayoutId(),
 																  false );
@@ -94,23 +99,6 @@ namespace Crystal
 
 		apiObject.primCount += 6u * 9u;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
-	}
-	//-------------------------------------------------------------------------
-	void Renderable::_destroy()
-	{
-		destroyBuffers( false );
-		Widget::_destroy();
-	}
-	//-------------------------------------------------------------------------
-	void Renderable::_setParent( Widget *parent )
-	{
-		Widget::_setParent( parent );
-
-		if( !isWindow() )
-		{
-			Window *window = parent->getFirstParentWindow();
-			getSharedBuffersFromParent( window );
-		}
 	}
 	//-------------------------------------------------------------------------
 	inline void Renderable::addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,
@@ -183,12 +171,21 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
-	UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot )
+	inline UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+														 const Ogre::Vector2 &parentPos,
+														 const Ogre::Matrix3 &parentRot,
+														 bool forWindows )
 	{
-		if( !m_parent->intersects( this ) )
-			return vertexBuffer;
+		if( forWindows )
+		{
+			if( m_parent && !m_parent->intersects( this ) )
+				return vertexBuffer;
+		}
+		else
+		{
+			if( !m_parent->intersects( this ) )
+				return vertexBuffer;
+		}
 
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -198,8 +195,19 @@ namespace Crystal
 		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
 		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
-		Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
-		Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
+		Ogre::Vector2 parentDerivedTL;
+		Ogre::Vector2 parentDerivedBR;
+
+		if( forWindows )
+		{
+			parentDerivedTL = -1.0f;
+			parentDerivedBR = 1.0f;
+		}
+		else
+		{
+			parentDerivedTL = m_parent->m_derivedTopLeft;
+			parentDerivedBR = m_parent->m_derivedBottomRight;
+		}
 
 		Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
@@ -279,10 +287,6 @@ namespace Crystal
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 
-//		Ogre::CommandBuffer *commandBuffer = TODO;
-//		Ogre::CbDrawCallIndexed *drawCall = mCommandBuffer->addCommand<Ogre::CbDrawCallIndexed>();
-//		*drawCall = Ogre::CbDrawCallIndexed( baseInstanceAndIndirectBuffers, vao, offset );
-
 		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
@@ -294,5 +298,12 @@ namespace Crystal
 		}
 
 		return vertexBuffer;
+	}
+	//-------------------------------------------------------------------------
+	UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+												  const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot )
+	{
+		return fillBuffersAndCommands( vertexBuffer, parentPos, parentRot, false );
 	}
 }

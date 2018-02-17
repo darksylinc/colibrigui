@@ -1,0 +1,33 @@
+
+compositor_node RenderingNode
+{
+    in 0 renderWindow
+
+    target renderWindow
+    {
+        pass render_scene
+        {
+            load
+            {
+                all				clear
+                clear_colour	0.2 0.4 0.6 1
+            }
+            store
+            {
+                colour	store_or_resolve
+                depth	dont_care
+                stencil	dont_care
+            }
+            overlays	on
+        }
+
+        pass custom crystal_gui
+        {
+        }
+    }
+}
+
+workspace CrystalGuiWorkspace
+{
+    connect_output					RenderingNode 0
+}

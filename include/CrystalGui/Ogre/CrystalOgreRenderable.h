@@ -16,15 +16,15 @@ namespace Ogre
 	*/
 	class CrystalOgreRenderable : public MovableObject, public Renderable
 	{
+	public:
+		static VertexArrayObject* createVao( uint32 vertexCount, VaoManager *vaoManager );
+		static void destroyVao( VertexArrayObject *vao, VaoManager *vaoManager );
 	protected:
-		void createBuffers();
-		void getSharedBuffersFromParent( CrystalOgreRenderable *parent );
-		void destroyBuffers( bool ownsVao );
+		void setVao( VertexArrayObject *vao );
 
 	public:
 		CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
-							   SceneManager* manager, uint8 renderQueueId,
-							   bool ownsVao );
+							   SceneManager* manager, uint8 renderQueueId );
 		virtual ~CrystalOgreRenderable();
 
 		/** Creates a prefilled index buffer to be used & reused for rendering.

@@ -27,6 +27,7 @@ using namespace Demo;
 
 namespace Demo
 {
+	extern Crystal::CrystalManager *crystalManager;
 	Crystal::CrystalManager *crystalManager = 0;
 	Crystal::Window *mainWindow = 0;
 
@@ -39,7 +40,7 @@ namespace Demo
     {
         mCameraController = new CameraController( mGraphicsSystem, false );
 
-		crystalManager = new Crystal::CrystalManager();
+		//crystalManager = new Crystal::CrystalManager();
 		crystalManager->setOgre( mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager() );
 
 		mainWindow = crystalManager->createWindow( 0 );

@@ -31,6 +31,8 @@ namespace Crystal
 	class CrystalManager
 	{
 		WindowVec m_windows;
+		/// Tracks total number of live widgets
+		size_t m_numWidgets;
 
 		LogListener	*m_logListener;
 
@@ -40,7 +42,10 @@ namespace Crystal
 		Ogre::VaoManager			*m_vaoManager;
 		Ogre::ObjectMemoryManager	*m_objectMemoryManager;
 		Ogre::SceneManager			*m_sceneManager;
+		Ogre::VertexArrayObject		*m_vao;
 //		Ogre::IndexBufferPacked		*m_defaultIndexBuffer;
+
+		void checkVertexBufferCapacity();
 
 		template <typename T>
 		void autosetNavigation( const std::vector<T> &container );
@@ -62,6 +67,7 @@ namespace Crystal
 
 		/// Destroy the window and all of its children window and widgets
 		void destroyWindow( Window *window );
+		void destroyWidget( Widget *widget );
 
 		/// For internal use. Do NOT call directly
 		void _setAsParentlessWindow( Window *window );
@@ -76,6 +82,8 @@ namespace Crystal
 		void _notifyChildWindowIsDirty();
 
 		void update();
+		void prepareRenderCommands();
+		void render();
 
 #if __clang__
 	#pragma clang diagnostic push
@@ -91,6 +99,8 @@ namespace Crystal
 			T *retVal = new T( this );
 
 			retVal->_setParent( parent );
+
+			++m_numWidgets;
 
 			return retVal;
 		}

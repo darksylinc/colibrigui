@@ -5,6 +5,7 @@
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "Vao/OgreVaoManager.h"
+#include "Vao/OgreVertexArrayObject.h"
 #include "Math/Array/OgreObjectMemoryManager.h"
 
 namespace Crystal
@@ -12,12 +13,14 @@ namespace Crystal
 	static LogListener DefaultLogListener;
 
 	CrystalManager::CrystalManager() :
+		m_numWidgets( 0 ),
 		m_logListener( &DefaultLogListener ),
 		m_windowNavigationDirty( false ),
 		m_childrenNavigationDirty( false ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
-		m_sceneManager( 0 )
+		m_sceneManager( 0 ),
+		m_vao( 0 )
 //		m_defaultIndexBuffer( 0 )
 	{
 	}
@@ -29,6 +32,11 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::setOgre( Ogre::VaoManager * crystalgui_nullable vaoManager )
 	{
+		if( m_vao )
+		{
+			Ogre::CrystalOgreRenderable::destroyVao( m_vao, vaoManager );
+			m_vao = 0;
+		}
 		/*if( m_defaultIndexBuffer )
 		{
 			m_vaoManager->destroyIndexBuffer( m_defaultIndexBuffer );
@@ -38,8 +46,13 @@ namespace Crystal
 		m_objectMemoryManager = 0;
 
 		m_vaoManager = vaoManager;
-		m_objectMemoryManager = new Ogre::ObjectMemoryManager();
-		//m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
+
+		if( vaoManager )
+		{
+			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
+			//m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
+			m_vao = Ogre::CrystalOgreRenderable::createVao( 6u * 9u, vaoManager );
+		}
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
@@ -55,6 +68,8 @@ namespace Crystal
 		}
 
 		retVal->setWindowNavigationDirty();
+
+		++m_numWidgets;
 
 		return retVal;
 	}
@@ -74,10 +89,25 @@ namespace Crystal
 				m_windows.erase( itor );
 		}
 
-		window->setWindowNavigationDirty();
-
 		window->_destroy();
 		delete window;
+
+		--m_numWidgets;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::destroyWidget( Widget *widget )
+	{
+		if( widget->isWindow() )
+		{
+			assert( dynamic_cast<Window*>( widget ) );
+			destroyWindow( static_cast<Window*>( widget ) );
+		}
+		else
+		{
+			widget->_destroy();
+			delete widget;
+			--m_numWidgets;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::_setAsParentlessWindow( Window *window )
@@ -91,6 +121,30 @@ namespace Crystal
 		{
 			window->detachFromParent();
 			m_windows.push_back( window );
+		}
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalManager::checkVertexBufferCapacity()
+	{
+		const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>( m_numWidgets * (6u * 9u) );
+
+		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+		const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+		if( requiredVertexCount > vertexBuffer->getNumElements() )
+		{
+			const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
+														  currVertexCount + (currVertexCount >> 1u) );
+			Ogre::CrystalOgreRenderable::destroyVao( m_vao, m_vaoManager );
+			m_vao = Ogre::CrystalOgreRenderable::createVao( newVertexCount, m_vaoManager );
+
+			WindowVec::const_iterator itor = m_windows.begin();
+			WindowVec::const_iterator end  = m_windows.end();
+
+			while( itor != end )
+			{
+				(*itor)->broadcastNewVao( m_vao );
+				++itor;
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -220,6 +274,8 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::autosetNavigation()
 	{
+		checkVertexBufferCapacity();
+
 		if( m_windowNavigationDirty )
 		{
 			autosetNavigation( m_windows );
@@ -252,14 +308,43 @@ namespace Crystal
 	void CrystalManager::update()
 	{
 		autosetNavigation();
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::prepareRenderCommands()
+	{
+		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+
+		UiVertex * RESTRICT_ALIAS vertex = reinterpret_cast<UiVertex * RESTRICT_ALIAS>(
+											   vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
+		UiVertex * RESTRICT_ALIAS startOffset = vertex;
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
 
 		while( itor != end )
 		{
-//			(*itor)->fillBuffersAndCommands( , Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );
+			vertex = (*itor)->fillBuffersAndCommands( vertex, Ogre::Vector2::ZERO,
+													  Ogre::Matrix3::IDENTITY );
 			++itor;
 		}
+
+		const size_t elementsWritten = vertex - startOffset;
+		assert( elementsWritten <= vertexBuffer->getNumElements() );
+		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::render()
+	{
+		ApiEncapsulatedObjects apiObjects;
+
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+			(*itor)->addCommands( apiObjects );
+			++itor;
+		}
+
 	}
 }

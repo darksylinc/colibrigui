@@ -6,7 +6,7 @@
 namespace Crystal
 {
 	Window::Window( CrystalManager *manager ) :
-		Renderable( manager, false ),
+		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_scrollArea( Ogre::Vector2::ZERO ),
 		m_defaultChildWidget( 0 ),
@@ -30,38 +30,39 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Window::_destroy()
 	{
+		setWindowNavigationDirty();
+
+		if( m_parent )
+		{
+			//Remove ourselves from being our Window parent's child
+			Window *parentWindow = getParentAsWindow();
+			WindowVec::iterator itor = std::find( parentWindow->m_childWindows.begin(),
+												  parentWindow->m_childWindows.end(),
+												  this );
+			parentWindow->m_childWindows.erase( itor );
+		}
+
 		{
 			WindowVec::const_iterator itor = m_childWindows.begin();
 			WindowVec::const_iterator end  = m_childWindows.end();
 
 			while( itor != end )
-			{
-				(*itor)->_destroy();
-				delete *itor;
-				++itor;
-			}
+				m_manager->destroyWindow( *itor++ );
 
 			m_childWindows.clear();
 		}
 
-		destroyBuffers( true );
-
 		Renderable::_destroy();
 	}
 	//-------------------------------------------------------------------------
-	void Window::notifyWidgetDestroyed( Widget *widget )
+	size_t Window::notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved )
 	{
-		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(), widget );
-		if( itor != m_children.end() )
-		{
-			const size_t idx = itor - m_children.begin();
-			if( m_defaultChildWidget >= idx )
-				--m_defaultChildWidget;
+		const size_t idx = Widget::notifyParentChildIsDestroyed( childWidgetBeingRemoved );
 
-			m_children.erase( itor );
-		}
+		if( m_defaultChildWidget >= idx )
+			--m_defaultChildWidget;
 
-		Widget::notifyWidgetDestroyed( widget );
+		return idx;
 	}
 	//-------------------------------------------------------------------------
 	void Window::notifyChildWindowIsDirty()
@@ -166,81 +167,23 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	void Window::broadcastNewVao( Ogre::VertexArrayObject *vao )
+	{
+		WindowVec::const_iterator itor = m_childWindows.begin();
+		WindowVec::const_iterator end  = m_childWindows.end();
+
+		while( itor != end )
+		{
+			(*itor)->broadcastNewVao( vao );
+			++itor;
+		}
+		Renderable::broadcastNewVao( vao );
+	}
+	//-------------------------------------------------------------------------
 	UiVertex* Window::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Matrix3 &parentRot )
 	{
-		if( !m_parent->intersects( this ) )
-			return vertexBuffer;
-
-		updateDerivedTransform( parentPos, parentRot );
-
-		const Ogre::Vector2 topLeft		= this->m_derivedTopLeft;
-		const Ogre::Vector2 bottomRight	= this->m_derivedBottomRight;
-
-		vertexBuffer->x = topLeft.x;
-		vertexBuffer->y = topLeft.y;
-		vertexBuffer->clipDistance[Borders::Top]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Left]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Right]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Bottom]	= 1.0f;
-		vertexBuffer->rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
-
-		++vertexBuffer;
-
-		vertexBuffer->x = topLeft.x;
-		vertexBuffer->y = bottomRight.y;
-		vertexBuffer->clipDistance[Borders::Top]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Left]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Right]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Bottom]	= 1.0f;
-		vertexBuffer->rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
-
-		++vertexBuffer;
-
-		vertexBuffer->x = bottomRight.x;
-		vertexBuffer->y = bottomRight.y;
-		vertexBuffer->clipDistance[Borders::Top]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Left]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Right]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Bottom]	= 1.0f;
-		vertexBuffer->rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
-
-		++vertexBuffer;
-
-		vertexBuffer->x = bottomRight.x;
-		vertexBuffer->y = topLeft.y;
-		vertexBuffer->clipDistance[Borders::Top]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Left]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Right]	= 1.0f;
-		vertexBuffer->clipDistance[Borders::Bottom]	= 1.0f;
-		vertexBuffer->rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-		vertexBuffer->rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
-
-		++vertexBuffer;
-
-		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
-
-		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.end();
-
-		while( itor != end )
-		{
-			vertexBuffer = (*itor)->fillBuffersAndCommands( vertexBuffer, topLeft, finalRot );
-			++itor;
-		}
-
-		return vertexBuffer;
+		return Renderable::fillBuffersAndCommands( vertexBuffer, parentPos, parentRot, true );
 	}
 }

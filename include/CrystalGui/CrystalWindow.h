@@ -7,6 +7,12 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
+	/** Windows are special Widgets:
+			1. They can only be children of other Windows
+			2. m_parent can be nullptr
+			3. Regular widgets can be navigated via left, up, down, etc.
+			   Windows can only be navigated by entering or leaving them.
+	*/
 	class Window : public Renderable
 	{
 		friend class CrystalManager;
@@ -30,14 +36,14 @@ namespace Crystal
 
 		Window* getParentAsWindow() const;
 
+		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
+
 	public:
 		Window( CrystalManager *manager );
 		virtual ~Window();
 
 		virtual void _destroy();
 		virtual bool isWindow() const	{ return true; }
-
-		virtual void notifyWidgetDestroyed( Widget *widget );
 
 		/// See Widget::setWidgetNavigationDirty
 		/// Notifies all of our children widgets are dirty and we need to recalculate them.
@@ -61,8 +67,9 @@ namespace Crystal
 		/// defaults to when the window is created)
 		/// If widget is not our child or nullptr, the current default is unset
 		void setDefault( Widget * crystalgui_nullable widget );
-
 		Widget* crystalgui_nullable getDefaultWidget() const;
+
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,

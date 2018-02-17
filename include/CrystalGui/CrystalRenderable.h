@@ -40,7 +40,7 @@ namespace Crystal
 	{
 		//Ogre::HlmsCrystalGui		*hlms;
 		Ogre::HlmsCache const		*lastHlmsCache;
-		const Ogre::HlmsCache		&passCache;
+		Ogre::HlmsCache const 		*passCache;
 		Ogre::Hlms					*hlms;
 		Ogre::uint32				lastVaoName;
 		Ogre::CommandBuffer			*commandBuffer;
@@ -77,14 +77,14 @@ namespace Crystal
 							 Ogre::Vector2 invSize );
 
 	public:
-		Renderable( CrystalManager *manager, bool ownsVao=false );
+		Renderable( CrystalManager *manager );
 
-		/// See Widget::_destroy
-		virtual void _destroy();
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
-		/// See Widget::_setParent
-		virtual void _setParent( Widget *parent );
-
+		inline UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
+												 const Ogre::Vector2 &parentPos,
+												 const Ogre::Matrix3 &parentRot,
+												 bool forWindows );
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,
 												  const Ogre::Matrix3 &parentRot );

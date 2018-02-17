@@ -6,8 +6,7 @@
 namespace Ogre
 {
 	CrystalOgreRenderable::CrystalOgreRenderable( IdType id, ObjectMemoryManager *objectMemoryManager,
-												  SceneManager *manager, uint8 renderQueueId,
-												  bool ownsVao ) :
+												  SceneManager *manager, uint8 renderQueueId ) :
 		MovableObject( id, objectMemoryManager, manager, renderQueueId ),
 		Renderable()
 	{
@@ -25,9 +24,6 @@ namespace Ogre
 		mObjectData.mLocalRadius[mObjectData.mIndex] = std::numeric_limits<Real>::max();
 		mObjectData.mWorldRadius[mObjectData.mIndex] = std::numeric_limits<Real>::max();
 
-		if( ownsVao )
-			createBuffers();
-
 		//This is very important!!! A MovableObject must tell what Renderables to render
 		//through this array. Since we derive from both MovableObject & Renderable, add
 		//ourselves to the array. Otherwise, nothing will be rendered.
@@ -42,7 +38,6 @@ namespace Ogre
 	//-----------------------------------------------------------------------------------
 	CrystalOgreRenderable::~CrystalOgreRenderable()
 	{
-		assert( mVaoPerLod[VpNormal].empty() && "destroyBuffers not called!" );
 	}
 	//-----------------------------------------------------------------------------------
 	/*Ogre::IndexBufferPacked* CrystalOgreRenderable::createIndexBuffer( VaoManager *vaoManager )
@@ -127,10 +122,8 @@ namespace Ogre
 		return indexBuffer;
 	}*/
 	//-----------------------------------------------------------------------------------
-	void CrystalOgreRenderable::createBuffers()
+	VertexArrayObject* CrystalOgreRenderable::createVao( uint32 vertexCount, VaoManager *vaoManager )
 	{
-		VaoManager *vaoManager = mManager->getDestinationRenderSystem()->getVaoManager();
-
 		//Vertex declaration
 		VertexElement2Vec vertexElements;
 		vertexElements.push_back( VertexElement2( VET_FLOAT2, VES_POSITION ) );
@@ -138,71 +131,46 @@ namespace Ogre
 		vertexElements.push_back( VertexElement2( VET_UBYTE4_NORM, VES_DIFFUSE ) );
 		vertexElements.push_back( VertexElement2( VET_FLOAT4, VES_NORMAL ) );
 
+		//Create the actual vertex buffer.
 		Ogre::VertexBufferPacked *vertexBuffer = 0;
-		try
-		{
-			//Create the actual vertex buffer.
-			vertexBuffer = vaoManager->createVertexBuffer( vertexElements, 8,
-														   BT_DYNAMIC_PERSISTENT,
-														   0, false );
-		}
-		catch( Ogre::Exception &e )
-		{
-			OGRE_FREE_SIMD( vertexBuffer, Ogre::MEMCATEGORY_GEOMETRY );
-			vertexBuffer = 0;
-			throw e;
-		}
+		vertexBuffer = vaoManager->createVertexBuffer( vertexElements, vertexCount,
+													   BT_DYNAMIC_PERSISTENT,
+													   0, false );
 
 		VertexBufferPackedVec vertexBuffers;
 		vertexBuffers.push_back( vertexBuffer );
 		Ogre::VertexArrayObject *vao = vaoManager->createVertexArrayObject(
 					vertexBuffers, 0, OT_TRIANGLE_LIST );
 
-		mVaoPerLod[0].push_back( vao );
-		mVaoPerLod[1].push_back( vao );
+		return vao;
 	}
 	//-----------------------------------------------------------------------------------
-	void CrystalOgreRenderable::getSharedBuffersFromParent( CrystalOgreRenderable *parent )
+	void CrystalOgreRenderable::destroyVao( VertexArrayObject *vao, VaoManager *vaoManager )
+	{
+		const VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();
+		VertexBufferPackedVec::const_iterator itBuffers = vertexBuffers.begin();
+		VertexBufferPackedVec::const_iterator enBuffers = vertexBuffers.end();
+
+		while( itBuffers != enBuffers )
+		{
+			vaoManager->destroyVertexBuffer( *itBuffers );
+			++itBuffers;
+		}
+
+		/* Do not destroy the index buffer. We do not own it.
+		if( vao->getIndexBuffer() )
+			vaoManager->destroyIndexBuffer( vao->getIndexBuffer() );*/
+		vaoManager->destroyVertexArrayObject( vao );
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalOgreRenderable::setVao( VertexArrayObject *vao )
 	{
 		assert( mVaoPerLod[0].empty() && mVaoPerLod[1].empty() &&
 				"getBuffersFromParentWindow or createBuffers already called!" );
-		mVaoPerLod[0] = parent->mVaoPerLod[0];
-		mVaoPerLod[1] = parent->mVaoPerLod[1];
-	}
-	//-----------------------------------------------------------------------------------
-	void CrystalOgreRenderable::destroyBuffers( bool ownsVao )
-	{
-		if( ownsVao )
-		{
-			VaoManager *vaoManager = mManager->getDestinationRenderSystem()->getVaoManager();
-
-			VertexArrayObjectArray::const_iterator itor = mVaoPerLod[0].begin();
-			VertexArrayObjectArray::const_iterator end  = mVaoPerLod[0].end();
-			while( itor != end )
-			{
-				VertexArrayObject *vao = *itor;
-
-				const VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();
-				VertexBufferPackedVec::const_iterator itBuffers = vertexBuffers.begin();
-				VertexBufferPackedVec::const_iterator enBuffers = vertexBuffers.end();
-
-				while( itBuffers != enBuffers )
-				{
-					vaoManager->destroyVertexBuffer( *itBuffers );
-					++itBuffers;
-				}
-
-				/* Do not destroy the index buffer. We do not own it.
-				if( vao->getIndexBuffer() )
-					vaoManager->destroyIndexBuffer( vao->getIndexBuffer() );*/
-				vaoManager->destroyVertexArrayObject( vao );
-
-				++itor;
-			}
-		}
-
-		mVaoPerLod[VpNormal].clear();
-		mVaoPerLod[VpShadow].clear();
+		mVaoPerLod[0].clear();
+		mVaoPerLod[1].clear();
+		mVaoPerLod[0].push_back( vao );
+		mVaoPerLod[1].push_back( vao );
 	}
 	//-----------------------------------------------------------------------------------
 	const String& CrystalOgreRenderable::getMovableType(void) const
