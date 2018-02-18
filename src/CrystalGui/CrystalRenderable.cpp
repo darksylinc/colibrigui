@@ -86,15 +86,13 @@ namespace Crystal
 			apiObject.drawCmd = drawCall;
 			apiObject.primCount = 0;
 
-			apiObject.drawCountPtr = reinterpret_cast<CbDrawIndexed*>( apiObject.indirectDraw );
+			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 			apiObject.drawCountPtr->primCount		= 0;
 			apiObject.drawCountPtr->instanceCount	= 1u;
 			apiObject.drawCountPtr->firstVertexIndex=
-					apiObject.vao->getIndexBuffer()->_getFinalBufferStart();
-			apiObject.drawCountPtr->baseVertex		=
 					apiObject.vao->getBaseVertexBuffer()->_getFinalBufferStart();
 			apiObject.drawCountPtr->baseInstance	= 0;
-			apiObject.indirectDraw += sizeof( CbDrawIndexed );
+			apiObject.indirectDraw += sizeof( CbDrawStrip );
 		}
 
 		apiObject.primCount += 6u * 9u;

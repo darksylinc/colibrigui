@@ -8,8 +8,8 @@
 
 namespace Ogre
 {
-	struct CbDrawCallIndexed;
-	struct CbDrawIndexed;
+	struct CbDrawCallStrip;
+	struct CbDrawStrip;
 	class HlmsCrystalGui;
 }
 
@@ -50,7 +50,7 @@ namespace Crystal
 		int							baseInstanceAndIndirectBuffers;
 		Ogre::VertexArrayObject		*vao;
 		Ogre::CbDrawCallStrip		*drawCmd;
-		Ogre::CbDrawIndexed			*drawCountPtr;
+		Ogre::CbDrawStrip			*drawCountPtr;
 		uint16_t primCount;
 	};
 

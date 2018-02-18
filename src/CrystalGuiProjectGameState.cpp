@@ -22,6 +22,7 @@
 #include "OgreHlmsPbs.h"
 
 #include "CrystalGui/CrystalManager.h"
+#include "CrystalGui/CrystalWindow.h"
 
 using namespace Demo;
 
@@ -46,6 +47,11 @@ namespace Demo
 								 mGraphicsSystem->getSceneManager() );
 
 		mainWindow = crystalManager->createWindow( 0 );
+
+		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
+		mainWindow->setDatablock( hlms->getDefaultDatablock() );
+
+		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
 
         TutorialGameState::createScene01();
     }

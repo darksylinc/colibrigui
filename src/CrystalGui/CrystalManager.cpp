@@ -77,6 +77,7 @@ namespace Crystal
 																   Ogre::BT_DYNAMIC_PERSISTENT,
 																   0, false );
 			m_commandBuffer = new Ogre::CommandBuffer();
+			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -405,5 +406,9 @@ namespace Crystal
 		}
 
 		m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
+
+		hlms->preCommandBufferExecution( m_commandBuffer );
+		m_commandBuffer->execute();
+		hlms->postCommandBufferExecution( m_commandBuffer );
 	}
 }
