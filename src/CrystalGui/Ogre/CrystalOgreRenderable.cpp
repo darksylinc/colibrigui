@@ -38,6 +38,9 @@ namespace Ogre
 		//If we don't set a datablock, we'll crash Ogre.
 //		this->setDatablock( Root::getSingleton().getHlmsManager()->
 //							getHlms( HLMS_UNLIT )->getDefaultDatablock() );
+
+		setUseIdentityProjection( true );
+		setUseIdentityView( true );
 	}
 	//-----------------------------------------------------------------------------------
 	CrystalOgreRenderable::~CrystalOgreRenderable()
