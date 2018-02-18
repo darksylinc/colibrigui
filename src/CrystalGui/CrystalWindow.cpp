@@ -3,6 +3,8 @@
 
 #include "CrystalGui/CrystalManager.h"
 
+#include "CrystalRenderable.inl"
+
 namespace Crystal
 {
 	Window::Window( CrystalManager *manager ) :
