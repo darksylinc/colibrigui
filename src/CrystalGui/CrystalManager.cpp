@@ -34,7 +34,7 @@ namespace Crystal
 		m_commandBuffer( 0 ),
 		m_skinManager( 0 )
 	{
-		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1024.0f ) );
+		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ) );
 
 		m_skinManager = new SkinManager( this );
 	}

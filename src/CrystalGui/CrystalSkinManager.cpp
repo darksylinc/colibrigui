@@ -76,9 +76,9 @@ namespace Crystal
 		}
 
 		const Ogre::Vector2 topLeft( uvTopLeftWidthHeight.x / texResolution.x,
-									 uvTopLeftWidthHeight.y / texResolution.y );
+		                             uvTopLeftWidthHeight.y / texResolution.y );
 		const Ogre::Vector2 widthHeight( uvTopLeftWidthHeight.z / texResolution.x,
-										 uvTopLeftWidthHeight.w / texResolution.y );
+		                                 uvTopLeftWidthHeight.w / texResolution.y );
 		borderSize /= texResolution;
 
 		GridLocations::GridLocations idx;
@@ -232,6 +232,14 @@ namespace Crystal
 									widthHeightToBottomLeft( uvTopLeftWidthHeight, texResolution );
 							skinInfo.stateInfo.uvTopLeftBottomRight[i] = uvTopLeftBottomRight;
 						}
+					}
+
+					for( size_t i=0; i<GridLocations::NumGridLocations; ++i )
+					{
+						skinInfo.stateInfo.uvTopLeftBottomRight[i].x += 0.5f / texResolution.x;
+						skinInfo.stateInfo.uvTopLeftBottomRight[i].y += 0.5f / texResolution.y;
+						skinInfo.stateInfo.uvTopLeftBottomRight[i].z -= 0.5f / texResolution.x;
+						skinInfo.stateInfo.uvTopLeftBottomRight[i].w -= 0.5f / texResolution.y;
 					}
 				}
 

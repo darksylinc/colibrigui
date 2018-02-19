@@ -177,26 +177,26 @@ namespace Crystal
 		addQuad( vertexBuffer,
 				 Ogre::Vector2( innerBottomRight.x, innerTopLeft.y ),
 				 Ogre::Vector2( outerBottomRight.x, innerBottomRight.y ),
-				 stateInfo.uvTopLeftBottomRight[4],
+				 stateInfo.uvTopLeftBottomRight[5],
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 		//3rd row
 		addQuad( vertexBuffer,
 				 Ogre::Vector2( outerTopLeft.x, innerBottomRight.y ),
 				 Ogre::Vector2( innerTopLeft.x, outerBottomRight.y ),
-				 stateInfo.uvTopLeftBottomRight[3],
+				 stateInfo.uvTopLeftBottomRight[6],
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 		addQuad( vertexBuffer,
 				 Ogre::Vector2( innerTopLeft.x, innerBottomRight.y ),
 				 Ogre::Vector2( innerBottomRight.x, outerBottomRight.y ),
-				 stateInfo.uvTopLeftBottomRight[4],
+				 stateInfo.uvTopLeftBottomRight[7],
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 		addQuad( vertexBuffer,
 				 Ogre::Vector2( innerBottomRight.x, innerBottomRight.y ),
 				 Ogre::Vector2( outerBottomRight.x, outerBottomRight.y ),
-				 stateInfo.uvTopLeftBottomRight[4],
+				 stateInfo.uvTopLeftBottomRight[8],
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 
