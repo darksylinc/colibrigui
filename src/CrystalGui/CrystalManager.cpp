@@ -2,6 +2,7 @@
 #include "CrystalGui/CrystalManager.h"
 
 #include "CrystalGui/CrystalWindow.h"
+#include "CrystalGui/CrystalSkinManager.h"
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "Vao/OgreVaoManager.h"
@@ -30,13 +31,24 @@ namespace Crystal
 		m_sceneManager( 0 ),
 		m_vao( 0 ),
 		m_indirectBuffer( 0 ),
-		m_commandBuffer( 0 )
+		m_commandBuffer( 0 ),
+		m_skinManager( 0 )
 	{
+		setCanvasSize( Ogre::Vector2( 1.0f ) );
+
+		m_skinManager = new SkinManager( this );
 	}
 	//-------------------------------------------------------------------------
 	CrystalManager::~CrystalManager()
 	{
 		setOgre( 0, 0, 0 );
+		delete m_skinManager;
+		m_skinManager = 0;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::loadSkins( const char *fullPath )
+	{
+		m_skinManager->loadSkins( fullPath );
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setOgre( Ogre::Root * crystalgui_nullable root,
@@ -79,6 +91,12 @@ namespace Crystal
 			m_commandBuffer = new Ogre::CommandBuffer();
 			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize )
+	{
+		m_canvasSize = canvasSize;
+		m_invCanvasSize2x = 2.0f / canvasSize;
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )

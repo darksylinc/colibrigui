@@ -1,0 +1,22 @@
+{
+    "skin name" :
+    {
+        "material" : "material name",
+        "tex_resolution" : ["width", "height"],
+        "grid_uv" :
+        {
+            "all" : ["top", "left", "width", "height"],
+            "top" : ["top", "left", "width", "height"],
+            "top_right" : ["top", "left", "width", "height"]
+        },
+        "borders" :
+        {
+
+            "all" : ["size", "repeat_size"],
+            "left" : ["size", "repeat_size"],
+            "right" : ["size", "repeat_size"],
+            "top" : ["size", "repeat_size"],
+            "bottom" : ["size", "repeat_size"]
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "ButtonSkin" :
+    {
+        "material" : "ButtonSkin",
+        "tex_resolution" : [64, 32],
+        "grid_uv" :
+        {
+            "center" : [0, 0, 64, 32]
+        },
+        "borders" :
+        {
+            "all" : [0, 0]
+        }
+    }
+}

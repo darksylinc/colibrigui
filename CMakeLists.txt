@@ -22,6 +22,7 @@ setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES )
 
 # Setup our application
 include_directories( "./include" )
+include_directories( "./Dependencies/Ogre/Dependencies/include/" )
 
 add_recursive( ./src SOURCES )
 add_recursive( ./include HEADERS )

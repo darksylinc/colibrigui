@@ -21,7 +21,7 @@ namespace Crystal
 		m_hidden( false ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
-		m_size( Ogre::Vector2::UNIT_SCALE ),
+		m_size( manager->getCanvasSize() ),
 		m_orientation( Ogre::Matrix3::IDENTITY ),
 		m_derivedTopLeft( Ogre::Vector2::ZERO ),
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
@@ -144,8 +144,12 @@ namespace Crystal
 	{
 		const Ogre::Matrix3 finalRot = parentRot * m_orientation;
 
-		m_derivedTopLeft		= mul( finalRot, m_position ) + parentPos;
-		m_derivedBottomRight	= m_derivedTopLeft + mul( finalRot, m_size );
+		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+		Ogre::Vector2 relPos	= m_position * invCanvasSize2x - Ogre::Vector2::UNIT_SCALE;
+		Ogre::Vector2 relSize	= m_size * invCanvasSize2x;
+
+		m_derivedTopLeft		= mul( finalRot, relPos ) + parentPos;
+		m_derivedBottomRight	= m_derivedTopLeft + mul( finalRot, relSize );
 		m_derivedOrientation	= finalRot;
 	}
 	//-------------------------------------------------------------------------

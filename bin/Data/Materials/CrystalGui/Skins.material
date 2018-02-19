@@ -1,0 +1,4 @@
+hlms ButtonSkin unlit
+{
+    diffuse_map ButtonSkin.png
+}

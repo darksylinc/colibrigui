@@ -18,6 +18,7 @@ namespace Crystal
 	class CrystalManager;
 	class Label;
 	class Renderable;
+	class SkinManager;
 	class Widget;
 	class Window;
 

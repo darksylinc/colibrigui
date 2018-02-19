@@ -45,11 +45,15 @@ namespace Demo
 		crystalManager->setOgre( mGraphicsSystem->getRoot(),
 								 mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager(),
 								 mGraphicsSystem->getSceneManager() );
+		crystalManager->loadSkins( (mGraphicsSystem->getResourcePath() +
+								   "Materials/CrystalGui/Skins.crystal.json").c_str() );
 
 		mainWindow = crystalManager->createWindow( 0 );
 
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
-		mainWindow->setDatablock( hlms->getDefaultDatablock() );
+		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
+		mainWindow->setSkin( "ButtonSkin" );
+		//mainWindow->setDatablock( "ButtonSkin" );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
 
