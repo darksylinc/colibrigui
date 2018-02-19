@@ -15,6 +15,7 @@ namespace Demo
         CrystalGuiGameState( const Ogre::String &helpDescription );
 
         virtual void createScene01(void);
+		virtual void destroyScene();
 
         virtual void update( float timeSinceLast );
 

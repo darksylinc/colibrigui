@@ -59,6 +59,12 @@ namespace Demo
 
         TutorialGameState::createScene01();
     }
+	//-----------------------------------------------------------------------------------
+	void CrystalGuiGameState::destroyScene()
+	{
+		crystalManager->destroyWindow( mainWindow );
+		delete crystalManager;
+	}
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::update( float timeSinceLast )
 	{

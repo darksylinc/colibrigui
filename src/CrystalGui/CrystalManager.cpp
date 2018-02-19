@@ -34,7 +34,7 @@ namespace Crystal
 		m_commandBuffer( 0 ),
 		m_skinManager( 0 )
 	{
-		setCanvasSize( Ogre::Vector2( 1.0f ) );
+		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1024.0f ) );
 
 		m_skinManager = new SkinManager( this );
 	}
@@ -64,7 +64,7 @@ namespace Crystal
 		}
 		if( m_vao )
 		{
-			Ogre::CrystalOgreRenderable::destroyVao( m_vao, vaoManager );
+			Ogre::CrystalOgreRenderable::destroyVao( m_vao, m_vaoManager );
 			m_vao = 0;
 		}
 		/*if( m_defaultIndexBuffer )
@@ -93,10 +93,11 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize )
+	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize )
 	{
 		m_canvasSize = canvasSize;
 		m_invCanvasSize2x = 2.0f / canvasSize;
+		m_pixelSize = pixelSize / canvasSize;
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )

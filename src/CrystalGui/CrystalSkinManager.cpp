@@ -238,10 +238,10 @@ namespace Crystal
 				itTmp = skinValue.FindMember( "borders" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsObject() )
 				{
-					const rapidjson::Value &gridValue = itTmp->value;
+					const rapidjson::Value &borderValue = itTmp->value;
 
-					itTmp = gridValue.FindMember( "all" );
-					if( itTmp != skinValue.MemberEnd() )
+					itTmp = borderValue.FindMember( "all" );
+					if( itTmp != borderValue.MemberEnd() )
 					{
 						Ogre::Vector2 borderSizeRepeat( Ogre::Vector2::ZERO );
 						if( itTmp->value.IsArray() )
@@ -266,8 +266,8 @@ namespace Crystal
 
 					for( size_t i=0; i<Borders::NumBorders; ++i )
 					{
-						itTmp = gridValue.FindMember( borders[i] );
-						if( itTmp != skinValue.MemberEnd() )
+						itTmp = borderValue.FindMember( borders[i] );
+						if( itTmp != borderValue.MemberEnd() )
 						{
 							Ogre::Vector2 borderSizeRepeat( Ogre::Vector2::ZERO );
 							if( itTmp->value.IsArray() )
@@ -366,8 +366,9 @@ namespace Crystal
 		if( fileSize > 0 )
 		{
 			std::vector<char> fileData;
-			fileData.resize( fileSize );
+			fileData.resize( fileSize + 1u );
 			inFile.read( &fileData[0], fileSize );
+			fileData[fileSize] = '\0'; //Add null terminator
 
 			std::string filename = fullPath;
 			std::string::size_type pos = filename.find_last_of( "/\\" );

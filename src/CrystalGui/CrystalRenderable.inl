@@ -127,13 +127,15 @@ namespace Crystal
 
 		const StateInformation stateInfo = m_stateInformation[m_currentState];
 
-		const Ogre::Vector2 borderTopLeft( stateInfo.borderSize[Borders::Left],
-										   stateInfo.borderSize[Borders::Top] );
-		const Ogre::Vector2 borderBottomRight( stateInfo.borderSize[Borders::Right],
-											   stateInfo.borderSize[Borders::Bottom] );
+		const Ogre::Vector2 canvasSize = m_manager->getPixelSize();
+
+		const Ogre::Vector2 borderTopLeft( stateInfo.borderSize[Borders::Left] * canvasSize.x,
+		                                   stateInfo.borderSize[Borders::Top] * canvasSize.y );
+		const Ogre::Vector2 borderBottomRight( stateInfo.borderSize[Borders::Right] * canvasSize.x,
+		                                       stateInfo.borderSize[Borders::Bottom] * canvasSize.y );
 		const Ogre::Vector2 innerTopLeft		= outerTopLeft + mul( this->m_derivedOrientation,
 																	  borderTopLeft );
-		const Ogre::Vector2 innerBottomRight	= outerBottomRight + mul( this->m_derivedOrientation,
+		const Ogre::Vector2 innerBottomRight	= outerBottomRight - mul( this->m_derivedOrientation,
 																		  borderBottomRight );
 		TODO_borderRepeatSize;
 //		stateInfo.borderRepeatSize[Borders::Left] / (innerBottomRight.x - innerTopLeft.x);

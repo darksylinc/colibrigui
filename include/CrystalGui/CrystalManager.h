@@ -51,6 +51,7 @@ namespace Crystal
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
+		Ogre::Vector2				m_pixelSize;
 
 		SkinManager	*m_skinManager;
 
@@ -75,9 +76,25 @@ namespace Crystal
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 
-		void setCanvasSize( const Ogre::Vector2 &canvasSize );
+		/** Sets the size of the virtual canvas. All widgets are relative to this canvas
+			For example if the canvas is 1920x1080, then a widget at x = 960 is in the
+			middle of the canvas.
+
+			This is irrespective of screen resolution. If the actual screen is 1024x768,
+			the canvas will be stretched to fit the aspect ratio.
+		@param canvasSize
+			The size of the canvas. A value of (1.0f, 1.0f) is screen independent with
+			an aspect ratio of 1:1
+		@param pixelSize
+			How many units a pixel occupies. This value is used to determine the size of the
+			widget borders.
+			Usually this value should be 1 (e.g. canvas = 1920x1080, pixelSize = 1). However
+			if you insert a canvas of 1x1; then your pixel size could be (1 / 1920, 1 / 1080)
+		*/
+		void setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize );
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
+		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 
