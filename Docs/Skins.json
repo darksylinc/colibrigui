@@ -1,22 +1,38 @@
 {
-    "skin name" :
+    "skins" :
     {
-        "material" : "material name",
-        "tex_resolution" : ["width", "height"],
-        "grid_uv" :
+        "skin name" :
         {
-            "all" : ["top", "left", "width", "height"],
-            "top" : ["top", "left", "width", "height"],
-            "top_right" : ["top", "left", "width", "height"]
-        },
-        "borders" :
-        {
+            "material" : "material name",
+            "tex_resolution" : ["width", "height"],
+            "grid_uv" :
+            {
+                "all" : ["top", "left", "width", "height"],
+                "enclosing" : [["top", "left", "width", "height"], ["border_x", "border_y"]],
+                "top" : ["top", "left", "width", "height"],
+                "top_right" : ["top", "left", "width", "height"]
+            },
+            "borders" :
+            {
 
-            "all" : ["size", "repeat_size"],
-            "left" : ["size", "repeat_size"],
-            "right" : ["size", "repeat_size"],
-            "top" : ["size", "repeat_size"],
-            "bottom" : ["size", "repeat_size"]
+                "all" : ["size", "repeat_size"],
+                "left" : ["size", "repeat_size"],
+                "right" : ["size", "repeat_size"],
+                "top" : ["size", "repeat_size"],
+                "bottom" : ["size", "repeat_size"]
+            }
+        }
+    },
+
+    "skin_packs" :
+    {
+        "Pack Name" :
+        {
+            "all" : "skin name",
+            "disabled" : "skin name",
+            "idle" : "skin name",
+            "highlighted" : "skin name",
+            "pressed" : "skin name"
         }
     }
 }
