@@ -43,7 +43,7 @@ namespace Crystal
 	}
 	//-------------------------------------------------------------------------
 	inline Ogre::Vector4 SkinManager::widthHeightToBottomLeft( Ogre::Vector4 uvTopLeftWidthHeight,
-														Ogre::Vector2 texResolution )
+															   Ogre::Vector2 texResolution )
 	{
 		uvTopLeftWidthHeight.x /= texResolution.x;
 		uvTopLeftWidthHeight.y /= texResolution.y;
@@ -53,6 +53,89 @@ namespace Crystal
 		return Ogre::Vector4( uvTopLeftWidthHeight.x, uvTopLeftWidthHeight.y,
 							  uvTopLeftWidthHeight.x + uvTopLeftWidthHeight.z,
 							  uvTopLeftWidthHeight.y + uvTopLeftWidthHeight.w );
+	}
+	//-------------------------------------------------------------------------
+	void SkinManager::buildGridFromEnclosingUv( Ogre::Vector4 uvTopLeftWidthHeight,
+												const Ogre::Vector2 &texResolution,
+												Ogre::Vector2 borderSize,
+												StateInformation &stateInfo,
+												const char *skinName, const char *filename )
+	{
+		if( borderSize.x * 2.0f > uvTopLeftWidthHeight.z ||
+			borderSize.y * 2.0f > uvTopLeftWidthHeight.w )
+		{
+			LogListener *log = m_crystalManager->getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+			errorMsg.clear();
+			errorMsg.a( "[SkinManager::buildGridFromEnclosingUv] Enclosing's border parameter "
+						"must be less than half of the width and less than the height. "
+						"Skin: ", skinName, " File: ", filename );
+			log->log( errorMsg.c_str(), LogSeverity::Warning );
+		}
+
+		const Ogre::Vector2 topLeft( uvTopLeftWidthHeight.x / texResolution.x,
+									 uvTopLeftWidthHeight.y / texResolution.y );
+		const Ogre::Vector2 widthHeight( uvTopLeftWidthHeight.z / texResolution.x,
+										 uvTopLeftWidthHeight.w / texResolution.y );
+		borderSize /= texResolution;
+
+		GridLocations::GridLocations idx;
+
+		idx = GridLocations::TopLeft;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+
+		idx = GridLocations::Top;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+
+		idx = GridLocations::TopRight;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+
+		idx = GridLocations::CenterLeft;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+
+		idx = GridLocations::Center;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+
+		idx = GridLocations::CenterRight;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+
+		idx = GridLocations::BottomLeft;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
+
+		idx = GridLocations::Bottom;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
+
+		idx = GridLocations::BottomRight;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
 	}
 	//-------------------------------------------------------------------------
 	void SkinManager::loadSkins( const rapidjson::Value &skinsValue, const char *filename )
@@ -110,6 +193,22 @@ namespace Crystal
 						for( size_t i=0; i<GridLocations::NumGridLocations; ++i )
 							skinInfo.stateInfo.uvTopLeftBottomRight[i] = uvTopLeftBottomRight;
 					}
+
+					itTmp = gridValue.FindMember( "enclosing" );
+					if( itTmp != skinValue.MemberEnd() &&
+						itTmp->value.IsArray() &&
+						itTmp->value.Size() == 2u &&
+						itTmp->value[0].IsArray() &&
+						itTmp->value[1].IsArray() )
+					{
+						const Ogre::Vector4 uvTopLeftWidthHeight = getVector4Array( itTmp->value[0] );
+						const Ogre::Vector2 borderUvSize =
+								getVector2Array( itTmp->value[1] );
+
+						buildGridFromEnclosingUv( uvTopLeftWidthHeight, texResolution, borderUvSize,
+												  skinInfo.stateInfo, skinInfo.name.c_str(), filename );
+					}
+
 					const char *gridLocations[GridLocations::NumGridLocations] =
 					{
 						"top_left",

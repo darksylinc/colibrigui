@@ -7,11 +7,12 @@
             "tex_resolution" : [64, 32],
             "grid_uv" :
             {
-                "center" : [0, 0, 64, 32]
+                "center2" : [0, 0, 64, 32],
+                "enclosing" : [[0, 0, 64, 32], [3, 2]]
             },
             "borders" :
             {
-                "all" : [0, 0]
+                "all" : [4, 4]
             }
         }
     },

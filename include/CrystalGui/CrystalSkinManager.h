@@ -48,6 +48,12 @@ namespace Crystal
 		inline Ogre::Vector4 widthHeightToBottomLeft( Ogre::Vector4 uvTopLeftWidthHeight,
 													  Ogre::Vector2 texResolution );
 
+		void buildGridFromEnclosingUv( Ogre::Vector4 uvTopLeftWidthHeight,
+									   const Ogre::Vector2 &texResolution,
+									   Ogre::Vector2 borderSize,
+									   StateInformation &stateInfo,
+									   const char *skinName, const char *filename );
+
 		void loadSkins( const rapidjson::Value &skinsValue, const char *filename );
 		void loadSkinPacks( const rapidjson::Value &packsValue, const char *filename );
 
