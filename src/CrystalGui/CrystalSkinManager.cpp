@@ -55,66 +55,14 @@ namespace Crystal
 							  uvTopLeftWidthHeight.y + uvTopLeftWidthHeight.w );
 	}
 	//-------------------------------------------------------------------------
-	void SkinManager::loadSkins( const char *fullPath )
+	void SkinManager::loadSkins( const rapidjson::Value &skinsValue, const char *filename )
 	{
 		LogListener *log = m_crystalManager->getLogListener();
 		char tmpBuffer[512];
 		Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
 
-		std::ifstream inFile( fullPath, std::ios::in | std::ios::binary );
-
-		if( !inFile.is_open() )
-		{
-			errorMsg.clear();
-			errorMsg.a( "[SkinManager::loadSkins]: Could not open JSON file ", fullPath );
-			log->log( errorMsg.c_str(), LogSeverity::Error );
-			return;
-		}
-
-		inFile.seekg( 0, std::ios_base::end );
-		const size_t fileSize = inFile.tellg();
-		inFile.seekg( 0, std::ios_base::beg );
-
-		if( fileSize > 0 )
-		{
-			std::vector<char> fileData;
-			fileData.resize( fileSize );
-			inFile.read( &fileData[0], fileSize );
-
-			std::string filename = fullPath;
-			std::string::size_type pos = filename.find_last_of( "/\\" );
-			if( pos != std::string::npos )
-				filename.erase( 0, pos + 1u );
-
-			loadSkins( &fileData[0], filename.c_str() );
-		}
-		else
-		{
-			errorMsg.clear();
-			errorMsg.a( "[SkinManager::loadSkins]: JSON file ", fullPath, " is empty!" );
-			log->log( errorMsg.c_str(), LogSeverity::Error );
-		}
-	}
-	//-------------------------------------------------------------------------
-	void SkinManager::loadSkins( const char *jsonString, const char *filename )
-	{
-		rapidjson::Document d;
-		d.Parse( jsonString );
-
-		LogListener *log = m_crystalManager->getLogListener();
-		char tmpBuffer[512];
-		Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
-
-		if( d.HasParseError() )
-		{
-			errorMsg.clear();
-			errorMsg.a( "[SkinManager::loadSkins]: Invalid JSON string in file ", filename );
-			log->log( errorMsg.c_str(), LogSeverity::Error );
-			return;
-		}
-
-		rapidjson::Value::ConstMemberIterator itor = d.MemberBegin();
-		rapidjson::Value::ConstMemberIterator end  = d.MemberEnd();
+		rapidjson::Value::ConstMemberIterator itor = skinsValue.MemberBegin();
+		rapidjson::Value::ConstMemberIterator end  = skinsValue.MemberEnd();
 
 		while( itor != end )
 		{
@@ -143,7 +91,10 @@ namespace Crystal
 
 				itTmp = skinValue.FindMember( "material" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+				{
 					skinInfo.materialName = itTmp->value.GetString();
+					skinInfo.stateInfo.materialName = skinInfo.materialName;
+				}
 
 				itTmp = skinValue.FindMember( "grid_uv" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsObject() )
@@ -246,6 +197,120 @@ namespace Crystal
 
 			++itor;
 		}
+	}
+	//-------------------------------------------------------------------------
+	void SkinManager::loadSkinPacks( const rapidjson::Value &packsValue, const char *filename )
+	{
+		rapidjson::Value::ConstMemberIterator itor = packsValue.MemberBegin();
+		rapidjson::Value::ConstMemberIterator end  = packsValue.MemberEnd();
+
+		while( itor != end )
+		{
+			if( itor->name.IsString() && itor->value.IsObject() )
+			{
+				SkinPack skinPack;
+
+				skinPack.name = itor->name.GetString();
+				const rapidjson::Value &skinValue = itor->value;
+
+				rapidjson::Value::ConstMemberIterator itTmp;
+
+				itTmp = skinValue.FindMember( "all" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+				{
+					skinPack.skinInfo[0] = itTmp->value.GetString();
+					for( size_t i=1u; i<States::NumStates; ++i )
+						skinPack.skinInfo[i] = skinPack.skinInfo[0];
+				}
+
+				const char *states[States::NumStates] =
+				{
+					"disabled",
+					"idle",
+					"highlighted",
+					"pressed"
+				};
+				for( size_t i=0u; i<States::NumStates; ++i )
+				{
+					itTmp = skinValue.FindMember( states[i] );
+					if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+						skinPack.skinInfo[i] = itTmp->value.GetString();
+				}
+
+				m_skinPacks[skinPack.name] = skinPack;
+			}
+
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
+	void SkinManager::loadSkins( const char *fullPath )
+	{
+		LogListener *log = m_crystalManager->getLogListener();
+		char tmpBuffer[512];
+		Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+		std::ifstream inFile( fullPath, std::ios::in | std::ios::binary );
+
+		if( !inFile.is_open() )
+		{
+			errorMsg.clear();
+			errorMsg.a( "[SkinManager::loadSkins]: Could not open JSON file ", fullPath );
+			log->log( errorMsg.c_str(), LogSeverity::Error );
+			return;
+		}
+
+		inFile.seekg( 0, std::ios_base::end );
+		const size_t fileSize = inFile.tellg();
+		inFile.seekg( 0, std::ios_base::beg );
+
+		if( fileSize > 0 )
+		{
+			std::vector<char> fileData;
+			fileData.resize( fileSize );
+			inFile.read( &fileData[0], fileSize );
+
+			std::string filename = fullPath;
+			std::string::size_type pos = filename.find_last_of( "/\\" );
+			if( pos != std::string::npos )
+				filename.erase( 0, pos + 1u );
+
+			loadSkins( &fileData[0], filename.c_str() );
+		}
+		else
+		{
+			errorMsg.clear();
+			errorMsg.a( "[SkinManager::loadSkins]: JSON file ", fullPath, " is empty!" );
+			log->log( errorMsg.c_str(), LogSeverity::Error );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void SkinManager::loadSkins( const char *jsonString, const char *filename )
+	{
+		rapidjson::Document d;
+		d.Parse( jsonString );
+
+		LogListener *log = m_crystalManager->getLogListener();
+		char tmpBuffer[512];
+		Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+		if( d.HasParseError() )
+		{
+			errorMsg.clear();
+			errorMsg.a( "[SkinManager::loadSkins]: Invalid JSON string in file ", filename );
+			log->log( errorMsg.c_str(), LogSeverity::Error );
+			return;
+		}
+
+		rapidjson::Value::ConstMemberIterator itTmp;
+
+		itTmp = d.FindMember( "skins" );
+		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
+			loadSkins( itTmp->value, filename );
+
+		itTmp = d.FindMember( "skin_packs" );
+		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
+			loadSkinPacks( itTmp->value, filename );
 	}
 }
 

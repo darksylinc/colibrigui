@@ -52,7 +52,7 @@ namespace Demo
 
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
-		mainWindow->setSkin( "ButtonSkin" );
+		mainWindow->setSkinPack( "ButtonSkin" );
 		//mainWindow->setDatablock( "ButtonSkin" );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );

@@ -1,15 +1,30 @@
 {
-    "ButtonSkin" :
+    "skins" :
     {
-        "material" : "ButtonSkin",
-        "tex_resolution" : [64, 32],
-        "grid_uv" :
+        "ButtonSkin" :
         {
-            "center" : [0, 0, 64, 32]
-        },
-        "borders" :
+            "material" : "ButtonSkin",
+            "tex_resolution" : [64, 32],
+            "grid_uv" :
+            {
+                "center" : [0, 0, 64, 32]
+            },
+            "borders" :
+            {
+                "all" : [0, 0]
+            }
+        }
+    },
+
+    "skin_packs" :
+    {
+        "ButtonSkin" :
         {
-            "all" : [0, 0]
+            "all" : "ButtonSkin",
+            "disabled" : "ButtonSkin",
+            "idle" : "ButtonSkin",
+            "highlighted" : "ButtonSkin",
+            "pressed" : "ButtonSkin"
         }
     }
 }

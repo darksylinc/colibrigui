@@ -34,7 +34,7 @@ namespace Crystal
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::setSkin( Ogre::IdString skinName )
+	void Renderable::setSkin( Ogre::IdString skinName, States::States forState )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();
 		const SkinInfoMap &skins = skinManager->getSkins();
@@ -42,10 +42,42 @@ namespace Crystal
 		SkinInfoMap::const_iterator itor = skins.find( skinName );
 		if( itor != skins.end() )
 		{
-			setDatablock( itor->second.materialName );
-			TODO_for_state;
+			if( forState == States::NumStates )
+			{
+				for( size_t i=0; i<States::NumStates; ++i )
+					m_stateInformation[i] = itor->second.stateInfo;
+				setDatablock( m_stateInformation[0].materialName );
+			}
+			else
+			{
+				m_stateInformation[forState] = itor->second.stateInfo;
+				if( forState == m_currentState )
+					setDatablock( m_stateInformation[forState].materialName );
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Renderable::setSkinPack( Ogre::IdString skinName )
+	{
+		SkinManager *skinManager = m_manager->getSkinManager();
+		const SkinInfoMap &skins = skinManager->getSkins();
+		const SkinPackMap &skinPacks = skinManager->getSkinPacks();
+
+		SkinPackMap::const_iterator itor = skinPacks.find( skinName );
+		if( itor != skinPacks.end() )
+		{
+			const SkinPack &pack = itor->second;
+
 			for( size_t i=0; i<States::NumStates; ++i )
-				m_stateInformation[i] = itor->second.stateInfo;
+			{
+				SkinInfoMap::const_iterator itSkinInfo = skins.find( pack.skinInfo[i] );
+				if( itSkinInfo != skins.end() )
+				{
+					m_stateInformation[i] = itSkinInfo->second.stateInfo;
+					if( i == m_currentState )
+						setDatablock( m_stateInformation[i].materialName );
+				}
+			}
 		}
 	}
 	//-------------------------------------------------------------------------

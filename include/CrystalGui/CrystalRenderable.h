@@ -23,6 +23,7 @@ namespace Crystal
 		Ogre::Vector4	uvTopLeftBottomRight[GridLocations::NumGridLocations];
 		float			borderSize[Borders::NumBorders];
 		float			borderRepeatSize[Borders::NumBorders]; /// 0 or negative means disable repeat
+		Ogre::IdString	materialName;
 	};
 
 	struct UiVertex
@@ -78,7 +79,8 @@ namespace Crystal
 	public:
 		Renderable( CrystalManager *manager );
 
-		void setSkin( Ogre::IdString skinName );
+		void setSkin( Ogre::IdString skinName, States::States forState );
+		void setSkinPack( Ogre::IdString skinPackName );
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
