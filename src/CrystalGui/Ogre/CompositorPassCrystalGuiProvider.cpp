@@ -26,7 +26,7 @@ namespace Ogre
 															   const RenderTargetViewDef *rtvDef,
 															   SceneManager *sceneManager )
 	{
-		assert( dynamic_cast<const CompositorPassCrystalGuiDef*>( definition ) );
+		CRYSTAL_ASSERT( dynamic_cast<const CompositorPassCrystalGuiDef*>( definition ) );
 		const CompositorPassCrystalGuiDef *crystalGuiDef =
 				static_cast<const CompositorPassCrystalGuiDef*>( definition );
 		return OGRE_NEW CompositorPassCrystalGui( crystalGuiDef, sceneManager, rtvDef,

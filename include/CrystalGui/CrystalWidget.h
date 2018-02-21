@@ -35,6 +35,7 @@ namespace Crystal
 	{
 	protected:
 		friend class CrystalManager;
+		friend class Renderable;
 
 		/// Child and parent relationships are explicit, thus they're not tracked via
 		/// WidgetListener::notifyWidgetDestroyed
@@ -54,16 +55,23 @@ namespace Crystal
 
 		WidgetListenerPairVec	m_listeners;
 
+		Ogre::Vector2   m_position;
+		Ogre::Vector2   m_size;
+		Ogre::Matrix3   m_orientation;
+
+		Ogre::Vector2   m_derivedTopLeft;
+		Ogre::Vector2   m_derivedBottomRight;
+		Ogre::Matrix3   m_derivedOrientation;
+
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
+		bool	m_transformOutOfDate;
+#endif
+
 		WidgetListenerPairVec::iterator findListener( WidgetListener *listener );
 
 		static Ogre::Vector2 mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos );
 
 		void updateDerivedTransform( const Ogre::Vector2 &parentPos, const Ogre::Matrix3 &parentRot );
-
-		/// Asumes:
-		///		1. Parent is already up to date
-		///		2. m_parent is non-null (i.e. Window breaks this assumption)
-		void updateDerivedTransformFromParent();
 
 		/** Notifies a parent that the input is about to be removed. It's similar to
 			notifyWidgetDestroyed, except this is explicitly about child-parent
@@ -73,22 +81,16 @@ namespace Crystal
 		*/
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
 
+		void setTransformDirty();
+
 	public:
-		Ogre::Vector2   m_position;
-		Ogre::Vector2   m_size;
-		Ogre::Matrix3   m_orientation;
-
-		Ogre::Vector2   m_derivedTopLeft;
-		Ogre::Vector2   m_derivedBottomRight;
-		Ogre::Matrix3   m_derivedOrientation;
-
 		Widget( CrystalManager *manager );
 		virtual ~Widget();
 
 		virtual void _destroy();
 
 		/// Do not call directly. 'this' cannot be a Window
-		virtual void _setParent( Widget *parent );
+		void _setParent( Widget *parent );
 
 		virtual bool isWindow() const	{ return false; }
 
@@ -141,6 +143,25 @@ namespace Crystal
 
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
+
+		void setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size,
+						   const Ogre::Matrix3 &orientation );
+		void setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size );
+		void setPosition( const Ogre::Vector2 &position );
+		void setSize( const Ogre::Vector2 &size );
+		void setOrientation( const Ogre::Matrix3 &orientation );
+
+		const Ogre::Vector2& getPosition() const				{ return m_position; }
+		const Ogre::Vector2& getSize() const					{ return m_size; }
+		const Ogre::Matrix3& getOrientation() const				{ return m_orientation; }
+
+		/// Call this function before calling getDerivedTopLeft & co and it was asserting.
+		/// Do not do it too often as it is not the most efficient solution.
+		void updateDerivedTransformFromParent();
+
+		const Ogre::Vector2& getDerivedTopLeft() const;
+		const Ogre::Vector2& getDerivedBottomRight() const;
+		const Ogre::Matrix3& getDerivedOrientation() const;
 	};
 }
 

@@ -113,6 +113,7 @@ namespace Crystal
 		}
 
 		retVal->setWindowNavigationDirty();
+		retVal->setTransformDirty();
 
 		++m_numWidgets;
 
@@ -144,7 +145,7 @@ namespace Crystal
 	{
 		if( widget->isWindow() )
 		{
-			assert( dynamic_cast<Window*>( widget ) );
+			CRYSTAL_ASSERT( dynamic_cast<Window*>( widget ) );
 			destroyWindow( static_cast<Window*>( widget ) );
 		}
 		else
@@ -382,7 +383,7 @@ namespace Crystal
 		}
 
 		const size_t elementsWritten = vertex - startOffset;
-		assert( elementsWritten <= vertexBuffer->getNumElements() );
+		CRYSTAL_ASSERT( elementsWritten <= vertexBuffer->getNumElements() );
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
 	}
 	//-------------------------------------------------------------------------

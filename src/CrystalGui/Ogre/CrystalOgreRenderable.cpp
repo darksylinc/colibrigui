@@ -172,8 +172,8 @@ namespace Ogre
 	//-----------------------------------------------------------------------------------
 	void CrystalOgreRenderable::setVao( VertexArrayObject *vao )
 	{
-		assert( mVaoPerLod[0].empty() && mVaoPerLod[1].empty() &&
-				"getBuffersFromParentWindow or createBuffers already called!" );
+		CRYSTAL_ASSERT( mVaoPerLod[0].empty() && mVaoPerLod[1].empty() &&
+						"getBuffersFromParentWindow or createBuffers already called!" );
 		mVaoPerLod[0].clear();
 		mVaoPerLod[1].clear();
 		mVaoPerLod[0].push_back( vao );

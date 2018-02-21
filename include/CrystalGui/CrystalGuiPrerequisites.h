@@ -77,3 +77,12 @@ namespace Ogre
 {
 	class CrystalOgreRenderable;
 }
+
+#include "CrystalGui/CrystalAssert.h"
+
+#define CRYSTALGUI_DEBUG_NONE		0
+#define CRYSTALGUI_DEBUG_LOW		1
+#define CRYSTALGUI_DEBUG_MEDIUM		2
+#define CRYSTALGUI_DEBUG_HIGH		3
+
+#define CRYSTALGUI_DEBUG CRYSTALGUI_DEBUG_LOW

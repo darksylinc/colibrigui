@@ -20,12 +20,12 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	Window::~Window()
 	{
-		assert( m_childWindows.empty() && "_destroy not called before deleting!" );
+		CRYSTAL_ASSERT( m_childWindows.empty() && "_destroy not called before deleting!" );
 	}
 	//-------------------------------------------------------------------------
 	Window* Window::getParentAsWindow() const
 	{
-		assert( dynamic_cast<Window*>( m_parent ) );
+		CRYSTAL_ASSERT( dynamic_cast<Window*>( m_parent ) );
 		Window *parentWindow = static_cast<Window*>( m_parent );
 		return parentWindow;
 	}

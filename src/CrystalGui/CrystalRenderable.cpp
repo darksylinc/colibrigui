@@ -20,8 +20,6 @@
 
 #include "CrystalRenderable.inl"
 
-#define TODO_for_state
-
 namespace Crystal
 {
 	Renderable::Renderable( CrystalManager *manager ) :
