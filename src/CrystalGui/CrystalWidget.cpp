@@ -26,8 +26,9 @@ namespace Crystal
 		m_derivedTopLeft( Ogre::Vector2::ZERO ),
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
 		m_derivedOrientation( Ogre::Matrix3::IDENTITY )
-  #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
-	,	m_transformOutOfDate( false )
+  #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
+	,	m_transformOutOfDate( false ),
+		m_destructionStarted( false )
   #endif
 	{
 		memset( m_nextWidget, 0, sizeof(m_nextWidget) );
@@ -42,16 +43,27 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	size_t Widget::notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved )
 	{
+		size_t retVal = std::numeric_limits<size_t>::max();
+
 		//Remove ourselves from being our parent's child
 		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(),
 											  childWidgetBeingRemoved );
-		const size_t idx = itor - m_children.begin();
-		m_children.erase( itor );
-		return idx;
+		if( itor != m_children.end() )
+		{
+			//It may not be found if we're also in destruction phase
+			retVal = itor - m_children.begin();
+			m_children.erase( itor );
+		}
+
+		CRYSTAL_ASSERT_MEDIUM( itor != m_children.end() || m_destructionStarted );
+
+		return retVal;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_destroy()
 	{
+		m_destructionStarted = true;
+
 		setWidgetNavigationDirty();
 
 		for( size_t i=0; i<Borders::NumBorders; ++i )
@@ -98,6 +110,8 @@ namespace Crystal
 
 			m_listeners.clear();
 		}
+
+		m_destructionStarted = false;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_setParent( Widget *parent )
@@ -105,7 +119,7 @@ namespace Crystal
 		CRYSTAL_ASSERT( !this->m_parent && parent );
 		CRYSTAL_ASSERT( !this->isWindow() );
 		this->m_parent = parent;
-		parent->m_children.push_back( parent );
+		parent->m_children.push_back( this );
 		parent->setWidgetNavigationDirty();
 		setTransformDirty();
 	}
@@ -160,7 +174,7 @@ namespace Crystal
 		m_derivedBottomRight	= derivedCenter + derivedHalfSize;
 		m_derivedOrientation	= finalRot;
 
-#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = false;
 #endif
 	}
@@ -294,7 +308,7 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Widget::setTransformDirty()
 	{
-#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = true;
 #endif
 	}
@@ -356,25 +370,25 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedTopLeft() const
 	{
-		CRYSTAL_ASSERT( !m_transformOutOfDate );
+		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return m_derivedTopLeft;
 	}
 	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedBottomRight() const
 	{
-		CRYSTAL_ASSERT( !m_transformOutOfDate );
+		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return m_derivedBottomRight;
 	}
 	//-------------------------------------------------------------------------
 	const Ogre::Matrix3& Widget::getDerivedOrientation() const
 	{
-		CRYSTAL_ASSERT( !m_transformOutOfDate );
+		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return m_derivedOrientation;
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::getDerivedCenter() const
 	{
-		CRYSTAL_ASSERT( !m_transformOutOfDate );
+		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return (m_derivedTopLeft + m_derivedBottomRight) * 0.5f;
 	}
 }

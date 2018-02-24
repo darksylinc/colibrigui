@@ -102,6 +102,9 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
 	{
+		CRYSTAL_ASSERT( (!parent || parent->isWindow()) &&
+						"parent can only be null or a window!" );
+
 		Window *retVal = new Window( this );
 
 		if( !parent )

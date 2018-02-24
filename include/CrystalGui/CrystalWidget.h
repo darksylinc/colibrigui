@@ -63,8 +63,9 @@ namespace Crystal
 		Ogre::Vector2	m_derivedBottomRight;
 		Ogre::Matrix3	m_derivedOrientation;
 
-#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		bool	m_transformOutOfDate;
+		bool	m_destructionStarted;
 #endif
 
 		WidgetListenerPairVec::iterator findListener( WidgetListener *listener );

@@ -128,8 +128,7 @@ namespace Crystal
 		template <typename T>
 		T * crystalgui_nonnull createWidget( Widget * crystalgui_nonnull parent )
 		{
-			assert( parent && "parent must be provided!" );
-			assert( !parent->isWindow() && "parent cannot be a window! Call createWindow instead" );
+			CRYSTAL_ASSERT( parent && "parent must be provided!" );
 
 			T *retVal = new T( this );
 

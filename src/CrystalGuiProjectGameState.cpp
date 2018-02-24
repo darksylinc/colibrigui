@@ -23,6 +23,7 @@
 
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/CrystalWindow.h"
+#include "CrystalGui/CrystalButton.h"
 
 using namespace Demo;
 
@@ -31,6 +32,7 @@ namespace Demo
 	extern Crystal::CrystalManager *crystalManager;
 	Crystal::CrystalManager *crystalManager = 0;
 	Crystal::Window *mainWindow = 0;
+	Crystal::Button *button = 0;
 
     CrystalGuiGameState::CrystalGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -53,7 +55,11 @@ namespace Demo
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 		mainWindow->setSkinPack( "ButtonSkin" );
-		//mainWindow->setDatablock( "ButtonSkin" );
+
+		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
+
+		Crystal::Button *button = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button->setSkinPack( "ButtonSkin" );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
 

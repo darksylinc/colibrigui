@@ -15,6 +15,7 @@
 
 namespace Crystal
 {
+	class Button;
 	class CrystalManager;
 	class Label;
 	class Renderable;
@@ -78,11 +79,30 @@ namespace Ogre
 	class CrystalOgreRenderable;
 }
 
-#include "CrystalGui/CrystalAssert.h"
-
+// No checks done at all
 #define CRYSTALGUI_DEBUG_NONE		0
+// We perform basic assert checks and other non-performance intensive checks
 #define CRYSTALGUI_DEBUG_LOW		1
+// We alter classes to add some debug variables for a bit more thorough checking
+// and also perform checks that may cause some performance hit
 #define CRYSTALGUI_DEBUG_MEDIUM		2
+// We perform intensive validation without concerns for performance
 #define CRYSTALGUI_DEBUG_HIGH		3
 
-#define CRYSTALGUI_DEBUG CRYSTALGUI_DEBUG_LOW
+#define CRYSTALGUI_DEBUG CRYSTALGUI_DEBUG_HIGH
+
+#include "CrystalGui/CrystalAssert.h"
+
+#define CRYSTAL_ASSERT_LOW CRYSTAL_ASSERT
+
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
+	#define CRYSTAL_ASSERT_MEDIUM CRYSTAL_ASSERT
+#else
+	#define CRYSTAL_ASSERT_MEDIUM do { CRYSTAL_UNUSED(condition); } while(0)
+#endif
+
+#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_HIGH
+	#define CRYSTAL_ASSERT_HIGH CRYSTAL_ASSERT
+#else
+	#define CRYSTAL_ASSERT_HIGH do { CRYSTAL_UNUSED(condition); } while(0)
+#endif

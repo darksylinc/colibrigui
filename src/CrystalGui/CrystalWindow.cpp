@@ -32,6 +32,7 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Window::_destroy()
 	{
+		m_destructionStarted = true;
 		setWindowNavigationDirty();
 
 		if( m_parent )
