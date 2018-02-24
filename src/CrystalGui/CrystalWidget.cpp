@@ -148,12 +148,16 @@ namespace Crystal
 	{
 		const Ogre::Matrix3 finalRot = parentRot * m_orientation;
 
-		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
-		Ogre::Vector2 relPos	= m_position * invCanvasSize2x - Ogre::Vector2::UNIT_SCALE;
-		Ogre::Vector2 relSize	= m_size * invCanvasSize2x;
+		Ogre::Vector2 center = getCenter();
 
-		m_derivedTopLeft		= mul( finalRot, relPos ) + parentPos;
-		m_derivedBottomRight	= m_derivedTopLeft + mul( finalRot, relSize );
+		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+		Ogre::Vector2 relCenter		= center * invCanvasSize2x - Ogre::Vector2::UNIT_SCALE;
+
+		Ogre::Vector2 derivedHalfSize	= mul( finalRot, m_size * 0.5f * invCanvasSize2x );
+		Ogre::Vector2 derivedCenter		= mul( finalRot, relCenter ) + parentPos;
+
+		m_derivedTopLeft		= derivedCenter - derivedHalfSize;
+		m_derivedBottomRight	= derivedCenter + derivedHalfSize;
 		m_derivedOrientation	= finalRot;
 
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
@@ -295,25 +299,25 @@ namespace Crystal
 #endif
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size,
+	void Widget::setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
 							   const Ogre::Matrix3 &orientation )
 	{
-		m_position = position;
+		m_position = topLeft;
 		m_size = size;
 		m_orientation = orientation;
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size )
+	void Widget::setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size )
 	{
-		m_position = position;
+		m_position = topLeft;
 		m_size = size;
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setPosition( const Ogre::Vector2 &position )
+	void Widget::setTopLeft( const Ogre::Vector2 &topLeft )
 	{
-		m_position = position;
+		m_position = topLeft;
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
@@ -329,13 +333,23 @@ namespace Crystal
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setCenter( const Ogre::Vector2 &center )
+	{
+		setTopLeft( center - this->m_size * 0.5f );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getCenter() const
+	{
+		return m_position + this->m_size * 0.5f;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::updateDerivedTransformFromParent()
 	{
 		if( m_parent )
+		{
 			m_parent->updateDerivedTransformFromParent();
-
-		if( m_parent )
 			updateDerivedTransform( m_parent->m_derivedTopLeft, m_parent->m_derivedOrientation );
+		}
 		else
 			updateDerivedTransform( Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );
 	}
@@ -356,5 +370,11 @@ namespace Crystal
 	{
 		CRYSTAL_ASSERT( !m_transformOutOfDate );
 		return m_derivedOrientation;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getDerivedCenter() const
+	{
+		CRYSTAL_ASSERT( !m_transformOutOfDate );
+		return (m_derivedTopLeft + m_derivedBottomRight) * 0.5f;
 	}
 }

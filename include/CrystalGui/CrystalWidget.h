@@ -55,13 +55,13 @@ namespace Crystal
 
 		WidgetListenerPairVec	m_listeners;
 
-		Ogre::Vector2   m_position;
-		Ogre::Vector2   m_size;
-		Ogre::Matrix3   m_orientation;
+		Ogre::Vector2	m_position;
+		Ogre::Vector2	m_size;
+		Ogre::Matrix3	m_orientation;
 
-		Ogre::Vector2   m_derivedTopLeft;
-		Ogre::Vector2   m_derivedBottomRight;
-		Ogre::Matrix3   m_derivedOrientation;
+		Ogre::Vector2	m_derivedTopLeft;
+		Ogre::Vector2	m_derivedBottomRight;
+		Ogre::Matrix3	m_derivedOrientation;
 
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_LOW
 		bool	m_transformOutOfDate;
@@ -144,12 +144,15 @@ namespace Crystal
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
 
-		void setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size,
+		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
 						   const Ogre::Matrix3 &orientation );
-		void setTransform( const Ogre::Vector2 &position, const Ogre::Vector2 &size );
-		void setPosition( const Ogre::Vector2 &position );
+		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size );
+		void setTopLeft( const Ogre::Vector2 &topLeft );
 		void setSize( const Ogre::Vector2 &size );
 		void setOrientation( const Ogre::Matrix3 &orientation );
+
+		void setCenter( const Ogre::Vector2 &center );
+		Ogre::Vector2 getCenter() const;
 
 		const Ogre::Vector2& getPosition() const				{ return m_position; }
 		const Ogre::Vector2& getSize() const					{ return m_size; }
@@ -159,9 +162,17 @@ namespace Crystal
 		/// Do not do it too often as it is not the most efficient solution.
 		void updateDerivedTransformFromParent();
 
+		/**
+		@remarks
+			Do not assume derived top left <= derived bottom right.
+			If the widget is rotated by 180°, then bottom right will return a value
+			at the top left corner, while the top left function will return a value
+			at the bottom right corner.
+		*/
 		const Ogre::Vector2& getDerivedTopLeft() const;
 		const Ogre::Vector2& getDerivedBottomRight() const;
 		const Ogre::Matrix3& getDerivedOrientation() const;
+		Ogre::Vector2 getDerivedCenter() const;
 	};
 }
 
