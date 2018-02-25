@@ -17,6 +17,7 @@ namespace Crystal
 
 	Widget::Widget( CrystalManager *manager ) :
 		m_parent( 0 ),
+		m_numNonRenderables( 0 ),
 		m_numWidgets( 0 ),
 		m_manager( manager ),
 		m_hidden( false ),
@@ -55,13 +56,18 @@ namespace Crystal
 			retVal = itor - m_children.begin();
 			m_children.erase( itor );
 
-			CRYSTAL_ASSERT( retVal < m_numWidgets && !childWidgetBeingRemoved->isWindow() ||
-							retVal >= m_numWidgets && childWidgetBeingRemoved->isWindow() );
+			CRYSTAL_ASSERT( (retVal < m_numWidgets && !childWidgetBeingRemoved->isWindow()) ||
+							(retVal >= m_numWidgets && childWidgetBeingRemoved->isWindow()) );
+			CRYSTAL_ASSERT( (retVal < m_numNonRenderables && !childWidgetBeingRemoved->isRenderable()) ||
+							(retVal >= m_numNonRenderables && childWidgetBeingRemoved->isRenderable()) );
+
+			if( retVal < m_numNonRenderables )
+				--m_numNonRenderables;
 
 			if( retVal < m_numWidgets )
 			{
 				//This is a widget what we're removing
-				++m_numWidgets;
+				--m_numWidgets;
 			}
 		}
 
@@ -138,8 +144,14 @@ namespace Crystal
 		this->m_parent = parent;
 		if( !thisIsWindow )
 		{
-			parent->m_children.insert( parent->m_children.begin() + parent->m_numWidgets, this );
-			++parent->m_numWidgets;
+			size_t idx = parent->m_numWidgets;
+			if( !this->isRenderable() )
+			{
+				idx = parent->m_numNonRenderables;
+				++parent->m_numNonRenderables;
+			}
+			parent->m_children.insert( parent->m_children.begin() + idx, this );
+			++parent->m_numWidgets; //Must be incremented regardless of whether it's a renderable
 		}
 		else
 		{

@@ -148,13 +148,14 @@ namespace Crystal
 		apiObject.primCount += 6u * 9u;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
-		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
 		WidgetVec::const_iterator end  = m_children.end();
 
 		while( itor != end )
 		{
-			TODO_ugly_cast;
-			static_cast<Renderable*>( (*itor) )->addCommands( apiObject );
+			CRYSTAL_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
+			Renderable *asRenderable = static_cast<Renderable*>( *itor );
+			asRenderable->addCommands( apiObject );
 			++itor;
 		}
 	}

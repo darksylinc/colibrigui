@@ -84,6 +84,8 @@ namespace Crystal
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
+		virtual bool isRenderable() const	{ return true; }
+
 		inline UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												 const Ogre::Vector2 &parentPos,
 												 const Ogre::Matrix3 &parentRot,

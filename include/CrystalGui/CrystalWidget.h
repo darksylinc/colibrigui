@@ -44,7 +44,13 @@ namespace Crystal
 		Widget * crystalgui_nonnull m_parent;
 		/// Includes windows, and they're always at the end. See m_numWidgets
 		WidgetVec					m_children;
+		/// Widgets that are Renderables start from m_children[m_numNonRenderables]
+		size_t						m_numNonRenderables;
 		/// Windows stored in m_children start from m_children[m_numWidgets]
+		/// The ranges are:
+		/// [0; m_numNonRenderables)			-> Widgets, not renderables
+		/// [m_numNonRenderables; m_numWidgets)	-> Widgets that are renderables
+		/// [m_numWidgets; m_children.size())	-> Windows
 		size_t						m_numWidgets;
 
 		CrystalManager          *m_manager;
@@ -95,7 +101,8 @@ namespace Crystal
 		/// Do not call directly. 'this' cannot be a Window
 		void _setParent( Widget *parent );
 
-		virtual bool isWindow() const	{ return false; }
+		virtual bool isRenderable() const	{ return false; }
+		virtual bool isWindow() const		{ return false; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns its
 		/// parent (or its parent's parent) until we find a window. Cannot
