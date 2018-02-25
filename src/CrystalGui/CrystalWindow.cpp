@@ -11,6 +11,7 @@ namespace Crystal
 		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_scrollArea( Ogre::Vector2::ZERO ),
+		m_allowsFocusWithChildren( true ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
@@ -193,5 +194,46 @@ namespace Crystal
 											  const Ogre::Matrix3 &parentRot )
 	{
 		return Renderable::fillBuffersAndCommands( vertexBuffer, parentPos, parentRot, true );
+	}
+	//-------------------------------------------------------------------------
+	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas )
+	{
+		FocusPair retVal;
+
+		//The first window that our button is touching wins. We go in LIFO order.
+		WindowVec::const_reverse_iterator ritor = m_childWindows.rbegin();
+		WindowVec::const_reverse_iterator rend  = m_childWindows.rend();
+
+		while( ritor != rend && !retVal.widget )
+		{
+			retVal = (*ritor)->setIdleCursorMoved( newPosInCanvas );
+			++ritor;
+		}
+
+		//One of the child windows is being touched by the cursor. We're done.
+		if( retVal.widget )
+			return retVal;
+
+		if( !this->intersects( newPosInCanvas ) || !m_allowsFocusWithChildren )
+			return FocusPair();
+
+		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
+		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
+
+		while( itor != end && !retVal.widget )
+		{
+			Widget *widget = *itor;
+			if( this->intersectsChild( widget ) &&
+				widget->intersects( newPosInCanvas ) )
+			{
+				widget->setState( States::Highlighted );
+				retVal.widget = widget;
+			}
+			++itor;
+		}
+
+		retVal.window = this;
+
+		return retVal;
 	}
 }

@@ -53,6 +53,9 @@ namespace Crystal
 		Ogre::Vector2				m_invCanvasSize2x;
 		Ogre::Vector2				m_pixelSize;
 
+		/// Window and/or Widget currently being in focus
+		FocusPair	m_focusedPair;
+
 		SkinManager	*m_skinManager;
 
 		void checkVertexBufferCapacity();
@@ -95,6 +98,8 @@ namespace Crystal
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
+
+		void setCursorMoved( const Ogre::Vector2 &newPosInCanvas );
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 

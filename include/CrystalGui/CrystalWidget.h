@@ -90,6 +90,8 @@ namespace Crystal
 		*/
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
 
+		virtual void stateChanged( States::States newState ) {}
+
 		void setTransformDirty();
 
 	public:
@@ -146,12 +148,15 @@ namespace Crystal
 		bool intersectsChild( Widget *child ) const;
 		//bool intersects( Widget *widget ) const;
 
+		bool intersects( const Ogre::Vector2 &pos ) const;
+
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,
 												  const Ogre::Matrix3 &parentRot );
 
+		void setState( States::States state );
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
 		/// Note it may be < getChildren().size(), as this value only returns pure widgets.

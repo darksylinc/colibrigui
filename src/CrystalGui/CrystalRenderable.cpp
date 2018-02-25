@@ -20,8 +20,6 @@
 
 #include "CrystalRenderable.inl"
 
-#define TODO_ugly_cast
-
 namespace Crystal
 {
 	Renderable::Renderable( CrystalManager *manager ) :
@@ -32,6 +30,11 @@ namespace Crystal
 		m_colour( Ogre::ColourValue::White )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
+	}
+	//-------------------------------------------------------------------------
+	void Renderable::stateChanged( States::States newState )
+	{
+		setDatablock( m_stateInformation[newState].materialName );
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setSkin( Ogre::IdString skinName, States::States forState )

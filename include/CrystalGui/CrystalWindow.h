@@ -20,6 +20,10 @@ namespace Crystal
 		Ogre::Vector2 m_currentScroll;
 		Ogre::Vector2 m_scrollArea;
 
+		/// The Window can be focused onto even if it has child windows.
+		/// Does not work if a Window is currently modal.
+		bool m_allowsFocusWithChildren;
+
 		/// In range [0; m_windowsStart)
 		uint16_t	m_defaultChildWidget;
 		/// When true, all of our immediate children widgets are dirty and need to be recalculated
@@ -68,6 +72,8 @@ namespace Crystal
 		/// If widget is not our child or nullptr, the current default is unset
 		void setDefault( Widget * crystalgui_nullable widget );
 		Widget* crystalgui_nullable getDefaultWidget() const;
+
+		FocusPair setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas );
 
 		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
 												  const Ogre::Vector2 &parentPos,

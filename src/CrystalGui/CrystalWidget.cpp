@@ -4,6 +4,8 @@
 
 #include "CrystalGui/CrystalManager.h"
 
+#define TODO_account_rotation
+
 namespace Crystal
 {
 	static Borders::Borders c_reciprocateBorders[Borders::NumBorders+1u] =
@@ -314,6 +316,15 @@ namespace Crystal
 				  this->m_size.y < child->m_position.y );
 	}
 	//-------------------------------------------------------------------------
+	bool Widget::intersects( const Ogre::Vector2 &pos ) const
+	{
+		TODO_account_rotation;
+		return !( pos.x < m_derivedTopLeft.x ||
+				  pos.y < m_derivedTopLeft.y ||
+				  pos.x > m_derivedBottomRight.x ||
+				  pos.y > m_derivedBottomRight.y );
+	}
+	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao )
 	{
 		WidgetVec::const_iterator itor = m_children.begin();
@@ -332,6 +343,23 @@ namespace Crystal
 	{
 		updateDerivedTransform( parentPos, parentRot );
 		return vertexBuffer;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setState( States::States state )
+	{
+		if( isWindow() )
+			return;
+
+		m_currentState = state;
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->setState( state );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	States::States Widget::getCurrentState() const

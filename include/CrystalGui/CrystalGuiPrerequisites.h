@@ -23,6 +23,21 @@ namespace Crystal
 	class Widget;
 	class Window;
 
+	namespace ButtonStates
+	{
+		enum ButtonStates
+		{
+			/// No key is currently being hit
+			Up,
+			/// Main key (enter / mouse button) is being hold down
+			DownHold,
+			/// Main key was just released, and action should be performed
+			/// Note that if the action was canceled, it may just transition
+			/// from DownHold to Up, instead of Released.
+			ActionPerform
+		};
+	}
+
 	namespace States
 	{
 		enum States
@@ -72,6 +87,14 @@ namespace Crystal
 			NumCorners
 		};
 	}*/
+
+	struct FocusPair
+	{
+		Window * crystalgui_nullable window;
+		Widget * crystalgui_nullable widget;
+
+		FocusPair() : window( 0 ), widget( 0 ) {}
+	};
 }
 
 namespace Ogre

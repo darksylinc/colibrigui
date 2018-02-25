@@ -100,6 +100,25 @@ namespace Crystal
 		m_pixelSize = pixelSize / canvasSize;
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::setCursorMoved( const Ogre::Vector2 &newPosInCanvas )
+	{
+		FocusPair focusedPair;
+
+		//The first window that our button is touching wins. We go in LIFO order.
+		WindowVec::const_reverse_iterator ritor = m_windows.rbegin();
+		WindowVec::const_reverse_iterator rend  = m_windows.rend();
+
+		while( ritor != rend && !focusedPair.widget )
+		{
+			focusedPair = (*ritor)->setIdleCursorMoved( newPosInCanvas );
+			++ritor;
+		}
+
+		if( m_focusedPair.widget && m_focusedPair.widget != focusedPair.widget )
+			m_focusedPair.widget->setState( States::Idle );
+		m_focusedPair = focusedPair;
+	}
+	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
 	{
 		CRYSTAL_ASSERT( (!parent || parent->isWindow()) &&
@@ -126,6 +145,9 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::destroyWindow( Window *window )
 	{
+		if( window == m_focusedPair.window )
+			m_focusedPair = FocusPair();
+
 		if( window->m_parent )
 		{
 			WindowVec::iterator itor = std::find( m_windows.begin(), m_windows.end(), window );
@@ -147,6 +169,9 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::destroyWidget( Widget *widget )
 	{
+		if( widget == m_focusedPair.widget )
+			m_focusedPair.widget = 0;
+
 		if( widget->isWindow() )
 		{
 			CRYSTAL_ASSERT( dynamic_cast<Window*>( widget ) );

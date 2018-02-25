@@ -76,6 +76,8 @@ namespace Crystal
 							 Ogre::Vector2 parentDerivedBR,
 							 Ogre::Vector2 invSize );
 
+		virtual void stateChanged( States::States newState );
+
 	public:
 		Renderable( CrystalManager *manager );
 
