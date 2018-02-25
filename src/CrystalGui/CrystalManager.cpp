@@ -413,8 +413,16 @@ namespace Crystal
 		apiObjects.lastVaoName = 0;
 		apiObjects.commandBuffer = m_commandBuffer;
 		apiObjects.indirectBuffer = m_indirectBuffer;
-		apiObjects.indirectDraw = reinterpret_cast<uint8_t*>(
-									  m_indirectBuffer->map( 0, m_indirectBuffer->getNumElements() ) );
+		if( m_vaoManager->supportsIndirectBuffers() )
+		{
+			apiObjects.indirectDraw = reinterpret_cast<uint8_t*>(
+										  m_indirectBuffer->map( 0,
+																 m_indirectBuffer->getNumElements() ) );
+		}
+		else
+		{
+			apiObjects.indirectDraw = reinterpret_cast<uint8_t*>( m_indirectBuffer->getSwBufferPtr() );
+		}
 		apiObjects.startIndirectDraw = apiObjects.indirectDraw;
 		apiObjects.baseInstanceAndIndirectBuffers = 0;
 		if( m_vaoManager->supportsIndirectBuffers() )
@@ -435,7 +443,8 @@ namespace Crystal
 			++itor;
 		}
 
-		m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
+		if( m_vaoManager->supportsIndirectBuffers() )
+			m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
 
 		hlms->preCommandBufferExecution( m_commandBuffer );
 		m_commandBuffer->execute();
