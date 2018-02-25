@@ -42,8 +42,10 @@ namespace Crystal
 		/// Can only be nullptr if 'this' is a Window.
 		/// Windows can only be children of Windows.
 		Widget * crystalgui_nonnull m_parent;
-		/// Does not include Windows
+		/// Includes windows, and they're always at the end. See m_numWidgets
 		WidgetVec					m_children;
+		/// Windows stored in m_children start from m_children[m_numWidgets]
+		size_t						m_numWidgets;
 
 		CrystalManager          *m_manager;
 
@@ -134,7 +136,8 @@ namespace Crystal
 		@return
 			True if the given widget is partially intersecting or fully inside this, or viceversa.
 		*/
-		bool intersects( Widget *widget ) const;
+		bool intersectsChild( Widget *child ) const;
+		//bool intersects( Widget *widget ) const;
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
@@ -144,6 +147,10 @@ namespace Crystal
 
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
+		/// Note it may be < getChildren().size(), as this value only returns pure widgets.
+		/// Windows can be children from other windows, but are not counted for getNumWidgets
+		/// See m_numWidgets
+		size_t getNumWidgets() const;
 
 		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
 						   const Ogre::Matrix3 &orientation );

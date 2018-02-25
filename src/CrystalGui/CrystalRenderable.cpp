@@ -20,6 +20,8 @@
 
 #include "CrystalRenderable.inl"
 
+#define TODO_ugly_cast
+
 namespace Crystal
 {
 	Renderable::Renderable( CrystalManager *manager ) :
@@ -145,6 +147,16 @@ namespace Crystal
 
 		apiObject.primCount += 6u * 9u;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			TODO_ugly_cast;
+			static_cast<Renderable*>( (*itor) )->addCommands( apiObject );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,

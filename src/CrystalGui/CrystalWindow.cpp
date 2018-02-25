@@ -112,13 +112,14 @@ namespace Crystal
 	{
 		window->detachFromParent();
 		m_childWindows.push_back( window );
+		window->_setParent( this );
 	}
 	//-------------------------------------------------------------------------
 	void Window::detachChild( Window *window )
 	{
 		WindowVec::iterator itor = std::find( m_childWindows.begin(), m_childWindows.end(), window );
 
-		if( itor != m_childWindows.end() )
+		if( itor == m_childWindows.end() )
 		{
 			LogListener	*log = m_manager->getLogListener();
 			log->log( "Window::removeChild could not find the window. It's not our child.",
@@ -128,6 +129,21 @@ namespace Crystal
 		{
 			m_childWindows.erase( itor );
 			window->m_parent = 0;
+
+			WidgetVec::iterator itWidget = std::find( m_children.begin() + m_numWidgets,
+													  m_children.end(), window );
+			if( itWidget == m_children.end() )
+			{
+				LogListener	*log = m_manager->getLogListener();
+				log->log( "Window::removeChild could not find the window in "
+						  "m_children but it was in m_childWindows!",
+						  LogSeverity::Fatal );
+			}
+			else
+			{
+				m_children.erase( itWidget );
+			}
+
 			m_manager->_setAsParentlessWindow( window );
 		}
 	}
@@ -143,16 +159,18 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Window::setDefault( Widget *widget )
 	{
+		CRYSTAL_ASSERT( !widget->isWindow() );
 		WidgetVec::const_iterator itor = std::find( m_children.begin(),
 													m_children.end(), widget );
 		m_defaultChildWidget = itor - m_children.begin();
+		CRYSTAL_ASSERT( m_defaultChildWidget < m_numWidgets );
 	}
 	//-------------------------------------------------------------------------
 	Widget* crystalgui_nullable Window::getDefaultWidget() const
 	{
 		Widget *retVal = 0;
 
-		size_t numChildren = m_children.size();
+		size_t numChildren = m_numWidgets;
 
 		size_t defaultChild = m_defaultChildWidget;
 		for( size_t i=0; i<numChildren && !retVal; ++i )
@@ -164,23 +182,10 @@ namespace Crystal
 			defaultChild = (defaultChild + 1u) % numChildren;
 		}
 
-		if( !retVal && !m_children.empty() )
+		if( !retVal && m_numWidgets > 0 )
 			retVal = m_children.front();
 
 		return retVal;
-	}
-	//-------------------------------------------------------------------------
-	void Window::broadcastNewVao( Ogre::VertexArrayObject *vao )
-	{
-		WindowVec::const_iterator itor = m_childWindows.begin();
-		WindowVec::const_iterator end  = m_childWindows.end();
-
-		while( itor != end )
-		{
-			(*itor)->broadcastNewVao( vao );
-			++itor;
-		}
-		Renderable::broadcastNewVao( vao );
 	}
 	//-------------------------------------------------------------------------
 	UiVertex* Window::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,

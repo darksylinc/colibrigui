@@ -58,7 +58,7 @@ namespace Crystal
 		void checkVertexBufferCapacity();
 
 		template <typename T>
-		void autosetNavigation( const std::vector<T> &container );
+		void autosetNavigation( const std::vector<T> &container, size_t start, size_t numWidgets );
 
 		void autosetNavigation( Window *window );
 

@@ -89,12 +89,12 @@ namespace Crystal
 	{
 		if( forWindows )
 		{
-			if( m_parent && !m_parent->intersects( this ) )
+			if( m_parent && !m_parent->intersectsChild( this ) )
 				return vertexBuffer;
 		}
 		else
 		{
-			if( !m_parent->intersects( this ) )
+			if( !m_parent->intersectsChild( this ) )
 				return vertexBuffer;
 		}
 

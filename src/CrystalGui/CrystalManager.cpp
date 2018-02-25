@@ -113,6 +113,7 @@ namespace Crystal
 		{
 			retVal->m_parent = parent;
 			parent->m_childWindows.push_back( retVal );
+			parent->_setParent( retVal );
 		}
 
 		retVal->setWindowNavigationDirty();
@@ -206,10 +207,13 @@ namespace Crystal
 	}
 	//-------------------------------------------------------------------------
 	template <typename T>
-	void CrystalManager::autosetNavigation( const std::vector<T> &container )
+	void CrystalManager::autosetNavigation( const std::vector<T> &container,
+											size_t start, size_t numWidgets )
 	{
-		typename std::vector<T>::const_iterator itor = container.begin();
-		typename std::vector<T>::const_iterator end  = container.end();
+		CRYSTAL_ASSERT( start + numWidgets <= container.size() );
+
+		typename std::vector<T>::const_iterator itor = container.begin() + start;
+		typename std::vector<T>::const_iterator end  = container.begin() + start + numWidgets;
 
 		while( itor != end )
 		{
@@ -307,18 +311,21 @@ namespace Crystal
 	{
 		if( window->m_widgetNavigationDirty )
 		{
-			autosetNavigation( window->m_children );
+			//Update the widgets from this 'window'
+			autosetNavigation( window->m_children, 0, window->m_numWidgets );
 			window->m_widgetNavigationDirty = false;
 		}
 
 		if( window->m_windowNavigationDirty )
 		{
-			autosetNavigation( window->m_childWindows );
+			//Update the widgets of the children windows from this 'window'
+			autosetNavigation( window->m_childWindows, 0, window->m_childWindows.size() );
 			window->m_windowNavigationDirty = false;
 		}
 
 		if( window->m_childrenNavigationDirty )
 		{
+			//Our windows' window are dirty
 			WindowVec::const_iterator itor = window->m_childWindows.begin();
 			WindowVec::const_iterator end  = window->m_childWindows.end();
 
@@ -335,7 +342,7 @@ namespace Crystal
 
 		if( m_windowNavigationDirty )
 		{
-			autosetNavigation( m_windows );
+			autosetNavigation( m_windows, 0u, m_windows.size() );
 			m_windowNavigationDirty = false;
 		}
 
@@ -380,7 +387,7 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			vertex = (*itor)->fillBuffersAndCommands( vertex, Ogre::Vector2::ZERO,
+			vertex = (*itor)->fillBuffersAndCommands( vertex, -Ogre::Vector2::UNIT_SCALE,
 													  Ogre::Matrix3::IDENTITY );
 			++itor;
 		}

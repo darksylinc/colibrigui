@@ -17,6 +17,7 @@ namespace Crystal
 
 	Widget::Widget( CrystalManager *manager ) :
 		m_parent( 0 ),
+		m_numWidgets( 0 ),
 		m_manager( manager ),
 		m_hidden( false ),
 		m_currentState( States::Idle ),
@@ -53,6 +54,15 @@ namespace Crystal
 			//It may not be found if we're also in destruction phase
 			retVal = itor - m_children.begin();
 			m_children.erase( itor );
+
+			CRYSTAL_ASSERT( retVal < m_numWidgets && !childWidgetBeingRemoved->isWindow() ||
+							retVal >= m_numWidgets && childWidgetBeingRemoved->isWindow() );
+
+			if( retVal < m_numWidgets )
+			{
+				//This is a widget what we're removing
+				++m_numWidgets;
+			}
 		}
 
 		CRYSTAL_ASSERT_MEDIUM( itor != m_children.end() || m_destructionStarted );
@@ -90,10 +100,14 @@ namespace Crystal
 			WidgetVec children;
 			children.swap( m_children );
 			WidgetVec::const_iterator itor = children.begin();
-			WidgetVec::const_iterator end  = children.end();
+			WidgetVec::const_iterator end  = children.begin() + m_numWidgets;
 
 			while( itor != end )
 				m_manager->destroyWidget( *itor++ );
+
+			//If 'this' is a CrystalWindow, then we should've already wiped out the windows.
+			//Otherwise, then we shouldn't be having children windows!
+			CRYSTAL_ASSERT( m_numWidgets == children.size() );
 
 			children.swap( m_children );
 			m_children.clear();
@@ -116,10 +130,21 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Widget::_setParent( Widget *parent )
 	{
-		CRYSTAL_ASSERT( !this->m_parent && parent );
-		CRYSTAL_ASSERT( !this->isWindow() );
+		const bool thisIsWindow = this->isWindow();
+		CRYSTAL_ASSERT( !this->m_parent && "'this' already has a parent!" );
+		CRYSTAL_ASSERT( parent && "parent cannot be null!" );
+		CRYSTAL_ASSERT( (parent->isWindow() || thisIsWindow == parent->isWindow()) &&
+						"Regular Widgets cannot be parents of windows!" );
 		this->m_parent = parent;
-		parent->m_children.push_back( this );
+		if( !thisIsWindow )
+		{
+			parent->m_children.insert( parent->m_children.begin() + parent->m_numWidgets, this );
+			++parent->m_numWidgets;
+		}
+		else
+		{
+			parent->m_children.push_back( this );
+		}
 		parent->setWidgetNavigationDirty();
 		setTransformDirty();
 	}
@@ -165,7 +190,7 @@ namespace Crystal
 		Ogre::Vector2 center = getCenter();
 
 		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
-		Ogre::Vector2 relCenter		= center * invCanvasSize2x - Ogre::Vector2::UNIT_SCALE;
+		Ogre::Vector2 relCenter		= center * invCanvasSize2x;
 
 		Ogre::Vector2 derivedHalfSize	= mul( finalRot, m_size * 0.5f * invCanvasSize2x );
 		Ogre::Vector2 derivedCenter		= mul( finalRot, relCenter ) + parentPos;
@@ -268,12 +293,13 @@ namespace Crystal
 		return m_position.y + m_size.y;
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::intersects( Widget *widget ) const
+	bool Widget::intersectsChild( Widget *child ) const
 	{
-		return !( this->m_position.x > widget->m_position.x + widget->m_size.x	||
-				  this->m_position.y > widget->m_position.y + widget->m_size.y	||
-				  this->m_position.x + this->m_size.x < widget->m_position.x	||
-				  this->m_position.y + this->m_size.y < widget->m_position.y );
+		CRYSTAL_ASSERT( this == child->m_parent );
+		return !( 0.0f > child->m_position.x + child->m_size.x	||
+				  0.0f > child->m_position.y + child->m_size.y	||
+				  this->m_size.x < child->m_position.x	||
+				  this->m_size.y < child->m_position.y );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao )
@@ -310,6 +336,17 @@ namespace Crystal
 	{
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = true;
+
+	#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_HIGH
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->setTransformDirty();
+			++itor;
+		}
+	#endif
 #endif
 	}
 	//-------------------------------------------------------------------------

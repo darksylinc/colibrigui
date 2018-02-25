@@ -58,10 +58,13 @@ namespace Demo
 
 		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
 
-		Crystal::Button *button = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button = crystalManager->createWidget<Crystal::Button>( mainWindow );
 		button->setSkinPack( "ButtonSkin" );
+		button->setTopLeft( Ogre::Vector2( 0.1, 0.1 ) );
+		button->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
+		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button );
 
         TutorialGameState::createScene01();
     }
@@ -75,6 +78,13 @@ namespace Demo
     void CrystalGuiGameState::update( float timeSinceLast )
 	{
 		crystalManager->update();
+
+		/*static float angle = 0;
+		Ogre::Matrix3 rotMat;
+		rotMat.FromEulerAnglesXYZ( Ogre::Degree( 0 ), Ogre::Radian( 0 ), Ogre::Radian( angle ) );
+		button->setOrientation( rotMat );
+		angle += timeSinceLast;*/
+
         TutorialGameState::update( timeSinceLast );
     }
     //-----------------------------------------------------------------------------------
