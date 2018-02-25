@@ -4,11 +4,24 @@
         "ButtonSkin" :
         {
             "material" : "ButtonSkin",
-            "tex_resolution" : [64, 32],
+            "tex_resolution" : [64, 64],
             "grid_uv" :
             {
                 "center2" : [0, 0, 64, 32],
                 "enclosing" : [[0, 0, 64, 32], [4, 4]]
+            },
+            "borders" :
+            {
+                "all" : [120, 120]
+            }
+        },
+	"ButtonSkinHighlighted" :
+        {
+            "material" : "ButtonSkin",
+            "tex_resolution" : [64, 64],
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 32, 64, 32], [4, 4]]
             },
             "borders" :
             {
@@ -24,7 +37,7 @@
             "all" : "ButtonSkin",
             "disabled" : "ButtonSkin",
             "idle" : "ButtonSkin",
-            "highlighted" : "ButtonSkin",
+            "highlighted" : "ButtonSkinHighlighted",
             "pressed" : "ButtonSkin"
         }
     }
