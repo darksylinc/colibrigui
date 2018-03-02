@@ -119,7 +119,10 @@ namespace Crystal
 			++ritor;
 		}
 
-		if( m_cursorFocusedPair.widget != focusedPair.widget )
+		//Do not steal focus from keyboard (by only moving the cursor) if we're holding
+		//the main key button down (clicking does steal the focus from keyboard in
+		//setMouseCursorPressed)
+		if( m_cursorFocusedPair.widget != focusedPair.widget && !m_primaryButtonDown )
 		{
 			if( m_cursorFocusedPair.widget )
 			{
@@ -192,7 +195,7 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::setKeyboardPrimaryReleased()
 	{
-		if( m_keyboardFocusedPair.widget )
+		if( m_primaryButtonDown && m_keyboardFocusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			m_keyboardFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
@@ -348,6 +351,7 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &focusedPair )
 	{
+		//Mouse can steal focus from keyboard and force them to match.
 		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != focusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::Idle );
@@ -359,12 +363,13 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideCursorFocusWith( const FocusPair &focusedPair )
 	{
+		//Keyboard can cancel mouse actions, but it won't still his focus.
 		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget != focusedPair.widget )
 		{
-			m_cursorFocusedPair.widget->setState( States::Idle );
+			m_cursorFocusedPair.widget->setState( States::HighlightedCursor, false );
 			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 		}
-		m_cursorFocusedPair = focusedPair;
+		//m_cursorFocusedPair = focusedPair;
 		m_mouseCursorButtonDown = false;
 	}
 	//-----------------------------------------------------------------------------------
