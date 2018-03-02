@@ -139,8 +139,11 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void CrystalGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
 	{
-		if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER )
+		if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
+			arg.keysym.sym == SDLK_SPACE )
+		{
 			crystalManager->setKeyboardPrimaryPressed();
+		}
 	}
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )
@@ -159,8 +162,11 @@ namespace Demo
 			crystalManager->setKeyDirection( Crystal::Borders::Left );
 		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
 			crystalManager->setKeyDirection( Crystal::Borders::Right );
-		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER )
+		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
+				 arg.keysym.sym == SDLK_SPACE )
+		{
 			crystalManager->setKeyboardPrimaryReleased();
+		}
 
 		TutorialGameState::keyReleased( arg );
     }

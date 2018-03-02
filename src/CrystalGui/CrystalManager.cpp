@@ -119,15 +119,19 @@ namespace Crystal
 			++ritor;
 		}
 
-		//Do not steal focus from keyboard (by only moving the cursor) if we're holding
-		//the main key button down (clicking does steal the focus from keyboard in
-		//setMouseCursorPressed)
-		if( m_cursorFocusedPair.widget != focusedPair.widget && !m_primaryButtonDown )
+		if( m_cursorFocusedPair.widget != focusedPair.widget )
 		{
-			if( m_cursorFocusedPair.widget )
+			//Do not steal focus from keyboard (by only moving the cursor) if we're holding
+			//the main key button down (clicking does steal the focus from keyboard in
+			//setMouseCursorPressed)
+			const bool oldFullyFocusedByKey = m_primaryButtonDown &&
+											  m_keyboardFocusedPair.widget == m_cursorFocusedPair.widget;
+			const bool newFullyFocusedByKey = m_primaryButtonDown &&
+											  m_keyboardFocusedPair.widget == focusedPair.widget;
+
+			if( m_cursorFocusedPair.widget && !oldFullyFocusedByKey )
 			{
-				if( m_cursorFocusedPair.widget != m_keyboardFocusedPair.widget ||
-					m_mouseCursorButtonDown )
+				if( m_cursorFocusedPair.widget != m_keyboardFocusedPair.widget )
 				{
 					m_cursorFocusedPair.widget->setState( States::Idle );
 				}
@@ -136,7 +140,7 @@ namespace Crystal
 				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 			}
 
-			if( focusedPair.widget )
+			if( focusedPair.widget && !newFullyFocusedByKey )
 			{
 				if( !m_mouseCursorButtonDown )
 				{
@@ -166,6 +170,11 @@ namespace Crystal
 
 			overrideKeyboardFocusWith( m_cursorFocusedPair );
 		}
+		else if( m_primaryButtonDown )
+		{
+			//User clicked outside any widget while keyboard was being hold down. Cancel that key.
+			setCancel();
+		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorReleased()
@@ -177,6 +186,10 @@ namespace Crystal
 
 			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
 				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
+		}
+		else if( m_mouseCursorButtonDown )
+		{
+			setCancel();
 		}
 		m_mouseCursorButtonDown = false;
 	}
