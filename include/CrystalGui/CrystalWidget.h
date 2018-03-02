@@ -14,6 +14,12 @@ namespace Crystal
 	typedef std::vector<Widget*> WidgetVec;
 	typedef std::vector<Window*> WindowVec;
 
+	class WidgetActionListener
+	{
+	public:
+		virtual void notifyWidgetAction( Action::Action action ) = 0;
+	};
+
 	class WidgetListener
 	{
 	public:
@@ -36,6 +42,16 @@ namespace Crystal
 	protected:
 		friend class CrystalManager;
 		friend class Renderable;
+
+		struct WidgetActionListenerRecord
+		{
+			uint32_t				actionMask;
+			WidgetActionListener	*listener;
+			WidgetActionListenerRecord( uint32_t _actionMask, WidgetActionListener *_listener ) :
+				actionMask( _actionMask ), listener( _listener ) {}
+		};
+
+		typedef std::vector<WidgetActionListenerRecord> WidgetActionListenerRecordVec;
 
 		/// Child and parent relationships are explicit, thus they're not tracked via
 		/// WidgetListener::notifyWidgetDestroyed
@@ -61,7 +77,8 @@ namespace Crystal
 
 		States::States			m_currentState;
 
-		WidgetListenerPairVec	m_listeners;
+		WidgetListenerPairVec			m_listeners;
+		WidgetActionListenerRecordVec	m_actionListeners;
 
 		Ogre::Vector2	m_position;
 		Ogre::Vector2	m_size;
@@ -116,6 +133,39 @@ namespace Crystal
 
 		void addListener( WidgetListener *listener );
 		void removeListener( WidgetListener *listener );
+
+		/** Adds a listener to listen for certain events such as when
+			the Widget is highlighted or pressed.
+
+			Insertion order is preserved. Note however if you later add more actions to an
+			already registered listener, these actions will be joined. For example:
+
+				addListener( listenerA, ActionMask::Highlighted );
+				addListener( listenerB, ActionMask::Cancel );
+				addListener( listenerA, ActionMask::Cancel );
+
+			For the event "ActionMask::Cancel", Listener A will be called before B, because
+			A was registered before B even though it was for the event "Highlighted".
+		@param listener
+			Listener to receive the callbacks.
+		@param actionMask
+			See ActionMask::ActionMask. The mask defines what events will be notified.
+			Cannot be 0.
+		*/
+		void addListener( WidgetActionListener *listener, uint32_t actionMask );
+
+		/** Remove a registered listener. Does nothing but issue a warning if listener does
+			not exist.
+
+			The listener isn't actually removed until all bits from actionMask are unset.
+		@param listener
+			Listener already registered with addListener
+		@param actionMask
+			See ActionMask::ActionMask. The mask to remove.
+		*/
+		void removeListener( WidgetActionListener *listener, uint32_t actionMask=~0u );
+
+		void callActionListeners( Action::Action action );
 
 		/** Call this to indicate the widget has been moved or created; thus we'll broadcast
 			the message until reaching our most immediate parent window.

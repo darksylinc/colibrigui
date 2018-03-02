@@ -23,18 +23,31 @@ namespace Crystal
 	class Widget;
 	class Window;
 
-	namespace ButtonStates
+	namespace Action
 	{
-		enum ButtonStates
+		enum Action
 		{
-			/// No key is currently being hit
-			Up,
-			/// Main key (enter / mouse button) is being hold down
-			DownHold,
-			/// Main key was just released, and action should be performed
-			/// Note that if the action was canceled, it may just transition
-			/// from DownHold to Up, instead of Released.
-			ActionPerform
+			/// Any previous action on this widget was cancelled
+			Cancel,
+			/// Widget is highlighted by user (e.g. cursor is on top of a button)
+			Highlighted,
+			/// User is holding enter/main button, but hasn't released it yet
+			Hold,
+			/// User released the main button and the main action should be performed
+			PrimaryActionPerform,
+			/// User released the secondary button and that action should be performed
+			SecondaryActionPerform
+		};
+	}
+	namespace ActionMask
+	{
+		enum ActionMask
+		{
+			Cancel					= 1u << Action::Cancel,
+			Highlighted				= 1u << Action::Highlighted,
+			Hold					= 1u << Action::Hold,
+			PrimaryActionPerform	= 1u << Action::PrimaryActionPerform,
+			SecondaryActionPerform	= 1u << Action::SecondaryActionPerform
 		};
 	}
 

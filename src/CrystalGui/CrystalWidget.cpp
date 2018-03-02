@@ -260,6 +260,59 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Widget::addListener( WidgetActionListener *listener, uint32_t actionMask )
+	{
+		CRYSTAL_ASSERT( actionMask != 0 );
+		WidgetActionListenerRecordVec::iterator itor = m_actionListeners.begin();
+		WidgetActionListenerRecordVec::iterator end  = m_actionListeners.end();
+
+		while( itor != end && itor->listener != listener )
+			++itor;
+
+		if( itor == end )
+			m_actionListeners.push_back( WidgetActionListenerRecord( actionMask, listener ) );
+		else
+			itor->actionMask |= actionMask;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::removeListener( WidgetActionListener *listener, uint32_t actionMask )
+	{
+		WidgetActionListenerRecordVec::iterator itor = m_actionListeners.begin();
+		WidgetActionListenerRecordVec::iterator end  = m_actionListeners.end();
+
+		while( itor != end && itor->listener != listener )
+			++itor;
+
+		if( itor != end )
+		{
+			itor->actionMask &= ~actionMask;
+			//Preserve the order in which listeners were added
+			if( !itor->actionMask )
+				m_actionListeners.erase( itor );
+		}
+		else
+		{
+			LogListener	*log = m_manager->getLogListener();
+			log->log( "Widget::removeListener could not find WidgetActionListener. Ignoring",
+					  LogSeverity::Warning );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Widget::callActionListeners( Action::Action action )
+	{
+		const uint32_t actionMask = 1u << action;
+
+		WidgetActionListenerRecordVec::const_iterator itor = m_actionListeners.begin();
+		WidgetActionListenerRecordVec::const_iterator end  = m_actionListeners.end();
+
+		while( itor != end )
+		{
+			if( itor->actionMask & actionMask )
+				itor->listener->notifyWidgetAction( action );
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setWidgetNavigationDirty(void)
 	{
 		m_parent->setWidgetNavigationDirty();

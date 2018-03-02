@@ -117,18 +117,30 @@ namespace Crystal
 			++ritor;
 		}
 
-		if( m_focusedPair.widget && m_focusedPair.widget != focusedPair.widget )
-			m_focusedPair.widget->setState( States::Idle );
+		if( m_focusedPair.widget != focusedPair.widget )
+		{
+			if( m_focusedPair.widget )
+			{
+				m_focusedPair.widget->setState( States::Idle );
+				m_focusedPair.widget->callActionListeners( Action::Cancel );
+			}
+
+			if( focusedPair.widget )
+			{
+				if( !m_mouseCursorButtonDown )
+				{
+					focusedPair.widget->setState( States::Highlighted );
+					focusedPair.widget->callActionListeners( Action::Highlighted );
+				}
+				else
+				{
+					focusedPair.widget->setState( States::Pressed );
+					focusedPair.widget->callActionListeners( Action::Hold );
+				}
+			}
+		}
 
 		m_focusedPair = focusedPair;
-
-		if( m_focusedPair.widget )
-		{
-			if( !m_mouseCursorButtonDown )
-				m_focusedPair.widget->setState( States::Highlighted );
-			else
-				m_focusedPair.widget->setState( States::Pressed );
-		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorPressed()
@@ -137,6 +149,7 @@ namespace Crystal
 		{
 			m_mouseCursorButtonDown = true;
 			m_focusedPair.widget->setState( States::Pressed );
+			m_focusedPair.widget->callActionListeners( Action::Hold );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -146,6 +159,17 @@ namespace Crystal
 		{
 			m_mouseCursorButtonDown = false;
 			m_focusedPair.widget->setState( States::Highlighted );
+			m_focusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setCancel()
+	{
+		if( m_focusedPair.widget )
+		{
+			m_mouseCursorButtonDown = false;
+			m_focusedPair.widget->setState( States::Highlighted );
+			m_focusedPair.widget->callActionListeners( Action::Cancel );
 		}
 	}
 	//-------------------------------------------------------------------------

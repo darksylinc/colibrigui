@@ -103,6 +103,7 @@ namespace Crystal
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
 		void setMouseCursorPressed();
 		void setMouseCursorReleased();
+		void setCancel();
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 
