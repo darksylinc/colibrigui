@@ -157,20 +157,20 @@ namespace Crystal
 	{
 		if( m_focusedPair.widget )
 		{
-			m_mouseCursorButtonDown = false;
 			m_focusedPair.widget->setState( States::Highlighted );
 			m_focusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
 		}
+		m_mouseCursorButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setCancel()
 	{
 		if( m_focusedPair.widget )
 		{
-			m_mouseCursorButtonDown = false;
 			m_focusedPair.widget->setState( States::Highlighted );
 			m_focusedPair.widget->callActionListeners( Action::Cancel );
 		}
+		m_mouseCursorButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
