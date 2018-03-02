@@ -55,6 +55,7 @@ namespace Crystal
 
 		/// Window and/or Widget currently being in focus
 		FocusPair	m_focusedPair;
+		bool		m_mouseCursorButtonDown;
 
 		SkinManager	*m_skinManager;
 
@@ -99,7 +100,9 @@ namespace Crystal
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
 
-		void setCursorMoved( Ogre::Vector2 newPosInCanvas );
+		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
+		void setMouseCursorPressed();
+		void setMouseCursorReleased();
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 

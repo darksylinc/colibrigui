@@ -226,7 +226,7 @@ namespace Crystal
 			if( this->intersectsChild( widget ) &&
 				widget->intersects( newPosInCanvas ) )
 			{
-				widget->setState( States::Highlighted );
+
 				retVal.widget = widget;
 			}
 			++itor;

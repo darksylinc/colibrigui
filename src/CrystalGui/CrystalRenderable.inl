@@ -22,7 +22,7 @@ namespace Crystal
 	                                 Ogre::Vector2 parentDerivedBR,
 	                                 Ogre::Vector2 invSize )
 	{
-            TODO_this_is_a_workaround_neg_y;
+		TODO_this_is_a_workaround_neg_y;
         #define CRYSTAL_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
                                     clipDistanceRight, clipDistanceBottom ) \
             vertexBuffer->x = _x; \

@@ -111,8 +111,18 @@ namespace Demo
 		float height = static_cast<float>( mGraphicsSystem->getRenderWindow()->getHeight() );
 
 		Ogre::Vector2 mousePos( arg.motion.x / width, arg.motion.y / height );
-		crystalManager->setCursorMoved( mousePos * crystalManager->getCanvasSize() );
+		crystalManager->setMouseCursorMoved( mousePos * crystalManager->getCanvasSize() );
 		TutorialGameState::mouseMoved( arg );
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalGuiGameState::mousePressed( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )
+	{
+		crystalManager->setMouseCursorPressed();
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalGuiGameState::mouseReleased( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )
+	{
+		crystalManager->setMouseCursorReleased();
 	}
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )

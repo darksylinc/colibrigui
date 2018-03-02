@@ -20,6 +20,8 @@ namespace Demo
         virtual void update( float timeSinceLast );
 
 		virtual void mouseMoved( const SDL_Event &arg );
+		virtual void mousePressed( const SDL_MouseButtonEvent &arg, Ogre::uint8 id );
+		virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Ogre::uint8 id );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
     };
 }

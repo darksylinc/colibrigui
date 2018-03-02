@@ -32,6 +32,7 @@ namespace Crystal
 		m_vao( 0 ),
 		m_indirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
+		m_mouseCursorButtonDown( false ),
 		m_skinManager( 0 )
 	{
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ) );
@@ -100,7 +101,7 @@ namespace Crystal
 		m_pixelSize = pixelSize / canvasSize;
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setCursorMoved( Ogre::Vector2 newPosInCanvas )
+	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
 		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
 
@@ -118,7 +119,34 @@ namespace Crystal
 
 		if( m_focusedPair.widget && m_focusedPair.widget != focusedPair.widget )
 			m_focusedPair.widget->setState( States::Idle );
+
 		m_focusedPair = focusedPair;
+
+		if( m_focusedPair.widget )
+		{
+			if( !m_mouseCursorButtonDown )
+				m_focusedPair.widget->setState( States::Highlighted );
+			else
+				m_focusedPair.widget->setState( States::Pressed );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setMouseCursorPressed()
+	{
+		if( m_focusedPair.widget )
+		{
+			m_mouseCursorButtonDown = true;
+			m_focusedPair.widget->setState( States::Pressed );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setMouseCursorReleased()
+	{
+		if( m_focusedPair.widget )
+		{
+			m_mouseCursorButtonDown = false;
+			m_focusedPair.widget->setState( States::Highlighted );
+		}
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
