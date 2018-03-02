@@ -15,9 +15,35 @@
                 "all" : [120, 120]
             }
         },
-        "ButtonSkinHighlighted" :
+        "ButtonSkinHighlightedCursor" :
+        {
+            "material" : "ButtonSkinBrighter",
+            "tex_resolution" : [64, 96],
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 0, 64, 32], [4, 4]]
+            },
+            "borders" :
+            {
+                "all" : [120, 120]
+            }
+        },
+        "ButtonSkinHighlightedButton" :
         {
             "material" : "ButtonSkin",
+            "tex_resolution" : [64, 96],
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 32, 64, 32], [4, 4]]
+            },
+            "borders" :
+            {
+                "all" : [120, 120]
+            }
+        },
+        "ButtonSkinHighlightedButtonAndCursor" :
+        {
+            "material" : "ButtonSkinBrighter",
             "tex_resolution" : [64, 96],
             "grid_uv" :
             {
@@ -50,7 +76,9 @@
             "all" : "ButtonSkin",
             "disabled" : "ButtonSkin",
             "idle" : "ButtonSkin",
-            "highlighted" : "ButtonSkinHighlighted",
+            "highlighted_cursor" : "ButtonSkinHighlightedCursor",
+            "highlighted_button" : "ButtonSkinHighlightedButton",
+            "highlighted_button_and_cursor" : "ButtonSkinHighlightedButtonAndCursor",
             "pressed" : "ButtonSkinPressed"
         }
     }

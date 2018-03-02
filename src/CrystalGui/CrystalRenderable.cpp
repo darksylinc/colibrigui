@@ -84,6 +84,14 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::setState( States::States state, bool smartHighlight )
+	{
+		Widget::setState( state, smartHighlight );
+
+		if( mHlmsDatablock->getName() != m_stateInformation[m_currentState].materialName )
+			setDatablock( m_stateInformation[m_currentState].materialName );
+	}
+	//-------------------------------------------------------------------------
 	void Renderable::broadcastNewVao( Ogre::VertexArrayObject *vao )
 	{
 		setVao( vao );
@@ -115,8 +123,9 @@ namespace Crystal
 			apiObject.lastVaoName = 0;
 		}
 
-		apiObject.hlms->fillBuffersForV2( hlmsCache, queuedRenderable, false,
-										  lastHlmsCacheHash, apiObject.commandBuffer );
+		uint32 baseInstance = apiObject.hlms->fillBuffersForV2(
+								  hlmsCache, queuedRenderable, false,
+								  lastHlmsCacheHash, apiObject.commandBuffer );
 
 		if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
 			apiObject.lastVaoName != vao->getVaoName() )
@@ -143,12 +152,14 @@ namespace Crystal
 			apiObject.drawCountPtr->primCount		= 0;
 			apiObject.drawCountPtr->instanceCount	= 1u;
 			apiObject.drawCountPtr->firstVertexIndex=
-					apiObject.vao->getBaseVertexBuffer()->_getFinalBufferStart();
-			apiObject.drawCountPtr->baseInstance	= 0;
+					apiObject.vao->getBaseVertexBuffer()->_getFinalBufferStart() +
+					apiObject.accumPrimCount;
+			apiObject.drawCountPtr->baseInstance	= baseInstance;
 			apiObject.indirectDraw += sizeof( CbDrawStrip );
 		}
 
 		apiObject.primCount += 6u * 9u;
+		apiObject.accumPrimCount += 6u * 9u;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
 		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;

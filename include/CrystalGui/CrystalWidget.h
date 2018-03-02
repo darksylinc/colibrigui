@@ -198,8 +198,8 @@ namespace Crystal
 		bool intersectsChild( Widget *child ) const;
 		//bool intersects( Widget *widget ) const;
 
-		/// Input must be in derived coordinates i.e. the canvas in range [-1; 1]
-		bool intersects( const Ogre::Vector2 &pos ) const;
+		/// Input must be in NDC space i.e. in range [-1; 1]
+		bool intersects( const Ogre::Vector2 &posNdc ) const;
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 
@@ -207,7 +207,17 @@ namespace Crystal
 												  const Ogre::Vector2 &parentPos,
 												  const Ogre::Matrix3 &parentRot );
 
-		void setState( States::States state );
+		/** Sets the new state, which affects skins.
+			The state is is broadcasted to our children.
+		@param state
+			New state to transition to.
+		@param smartHighlight
+			When true and the Widget is already highlighted by a button, and now it's being
+			highlighted by cursor (or viceversa), sets the new state to
+			States::HighlightedButtonAndCursor
+			If false, we just set exactly what was requested.
+		*/
+		virtual void setState( States::States state, bool smartHighlight=true );
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
 		/// Note it may be < getChildren().size(), as this value only returns pure widgets.

@@ -334,7 +334,9 @@ namespace Crystal
 				{
 					"disabled",
 					"idle",
-					"highlighted",
+					"highlighted_cursor",
+					"highlighted_button",
+					"highlighted_button_and_cursor",
 					"pressed"
 				};
 				for( size_t i=0u; i<States::NumStates; ++i )

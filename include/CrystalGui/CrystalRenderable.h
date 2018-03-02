@@ -52,6 +52,7 @@ namespace Crystal
 		Ogre::CbDrawCallStrip		*drawCmd;
 		Ogre::CbDrawStrip			*drawCountPtr;
 		uint16_t primCount;
+		uint32_t accumPrimCount;
 	};
 
 	/**
@@ -83,6 +84,8 @@ namespace Crystal
 
 		void setSkin( Ogre::IdString skinName, States::States forState );
 		void setSkinPack( Ogre::IdString skinPackName );
+
+		virtual void setState( States::States state, bool smartHighlight=true );
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
 

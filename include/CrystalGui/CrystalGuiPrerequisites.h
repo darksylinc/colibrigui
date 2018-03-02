@@ -57,7 +57,9 @@ namespace Crystal
 		{
 			Disabled,
 			Idle,
-			Highlighted,
+			HighlightedCursor,
+			HighlightedButton,
+			HighlightedButtonAndCursor,
 			Pressed,
 			NumStates
 		};

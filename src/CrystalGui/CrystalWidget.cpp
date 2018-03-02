@@ -369,14 +369,14 @@ namespace Crystal
 				  this->m_size.y < child->m_position.y );
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::intersects( const Ogre::Vector2 &pos ) const
+	bool Widget::intersects( const Ogre::Vector2 &posNdc ) const
 	{
 		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		TODO_account_rotation;
-		return !( pos.x < m_derivedTopLeft.x ||
-				  pos.y < m_derivedTopLeft.y ||
-				  pos.x > m_derivedBottomRight.x ||
-				  pos.y > m_derivedBottomRight.y );
+		return !( posNdc.x < m_derivedTopLeft.x ||
+				  posNdc.y < m_derivedTopLeft.y ||
+				  posNdc.x > m_derivedBottomRight.x ||
+				  posNdc.y > m_derivedBottomRight.y );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao )
@@ -399,10 +399,19 @@ namespace Crystal
 		return vertexBuffer;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setState( States::States state )
+	void Widget::setState( States::States state, bool smartHighlight )
 	{
 		if( isWindow() )
 			return;
+
+		if( smartHighlight &&
+			((m_currentState == States::HighlightedButtonAndCursor &&
+			  (state == States::HighlightedCursor || state == States::HighlightedButton)) ||
+			 (state == States::HighlightedCursor && m_currentState == States::HighlightedButton) ||
+			 (state == States::HighlightedButton && m_currentState == States::HighlightedCursor)) )
+		{
+			state = States::HighlightedButtonAndCursor;
+		}
 
 		m_currentState = state;
 
@@ -411,7 +420,7 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->setState( state );
+			(*itor)->setState( state, false );
 			++itor;
 		}
 	}

@@ -32,6 +32,8 @@ namespace Crystal
 		m_indirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
 		m_mouseCursorButtonDown( false ),
+		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
+		m_primaryButtonDown( false ),
 		m_skinManager( 0 )
 	{
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ) );
@@ -103,6 +105,7 @@ namespace Crystal
 	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
 		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
+		m_mouseCursorPosNdc = newPosInCanvas;
 
 		FocusPair focusedPair;
 
@@ -116,74 +119,139 @@ namespace Crystal
 			++ritor;
 		}
 
-		if( m_focusedPair.widget != focusedPair.widget )
+		if( m_cursorFocusedPair.widget != focusedPair.widget )
 		{
-			if( m_focusedPair.widget )
+			if( m_cursorFocusedPair.widget )
 			{
-				m_focusedPair.widget->setState( States::Idle );
-				m_focusedPair.widget->callActionListeners( Action::Cancel );
+				if( m_cursorFocusedPair.widget != m_keyboardFocusedPair.widget ||
+					m_mouseCursorButtonDown )
+				{
+					m_cursorFocusedPair.widget->setState( States::Idle );
+				}
+				else
+					m_cursorFocusedPair.widget->setState( States::HighlightedButton, false );
+				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 			}
 
 			if( focusedPair.widget )
 			{
 				if( !m_mouseCursorButtonDown )
 				{
-					focusedPair.widget->setState( States::Highlighted );
+					focusedPair.widget->setState( States::HighlightedCursor );
 					focusedPair.widget->callActionListeners( Action::Highlighted );
 				}
 				else
 				{
 					focusedPair.widget->setState( States::Pressed );
 					focusedPair.widget->callActionListeners( Action::Hold );
+
+					overrideKeyboardFocusWith( focusedPair );
 				}
 			}
 		}
 
-		m_focusedPair = focusedPair;
+		m_cursorFocusedPair = focusedPair;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorPressed()
 	{
-		if( m_focusedPair.widget )
+		if( m_cursorFocusedPair.widget )
 		{
 			m_mouseCursorButtonDown = true;
-			m_focusedPair.widget->setState( States::Pressed );
-			m_focusedPair.widget->callActionListeners( Action::Hold );
+			m_cursorFocusedPair.widget->setState( States::Pressed );
+			m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
+
+			overrideKeyboardFocusWith( m_cursorFocusedPair );
 		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorReleased()
 	{
-		if( m_focusedPair.widget )
+		if( m_cursorFocusedPair.widget )
 		{
-			m_focusedPair.widget->setState( States::Highlighted );
-			m_focusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+			m_cursorFocusedPair.widget->setState( States::HighlightedCursor );
+			m_cursorFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+
+			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
 		}
 		m_mouseCursorButtonDown = false;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setKeyboardPrimaryPressed()
+	{
+		if( m_keyboardFocusedPair.widget )
+		{
+			m_primaryButtonDown = true;
+			m_keyboardFocusedPair.widget->setState( States::Pressed );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::Hold );
+
+			overrideCursorFocusWith( m_keyboardFocusedPair );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setKeyboardPrimaryReleased()
+	{
+		if( m_keyboardFocusedPair.widget )
+		{
+			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+
+			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+				m_keyboardFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
+		}
+		m_primaryButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setCancel()
 	{
-		if( m_focusedPair.widget )
+		const bool cursorAndKeyboardMatch = m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget;
+		States::States newCursorState = States::HighlightedCursor;
+		States::States newKeyboardState = States::HighlightedButton;
+		if( cursorAndKeyboardMatch )
 		{
-			m_focusedPair.widget->setState( States::Highlighted );
-			m_focusedPair.widget->callActionListeners( Action::Cancel );
+			newCursorState = States::HighlightedButtonAndCursor;
+			newKeyboardState = States::HighlightedButtonAndCursor;
+		}
+
+		//Highlight with cursor
+		if( m_cursorFocusedPair.widget )
+		{
+			m_cursorFocusedPair.widget->setState( newCursorState, false );
+			if( !cursorAndKeyboardMatch )
+				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 		}
 		m_mouseCursorButtonDown = false;
+
+		//Highlight with keyboard
+		if( m_keyboardFocusedPair.widget )
+		{
+			m_keyboardFocusedPair.widget->setState( newKeyboardState, true );
+			if( !cursorAndKeyboardMatch )
+				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+		}
+		m_primaryButtonDown = false;
+
+		//Cursor and keyboard are highlighting the same widget.
+		//Let's make sure we only call the callback once.
+		if( cursorAndKeyboardMatch && m_cursorFocusedPair.widget )
+			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setKeyDirection( Borders::Borders direction )
 	{
-		if( m_focusedPair.widget )
+		if( m_keyboardFocusedPair.widget )
 		{
-			Widget * crystalgui_nullable nextWidget = m_focusedPair.widget->m_nextWidget[direction];
+			Widget * crystalgui_nullable nextWidget =
+					m_keyboardFocusedPair.widget->m_nextWidget[direction];
 			if( nextWidget )
 			{
-				m_focusedPair.widget->setState( States::Idle );
-				m_focusedPair.widget->callActionListeners( Action::Cancel );
-				if( !m_mouseCursorButtonDown )
+				m_keyboardFocusedPair.widget->setState( States::Idle );
+				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+
+				if( !m_primaryButtonDown )
 				{
-					nextWidget->setState( States::Highlighted );
+					nextWidget->setState( States::HighlightedButton );
 					nextWidget->callActionListeners( Action::Highlighted );
 				}
 				else
@@ -191,7 +259,9 @@ namespace Crystal
 					nextWidget->setState( States::Pressed );
 					nextWidget->callActionListeners( Action::Hold );
 				}
-				m_focusedPair.widget = nextWidget;
+
+				m_keyboardFocusedPair.widget = nextWidget;
+				overrideCursorFocusWith( m_keyboardFocusedPair );
 			}
 		}
 	}
@@ -222,8 +292,8 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::destroyWindow( Window *window )
 	{
-		if( window == m_focusedPair.window )
-			m_focusedPair = FocusPair();
+		if( window == m_cursorFocusedPair.window )
+			m_cursorFocusedPair = FocusPair();
 
 		if( window->m_parent )
 		{
@@ -246,8 +316,8 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::destroyWidget( Widget *widget )
 	{
-		if( widget == m_focusedPair.widget )
-			m_focusedPair.widget = 0;
+		if( widget == m_cursorFocusedPair.widget )
+			m_cursorFocusedPair.widget = 0;
 
 		if( widget->isWindow() )
 		{
@@ -274,6 +344,28 @@ namespace Crystal
 			window->detachFromParent();
 			m_windows.push_back( window );
 		}
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &focusedPair )
+	{
+		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != focusedPair.widget )
+		{
+			m_keyboardFocusedPair.widget->setState( States::Idle );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+		}
+		m_keyboardFocusedPair = focusedPair;
+		m_primaryButtonDown = false;
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalManager::overrideCursorFocusWith( const FocusPair &focusedPair )
+	{
+		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget != focusedPair.widget )
+		{
+			m_cursorFocusedPair.widget->setState( States::Idle );
+			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
+		}
+		m_cursorFocusedPair = focusedPair;
+		m_mouseCursorButtonDown = false;
 	}
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::checkVertexBufferCapacity()
@@ -538,6 +630,7 @@ namespace Crystal
 		apiObjects.drawCmd = 0;
 		apiObjects.drawCountPtr = 0;
 		apiObjects.primCount = 0;
+		apiObjects.accumPrimCount = 0;
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();

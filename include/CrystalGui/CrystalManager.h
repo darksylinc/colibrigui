@@ -53,10 +53,17 @@ namespace Crystal
 		Ogre::Vector2				m_pixelSize;
 
 		/// Window and/or Widget currently being in focus
-		FocusPair	m_focusedPair;
-		bool		m_mouseCursorButtonDown;
+		FocusPair		m_cursorFocusedPair;
+		FocusPair		m_keyboardFocusedPair;
+		bool			m_mouseCursorButtonDown;
+		Ogre::Vector2	m_mouseCursorPosNdc; ///NDC = Normalized Device Coordinates
+		bool			m_primaryButtonDown;
 
 		SkinManager	*m_skinManager;
+
+		/// When pressing a mouse button on a widget, that overrides whatever keyboard was on.
+		void overrideKeyboardFocusWith( const FocusPair &focusedPair );
+		void overrideCursorFocusWith( const FocusPair &focusedPair );
 
 		void checkVertexBufferCapacity();
 
@@ -102,6 +109,8 @@ namespace Crystal
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
 		void setMouseCursorPressed();
 		void setMouseCursorReleased();
+		void setKeyboardPrimaryPressed();
+		void setKeyboardPrimaryReleased();
 		void setCancel();
 		void setKeyDirection( Borders::Borders direction );
 
