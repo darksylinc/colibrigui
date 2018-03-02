@@ -99,7 +99,7 @@ namespace Crystal
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
 
-		void setCursorMoved( const Ogre::Vector2 &newPosInCanvas );
+		void setCursorMoved( Ogre::Vector2 newPosInCanvas );
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 

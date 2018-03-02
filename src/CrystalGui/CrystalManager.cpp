@@ -100,8 +100,10 @@ namespace Crystal
 		m_pixelSize = pixelSize / canvasSize;
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setCursorMoved( const Ogre::Vector2 &newPosInCanvas )
+	void CrystalManager::setCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
+		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
+
 		FocusPair focusedPair;
 
 		//The first window that our button is touching wins. We go in LIFO order.

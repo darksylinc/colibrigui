@@ -19,6 +19,7 @@ namespace Demo
 
         virtual void update( float timeSinceLast );
 
+		virtual void mouseMoved( const SDL_Event &arg );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
     };
 }

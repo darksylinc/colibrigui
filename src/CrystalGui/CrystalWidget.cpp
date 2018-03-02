@@ -318,6 +318,7 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	bool Widget::intersects( const Ogre::Vector2 &pos ) const
 	{
+		CRYSTAL_ASSERT_MEDIUM( !m_transformOutOfDate );
 		TODO_account_rotation;
 		return !( pos.x < m_derivedTopLeft.x ||
 				  pos.y < m_derivedTopLeft.y ||

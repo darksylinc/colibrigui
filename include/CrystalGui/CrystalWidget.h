@@ -148,6 +148,7 @@ namespace Crystal
 		bool intersectsChild( Widget *child ) const;
 		//bool intersects( Widget *widget ) const;
 
+		/// Input must be in derived coordinates i.e. the canvas in range [-1; 1]
 		bool intersects( const Ogre::Vector2 &pos ) const;
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );

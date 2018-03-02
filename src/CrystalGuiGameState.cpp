@@ -21,6 +21,9 @@
 #include "OgreHlmsTextureManager.h"
 #include "OgreHlmsPbs.h"
 
+#include "OgreWindow.h"
+#include "SdlInputHandler.h"
+
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalButton.h"
@@ -77,6 +80,15 @@ namespace Demo
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::update( float timeSinceLast )
 	{
+		static bool tried = false;
+		if( !tried )
+		{
+			SdlInputHandler *inputHandler = mGraphicsSystem->getInputHandler();
+			inputHandler->setGrabMousePointer( false );
+			inputHandler->setMouseVisible( true );
+			tried = true;
+		}
+
 		crystalManager->update();
 
 		/*static float angle = 0;
@@ -91,6 +103,16 @@ namespace Demo
     void CrystalGuiGameState::generateDebugText( float timeSinceLast, Ogre::String &outText )
 	{
 		TutorialGameState::generateDebugText( timeSinceLast, outText );
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalGuiGameState::mouseMoved( const SDL_Event &arg )
+	{
+		float width  = static_cast<float>( mGraphicsSystem->getRenderWindow()->getWidth() );
+		float height = static_cast<float>( mGraphicsSystem->getRenderWindow()->getHeight() );
+
+		Ogre::Vector2 mousePos( arg.motion.x / width, arg.motion.y / height );
+		crystalManager->setCursorMoved( mousePos * crystalManager->getCanvasSize() );
+		TutorialGameState::mouseMoved( arg );
 	}
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )
