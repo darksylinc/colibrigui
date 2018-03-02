@@ -24,7 +24,6 @@ namespace Crystal
 		m_numWidgets( 0 ),
 		m_logListener( &DefaultLogListener ),
 		m_windowNavigationDirty( false ),
-		m_childrenNavigationDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -173,6 +172,30 @@ namespace Crystal
 		m_mouseCursorButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::setKeyDirection( Borders::Borders direction )
+	{
+		if( m_focusedPair.widget )
+		{
+			Widget * crystalgui_nullable nextWidget = m_focusedPair.widget->m_nextWidget[direction];
+			if( nextWidget )
+			{
+				m_focusedPair.widget->setState( States::Idle );
+				m_focusedPair.widget->callActionListeners( Action::Cancel );
+				if( !m_mouseCursorButtonDown )
+				{
+					nextWidget->setState( States::Highlighted );
+					nextWidget->callActionListeners( Action::Highlighted );
+				}
+				else
+				{
+					nextWidget->setState( States::Pressed );
+					nextWidget->callActionListeners( Action::Hold );
+				}
+				m_focusedPair.widget = nextWidget;
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
 	{
 		CRYSTAL_ASSERT( (!parent || parent->isWindow()) &&
@@ -294,6 +317,21 @@ namespace Crystal
 		typename std::vector<T>::const_iterator itor = container.begin() + start;
 		typename std::vector<T>::const_iterator end  = container.begin() + start + numWidgets;
 
+		//Remove existing links
+		while( itor != end )
+		{
+			Widget *widget = *itor;
+			for( size_t i=0; i<4u; ++i )
+			{
+				if( widget->m_autoSetNextWidget[i] )
+					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
+			}
+			++itor;
+		}
+
+		//Search for them again
+		itor = container.begin() + start;
+
 		while( itor != end )
 		{
 			Widget *widget = *itor;
@@ -336,25 +374,25 @@ namespace Crystal
 					const float cosAngle( dirTo.dotProduct( Ogre::Vector2::UNIT_X ) );
 
 					if( dirLength < closestSiblingDistances[Borders::Right] &&
-						cosAngle <= Ogre::Degree( 45.0f ).valueRadians() )
+						cosAngle >= cosf( Ogre::Degree( 45.0f ).valueRadians() ) )
 					{
 						closestSiblings[Borders::Right] = widget2;
 						closestSiblingDistances[Borders::Right] = dirLength;
 					}
 
 					if( dirLength < closestSiblingDistances[Borders::Left] &&
-						cosAngle <= Ogre::Degree( 135.0f ).valueRadians() )
+						cosAngle <= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
 					{
 						closestSiblings[Borders::Left] = widget2;
 						closestSiblingDistances[Borders::Left] = dirLength;
 					}
 
-					if( cosAngle >= Ogre::Degree( 45.0f ).valueRadians() &&
-						cosAngle <= Ogre::Degree( 135.0f ).valueRadians() )
+					if( cosAngle <= cosf( Ogre::Degree( 45.0f ).valueRadians() ) &&
+						cosAngle >= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
 					{
 						float crossProduct = dirTo.crossProduct( Ogre::Vector2::UNIT_X );
 
-						if( crossProduct <= 0.0f )
+						if( crossProduct >= 0.0f )
 						{
 							if( dirLength < closestSiblingDistances[Borders::Top] )
 							{
@@ -378,7 +416,7 @@ namespace Crystal
 
 			for( size_t i=0; i<4u; ++i )
 			{
-				if( widget->m_autoSetNextWidget[i] )
+				if( widget->m_autoSetNextWidget[i] && !widget->m_nextWidget[i] )
 					widget->setNextWidget( closestSiblings[i], static_cast<Borders::Borders>( i ) );
 			}
 
@@ -421,31 +459,19 @@ namespace Crystal
 
 		if( m_windowNavigationDirty )
 		{
-			autosetNavigation( m_windows, 0u, m_windows.size() );
-			m_windowNavigationDirty = false;
-		}
-
-		if( m_childrenNavigationDirty )
-		{
 			WindowVec::const_iterator itor = m_windows.begin();
 			WindowVec::const_iterator end  = m_windows.end();
 
 			while( itor != end )
-			{
 				autosetNavigation( *itor++ );
-				m_childrenNavigationDirty = false;
-			}
+
+			m_windowNavigationDirty = false;
 		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::_setWindowNavigationDirty()
 	{
 		m_windowNavigationDirty = true;
-	}
-	//-------------------------------------------------------------------------
-	void CrystalManager::_notifyChildWindowIsDirty()
-	{
-		m_childrenNavigationDirty = true;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::update()

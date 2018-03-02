@@ -80,7 +80,7 @@ namespace Crystal
 		}
 		else
 		{
-			m_manager->_notifyChildWindowIsDirty();
+			m_manager->_setWindowNavigationDirty();
 		}
 	}
 	//-------------------------------------------------------------------------

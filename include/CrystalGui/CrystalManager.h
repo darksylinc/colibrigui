@@ -39,7 +39,6 @@ namespace Crystal
 		LogListener	*m_logListener;
 
 		bool m_windowNavigationDirty;
-		bool m_childrenNavigationDirty;
 
 		Ogre::Root					*m_root;
 		Ogre::VaoManager			*m_vaoManager;
@@ -104,6 +103,7 @@ namespace Crystal
 		void setMouseCursorPressed();
 		void setMouseCursorReleased();
 		void setCancel();
+		void setKeyDirection( Borders::Borders direction );
 
 		LogListener* getLogListener() const		{ return m_logListener; }
 
@@ -123,7 +123,6 @@ namespace Crystal
 		void autosetNavigation();
 
 		void _setWindowNavigationDirty();
-		void _notifyChildWindowIsDirty();
 
 		void update();
 		void prepareRenderCommands();

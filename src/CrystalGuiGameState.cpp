@@ -35,7 +35,8 @@ namespace Demo
 	extern Crystal::CrystalManager *crystalManager;
 	Crystal::CrystalManager *crystalManager = 0;
 	Crystal::Window *mainWindow = 0;
-	Crystal::Button *button = 0;
+	Crystal::Button *button0 = 0;
+	Crystal::Button *button1 = 0;
 
     CrystalGuiGameState::CrystalGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -61,13 +62,19 @@ namespace Demo
 
 		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
 
-		button = crystalManager->createWidget<Crystal::Button>( mainWindow );
-		button->setSkinPack( "ButtonSkin" );
-		button->setTopLeft( Ogre::Vector2( 0.1, 0.1 ) );
-		button->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		button0 = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button0->setSkinPack( "ButtonSkin" );
+		button0->setTopLeft( Ogre::Vector2( 0.1, 0.1 ) );
+		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+
+		button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button1->setSkinPack( "ButtonSkin" );
+		button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 ) );
+		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
-		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button );
+		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button0 );
+		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button1 );
 
         TutorialGameState::createScene01();
     }
@@ -117,12 +124,23 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void CrystalGuiGameState::mousePressed( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )
 	{
+		float width  = static_cast<float>( mGraphicsSystem->getRenderWindow()->getWidth() );
+		float height = static_cast<float>( mGraphicsSystem->getRenderWindow()->getHeight() );
+
+		Ogre::Vector2 mousePos( arg.x / width, arg.y / height );
+		crystalManager->setMouseCursorMoved( mousePos * crystalManager->getCanvasSize() );
 		crystalManager->setMouseCursorPressed();
 	}
 	//-----------------------------------------------------------------------------------
 	void CrystalGuiGameState::mouseReleased( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )
 	{
 		crystalManager->setMouseCursorReleased();
+	}
+	//-----------------------------------------------------------------------------------
+	void CrystalGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
+	{
+		if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER )
+			crystalManager->setMouseCursorPressed();
 	}
     //-----------------------------------------------------------------------------------
     void CrystalGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )
@@ -132,6 +150,17 @@ namespace Demo
             TutorialGameState::keyReleased( arg );
             return;
         }
+
+		if( arg.keysym.sym == SDLK_w || arg.keysym.sym == SDLK_UP )
+			crystalManager->setKeyDirection( Crystal::Borders::Top );
+		else if( arg.keysym.sym == SDLK_s || arg.keysym.sym == SDLK_DOWN )
+			crystalManager->setKeyDirection( Crystal::Borders::Bottom );
+		else if( arg.keysym.sym == SDLK_a || arg.keysym.sym == SDLK_LEFT )
+			crystalManager->setKeyDirection( Crystal::Borders::Left );
+		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
+			crystalManager->setKeyDirection( Crystal::Borders::Right );
+		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER )
+			crystalManager->setMouseCursorReleased();
 
 		TutorialGameState::keyReleased( arg );
     }
