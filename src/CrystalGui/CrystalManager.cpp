@@ -303,6 +303,16 @@ namespace Crystal
 
 		++m_numWidgets;
 
+		if( m_keyboardFocusedPair.window == parent )
+		{
+			m_keyboardFocusedPair.window = retVal;
+			if( m_keyboardFocusedPair.widget )
+			{
+				m_keyboardFocusedPair.widget->setState( States::Idle );
+				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+			}
+		}
+
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
@@ -587,6 +597,13 @@ namespace Crystal
 	void CrystalManager::update()
 	{
 		autosetNavigation();
+
+		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
+		{
+			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
+			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::prepareRenderCommands()
