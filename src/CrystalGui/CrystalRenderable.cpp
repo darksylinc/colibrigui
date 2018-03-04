@@ -15,6 +15,7 @@
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/CrystalSkinManager.h"
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
+#include "CrystalGui/Ogre/OgreHlmsCrystal.h"
 
 #include "OgreBitwise.h"
 
@@ -123,8 +124,8 @@ namespace Crystal
 			apiObject.lastVaoName = 0;
 		}
 
-		uint32 baseInstance = apiObject.hlms->fillBuffersForV2(
-								  hlmsCache, queuedRenderable, false,
+		uint32 baseInstance = apiObject.hlms->fillBuffersForCrystal(
+								  hlmsCache, queuedRenderable, false, apiObject.accumPrimCount,
 								  lastHlmsCacheHash, apiObject.commandBuffer );
 
 		if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
@@ -151,9 +152,7 @@ namespace Crystal
 			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 			apiObject.drawCountPtr->primCount		= 0;
 			apiObject.drawCountPtr->instanceCount	= 1u;
-			apiObject.drawCountPtr->firstVertexIndex=
-					apiObject.vao->getBaseVertexBuffer()->_getFinalBufferStart() +
-					apiObject.accumPrimCount;
+			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount;
 			apiObject.drawCountPtr->baseInstance	= baseInstance;
 			apiObject.indirectDraw += sizeof( CbDrawStrip );
 		}

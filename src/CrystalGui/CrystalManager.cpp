@@ -5,6 +5,7 @@
 #include "CrystalGui/CrystalSkinManager.h"
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
+#include "CrystalGui/Ogre/OgreHlmsCrystal.h"
 #include "Vao/OgreVaoManager.h"
 #include "Vao/OgreVertexArrayObject.h"
 #include "Vao/OgreIndirectBufferPacked.h"
@@ -636,12 +637,14 @@ namespace Crystal
 		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
 
 		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
+		CRYSTAL_ASSERT_HIGH( dynamic_cast<Ogre::HlmsCrystal*>( hlms ) );
+		Ogre::HlmsCrystal *hlmsCrystal = static_cast<Ogre::HlmsCrystal*>( hlms );
 
 		apiObjects.lastHlmsCache = &c_dummyCache;
 
 		Ogre::HlmsCache passCache = hlms->preparePassHash( 0, false, false, m_sceneManager );
 		apiObjects.passCache = &passCache;
-		apiObjects.hlms = hlms;
+		apiObjects.hlms = hlmsCrystal;
 		apiObjects.lastVaoName = 0;
 		apiObjects.commandBuffer = m_commandBuffer;
 		apiObjects.indirectBuffer = m_indirectBuffer;
@@ -665,7 +668,7 @@ namespace Crystal
 		apiObjects.drawCmd = 0;
 		apiObjects.drawCountPtr = 0;
 		apiObjects.primCount = 0;
-		apiObjects.accumPrimCount = 0;
+		apiObjects.accumPrimCount = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();

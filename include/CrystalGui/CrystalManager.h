@@ -40,13 +40,13 @@ namespace Crystal
 
 		bool m_windowNavigationDirty;
 
-		Ogre::Root					*m_root;
-		Ogre::VaoManager			*m_vaoManager;
-		Ogre::ObjectMemoryManager	*m_objectMemoryManager;
-		Ogre::SceneManager			*m_sceneManager;
-		Ogre::VertexArrayObject		*m_vao;
-		Ogre::IndirectBufferPacked	*m_indirectBuffer;
-		Ogre::CommandBuffer			*m_commandBuffer;
+		Ogre::Root					* crystalgui_nullable m_root;
+		Ogre::VaoManager			* crystalgui_nullable m_vaoManager;
+		Ogre::ObjectMemoryManager	* crystalgui_nullable m_objectMemoryManager;
+		Ogre::SceneManager			* crystalgui_nullable m_sceneManager;
+		Ogre::VertexArrayObject		* crystalgui_nullable m_vao;
+		Ogre::IndirectBufferPacked	* crystalgui_nullable m_indirectBuffer;
+		Ogre::CommandBuffer			* crystalgui_nullable m_commandBuffer;
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;

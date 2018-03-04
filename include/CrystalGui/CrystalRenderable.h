@@ -10,7 +10,7 @@ namespace Ogre
 {
 	struct CbDrawCallStrip;
 	struct CbDrawStrip;
-	class HlmsCrystalGui;
+	class HlmsCrystal;
 }
 
 CRYSTALGUI_ASSUME_NONNULL_BEGIN
@@ -41,7 +41,7 @@ namespace Crystal
 		//Ogre::HlmsCrystalGui		*hlms;
 		Ogre::HlmsCache const		*lastHlmsCache;
 		Ogre::HlmsCache const 		*passCache;
-		Ogre::Hlms					*hlms;
+		Ogre::HlmsCrystal			*hlms;
 		Ogre::uint32				lastVaoName;
 		Ogre::CommandBuffer			*commandBuffer;
 		Ogre::IndirectBufferPacked	*indirectBuffer;
@@ -49,8 +49,8 @@ namespace Crystal
 		uint8_t						*startIndirectDraw;
 		int							baseInstanceAndIndirectBuffers;
 		Ogre::VertexArrayObject		*vao;
-		Ogre::CbDrawCallStrip		*drawCmd;
-		Ogre::CbDrawStrip			*drawCountPtr;
+		Ogre::CbDrawCallStrip		* crystalgui_nullable drawCmd;
+		Ogre::CbDrawStrip			* crystalgui_nullable drawCountPtr;
 		uint16_t primCount;
 		uint32_t accumPrimCount;
 	};

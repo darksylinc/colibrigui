@@ -41,6 +41,10 @@ namespace Ogre
 
 		setUseIdentityProjection( true );
 		setUseIdentityView( true );
+
+		//We use this magic value 6372, to indicate this is a CrystalWidget
+		//and thus needs special shaders from HlmsCrystal
+		setCustomParameter( 6372, Ogre::Vector4( 1.0f ) );
 	}
 	//-----------------------------------------------------------------------------------
 	CrystalOgreRenderable::~CrystalOgreRenderable()

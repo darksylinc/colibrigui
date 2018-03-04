@@ -12,6 +12,11 @@
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/Ogre/CompositorPassCrystalGuiProvider.h"
 
+#include "OgreHlmsManager.h"
+#include "OgreHlmsPbs.h"
+#include "CrystalGui/Ogre/OgreHlmsCrystal.h"
+#include "OgreArchiveManager.h"
+
 //Declares WinMain / main
 #include "MainEntryPointHelper.h"
 #include "System/MainEntryPoints.h"
@@ -50,6 +55,101 @@ namespace Demo
 			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
 			return compositorManager->addWorkspace( mSceneManager, mRenderWindow->getTexture(), mCamera,
 													"CrystalGuiWorkspace", true );
+		}
+
+		void registerHlms(void)
+		{
+			Ogre::ConfigFile cf;
+			cf.load( mResourcePath + "resources2.cfg" );
+
+	#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE || OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
+			Ogre::String rootHlmsFolder = Ogre::macBundlePath() + '/' +
+									  cf.getSetting( "DoNotUseAsResource", "Hlms", "" );
+	#else
+			Ogre::String rootHlmsFolder = mResourcePath + cf.getSetting( "DoNotUseAsResource", "Hlms", "" );
+	#endif
+
+			if( rootHlmsFolder.empty() )
+				rootHlmsFolder = "./";
+			else if( *(rootHlmsFolder.end() - 1) != '/' )
+				rootHlmsFolder += "/";
+
+			//At this point rootHlmsFolder should be a valid path to the Hlms data folder
+
+			Ogre::HlmsCrystal *hlmsCrystal = 0;
+			Ogre::HlmsPbs *hlmsPbs = 0;
+
+			//For retrieval of the paths to the different folders needed
+			Ogre::String mainFolderPath;
+			Ogre::StringVector libraryFoldersPaths;
+			Ogre::StringVector::const_iterator libraryFolderPathIt;
+			Ogre::StringVector::const_iterator libraryFolderPathEn;
+
+			Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+
+			{
+				//Create & Register HlmsCrystal
+				//Get the path to all the subdirectories used by HlmsCrystal
+				Ogre::HlmsCrystal::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+				Ogre::Archive *archiveUnlit = archiveManager.load( rootHlmsFolder + mainFolderPath,
+																   "FileSystem", true );
+				Ogre::ArchiveVec archiveUnlitLibraryFolders;
+				libraryFolderPathIt = libraryFoldersPaths.begin();
+				libraryFolderPathEn = libraryFoldersPaths.end();
+				while( libraryFolderPathIt != libraryFolderPathEn )
+				{
+					Ogre::Archive *archiveLibrary =
+							archiveManager.load( rootHlmsFolder + *libraryFolderPathIt, "FileSystem", true );
+					archiveUnlitLibraryFolders.push_back( archiveLibrary );
+					++libraryFolderPathIt;
+				}
+
+				//Create and register the unlit Hlms
+				hlmsCrystal = OGRE_NEW Ogre::HlmsCrystal( archiveUnlit, &archiveUnlitLibraryFolders );
+				Ogre::Root::getSingleton().getHlmsManager()->registerHlms( hlmsCrystal );
+			}
+
+			{
+				//Create & Register HlmsPbs
+				//Do the same for HlmsPbs:
+				Ogre::HlmsPbs::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+				Ogre::Archive *archivePbs = archiveManager.load( rootHlmsFolder + mainFolderPath,
+																 "FileSystem", true );
+
+				//Get the library archive(s)
+				Ogre::ArchiveVec archivePbsLibraryFolders;
+				libraryFolderPathIt = libraryFoldersPaths.begin();
+				libraryFolderPathEn = libraryFoldersPaths.end();
+				while( libraryFolderPathIt != libraryFolderPathEn )
+				{
+					Ogre::Archive *archiveLibrary =
+							archiveManager.load( rootHlmsFolder + *libraryFolderPathIt, "FileSystem", true );
+					archivePbsLibraryFolders.push_back( archiveLibrary );
+					++libraryFolderPathIt;
+				}
+
+				//Create and register
+				hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+				Ogre::Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
+			}
+
+
+			Ogre::RenderSystem *renderSystem = mRoot->getRenderSystem();
+			if( renderSystem->getName() == "Direct3D11 Rendering Subsystem" )
+			{
+				//Set lower limits 512kb instead of the default 4MB per Hlms in D3D 11.0
+				//and below to avoid saturating AMD's discard limit (8MB) or
+				//saturate the PCIE bus in some low end machines.
+				bool supportsNoOverwriteOnTextureBuffers;
+				renderSystem->getCustomAttribute( "MapNoOverwriteOnDynamicBufferSRV",
+												  &supportsNoOverwriteOnTextureBuffers );
+
+				if( !supportsNoOverwriteOnTextureBuffers )
+				{
+					hlmsPbs->setTextureBufferDefaultSize( 512 * 1024 );
+					hlmsCrystal->setTextureBufferDefaultSize( 512 * 1024 );
+				}
+			}
 		}
 
         virtual void setupResources(void)
