@@ -43,43 +43,43 @@ namespace Crystal
 		                    uvTopLeftBottomRight.x, uvTopLeftBottomRight.y,
 		                    (topLeft.y - parentDerivedTL.y) * invSize.y,
 		                    (topLeft.x - parentDerivedTL.x) * invSize.x,
-		                    (topLeft.x - parentDerivedBR.x) * invSize.x,
-		                    (topLeft.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - topLeft.x) * invSize.x,
+		                    (parentDerivedBR.y - topLeft.y) * invSize.y );
 
 		CRYSTAL_ADD_VERTEX( topLeft.x, bottomRight.y,
 		                    uvTopLeftBottomRight.x, uvTopLeftBottomRight.w,
 		                    (bottomRight.y - parentDerivedTL.y) * invSize.y,
 		                    (topLeft.x - parentDerivedTL.x) * invSize.x,
-		                    (topLeft.x - parentDerivedBR.x) * invSize.x,
-		                    (bottomRight.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - topLeft.x) * invSize.x,
+		                    (parentDerivedBR.y - bottomRight.y) * invSize.y );
 
 		CRYSTAL_ADD_VERTEX( bottomRight.x, bottomRight.y,
 		                    uvTopLeftBottomRight.z, uvTopLeftBottomRight.w,
 		                    (bottomRight.y - parentDerivedTL.y) * invSize.y,
 		                    (bottomRight.x - parentDerivedTL.x) * invSize.x,
-		                    (bottomRight.x - parentDerivedBR.x) * invSize.x,
-		                    (bottomRight.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - bottomRight.x) * invSize.x,
+		                    (parentDerivedBR.y - bottomRight.y) * invSize.y );
 
 		CRYSTAL_ADD_VERTEX( bottomRight.x, bottomRight.y,
 		                    uvTopLeftBottomRight.z, uvTopLeftBottomRight.w,
 		                    (bottomRight.y - parentDerivedTL.y) * invSize.y,
 		                    (bottomRight.x - parentDerivedTL.x) * invSize.x,
-		                    (bottomRight.x - parentDerivedBR.x) * invSize.x,
-		                    (bottomRight.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - bottomRight.x) * invSize.x,
+		                    (parentDerivedBR.y - bottomRight.y) * invSize.y );
 
 		CRYSTAL_ADD_VERTEX( bottomRight.x, topLeft.y,
 		                    uvTopLeftBottomRight.z, uvTopLeftBottomRight.y,
 		                    (topLeft.y - parentDerivedTL.y) * invSize.y,
 		                    (bottomRight.x - parentDerivedTL.x) * invSize.x,
-		                    (bottomRight.x - parentDerivedBR.x) * invSize.x,
-		                    (topLeft.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - bottomRight.x) * invSize.x,
+		                    (parentDerivedBR.y - topLeft.y) * invSize.y );
 
 		CRYSTAL_ADD_VERTEX( topLeft.x, topLeft.y,
 		                    uvTopLeftBottomRight.x, uvTopLeftBottomRight.y,
 		                    (topLeft.y - parentDerivedTL.y) * invSize.y,
 		                    (topLeft.x - parentDerivedTL.x) * invSize.x,
-		                    (topLeft.x - parentDerivedBR.x) * invSize.x,
-		                    (topLeft.y - parentDerivedBR.y) * invSize.y );
+		                    (parentDerivedBR.x - topLeft.x) * invSize.x,
+		                    (parentDerivedBR.y - topLeft.y) * invSize.y );
 
         #undef CRYSTAL_ADD_VERTEX
     }
