@@ -28,6 +28,7 @@ THE SOFTWARE.
 
 #include "OgreStableHeaders.h"
 
+#include "CrystalGui/CrystalAssert.h"
 #include "CrystalGui/Ogre/OgreHlmsCrystal.h"
 #include "CrystalGui/Ogre/OgreHlmsCrystalDatablock.h"
 #include "OgreUnlitProperty.h"
@@ -172,7 +173,7 @@ namespace Ogre
 		{
 			setProperty( "crystal_gui", 1 );
 			setProperty( HlmsBaseProp::IdentityWorld, 1 );
-			//setProperty( HlmsBaseProp::GlobalClipDistances, 4 );
+			setProperty( HlmsBaseProp::PsoClipDistances, 4 );
 		}
 	}
 	//-----------------------------------------------------------------------------------
@@ -182,6 +183,10 @@ namespace Ogre
 											   uint32 lastCacheHash,
 											   CommandBuffer *commandBuffer )
 	{
+		CRYSTAL_ASSERT_HIGH( getProperty( cache->setProperties,
+										  HlmsBaseProp::GlobalClipPlanes ) == 0 &&
+							 "Clipping planes not supported! Generated shader may be buggy!" );
+
 		assert( dynamic_cast<const HlmsCrystalDatablock*>( queuedRenderable.renderable->getDatablock() ) );
 		const HlmsCrystalDatablock *datablock = static_cast<const HlmsCrystalDatablock*>(
                                                 queuedRenderable.renderable->getDatablock() );

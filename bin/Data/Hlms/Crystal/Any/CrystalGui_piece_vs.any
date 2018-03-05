@@ -10,10 +10,10 @@
 	#define finalDrawId crystalDrawId
 	#define worldViewProj 1.0f
 
-	/*gl_ClipDistance[0] = normal.x;
+	gl_ClipDistance[0] = normal.x;
 	gl_ClipDistance[1] = normal.y;
 	gl_ClipDistance[2] = normal.z;
-	gl_ClipDistance[3] = normal.w;*/
+	gl_ClipDistance[3] = normal.w;
 @end
 
 @end
