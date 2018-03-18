@@ -18,11 +18,17 @@ set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}
 include( CMake/Bootstrap.cmake )
 include( CMake/Dependencies/OGRE.cmake )
 
+add_subdirectory( Dependencies )
+
 setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES )
 
 # Setup our application
 include_directories( "./include" )
 include_directories( "./Dependencies/Ogre/Dependencies/include/" )
+include_directories( "./Dependencies/icu/common" )
+include_directories( ${ZLIB_INCLUDE_DIRS} )
+include_directories( ${HARFBUZZ_INCLUDE_DIRS} )
+include_directories( ${FREETYPE_INCLUDE_DIRS} )
 
 add_recursive( ./src SOURCES )
 add_recursive( ./include HEADERS )
@@ -34,6 +40,11 @@ endif()
 
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
+
+target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} )
+if( UNIX )
+	target_link_libraries( ${PROJECT_NAME} dl )
+endif()
 
 if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO" )

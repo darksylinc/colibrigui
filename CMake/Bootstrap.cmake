@@ -1,5 +1,6 @@
 
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG" )
+set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG" )
 
 if( NOT APPLE )
 	if( CMAKE_BUILD_TYPE STREQUAL "" )
@@ -14,7 +15,11 @@ if( NOT MSVC )
 	set( CMAKE_CXX_FLAGS_MINSIZEREL		"${CMAKE_CXX_FLAGS_MINSIZEREL}		-Os -DNDEBUG"				)
 	set( CMAKE_CXX_FLAGS_RELEASE		"${CMAKE_CXX_FLAGS_RELEASE}			-O2 -DNDEBUG"				)
 	set( CMAKE_CXX_FLAGS_RELWITHDEBINFO	"${CMAKE_CXX_FLAGS_RELWITHDEBINFO}	-O2 -g"						)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-overloaded-virtual" )
+
+	set( CMAKE_C_FLAGS_DEBUG			"${CMAKE_C_FLAGS_DEBUG}				-DDEBUG=1 -D_DEBUG=1 -g"	)
+	set( CMAKE_C_FLAGS_MINSIZEREL		"${CMAKE_C_FLAGS_MINSIZEREL}		-Os -DNDEBUG"				)
+	set( CMAKE_C_FLAGS_RELEASE			"${CMAKE_C_FLAGS_RELEASE}			-O2 -DNDEBUG"				)
+	set( CMAKE_C_FLAGS_RELWITHDEBINFO	"${CMAKE_C_FLAGS_RELWITHDEBINFO}	-O2 -g"						)
 endif()
 
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
@@ -42,10 +47,10 @@ endif()
 
 if( APPLE )
 	macro( add_recursive dir retVal )
-		file( GLOB_RECURSE ${retVal} ${dir}/*.h ${dir}/*.cpp ${dir}/*.c ${dir}/*.inl ${dir}/*.mm ${dir}/*.m )
+		file( GLOB_RECURSE ${retVal} ${dir}/*.h ${dir}/*.cpp ${dir}/*.c ${dir}/*.cc ${dir}/*.mm ${dir}/*.m )
 	endmacro()
 else()
 	macro( add_recursive dir retVal )
-		file( GLOB_RECURSE ${retVal} ${dir}/*.h ${dir}/*.cpp ${dir}/*.c ${dir}/*.inl )
+		file( GLOB_RECURSE ${retVal} ${dir}/*.h ${dir}/*.cpp ${dir}/*.c ${dir}/*.cc )
 	endmacro()
 endif()

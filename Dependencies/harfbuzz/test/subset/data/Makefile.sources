@@ -1,0 +1,10 @@
+TESTS = \
+	tests/basics.tests \
+	tests/full-font.tests \
+	$(NULL)
+
+XFAIL_TESTS = \
+	$(NULL)
+
+DISABLED_TESTS = \
+	$(NULL)
