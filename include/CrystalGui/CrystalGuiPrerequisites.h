@@ -18,7 +18,10 @@ namespace Crystal
 	class Button;
 	class CrystalManager;
 	class Label;
+	class LogListener;
 	class Renderable;
+	class Shaper;
+	class ShaperManager;
 	class SkinManager;
 	class Widget;
 	class Window;
