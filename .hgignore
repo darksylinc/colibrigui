@@ -13,3 +13,4 @@ include/OgreCommon/
 src/OgreCommon/
 
 Dependencies/Ogre
+Dependencies/build_result/
