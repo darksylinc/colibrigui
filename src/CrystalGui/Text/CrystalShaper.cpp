@@ -156,6 +156,10 @@ namespace Crystal
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
+			const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
+																	  glyphInfo[i].codepoint,
+																	  m_ptSize );
+			TODO_fill_vertex_buffer;
 			//glyphInfo[i].codepoint;
 			//glyphPos[i].
 		}

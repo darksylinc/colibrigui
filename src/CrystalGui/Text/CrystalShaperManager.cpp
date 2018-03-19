@@ -2,6 +2,8 @@
 #include "CrystalGui/Text/CrystalShaperManager.h"
 #include "CrystalGui/CrystalManager.h"
 
+#include "OgreLwString.h"
+
 #include "ft2build.h"
 #include "freetype/freetype.h"
 
@@ -10,6 +12,259 @@ namespace Crystal
 	LogListener* ShaperManager::getLogListener() const
 	{
 		return m_crystalManager->getLogListener();
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::growAtlas( size_t sizeBytes )
+	{
+		m_atlasCapacity = std::max( m_offsetPtr + sizeBytes,
+									m_atlasCapacity + (m_atlasCapacity >> 1u) + 1u );
+		m_glyphAtlas = reinterpret_cast<uint8_t*>( realloc( m_glyphAtlas, m_atlasCapacity ) );
+		TODO_schedule_buffer_grow;
+	}
+	//-------------------------------------------------------------------------
+	size_t ShaperManager::getAtlasOffset( size_t sizeBytes )
+	{
+		//Get smallest available free range
+		RangeVec::iterator end = m_freeRanges.end();
+		RangeVec::iterator bestRange = end;
+
+		{
+			RangeVec::iterator itor = m_freeRanges.begin();
+			while( itor != end )
+			{
+				if( sizeBytes < itor->size && (bestRange == end || bestRange->size > itor->size) )
+					bestRange = itor;
+				++itor;
+			}
+		}
+
+		size_t retVal = 0;
+
+		if( bestRange != end )
+		{
+			retVal = bestRange->offset;
+			bestRange->offset	+= sizeBytes;
+			bestRange->size		-= sizeBytes;
+			if( bestRange->size == 0 )
+				Ogre::efficientVectorRemove( m_freeRanges, bestRange );
+		}
+		else
+		{
+			//Couldn't find free space in fragmented pool.
+			if( m_offsetPtr + sizeBytes > m_atlasCapacity )
+			{
+				//We're out of space. First check if we can steal another slot.
+				CachedGlyphMap::iterator end  = m_glyphCache.end();
+				CachedGlyphMap::iterator bestUnusedGlyph = end;
+
+				for( size_t i=0; i<2u && bestUnusedGlyph == end; ++i )
+				{
+					CachedGlyphMap::iterator itor = m_glyphCache.begin();
+					while( itor != end )
+					{
+						if( !itor->second.refCount && itor->second.getSizeBytes() >= sizeBytes &&
+							(bestUnusedGlyph == end ||
+							 itor->second.getSizeBytes() < bestUnusedGlyph->second.getSizeBytes()) )
+						{
+							bestUnusedGlyph = itor;
+						}
+						++itor;
+					}
+
+					//Not found? Try again, this time with all unused glyphs removed and merged.
+					//We may have two contiguous unused glyphs that are big enough to hold
+					//this new glyph, but weren't big enough individually.
+					if( i == 0 && bestUnusedGlyph == end )
+						flushReleasedGlyphs();
+				}
+
+				if( bestUnusedGlyph == end )
+				{
+					//Cannot steal. Grow the atlas, advance the pointer and get a fresh region
+					growAtlas( sizeBytes );
+					retVal = m_offsetPtr;
+					m_offsetPtr += sizeBytes;
+				}
+				else
+				{
+					//Steal successful! Put the unused glyph back into the pool and try again
+					destroyGlyph( bestUnusedGlyph );
+					retVal = getAtlasOffset( sizeBytes );
+				}
+			}
+			else
+			{
+				//Advance the pointer and get a fresh region
+				retVal = m_offsetPtr;
+				m_offsetPtr += sizeBytes;
+			}
+		}
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize )
+	{
+		FT_Error errorCode = FT_Load_Glyph( font, codepoint, FT_LOAD_DEFAULT );
+		if( errorCode )
+		{
+			LogListener *log = getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+			errorMsg.clear();
+			errorMsg.a( "[Freetype2 error] Could not load glyph for codepoint ", codepoint,
+						" errorCode: ", errorCode, " Desc: ",
+						ShaperManager::getErrorMessage( errorCode ) );
+			log->log( errorMsg.c_str(), LogSeverity::Warning );
+		}
+
+		//Rasterize the glyph
+		FT_GlyphSlot slot = font->glyph;
+		FT_Render_Glyph( slot, FT_RENDER_MODE_NORMAL );
+
+		FT_Bitmap ftBitmap = slot->bitmap;
+
+		//Create a cache entry
+		CachedGlyph newGlyph;
+		newGlyph.codepoint	= codepoint;
+		newGlyph.ptSize		= ptSize;
+		newGlyph.bearingX	= slot->bitmap_left;
+		newGlyph.bearingY	= slot->bitmap_top;
+		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
+		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
+		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
+		newGlyph.refCount	= 0;
+
+		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+		std::pair<CachedGlyphMap::iterator, bool> pair =
+				m_glyphCache.insert( std::pair<uint64_t, CachedGlyph>( glyphKey, newGlyph ) );
+
+		//Copy the rasterized results to our atlas
+		memcpy( m_glyphAtlas + newGlyph.offsetStart, ftBitmap.buffer, newGlyph.getSizeBytes() );
+		{
+			//Schedule a transfer to the GPU.
+			Range dirtyRange;
+			dirtyRange.offset	= newGlyph.offsetStart;
+			dirtyRange.size		= newGlyph.getSizeBytes();
+			m_dirtyRanges.push_back( dirtyRange );
+		}
+
+		return &pair.first->second;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::destroyGlyph( CachedGlyphMap::iterator glyphIt )
+	{
+		CachedGlyph &glyph = glyphIt->second;
+
+		if( glyph.offsetStart + glyph.getSizeBytes() == m_offsetPtr )
+		{
+			//Easy case. LIFO.
+			m_offsetPtr -= glyph.getSizeBytes();
+		}
+		else
+		{
+			Range freeRange;
+			freeRange.offset= glyph.offsetStart;
+			freeRange.size	= glyph.getSizeBytes();
+			m_freeRanges.push_back( freeRange );
+			mergeContiguousBlocks( m_freeRanges.end() - 1u, m_freeRanges );
+		}
+
+		m_glyphCache.erase( glyphIt );
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::mergeContiguousBlocks( RangeVec::iterator blockToMerge,
+											   RangeVec &blocks )
+	{
+		RangeVec::iterator itor = blocks.begin();
+		RangeVec::iterator end  = blocks.end();
+
+		while( itor != end )
+		{
+			if( itor->offset + itor->size == blockToMerge->offset )
+			{
+				itor->size += blockToMerge->size;
+				size_t idx = itor - blocks.begin();
+
+				//When blockToMerge is the last one, its index won't be the same
+				//after removing the other iterator, they will swap.
+				if( idx == blocks.size() - 1 )
+					idx = blockToMerge - blocks.begin();
+
+				Ogre::efficientVectorRemove( blocks, blockToMerge );
+
+				blockToMerge = blocks.begin() + idx;
+				itor = blocks.begin();
+				end  = blocks.end();
+			}
+			else if( blockToMerge->offset + blockToMerge->size == itor->offset )
+			{
+				blockToMerge->size += itor->size;
+				size_t idx = blockToMerge - blocks.begin();
+
+				//When blockToMerge is the last one, its index won't be the same
+				//after removing the other iterator, they will swap.
+				if( idx == blocks.size() - 1 )
+					idx = itor - blocks.begin();
+
+				Ogre::efficientVectorRemove( blocks, itor );
+
+				blockToMerge = blocks.begin() + idx;
+				itor = blocks.begin();
+				end  = blocks.end();
+			}
+			else
+			{
+				++itor;
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	const CachedGlyph* ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize )
+	{
+		CachedGlyph *retVal = 0;
+
+		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
+
+		if( itor != m_glyphCache.end() )
+			retVal = &itor->second;
+		else
+			retVal = createGlyph( font, codepoint, ptSize );
+
+		++retVal->refCount;
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::releaseGlyph( uint32_t codepoint, uint32_t ptSize )
+	{
+		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+
+		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
+
+		if( itor != m_glyphCache.end() && itor->second.refCount > 0 )
+			--itor->second.refCount;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::flushReleasedGlyphs()
+	{
+		CachedGlyphMap::iterator itor = m_glyphCache.begin();
+		CachedGlyphMap::iterator end  = m_glyphCache.end();
+
+		while( itor != end )
+		{
+			if( !itor->second.refCount )
+			{
+				CachedGlyphMap::iterator toDelete = itor++;
+				destroyGlyph( toDelete );
+			}
+			else
+			{
+				++itor;
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	const char* ShaperManager::getErrorMessage( FT_Error errorCode )
@@ -21,4 +276,27 @@ namespace Crystal
 		#include FT_ERRORS_H
 		return "(Unknown error)";
 	}
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	size_t CachedGlyph::getSizeBytes() const
+	{
+		return this->width * this->height;
+	}
+	/*bool CachedGlyph::operator < ( const CachedGlyph &other ) const
+	{
+		const uint64_t thisKey = ((uint64_t)this->codepoint << 32ul) | ((uint64_t)this->ptSize);
+		const uint64_t otherKey = ((uint64_t)other.codepoint << 32ul) | ((uint64_t)other.ptSize);
+		return thisKey < otherKey;
+	}
+	bool operator < ( const CachedGlyph &a, const uint64_t &codePointSize )
+	{
+		const uint64_t aKey = ((uint64_t)a.codepoint << 32ul) | ((uint64_t)a.ptSize);
+		return aKey < codePointSize;
+	}
+	bool operator < ( const uint64_t &codePointSize, const CachedGlyph &b )
+	{
+		const uint64_t bKey = ((uint64_t)b.codepoint << 32ul) | ((uint64_t)b.ptSize);
+		return codePointSize < bKey;
+	}*/
 }

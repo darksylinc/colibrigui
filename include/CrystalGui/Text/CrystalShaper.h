@@ -13,16 +13,6 @@ typedef struct FT_LibraryRec_  *FT_Library;
 
 namespace Crystal
 {
-	struct CachedGlyph
-	{
-		uint32_t codepoint;
-		uint32_t ptSize;
-		uint16_t x;
-		uint16_t y;
-		uint16_t width;
-		uint16_t height;
-	};
-
 	class Shaper
 	{
 	protected:
