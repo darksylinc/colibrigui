@@ -29,6 +29,22 @@ namespace Crystal
 	public:
 		Label( CrystalManager *manager );
 
+		virtual bool isLabel() const		{ return true; }
+
+		/** Called by CrystalManager after we've told them we're dirty.
+			It will update m_shapes so we can correctly render text.
+		@return
+			True if the max number of glyphs has increased from the last time.
+		*/
+		bool _updateDirtyGlyphs();
+
+		/** Returns the max number of glyphs needed to render
+		@return
+			It's not the sum of all states, but rather the maximum of all states,
+			since only one state can be active at any given time.
+		*/
+		size_t getMaxNumGlyphs() const;
+
 		/**
 		@param text
 			Text must be UTF8

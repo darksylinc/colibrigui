@@ -11,6 +11,8 @@
 #include "unicode/ubidi.h"
 #include "unicode/unistr.h"
 
+#define TODO_schedule_buffer_grow
+
 namespace Crystal
 {
 	ShaperManager::ShaperManager( CrystalManager *crystalManager ) :

@@ -3,6 +3,7 @@
 
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalSkinManager.h"
+#include "CrystalGui/CrystalLabel.h"
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "CrystalGui/Ogre/OgreHlmsCrystal.h"
@@ -39,7 +40,8 @@ namespace Crystal
 		m_primaryButtonDown( false ),
 		m_skinManager( 0 )
 	{
-		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ) );
+		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ),
+					   Ogre::Vector2( 1600.0f, 900.0f ) );
 
 		m_skinManager = new SkinManager( this );
 	}
@@ -98,11 +100,14 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize )
+	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize,
+										const Ogre::Vector2 &pixelSize,
+										const Ogre::Vector2 &windowResolution )
 	{
 		m_canvasSize = canvasSize;
 		m_invCanvasSize2x = 2.0f / canvasSize;
 		m_pixelSize = pixelSize / canvasSize;
+		m_invWindowResolution = 1.0f / windowResolution;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
@@ -319,6 +324,15 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	template <>
+	Label * crystalgui_nonnull CrystalManager::createWidget<Label>( Widget * crystalgui_nonnull parent )
+	{
+		Label *retVal = _createWidget<Label>( parent );
+		m_labels.push_back( retVal );
+		++m_numLabels;
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::destroyWindow( Window *window )
 	{
 		if( window == m_cursorFocusedPair.window )
@@ -355,6 +369,14 @@ namespace Crystal
 		}
 		else
 		{
+			if( widget->isLabel() )
+			{
+				//We do not update m_numTextGlyphs since it's pointless to shrink it.
+				//It will eventually be recalculated anyway
+				LabelVec::iterator itor = std::find( m_labels.begin(), m_labels.end(), widget );
+				Ogre::efficientVectorRemove( m_labels, itor );
+				--m_numLabels;
+			}
 			widget->_destroy();
 			delete widget;
 			--m_numWidgets;
@@ -401,6 +423,8 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::checkVertexBufferCapacity()
 	{
+		CRYSTAL_ASSERT_LOW( m_dirtyLabels.empty() && "updateDirtyLabels has not been called!" );
+
 		const Ogre::uint32 requiredVertexCount =
 				static_cast<Ogre::uint32>( (m_numWidgets - m_numLabels) * (6u * 9u) +
 										   (m_numTextGlyphs * 6u) );
@@ -578,8 +602,37 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::updateDirtyLabels()
+	{
+		bool recalculateNumGlyphs = false;
+		LabelVec::const_iterator itor = m_dirtyLabels.begin();
+		LabelVec::const_iterator end  = m_dirtyLabels.end();
+
+		while( itor != end )
+		{
+			recalculateNumGlyphs |= (*itor)->_updateDirtyGlyphs();
+			++itor;
+		}
+
+		m_dirtyLabels.clear();
+
+		if( recalculateNumGlyphs )
+		{
+			m_numTextGlyphs = 0;
+			itor = m_labels.begin();
+			end  = m_labels.end();
+
+			while( itor != end )
+			{
+				m_numTextGlyphs += (*itor)->getMaxNumGlyphs();
+				++itor;
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::autosetNavigation()
 	{
+		updateDirtyLabels();
 		checkVertexBufferCapacity();
 
 		if( m_windowNavigationDirty )

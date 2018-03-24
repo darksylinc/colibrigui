@@ -2,6 +2,8 @@
 #include "CrystalGui/CrystalLabel.h"
 #include "CrystalGui/Text/CrystalShaperManager.h"
 
+#include "CrystalRenderable.inl"
+
 namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
@@ -74,9 +76,72 @@ namespace Crystal
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Matrix3 &parentRot )
 	{
-		TODO_implement;
+		if( !m_parent->intersectsChild( this ) )
+			return vertexBuffer;
+
+		Ogre::Vector2 caretPos = m_derivedTopLeft;
+
+		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution();
+
+		uint8_t rgbaColour[4];
+		rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
+		rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
+		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
+		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
+
+		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
+		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+
+		while( itor != end )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			Ogre::Vector2 topLeft = caretPos + shapedGlyph.offset +
+									Ogre::Vector2( shapedGlyph.glyph->bearingX,
+												   shapedGlyph.glyph->bearingY );
+			Ogre::Vector2 bottomRight = caretPos + Ogre::Vector2( shapedGlyph.glyph->width,
+																  shapedGlyph.glyph->height ) *
+										invWindowRes;
+
+			Ogre::Vector4 uv( 1.0f );
+			addQuad( vertexBuffer, topLeft, bottomRight, uv, rgbaColour,
+					 Ogre::Vector2(1.0f),Ogre::Vector2(1.0f), Ogre::Vector2(1.0f) );
+			vertexBuffer += 6u;
+
+			caretPos += shapedGlyph.advance;
+
+			++itor;
+		}
 
 		return vertexBuffer;
+	}
+	//-------------------------------------------------------------------------
+	bool Label::_updateDirtyGlyphs()
+	{
+		bool retVal = false;
+		for( size_t i=0; i<States::NumStates; ++i )
+		{
+			if( m_glyphsDirty[i] )
+			{
+				const size_t prevNumGlyphs = m_shapes[i].size();
+				updateGlyphs( static_cast<States::States>( i ) );
+				const size_t currNumGlyphs = m_shapes[i].size();
+
+				if( prevNumGlyphs > currNumGlyphs )
+					retVal = true;
+			}
+		}
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	size_t Label::getMaxNumGlyphs() const
+	{
+		size_t retVal = 0;
+		for( size_t i=0; i<States::NumStates; ++i )
+			retVal = std::max( m_shapes[i].size(), retVal );
+
+		return retVal;
 	}
 	//-------------------------------------------------------------------------
 	void Label::setText( const std::string &text, States::States forState )

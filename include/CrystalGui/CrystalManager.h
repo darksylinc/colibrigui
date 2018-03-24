@@ -7,6 +7,8 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
+	typedef std::vector<Label*> LabelVec;
+
 	namespace LogSeverity
 	{
 		enum LogSeverity
@@ -33,10 +35,12 @@ namespace Crystal
 	class CrystalManager
 	{
 		WindowVec m_windows;
+		LabelVec m_labels;
 		/// Tracks total number of live widgets
 		size_t m_numWidgets;
 		size_t m_numLabels;
-		size_t m_numTextGlyphs;
+		size_t m_numTextGlyphs; /// It's an upper bound. Current max number of glyphs may be lower
+		LabelVec m_dirtyLabels;
 
 		LogListener	*m_logListener;
 
@@ -53,6 +57,7 @@ namespace Crystal
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
 		Ogre::Vector2				m_pixelSize;
+		Ogre::Vector2				m_invWindowResolution;
 
 		/// Window and/or Widget currently being in focus
 		FocusPair		m_cursorFocusedPair;
@@ -67,6 +72,7 @@ namespace Crystal
 		void overrideKeyboardFocusWith( const FocusPair &focusedPair );
 		void overrideCursorFocusWith( const FocusPair &focusedPair );
 
+		void updateDirtyLabels();
 		void checkVertexBufferCapacity();
 
 		template <typename T>
@@ -102,11 +108,16 @@ namespace Crystal
 			widget borders.
 			Usually this value should be 1 (e.g. canvas = 1920x1080, pixelSize = 1). However
 			if you insert a canvas of 1x1; then your pixel size could be (1 / 1920, 1 / 1080)
+		@param windowResolution
+			The actual size of the window. Does not necesarily have to match the virtual canvas
+			size. We use this value to display sharp text.
 		*/
-		void setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize );
+		void setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize,
+							const Ogre::Vector2 &windowResolution );
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
+		const Ogre::Vector2& getInvWindowResolution() const			{ return m_invWindowResolution; }
 
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
 		void setMouseCursorPressed();
@@ -143,9 +154,10 @@ namespace Crystal
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wnullability-completeness"
 #endif
+	protected:
 		/// Parent cannot be null
 		template <typename T>
-		T * crystalgui_nonnull createWidget( Widget * crystalgui_nonnull parent )
+		T * crystalgui_nonnull _createWidget( Widget * crystalgui_nonnull parent )
 		{
 			CRYSTAL_ASSERT( parent && "parent must be provided!" );
 
@@ -156,6 +168,13 @@ namespace Crystal
 			++m_numWidgets;
 
 			return retVal;
+		}
+	public:
+		/// Parent cannot be null
+		template <typename T>
+		T * crystalgui_nonnull createWidget( Widget * crystalgui_nonnull parent )
+		{
+			return _createWidget<T>( parent );
 		}
 #if __clang__
 	#pragma clang diagnostic pop

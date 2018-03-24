@@ -122,6 +122,7 @@ namespace Crystal
 
 		virtual bool isRenderable() const	{ return false; }
 		virtual bool isWindow() const		{ return false; }
+		virtual bool isLabel() const		{ return false; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns its
 		/// parent (or its parent's parent) until we find a window. Cannot
