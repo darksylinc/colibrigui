@@ -39,9 +39,10 @@ if( APPLE )
 endif()
 
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
-target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
 
 target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
+
 if( UNIX )
 	target_link_libraries( ${PROJECT_NAME} dl )
 endif()

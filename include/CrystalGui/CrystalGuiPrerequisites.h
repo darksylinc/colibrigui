@@ -6,11 +6,20 @@
 	#define crystalgui_nonnull _Nonnull
 	#define CRYSTALGUI_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")
 	#define CRYSTALGUI_ASSUME_NONNULL_END   _Pragma("clang assume_nonnull end")
+	#define crystalgui_likely(x)	__builtin_expect((x),1)
+	#define crystalgui_unlikely(x)	__builtin_expect((x),0)
 #else
 	#define crystalgui_nullable
 	#define crystalgui_nonnull
 	#define CRYSTALGUI_ASSUME_NONNULL_BEGIN
 	#define CRYSTALGUI_ASSUME_NONNULL_END
+	#if __GNUC__
+		#define crystalgui_likely(x)	__builtin_expect((x),1)
+		#define crystalgui_unlikely(x)	__builtin_expect((x),0)
+	#else
+		#define crystalgui_likely(x)	(x)
+		#define crystalgui_unlikely(x)	(x)
+	#endif
 #endif
 
 #include <stdint.h>

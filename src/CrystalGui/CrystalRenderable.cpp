@@ -28,7 +28,8 @@ namespace Crystal
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u, manager ),
-		m_colour( Ogre::ColourValue::White )
+		m_colour( Ogre::ColourValue::White ),
+		m_numVertices( 6u * 9u )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
 	}
@@ -157,8 +158,8 @@ namespace Crystal
 			apiObject.indirectDraw += sizeof( CbDrawStrip );
 		}
 
-		apiObject.primCount += 6u * 9u;
-		apiObject.accumPrimCount += 6u * 9u;
+		apiObject.primCount += m_numVertices;
+		apiObject.accumPrimCount += m_numVertices;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
 		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;

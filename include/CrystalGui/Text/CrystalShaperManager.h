@@ -63,6 +63,9 @@ namespace Crystal
 		UBiDiLevel	m_defaultDirection;
 		bool		m_useVerticalLayoutWhenAvailable;
 
+		typedef std::vector<Shaper*> ShaperVec;
+		ShaperVec	m_shapers;
+
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );
 		CachedGlyph* createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize );
@@ -71,6 +74,12 @@ namespace Crystal
 
 	public:
 		ShaperManager( CrystalManager *crystalManager );
+		~ShaperManager();
+
+		void addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
+						const std::string &language );
+		void setDefaultShaper( uint16_t font, HorizReadingDir::HorizReadingDir horizReadingDir,
+							   bool useVerticalLayoutWhenAvailable );
 
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
 		LogListener* getLogListener() const;

@@ -24,6 +24,8 @@
 #include "OgreWindow.h"
 #include "SdlInputHandler.h"
 
+#include "OgreLogManager.h"
+
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalButton.h"
@@ -73,11 +75,14 @@ namespace Demo
 		button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 ) );
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
-		//Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
+		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
+		label->setSkinPack( "ButtonSkin" );
+		label->setText( "Hola" );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button0 );
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button1 );
+		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( label );
 
         TutorialGameState::createScene01();
     }

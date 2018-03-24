@@ -66,6 +66,12 @@ namespace Crystal
 
 		Ogre::ColourValue	m_colour;
 
+		/// WARNING: Most of the code assumes m_numVertices is hardcoded to 6*9;
+		/// this value is dynamic because certain widgets (such as Labels) can
+		/// have arbitrary number of vertices and the rest of the code
+		/// also acknowledges that!
+		uint32_t			m_numVertices;
+
 		void addCommands( ApiEncapsulatedObjects &apiObject );
 
 		inline void addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,

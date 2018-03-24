@@ -5,6 +5,8 @@
 #include "CrystalGui/CrystalSkinManager.h"
 #include "CrystalGui/CrystalLabel.h"
 
+#include "CrystalGui/Text/CrystalShaperManager.h"
+
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "CrystalGui/Ogre/OgreHlmsCrystal.h"
 #include "Vao/OgreVaoManager.h"
@@ -22,7 +24,7 @@ namespace Crystal
 	static LogListener DefaultLogListener;
 	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX, Ogre::HlmsPso() );
 
-	CrystalManager::CrystalManager() :
+	CrystalManager::CrystalManager( LogListener *logListener ) :
 		m_numWidgets( 0 ),
 		m_numLabels( 0 ),
 		m_numTextGlyphs( 0 ),
@@ -38,19 +40,34 @@ namespace Crystal
 		m_mouseCursorButtonDown( false ),
 		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
 		m_primaryButtonDown( false ),
-		m_skinManager( 0 )
+		m_skinManager( 0 ),
+		m_shaperManager( 0 )
 	{
+		setLogListener( logListener );
+
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ),
 					   Ogre::Vector2( 1600.0f, 900.0f ) );
 
 		m_skinManager = new SkinManager( this );
+
+		m_shaperManager = new ShaperManager( this );
 	}
 	//-------------------------------------------------------------------------
 	CrystalManager::~CrystalManager()
 	{
+		delete m_shaperManager;
+		m_shaperManager = 0;
+
 		setOgre( 0, 0, 0 );
 		delete m_skinManager;
 		m_skinManager = 0;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setLogListener( LogListener *logListener )
+	{
+		m_logListener = logListener;
+		if( !m_logListener )
+			m_logListener = &DefaultLogListener;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::loadSkins( const char *fullPath )

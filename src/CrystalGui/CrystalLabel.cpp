@@ -4,6 +4,8 @@
 
 #include "CrystalRenderable.inl"
 
+#include "OgreLwString.h"
+
 namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
@@ -14,11 +16,62 @@ namespace Crystal
 	{
 		for( size_t i=0; i<States::NumStates; ++i )
 			 m_glyphsDirty[i] = false;
+
+		m_numVertices = 0;
+	}
+	//-------------------------------------------------------------------------
+	void Label::validateRichText( States::States state )
+	{
+		const size_t textSize = m_text[state].size();
+		if( m_richText[state].empty() )
+		{
+			RichText rt;
+			rt.ptSize = 13u << 6u;
+			rt.font = 0;
+			rt.offset = 0;
+			rt.length = textSize;
+			m_richText[state].push_back( rt );
+		}
+		else
+		{
+			bool invalidRtDetected = false;
+			RichTextVec::iterator itor = m_richText[state].begin();
+			RichTextVec::iterator end  = m_richText[state].end();
+
+			while( itor != end )
+			{
+				if( itor->offset > textSize )
+				{
+					itor->offset = textSize;
+					invalidRtDetected = true;
+				}
+				if( itor->offset + itor->length > textSize )
+				{
+					itor->length = textSize - itor->offset;
+					invalidRtDetected = true;
+				}
+				++itor;
+			}
+
+			if( invalidRtDetected )
+			{
+				LogListener *log = m_manager->getLogListener();
+				char tmpBuffer[512];
+				Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer,
+																		   sizeof(tmpBuffer) ) );
+
+				errorMsg.clear();
+				errorMsg.a( "[Label::validateRichText] Rich Edit goes out of bounds. "
+							"We've corrected the situation. Text may not be drawn as expected."
+							" String: ", m_text[state].c_str() );
+				log->log( errorMsg.c_str(), LogSeverity::Warning );
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::updateGlyphs( States::States state )
 	{
-		ShaperManager *shaperManager = 0;
+		ShaperManager *shaperManager = m_manager->getShaperManager();
 
 		{
 			ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
@@ -32,6 +85,8 @@ namespace Crystal
 
 			m_shapes[state].clear();
 		}
+
+		validateRichText( state );
 
 		//See if we can reuse the results from another state. If so,
 		//we just need to copy them and increase the ref counts.
@@ -81,6 +136,8 @@ namespace Crystal
 		if( !m_parent->intersectsChild( this ) )
 			return vertexBuffer;
 
+		updateDerivedTransform( parentPos, parentRot );
+
 		Ogre::Vector2 caretPos = m_derivedTopLeft;
 
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution();
@@ -112,6 +169,8 @@ namespace Crystal
 
 			caretPos += shapedGlyph.advance;
 
+			m_numVertices += 6u;
+
 			++itor;
 		}
 
@@ -129,7 +188,7 @@ namespace Crystal
 				updateGlyphs( static_cast<States::States>( i ) );
 				const size_t currNumGlyphs = m_shapes[i].size();
 
-				if( prevNumGlyphs > currNumGlyphs )
+				if( currNumGlyphs > prevNumGlyphs )
 					retVal = true;
 			}
 		}
@@ -171,7 +230,8 @@ namespace Crystal
 				if( m_text[i] != text )
 				{
 					m_text[i] = text;
-					flagDirty( forState );
+					m_richText[i].clear();
+					flagDirty( static_cast<States::States>( i ) );
 				}
 			}
 		}
@@ -180,6 +240,7 @@ namespace Crystal
 			if( m_text[forState] != text )
 			{
 				m_text[forState] = text;
+				m_richText[forState].clear();
 				flagDirty( forState );
 			}
 		}

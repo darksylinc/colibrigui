@@ -24,6 +24,7 @@ namespace Crystal
 
 		//Renderable	*m_background;
 
+		void validateRichText( States::States state );
 		void updateGlyphs( States::States state );
 
 		bool isAnyStateDirty() const;
@@ -48,7 +49,7 @@ namespace Crystal
 		*/
 		size_t getMaxNumGlyphs() const;
 
-		/**
+		/** Rich Edit settings are cleared when calling this function
 		@param text
 			Text must be UTF8
 		@param forState

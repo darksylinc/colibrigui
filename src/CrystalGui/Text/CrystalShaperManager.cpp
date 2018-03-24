@@ -25,7 +25,38 @@ namespace Crystal
 		m_defaultDirection( UBIDI_DEFAULT_LTR ),
 		m_useVerticalLayoutWhenAvailable( false )
 	{
+		FT_Error errorCode = FT_Init_FreeType( &m_ftLibrary );
+		if( errorCode )
+		{
+			LogListener *log = this->getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
 
+			errorMsg.clear();
+			errorMsg.a( "[Freetype2 error] Could not initialize Freetype errorCode: ",
+						errorCode, " Desc: ", ShaperManager::getErrorMessage( errorCode ) );
+			log->log( errorMsg.c_str(), LogSeverity::Fatal );
+		}
+
+		m_bidi = ubidi_open();
+	}
+	//-------------------------------------------------------------------------
+	ShaperManager::~ShaperManager()
+	{
+		ubidi_close( m_bidi );
+		m_bidi = 0;
+
+		FT_Done_FreeType( m_ftLibrary );
+		m_ftLibrary = 0;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
+								   const std::string &language )
+	{
+		Shaper *shaper = new Shaper( static_cast<hb_script_t>( script ), fontPath, language, this );
+		if( m_shapers.empty() )
+			m_shapers.push_back( shaper );
+		m_shapers.push_back( shaper );
 	}
 	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
@@ -125,7 +156,7 @@ namespace Crystal
 	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize )
 	{
 		FT_Error errorCode = FT_Load_Glyph( font, codepoint, FT_LOAD_DEFAULT );
-		if( errorCode )
+		if( crystalgui_unlikely( errorCode ) )
 		{
 			LogListener *log = getLogListener();
 			char tmpBuffer[512];
@@ -326,7 +357,7 @@ namespace Crystal
 		UErrorCode errorCode = U_ZERO_ERROR;
 		ubidi_setPara( m_bidi, uStr.getBuffer(), uStr.length(), m_defaultDirection, 0, &errorCode );
 
-		if( !U_SUCCESS(errorCode) )
+		if( crystalgui_unlikely( !U_SUCCESS(errorCode) ) )
 		{
 			LogListener *log = this->getLogListener();
 			char tmpBuffer[512];
@@ -339,6 +370,23 @@ namespace Crystal
 			log->log( utf8Str, LogSeverity::Warning );
 			return;
 		}
+
+		Shaper *shaper = 0;
+		if( crystalgui_unlikely( richText.font >= m_shapers.size() ) )
+		{
+			LogListener *log = this->getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+			errorMsg.clear();
+			errorMsg.a( "[ShaperManager::renderString] RichText wants font ", richText.font,
+						" but there's only ", (uint32_t)m_shapers.size(), " fonts installed" );
+			log->log( errorMsg.c_str(), LogSeverity::Error );
+
+			shaper = m_shapers[0];
+		}
+		else
+			shaper = m_shapers[richText.font];
 
 		UnicodeString uniStr( false, ubidi_getText( m_bidi ), ubidi_getLength( m_bidi ) );
 
@@ -358,8 +406,6 @@ namespace Crystal
 				hbDir = HB_DIRECTION_TTB;
 			}
 
-			Shaper *shaper = 0;
-			//richText.font
 			const uint16_t *utf16Str = temp.getBuffer();
 			shaper->setFontSize26d6( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, outShapes );

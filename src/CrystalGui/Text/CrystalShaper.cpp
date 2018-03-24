@@ -49,7 +49,7 @@ namespace Crystal
 	const hb_feature_t Shaper::CligOn      = { CligTag, 1, 0, std::numeric_limits<unsigned int>::max() };
 
 	Shaper::Shaper( hb_script_t script, const char *fontLocation,
-					hb_direction_t direction, const std::string &language,
+					const std::string &language,
 					ShaperManager *shaperManager ) :
 		m_script( script ),
 		m_ftFont( 0 ),
@@ -77,7 +77,6 @@ namespace Crystal
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );
 		m_buffer = hb_buffer_create();
 
-		hb_buffer_set_direction( m_buffer, direction );
 		hb_buffer_set_script( m_buffer, m_script );
 		hb_buffer_set_language( m_buffer, hb_language_from_string( language.c_str(), language.size() ) );
 	}
@@ -123,7 +122,7 @@ namespace Crystal
 			const FT_UInt deviceVdpi = 72u;
 			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize,
 												   deviceHdpi, deviceVdpi );
-			if( errorCode )
+			if( crystalgui_unlikely( errorCode ) )
 			{
 				LogListener *log = m_shaperManager->getLogListener();
 				char tmpBuffer[512];
@@ -131,11 +130,13 @@ namespace Crystal
 																		   sizeof(tmpBuffer) ) );
 
 				errorMsg.clear();
-				errorMsg.a( "[Freetype2 error] Could set font size to ", ptSize, ". errorCode: ",
-							errorCode, " Desc: ", ShaperManager::getErrorMessage( errorCode ) );
+				errorMsg.a( "[Freetype2 error] Could set font size to ",
+							Ogre::LwString::Float( getFontSizeFloat(), 2 ),
+							". errorCode: ", errorCode, " Desc: ",
+							ShaperManager::getErrorMessage( errorCode ) );
 				log->log( errorMsg.c_str(), LogSeverity::Error );
 			}
-			else if( m_hbFont )
+			else if( crystalgui_likely( m_hbFont != 0 ) )
 				hb_ft_font_changed( m_hbFont );
 		}
 	}

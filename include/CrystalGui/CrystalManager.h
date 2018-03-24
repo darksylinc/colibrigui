@@ -29,7 +29,7 @@ namespace Crystal
 	class LogListener
 	{
 	public:
-		virtual void log( const char *text, LogSeverity::LogSeverity severity ) {}
+		virtual void log( const char *text, Crystal::LogSeverity::LogSeverity severity ) {}
 	};
 
 	class CrystalManager
@@ -67,6 +67,7 @@ namespace Crystal
 		bool			m_primaryButtonDown;
 
 		SkinManager	*m_skinManager;
+		ShaperManager *m_shaperManager;
 
 		/// When pressing a mouse button on a widget, that overrides whatever keyboard was on.
 		void overrideKeyboardFocusWith( const FocusPair &focusedPair );
@@ -81,11 +82,13 @@ namespace Crystal
 		void autosetNavigation( Window *window );
 
 	public:
-		CrystalManager();
+		CrystalManager( LogListener *logListener );
 		~CrystalManager();
 
 		void loadSkins( const char *fullPath );
 		SkinManager* getSkinManager()								{ return m_skinManager; }
+
+		ShaperManager* getShaperManager()							{ return m_shaperManager; }
 
 		void setOgre( Ogre::Root * crystalgui_nullable root,
 					  Ogre::VaoManager * crystalgui_nullable vaoManager,
@@ -127,6 +130,7 @@ namespace Crystal
 		void setCancel();
 		void setKeyDirection( Borders::Borders direction );
 
+		void setLogListener( LogListener *logListener );
 		LogListener* getLogListener() const		{ return m_logListener; }
 
 		Window* createWindow( Window * crystalgui_nullable parent );

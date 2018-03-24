@@ -39,7 +39,7 @@ namespace Crystal
 
 	public:
 		Shaper( hb_script_t script, const char *fontLocation,
-				hb_direction_t direction, const std::string &language,
+				const std::string &language,
 				ShaperManager *shaperManager );
 		~Shaper();
 

@@ -10,6 +10,7 @@
 #include "Compositor/OgreCompositorManager2.h"
 
 #include "CrystalGui/CrystalManager.h"
+#include "CrystalGui/Text/CrystalShaperManager.h"
 #include "CrystalGui/Ogre/CompositorPassCrystalGuiProvider.h"
 
 #include "OgreHlmsManager.h"
@@ -20,6 +21,9 @@
 //Declares WinMain / main
 #include "MainEntryPointHelper.h"
 #include "System/MainEntryPoints.h"
+
+#include "OgreLogManager.h"
+#include "hb.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
     #include <unistd.h>
@@ -47,6 +51,14 @@ int mainApp( int argc, const char *argv[] )
 namespace Demo
 {
 	extern Crystal::CrystalManager *crystalManager;
+	class CrystalLogListener : public Crystal::LogListener
+	{
+		virtual void log( const char *text, Crystal::LogSeverity::LogSeverity severity )
+		{
+			Ogre::LogManager::getSingleton().logMessage( text );
+		}
+	};
+	static CrystalLogListener g_crystalLogListener;
 
     class CrystalGuiGraphicsSystem : public GraphicsSystem
 	{
@@ -155,7 +167,9 @@ namespace Demo
         virtual void setupResources(void)
         {
 			TODO_fix_leak;
-			crystalManager = new Crystal::CrystalManager();
+			crystalManager = new Crystal::CrystalManager( &g_crystalLogListener );
+			Crystal::ShaperManager *shaperManager = crystalManager->getShaperManager();
+			shaperManager->addShaper( HB_SCRIPT_LATIN, "../Data/Fonts/DejaVuSerif.ttf", "en" );
 			Ogre::CompositorPassCrystalGuiProvider *compoProvider =
 					OGRE_NEW Ogre::CompositorPassCrystalGuiProvider( crystalManager );
 			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
