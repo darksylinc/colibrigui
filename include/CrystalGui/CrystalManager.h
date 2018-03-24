@@ -145,6 +145,7 @@ namespace Crystal
 		void autosetNavigation();
 
 		void _setWindowNavigationDirty();
+		void _addDirtyLabel( Label *label );
 
 		void update();
 		void prepareRenderCommands();

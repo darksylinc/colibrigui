@@ -652,6 +652,11 @@ namespace Crystal
 		m_windowNavigationDirty = true;
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::_addDirtyLabel( Label *label )
+	{
+		m_dirtyLabels.push_back( label );
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::update()
 	{
 		autosetNavigation();

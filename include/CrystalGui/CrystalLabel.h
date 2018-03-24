@@ -26,6 +26,9 @@ namespace Crystal
 
 		void updateGlyphs( States::States state );
 
+		bool isAnyStateDirty() const;
+		void flagDirty( States::States state );
+
 	public:
 		Label( CrystalManager *manager );
 

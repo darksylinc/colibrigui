@@ -70,6 +70,8 @@ namespace Crystal
 				++itor;
 			}
 		}
+
+		m_glyphsDirty[state] = false;
 	}
 	//-------------------------------------------------------------------------
 	UiVertex* Label::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
@@ -135,6 +137,22 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	bool Label::isAnyStateDirty() const
+	{
+		bool retVal = false;
+		for( size_t i=0; i<States::NumStates; ++i )
+			retVal |= m_glyphsDirty[i];
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void Label::flagDirty( States::States state )
+	{
+		if( !isAnyStateDirty() )
+			m_manager->_addDirtyLabel( this );
+		m_glyphsDirty[state] = true;
+	}
+	//-------------------------------------------------------------------------
 	size_t Label::getMaxNumGlyphs() const
 	{
 		size_t retVal = 0;
@@ -153,7 +171,7 @@ namespace Crystal
 				if( m_text[i] != text )
 				{
 					m_text[i] = text;
-					m_glyphsDirty[i] = true;
+					flagDirty( forState );
 				}
 			}
 		}
@@ -162,7 +180,7 @@ namespace Crystal
 			if( m_text[forState] != text )
 			{
 				m_text[forState] = text;
-				m_glyphsDirty[forState] = true;
+				flagDirty( forState );
 			}
 		}
 	}
