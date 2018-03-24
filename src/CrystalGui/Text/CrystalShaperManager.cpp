@@ -1,5 +1,6 @@
 
 #include "CrystalGui/Text/CrystalShaperManager.h"
+#include "CrystalGui/Text/CrystalShaper.h"
 #include "CrystalGui/CrystalManager.h"
 
 #include "OgreLwString.h"
@@ -7,8 +8,24 @@
 #include "ft2build.h"
 #include "freetype/freetype.h"
 
+#include "unicode/ubidi.h"
+#include "unicode/unistr.h"
+
 namespace Crystal
 {
+	ShaperManager::ShaperManager( CrystalManager *crystalManager ) :
+		m_ftLibrary( 0 ),
+		m_crystalManager( crystalManager ),
+		m_glyphAtlas( 0 ),
+		m_offsetPtr( 0 ),
+		m_atlasCapacity( 0 ),
+		m_bidi( 0 ),
+		m_defaultDirection( UBIDI_DEFAULT_LTR ),
+		m_useVerticalLayoutWhenAvailable( false )
+	{
+
+	}
+	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
 	{
 		return m_crystalManager->getLogListener();
@@ -134,6 +151,7 @@ namespace Crystal
 		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
 		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
 		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
+		newGlyph.newlineSize= slot->metrics.height / 64.0f;
 		newGlyph.refCount	= 0;
 
 		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
@@ -238,14 +256,44 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	void ShaperManager::addRefCount( const CachedGlyph *cachedGlyph )
+	{
+		const uint64_t glyphKey = ((uint64_t)cachedGlyph->codepoint << 32ul) |
+								  ((uint64_t)cachedGlyph->ptSize);
+
+		CRYSTAL_ASSERT_MEDIUM( m_glyphCache.find( glyphKey ) != m_glyphCache.end() &&
+							   "Invalid glyph cache entry. Use-after-free perhaps?" );
+
+		CachedGlyph *nonConstCachedGlyph = const_cast<CachedGlyph*>( cachedGlyph );
+		++nonConstCachedGlyph->refCount;
+	}
+	//-------------------------------------------------------------------------
 	void ShaperManager::releaseGlyph( uint32_t codepoint, uint32_t ptSize )
 	{
 		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
 
 		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
 
+		CRYSTAL_ASSERT_LOW( itor != m_glyphCache.end() &&
+							"Invalid glyph cache entry not found. Use-after-free perhaps?" );
+		CRYSTAL_ASSERT_LOW( itor->second.refCount > 0 );
+
 		if( itor != m_glyphCache.end() && itor->second.refCount > 0 )
 			--itor->second.refCount;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::releaseGlyph( const CachedGlyph *cachedGlyph )
+	{
+		const uint64_t glyphKey = ((uint64_t)cachedGlyph->codepoint << 32ul) |
+								  ((uint64_t)cachedGlyph->ptSize);
+
+		CRYSTAL_ASSERT_MEDIUM( m_glyphCache.find( glyphKey ) != m_glyphCache.end() &&
+							   "Invalid glyph cache entry. Use-after-free perhaps?" );
+		CRYSTAL_ASSERT_LOW( cachedGlyph->refCount > 0 );
+
+		CachedGlyph *nonConstCachedGlyph = const_cast<CachedGlyph*>( cachedGlyph );
+		if( nonConstCachedGlyph->refCount > 0 )
+			--nonConstCachedGlyph->refCount;
 	}
 	//-------------------------------------------------------------------------
 	void ShaperManager::flushReleasedGlyphs()
@@ -264,6 +312,55 @@ namespace Crystal
 			{
 				++itor;
 			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::renderString( const char *utf8Str, const RichText &richText,
+									  VertReadingDir::VertReadingDir vertReadingDir,
+									  ShapedGlyphVec &outShapes )
+	{
+		UnicodeString uStr( utf8Str, (int32_t)richText.length );
+
+		UErrorCode errorCode = U_ZERO_ERROR;
+		ubidi_setPara( m_bidi, uStr.getBuffer(), uStr.length(), m_defaultDirection, 0, &errorCode );
+
+		if( !U_SUCCESS(errorCode) )
+		{
+			LogListener *log = this->getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+
+			errorMsg.clear();
+			errorMsg.a( "[UBiDi error] Error analyzing text. Error code: ", errorCode,
+						" Desc: ", u_errorName( errorCode ), "\n[UBiDi error] String:" );
+			log->log( errorMsg.c_str(), LogSeverity::Warning );
+			log->log( utf8Str, LogSeverity::Warning );
+			return;
+		}
+
+		UnicodeString uniStr( false, ubidi_getText( m_bidi ), ubidi_getLength( m_bidi ) );
+
+		const int32_t numBlocks = ubidi_countRuns( m_bidi, &errorCode );
+		for( size_t i=0; i<numBlocks; ++i )
+		{
+			int32_t logicalStart, length;
+			UBiDiDirection dir = ubidi_getVisualRun( m_bidi, i, &logicalStart, &length );
+
+			UnicodeString temp = uniStr.tempSubString( logicalStart, length );
+
+			hb_direction_t hbDir = dir == UBIDI_LTR ? HB_DIRECTION_LTR : HB_DIRECTION_RTL;
+
+			if( (vertReadingDir == VertReadingDir::IfNeededTTB && m_useVerticalLayoutWhenAvailable) ||
+				vertReadingDir == VertReadingDir::ForceTTB )
+			{
+				hbDir = HB_DIRECTION_TTB;
+			}
+
+			Shaper *shaper = 0;
+			//richText.font
+			const uint16_t *utf16Str = temp.getBuffer();
+			shaper->setFontSize26d6( richText.ptSize );
+			shaper->renderString( utf16Str, temp.length(), hbDir, outShapes );
 		}
 	}
 	//-------------------------------------------------------------------------

@@ -35,6 +35,8 @@ namespace Crystal
 		WindowVec m_windows;
 		/// Tracks total number of live widgets
 		size_t m_numWidgets;
+		size_t m_numLabels;
+		size_t m_numTextGlyphs;
 
 		LogListener	*m_logListener;
 

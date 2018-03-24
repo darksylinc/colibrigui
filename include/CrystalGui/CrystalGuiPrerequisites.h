@@ -13,13 +13,19 @@
 	#define CRYSTALGUI_ASSUME_NONNULL_END
 #endif
 
+#include <stdint.h>
+
+CRYSTALGUI_ASSUME_NONNULL_BEGIN
+
 namespace Crystal
 {
 	class Button;
+	struct CachedGlyph;
 	class CrystalManager;
 	class Label;
 	class LogListener;
 	class Renderable;
+	struct ShapedGlyph;
 	class Shaper;
 	class ShaperManager;
 	class SkinManager;
@@ -113,12 +119,79 @@ namespace Crystal
 
 		FocusPair() : window( 0 ), widget( 0 ) {}
 	};
+
+	struct RichText
+	{
+		uint32_t ptSize;
+		uint32_t offset;
+		uint32_t length;
+		uint16_t font;
+
+		bool operator == ( const RichText &other ) const;
+	};
+
+	namespace HorizReadingDir
+	{
+		enum HorizReadingDir
+		{
+			/// When default langauge is LTR, it will display LTR unless the string is fully RTL.
+			/// If the string is mixed, text starts from the left but the reading directions will
+			/// be respected for RTL characters.
+			/// CJK languages are LTR unless overriden by VertReadingDir
+			///
+			/// When default langauge is RTL, it will display RTL unless the string is fully LTR
+			/// If the string is mixed, text starts from the right but the reading directions will
+			/// be respected for LTR characters.
+			Natural,
+			/// Text always starts from the left. RTL character directions will be respected.
+			/// Can be overriden by VertReadingDir
+			LTR,
+			/// Text always starts from the right. LTR character directions will be respected.
+			/// Can be overriden by VertReadingDir
+			RTL
+		};
+	}
+	namespace VertReadingDir
+	{
+		enum VertReadingDir
+		{
+			/// Always obey HorizReadingDir
+			Disabled,
+			/// When default language is not CJK, same as Disabled
+			/// When default language is CJK, same aligns top to bottom, newlines right to left
+			IfNeededTTB,
+			/// Aligns top to bottom, newlines right to left, regardless of language
+			ForceTTB,
+			/// Not used
+			IfNeededBTT,
+			/// Not used
+			ForceBTT,
+		};
+	}
+
+	namespace LinebreakMode
+	{
+		enum LinebreakMode
+		{
+			/// Letters will be broken into the next newline.
+			CharWrap,
+			/// Text outside bounds will disapear
+			Clip
+			/// Unsupported: WordWrap would need us to include very big unicode datafiles
+			/// for word recognition (which bloats binary size and memory consumption) or
+			/// depend on system files to do it. Both solutions go against CrystalGui's
+			/// philosophy
+			/// WordWrap
+		};
+	}
 }
 
 namespace Ogre
 {
 	class CrystalOgreRenderable;
 }
+
+CRYSTALGUI_ASSUME_NONNULL_END
 
 // No checks done at all
 #define CRYSTALGUI_DEBUG_NONE		0

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CrystalGui/CrystalGuiPrerequisites.h"
+#include "OgreVector2.h"
 
 #include "hb.h"
 
@@ -13,6 +14,14 @@ typedef struct FT_LibraryRec_  *FT_Library;
 
 namespace Crystal
 {
+	struct ShapedGlyph
+	{
+		Ogre::Vector2 advance;
+		Ogre::Vector2 offset;
+		CachedGlyph const *glyph;
+	};
+	typedef std::vector<ShapedGlyph> ShapedGlyphVec;
+
 	class Shaper
 	{
 	protected:
@@ -38,11 +47,13 @@ namespace Crystal
 
 		/// Set the font size in points. Note the returned value by getFontSize
 		/// can differ as the float is internally converted to 26.6 fixed point
-		void setFontSize( float ptSize );
-		float getFontSize() const;
+		void setFontSizeFloat( float ptSize );
+		void setFontSize26d6( uint32_t ptSize );
+		float getFontSizeFloat() const;
+		uint32_t getFontSize26d6() const;
 
-		void renderString( const std::string &utf8Str );
-		void renderString( const char *utf8Str, size_t stringLength );
+		void renderString( const uint16_t *utf16Str, size_t stringLength,
+						   hb_direction_t dir, ShapedGlyphVec &outShapes );
 
 		bool operator < ( const Shaper &other ) const;
 

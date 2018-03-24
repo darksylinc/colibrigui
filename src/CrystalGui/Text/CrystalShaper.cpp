@@ -71,7 +71,7 @@ namespace Crystal
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
 
-		setFontSize( 50.0f );
+		setFontSizeFloat( 13.0f );
 		force_ucs2_charmap( m_ftFont );
 
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );
@@ -107,10 +107,15 @@ namespace Crystal
 		hb_shape( m_hbFont, m_buffer, features.empty() ? 0 : &features[0], features.size() );
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::setFontSize( float ptSize )
+	void Shaper::setFontSizeFloat( float ptSize )
+	{
+		setFontSize26d6( static_cast<uint32_t>( round( ptSize * 64.0f ) ) );
+	}
+	//-------------------------------------------------------------------------
+	void Shaper::setFontSize26d6( uint32_t ptSize )
 	{
 		const uint32_t oldSize = m_ptSize;
-		m_ptSize = round( ptSize * 64.0f );
+		m_ptSize = ptSize;
 
 		if( oldSize != m_ptSize )
 		{
@@ -135,20 +140,25 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	float Shaper::getFontSize() const
+	float Shaper::getFontSizeFloat() const
 	{
 		return m_ptSize / 64.0f;
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::renderString( const std::string &utf8Str )
+	uint32_t Shaper::getFontSize26d6() const
 	{
-		renderString( utf8Str.c_str(), utf8Str.size() );
+		return m_ptSize;
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::renderString( const char *utf8Str, size_t stringLength )
+	void Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
+							   hb_direction_t dir, ShapedGlyphVec &outShapes )
 	{
+		ShapedGlyphVec shapesVec;
+		shapesVec.swap( outShapes );
+
 		hb_buffer_clear_contents( m_buffer );
-		hb_buffer_add_utf8( m_buffer, utf8Str, stringLength, 0, stringLength );
+		hb_buffer_set_direction( m_buffer, dir );
+		hb_buffer_add_utf16( m_buffer, utf16Str, stringLength, 0, stringLength );
 
 		unsigned int glyphCount;
 		hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos( m_buffer, &glyphCount );
@@ -156,13 +166,29 @@ namespace Crystal
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
-			const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
-																	  glyphInfo[i].codepoint,
-																	  m_ptSize );
-			TODO_fill_vertex_buffer;
-			//glyphInfo[i].codepoint;
-			//glyphPos[i].
+			if( glyphInfo[i].codepoint == '\n' )
+			{
+				ShapedGlyph shapedGlyph;
+				memset( &shapedGlyph, 0, sizeof( ShapedGlyph ) );
+				shapesVec.push_back( shapedGlyph );
+			}
+			else
+			{
+				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
+																		  glyphInfo[i].codepoint,
+																		  m_ptSize );
+
+				ShapedGlyph shapedGlyph;
+				shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
+													 glyphPos[i].y_advance ) / 64.0f;
+				shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
+													glyphPos[i].y_offset ) / 64.0f;
+				shapedGlyph.glyph = glyph;
+				shapesVec.push_back( shapedGlyph );
+			}
 		}
+
+		shapesVec.swap( outShapes );
 	}
 	//-------------------------------------------------------------------------
 	bool Shaper::operator < ( const Shaper &other ) const

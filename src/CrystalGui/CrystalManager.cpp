@@ -23,6 +23,8 @@ namespace Crystal
 
 	CrystalManager::CrystalManager() :
 		m_numWidgets( 0 ),
+		m_numLabels( 0 ),
+		m_numTextGlyphs( 0 ),
 		m_logListener( &DefaultLogListener ),
 		m_windowNavigationDirty( false ),
 		m_root( 0 ),
@@ -399,7 +401,9 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::checkVertexBufferCapacity()
 	{
-		const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>( m_numWidgets * (6u * 9u) );
+		const Ogre::uint32 requiredVertexCount =
+				static_cast<Ogre::uint32>( (m_numWidgets - m_numLabels) * (6u * 9u) +
+										   (m_numTextGlyphs * 6u) );
 
 		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
 		const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
