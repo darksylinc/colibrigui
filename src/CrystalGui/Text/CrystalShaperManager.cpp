@@ -3,6 +3,10 @@
 #include "CrystalGui/Text/CrystalShaper.h"
 #include "CrystalGui/CrystalManager.h"
 
+#include "CrystalGui/Ogre/OgreHlmsCrystal.h"
+
+#include "Vao/OgreTexBufferPacked.h"
+
 #include "OgreLwString.h"
 
 #include "ft2build.h"
@@ -11,8 +15,6 @@
 #include "unicode/ubidi.h"
 #include "unicode/unistr.h"
 
-#define TODO_schedule_buffer_grow
-
 namespace Crystal
 {
 	ShaperManager::ShaperManager( CrystalManager *crystalManager ) :
@@ -20,10 +22,13 @@ namespace Crystal
 		m_crystalManager( crystalManager ),
 		m_glyphAtlas( 0 ),
 		m_offsetPtr( 0 ),
-		m_atlasCapacity( 0 ),
+		m_atlasCapacity( 32 ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR ),
-		m_useVerticalLayoutWhenAvailable( false )
+		m_useVerticalLayoutWhenAvailable( false ),
+		m_glyphAtlasBuffer( 0 ),
+		m_hlms( 0 ),
+		m_vaoManager( 0 )
 	{
 		FT_Error errorCode = FT_Init_FreeType( &m_ftLibrary );
 		if( errorCode )
@@ -43,11 +48,37 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	ShaperManager::~ShaperManager()
 	{
+		setOgre( 0, 0 );
+
 		ubidi_close( m_bidi );
 		m_bidi = 0;
 
 		FT_Done_FreeType( m_ftLibrary );
 		m_ftLibrary = 0;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::setOgre( Ogre::HlmsCrystal * crystalgui_nullable hlms,
+								 Ogre::VaoManager * crystalgui_nullable vaoManager )
+	{
+		if( m_hlms )
+			m_hlms->setGlyphAtlasBuffer( 0 );
+		if( m_vaoManager && m_glyphAtlasBuffer )
+		{
+			m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
+			m_glyphAtlasBuffer = 0;
+		}
+
+		m_hlms = hlms;
+		m_vaoManager = vaoManager;
+
+		if( m_vaoManager )
+		{
+			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
+																Ogre::BT_DEFAULT, 0, false );
+		}
+
+		if( m_hlms )
+			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
 	}
 	//-------------------------------------------------------------------------
 	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
@@ -71,7 +102,6 @@ namespace Crystal
 		m_atlasCapacity = std::max( m_offsetPtr + sizeBytes,
 									m_atlasCapacity + (m_atlasCapacity >> 1u) + 1u );
 		m_glyphAtlas = reinterpret_cast<uint8_t*>( realloc( m_glyphAtlas, m_atlasCapacity ) );
-		TODO_schedule_buffer_grow;
 	}
 	//-------------------------------------------------------------------------
 	size_t ShaperManager::getAtlasOffset( size_t sizeBytes )
@@ -411,6 +441,35 @@ namespace Crystal
 			const uint16_t *utf16Str = temp.getBuffer();
 			shaper->setFontSize26d6( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, outShapes );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::updateGpuBuffers()
+	{
+		if( m_atlasCapacity !=
+			m_glyphAtlasBuffer->getNumElements() * m_glyphAtlasBuffer->getBytesPerElement() )
+		{
+			//Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
+			m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
+			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
+																Ogre::BT_DEFAULT, 0, false );
+			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
+
+			m_glyphAtlasBuffer->upload( m_glyphAtlas, 0, m_offsetPtr );
+			m_dirtyRanges.clear();
+		}
+		else
+		{
+			RangeVec::const_iterator itor = m_dirtyRanges.begin();
+			RangeVec::const_iterator end  = m_dirtyRanges.end();
+
+			while( itor != end )
+			{
+				m_glyphAtlasBuffer->upload( m_glyphAtlas, itor->offset, itor->size );
+				++itor;
+			}
+
+			m_dirtyRanges.clear();
 		}
 	}
 	//-------------------------------------------------------------------------

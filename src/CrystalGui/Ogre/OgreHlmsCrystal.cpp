@@ -65,12 +65,14 @@ namespace Ogre
     extern const String c_unlitBlendModes[];
 
 	HlmsCrystal::HlmsCrystal( Archive *dataFolder, ArchiveVec *libraryFolders ) :
-		HlmsUnlit( dataFolder, libraryFolders )
+		HlmsUnlit( dataFolder, libraryFolders ),
+		mGlyphAtlasBuffer( 0 )
 	{
     }
 	HlmsCrystal::HlmsCrystal( Archive *dataFolder, ArchiveVec *libraryFolders,
 							  HlmsTypes type, const String &typeName ) :
-		HlmsUnlit( dataFolder, libraryFolders, type, typeName )
+		HlmsUnlit( dataFolder, libraryFolders, type, typeName ),
+		mGlyphAtlasBuffer( 0 )
 	{
     }
     //-----------------------------------------------------------------------------------
@@ -79,88 +81,16 @@ namespace Ogre
 	}
 	//-----------------------------------------------------------------------------------
 	const HlmsCache* HlmsCrystal::createShaderCacheEntry( uint32 renderableHash,
-														const HlmsCache &passCache,
-														uint32 finalHash,
-														const QueuedRenderable &queuedRenderable )
+														  const HlmsCache &passCache,
+														  uint32 finalHash,
+														  const QueuedRenderable &queuedRenderable )
 	{
-#if 1
-		const HlmsCache *retVal = Hlms::createShaderCacheEntry( renderableHash, passCache, finalHash,
-																queuedRenderable );
-
-		if( mShaderProfile == "hlsl" || mShaderProfile == "metal" )
-		{
-			mListener->shaderCacheEntryCreated( mShaderProfile, retVal, passCache,
-												mSetProperties, queuedRenderable );
-			return retVal; //D3D embeds the texture slots in the shader.
-		}
-
-		//Set samplers.
-		assert( dynamic_cast<const HlmsCrystalDatablock*>( queuedRenderable.renderable->getDatablock() ) );
-		const HlmsCrystalDatablock *datablock = static_cast<const HlmsCrystalDatablock*>(
-												queuedRenderable.renderable->getDatablock() );
-
-		if( !retVal->pso.pixelShader.isNull() )
-		{
-			GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
-
-			int texUnit = 2; //Vertex shader consumes 2 slots with its two tbuffers.
-
-			if( !getProperty( HlmsBaseProp::ShadowCaster ) && datablock->mTexturesDescSet )
-			{
-				FastArray<const TextureGpu*>::const_iterator itor =
-						datablock->mTexturesDescSet->mTextures.begin();
-				FastArray<const TextureGpu*>::const_iterator end  =
-						datablock->mTexturesDescSet->mTextures.end();
-
-				int numTextures = 0;
-				int numArrayTextures = 0;
-				while( itor != end )
-				{
-					if( (*itor)->getInternalTextureType() == TextureTypes::Type2DArray )
-					{
-						psParams->setNamedConstant( "textureMapsArray[" +
-													StringConverter::toString( numArrayTextures++ ) +
-													"]", texUnit++ );
-					}
-					else
-					{
-						psParams->setNamedConstant( "textureMaps[" +
-													StringConverter::toString( numTextures++ ) + "]",
-													texUnit++ );
-					}
-
-					++itor;
-				}
-			}
-		}
-
-		GpuProgramParametersSharedPtr vsParams = retVal->pso.vertexShader->getDefaultParameters();
-		vsParams->setNamedConstant( "worldMatBuf", 0 );
-		if( getProperty( UnlitProperty::TextureMatrix ) )
-			vsParams->setNamedConstant( "animationMatrixBuf", 1 );
-
-		mListener->shaderCacheEntryCreated( mShaderProfile, retVal, passCache,
-											mSetProperties, queuedRenderable );
-
-		mRenderSystem->_setPipelineStateObject( &retVal->pso );
-
-		mRenderSystem->bindGpuProgramParameters( GPT_VERTEX_PROGRAM, vsParams, GPV_ALL );
-		if( !retVal->pso.pixelShader.isNull() )
-		{
-			GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
-			mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
-		}
-
-		if( !mRenderSystem->getCapabilities()->hasCapability( RSC_CONST_BUFFER_SLOTS_IN_SHADER ) )
-		{
-			//Setting it to the vertex shader will set it to the PSO actually.
-			retVal->pso.vertexShader->setUniformBlockBinding( "PassBuffer", 0 );
-			retVal->pso.vertexShader->setUniformBlockBinding( "MaterialBuf", 1 );
-			retVal->pso.vertexShader->setUniformBlockBinding( "InstanceBuffer", 2 );
-		}
-
+		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry( renderableHash, passCache,
+																	 finalHash, queuedRenderable );
+		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
+		if( getProperty( "crystal_text" ) )
+			psParams->setNamedConstant( "glyphAtlas", 3 );
 		return retVal;
-#endif
 	}
 	//-----------------------------------------------------------------------------------
 	void HlmsCrystal::calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces )
@@ -175,6 +105,15 @@ namespace Ogre
 			setProperty( HlmsBaseProp::IdentityWorld, 1 );
 			setProperty( HlmsBaseProp::PsoClipDistances, 4 );
 		}
+
+		//See Crystal::Label
+		if( customParams.find( 6373 ) != customParams.end() )
+			setProperty( "crystal_text", 1 );
+	}
+	//-----------------------------------------------------------------------------------
+	void HlmsCrystal::setGlyphAtlasBuffer( TexBufferPacked *texBuffer )
+	{
+		mGlyphAtlasBuffer = texBuffer;
 	}
 	//-----------------------------------------------------------------------------------
 	uint32 HlmsCrystal::fillBuffersForCrystal( const HlmsCache *cache,
@@ -219,6 +158,13 @@ namespace Ogre
                 *commandBuffer->addCommand<CbShaderBuffer>() =
                         CbShaderBuffer( PixelShader, 2, mConstBuffers[mCurrentConstBuffer], 0, 0 );
             }
+
+			//layout(binding = 3) uniform samplerBuffer glyphAtlas
+			if( mGlyphAtlasBuffer )
+			{
+				*commandBuffer->addCommand<CbShaderBuffer>() =
+						CbShaderBuffer( PixelShader, 3, mGlyphAtlasBuffer, 0, 0 );
+			}
 
             rebindTexBuffer( commandBuffer );
 
@@ -291,7 +237,7 @@ namespace Ogre
             if( datablock->mTexturesDescSet != mLastDescTexture )
             {
                 //Bind textures
-                size_t texUnit = 2;
+                size_t texUnit = 3;
 
                 if( datablock->mTexturesDescSet )
                 {
@@ -316,7 +262,7 @@ namespace Ogre
                 if( datablock->mSamplersDescSet )
                 {
                     //Bind samplers
-                    size_t texUnit = 2;
+                    size_t texUnit = 3;
                     *commandBuffer->addCommand<CbSamplers>() =
                             CbSamplers( texUnit, datablock->mSamplersDescSet );
                     mLastDescSampler = datablock->mSamplersDescSet;

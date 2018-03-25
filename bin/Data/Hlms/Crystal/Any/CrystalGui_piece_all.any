@@ -1,0 +1,10 @@
+@property( crystal_gui )
+
+@property( crystal_text )
+	@piece( custom_VStoPS )
+		flat uint glyphOffsetStart;
+		flat uint pixelsPerRow;
+	@end
+@end
+
+@end

@@ -18,6 +18,8 @@ namespace Crystal
 			 m_glyphsDirty[i] = false;
 
 		m_numVertices = 0;
+
+		setCustomParameter( 6373, Ogre::Vector4( 1.0f ) );
 	}
 	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )

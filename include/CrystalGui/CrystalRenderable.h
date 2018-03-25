@@ -36,6 +36,17 @@ namespace Crystal
 		float clipDistance[Borders::NumBorders];
 	};
 
+	struct GlyphVertex
+	{
+		float x;
+		float y;
+		uint16_t u;
+		uint16_t v;
+		uint32_t offset;
+		uint8_t rgbaColour[4];
+		float clipDistance[Borders::NumBorders];
+	};
+
 	struct ApiEncapsulatedObjects
 	{
 		//Ogre::HlmsCrystalGui		*hlms;

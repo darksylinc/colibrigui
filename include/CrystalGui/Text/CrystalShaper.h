@@ -9,6 +9,8 @@
 #include <vector>
 #include <string>
 
+CRYSTALGUI_ASSUME_NONNULL_BEGIN
+
 typedef struct FT_FaceRec_*  FT_Face;
 typedef struct FT_LibraryRec_  *FT_Library;
 
@@ -67,3 +69,5 @@ namespace Crystal
 		static const hb_feature_t CligOn;
 	};
 }
+
+CRYSTALGUI_ASSUME_NONNULL_END

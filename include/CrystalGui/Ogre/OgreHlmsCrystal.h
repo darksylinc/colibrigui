@@ -44,6 +44,8 @@ namespace Ogre
 	class HlmsCrystal : public HlmsUnlit
     {
 	protected:
+		TexBufferPacked *mGlyphAtlasBuffer;
+
 		virtual const HlmsCache* createShaderCacheEntry( uint32 renderableHash,
 														 const HlmsCache &passCache,
 														 uint32 finalHash,
@@ -61,6 +63,8 @@ namespace Ogre
 		HlmsCrystal( Archive *dataFolder, ArchiveVec *libraryFolders,
 					 HlmsTypes type, const String &typeName );
 		virtual ~HlmsCrystal();
+
+		void setGlyphAtlasBuffer( TexBufferPacked *texBuffer );
 
 		uint32 fillBuffersForCrystal( const HlmsCache *cache,
 									  const QueuedRenderable &queuedRenderable,

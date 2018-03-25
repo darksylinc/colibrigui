@@ -2,10 +2,19 @@
 
 @piece( custom_vs_attributes )
 	in float4 normal;
+
+	@property( crystal_text )
+		in uint tangent;
+		in uint blendIndices;
+	@end
 @end
 
 @piece( custom_vs_preExecution )
-	uint crystalDrawId = drawId + ((uint(gl_VertexID) - instance.worldMaterialIdx[drawId].w) / 54u);
+	@property( !crystal_text )
+		uint crystalDrawId = drawId + ((uint(gl_VertexID) - instance.worldMaterialIdx[drawId].w) / 54u);
+	@end @property( crystal_text )
+		uint crystalDrawId = drawId + ((uint(gl_VertexID) - instance.worldMaterialIdx[drawId].w) / 6u);
+	@end
 	#undef finalDrawId
 	#define finalDrawId crystalDrawId
 	#define worldViewProj 1.0f
@@ -14,6 +23,11 @@
 	gl_ClipDistance[1] = normal.y;
 	gl_ClipDistance[2] = normal.z;
 	gl_ClipDistance[3] = normal.w;
+
+	@property( crystal_text )
+		outVs.glyphOffsetStart	= tangent;
+		outVs.pixelsPerRow		= blendIndices;
+	@end
 @end
 
 @end

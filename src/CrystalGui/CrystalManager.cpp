@@ -115,6 +115,19 @@ namespace Crystal
 			m_commandBuffer = new Ogre::CommandBuffer();
 			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
 		}
+
+		if( m_shaperManager )
+		{
+			Ogre::HlmsCrystal *hlmsCrystal = 0;
+			if( m_root )
+			{
+				Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
+				Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
+				CRYSTAL_ASSERT_HIGH( dynamic_cast<Ogre::HlmsCrystal*>( hlms ) );
+				hlmsCrystal = static_cast<Ogre::HlmsCrystal*>( hlms );
+			}
+			m_shaperManager->setOgre( hlmsCrystal, vaoManager );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize,
@@ -684,6 +697,8 @@ namespace Crystal
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
 		}
+
+		m_shaperManager->updateGpuBuffers();
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::prepareRenderCommands()

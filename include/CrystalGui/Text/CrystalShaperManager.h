@@ -7,12 +7,21 @@
 #include <map>
 #include <string>
 
+CRYSTALGUI_ASSUME_NONNULL_BEGIN
+
 typedef struct FT_LibraryRec_  *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
 typedef int  FT_Error;
 
 typedef struct UBiDi UBiDi;
 typedef uint8_t UBiDiLevel;
+
+namespace Ogre
+{
+	class HlmsCrystal;
+	class TexBufferPacked;
+	class VaoManager;
+}
 
 namespace Crystal
 {
@@ -66,6 +75,10 @@ namespace Crystal
 		typedef std::vector<Shaper*> ShaperVec;
 		ShaperVec	m_shapers;
 
+		Ogre::TexBufferPacked * crystalgui_nullable m_glyphAtlasBuffer;
+		Ogre::HlmsCrystal	* crystalgui_nullable m_hlms;
+		Ogre::VaoManager	* crystalgui_nullable m_vaoManager;
+
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );
 		CachedGlyph* createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize );
@@ -75,6 +88,9 @@ namespace Crystal
 	public:
 		ShaperManager( CrystalManager *crystalManager );
 		~ShaperManager();
+
+		void setOgre( Ogre::HlmsCrystal * crystalgui_nullable hlms,
+					  Ogre::VaoManager * crystalgui_nullable vaoManager );
 
 		Shaper* addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
 						   const std::string &language );
@@ -122,6 +138,10 @@ namespace Crystal
 						   VertReadingDir::VertReadingDir vertReadingDir,
 						   ShapedGlyphVec &outShapes );
 
+		void updateGpuBuffers();
+
 		static const char* getErrorMessage( FT_Error errorCode );
 	};
 }
+
+CRYSTALGUI_ASSUME_NONNULL_END
