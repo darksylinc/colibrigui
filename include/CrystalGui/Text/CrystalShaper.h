@@ -25,10 +25,11 @@ namespace Crystal
 	class Shaper
 	{
 	protected:
-		hb_script_t m_script;
-		FT_Face		m_ftFont;
-		hb_font_t	*m_hbFont;
-		hb_buffer_t	*m_buffer;
+		hb_script_t		m_script;
+		FT_Face			m_ftFont;
+		hb_language_t	m_hbLanguage;
+		hb_font_t		*m_hbFont;
+		hb_buffer_t		*m_buffer;
 
 		std::vector<hb_feature_t> m_features;
 
@@ -44,6 +45,7 @@ namespace Crystal
 		~Shaper();
 
 		void setFeatures( const std::vector<hb_feature_t> &features );
+		void addFeatures( const hb_feature_t &feature );
 
 		/// Set the font size in points. Note the returned value by getFontSize
 		/// can differ as the float is internally converted to 26.6 fixed point

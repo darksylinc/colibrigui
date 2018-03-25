@@ -77,8 +77,7 @@ namespace Crystal
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );
 		m_buffer = hb_buffer_create();
 
-		hb_buffer_set_script( m_buffer, m_script );
-		hb_buffer_set_language( m_buffer, hb_language_from_string( language.c_str(), language.size() ) );
+		m_hbLanguage = hb_language_from_string( language.c_str(), language.size() );
 	}
 	//-------------------------------------------------------------------------
 	Shaper::~Shaper()
@@ -103,7 +102,12 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Shaper::setFeatures( const std::vector<hb_feature_t> &features )
 	{
-		hb_shape( m_hbFont, m_buffer, features.empty() ? 0 : &features[0], features.size() );
+		m_features = features;
+	}
+	//-------------------------------------------------------------------------
+	void Shaper::addFeatures( const hb_feature_t &feature )
+	{
+		m_features.push_back( feature );
 	}
 	//-------------------------------------------------------------------------
 	void Shaper::setFontSizeFloat( float ptSize )
@@ -159,7 +163,12 @@ namespace Crystal
 
 		hb_buffer_clear_contents( m_buffer );
 		hb_buffer_set_direction( m_buffer, dir );
+
+		hb_buffer_set_script( m_buffer, m_script );
+		hb_buffer_set_language( m_buffer, m_hbLanguage );
+
 		hb_buffer_add_utf16( m_buffer, utf16Str, stringLength, 0, stringLength );
+		hb_shape( m_hbFont, m_buffer, m_features.empty() ? 0 : &m_features[0], m_features.size() );
 
 		unsigned int glyphCount;
 		hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos( m_buffer, &glyphCount );

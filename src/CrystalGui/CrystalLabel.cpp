@@ -142,6 +142,8 @@ namespace Crystal
 
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution();
 
+		m_numVertices = 0;
+
 		uint8_t rgbaColour[4];
 		rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
 		rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
@@ -155,9 +157,10 @@ namespace Crystal
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			Ogre::Vector2 topLeft = caretPos + shapedGlyph.offset +
-									Ogre::Vector2( shapedGlyph.glyph->bearingX,
-												   shapedGlyph.glyph->bearingY );
+			Ogre::Vector2 topLeft = caretPos +
+									(shapedGlyph.offset +
+									 Ogre::Vector2( shapedGlyph.glyph->bearingX,
+													shapedGlyph.glyph->bearingY )) * invWindowRes;
 			Ogre::Vector2 bottomRight = caretPos + Ogre::Vector2( shapedGlyph.glyph->width,
 																  shapedGlyph.glyph->height ) *
 										invWindowRes;
@@ -167,7 +170,7 @@ namespace Crystal
 					 Ogre::Vector2(1.0f),Ogre::Vector2(1.0f), Ogre::Vector2(1.0f) );
 			vertexBuffer += 6u;
 
-			caretPos += shapedGlyph.advance;
+			caretPos += shapedGlyph.advance * invWindowRes;
 
 			m_numVertices += 6u;
 

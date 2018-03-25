@@ -76,8 +76,8 @@ namespace Crystal
 		ShaperManager( CrystalManager *crystalManager );
 		~ShaperManager();
 
-		void addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
-						const std::string &language );
+		Shaper* addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
+						   const std::string &language );
 		void setDefaultShaper( uint16_t font, HorizReadingDir::HorizReadingDir horizReadingDir,
 							   bool useVerticalLayoutWhenAvailable );
 

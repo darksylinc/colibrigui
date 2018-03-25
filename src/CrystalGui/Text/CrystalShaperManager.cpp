@@ -50,13 +50,15 @@ namespace Crystal
 		m_ftLibrary = 0;
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
-								   const std::string &language )
+	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
+									  const std::string &language )
 	{
 		Shaper *shaper = new Shaper( static_cast<hb_script_t>( script ), fontPath, language, this );
 		if( m_shapers.empty() )
 			m_shapers.push_back( shaper );
 		m_shapers.push_back( shaper );
+
+		return shaper;
 	}
 	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const

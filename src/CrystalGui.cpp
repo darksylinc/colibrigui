@@ -11,6 +11,7 @@
 
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/Text/CrystalShaperManager.h"
+#include "CrystalGui/Text/CrystalShaper.h"
 #include "CrystalGui/Ogre/CompositorPassCrystalGuiProvider.h"
 
 #include "OgreHlmsManager.h"
@@ -169,7 +170,9 @@ namespace Demo
 			TODO_fix_leak;
 			crystalManager = new Crystal::CrystalManager( &g_crystalLogListener );
 			Crystal::ShaperManager *shaperManager = crystalManager->getShaperManager();
-			shaperManager->addShaper( HB_SCRIPT_LATIN, "../Data/Fonts/DejaVuSerif.ttf", "en" );
+			Crystal::Shaper *shaper = shaperManager->addShaper( HB_SCRIPT_LATIN,
+																"../Data/Fonts/DejaVuSerif.ttf", "en" );
+			shaper->addFeatures( Crystal::Shaper::KerningOn );
 			Ogre::CompositorPassCrystalGuiProvider *compoProvider =
 					OGRE_NEW Ogre::CompositorPassCrystalGuiProvider( crystalManager );
 			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();
