@@ -42,6 +42,7 @@ namespace Crystal
 	protected:
 		friend class CrystalManager;
 		friend class Renderable;
+		friend class Label;
 
 		struct WidgetActionListenerRecord
 		{

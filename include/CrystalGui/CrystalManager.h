@@ -57,7 +57,7 @@ namespace Crystal
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
 		Ogre::Vector2				m_pixelSize;
-		Ogre::Vector2				m_invWindowResolution;
+		Ogre::Vector2				m_invWindowResolution2x;
 
 		/// Window and/or Widget currently being in focus
 		FocusPair		m_cursorFocusedPair;
@@ -120,7 +120,7 @@ namespace Crystal
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
-		const Ogre::Vector2& getInvWindowResolution() const			{ return m_invWindowResolution; }
+		const Ogre::Vector2& getInvWindowResolution2x() const		{ return m_invWindowResolution2x; }
 
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
 		void setMouseCursorPressed();

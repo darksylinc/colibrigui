@@ -133,16 +133,20 @@ namespace Crystal
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Matrix3 &parentRot )
 	{
+		m_numVertices = 0;
 		if( !m_parent->intersectsChild( this ) )
 			return vertexBuffer;
 
 		updateDerivedTransform( parentPos, parentRot );
 
+		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
+
 		Ogre::Vector2 caretPos = m_derivedTopLeft;
+		caretPos.y += m_shapes[m_currentState][0].glyph->height * invWindowRes.y;
 
-		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution();
-
-		m_numVertices = 0;
+		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
+		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
+		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
 		uint8_t rgbaColour[4];
 		rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
@@ -160,14 +164,15 @@ namespace Crystal
 			Ogre::Vector2 topLeft = caretPos +
 									(shapedGlyph.offset +
 									 Ogre::Vector2( shapedGlyph.glyph->bearingX,
-													shapedGlyph.glyph->bearingY )) * invWindowRes;
-			Ogre::Vector2 bottomRight = caretPos + Ogre::Vector2( shapedGlyph.glyph->width,
-																  shapedGlyph.glyph->height ) *
-										invWindowRes;
+													-shapedGlyph.glyph->bearingY )) * invWindowRes;
+			Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
+													   invWindowRes.x,
+													   topLeft.y + shapedGlyph.glyph->height *
+													   invWindowRes.y );
 
 			Ogre::Vector4 uv( 1.0f );
 			addQuad( vertexBuffer, topLeft, bottomRight, uv, rgbaColour,
-					 Ogre::Vector2(1.0f),Ogre::Vector2(1.0f), Ogre::Vector2(1.0f) );
+					 parentDerivedTL, parentDerivedBR, invSize );
 			vertexBuffer += 6u;
 
 			caretPos += shapedGlyph.advance * invWindowRes;
