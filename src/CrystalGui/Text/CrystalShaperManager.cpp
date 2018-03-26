@@ -22,7 +22,7 @@ namespace Crystal
 		m_crystalManager( crystalManager ),
 		m_glyphAtlas( 0 ),
 		m_offsetPtr( 0 ),
-		m_atlasCapacity( 32 ),
+		m_atlasCapacity( 0 ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR ),
 		m_useVerticalLayoutWhenAvailable( false ),
