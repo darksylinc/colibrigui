@@ -28,7 +28,7 @@ namespace Crystal
 		if( m_richText[state].empty() )
 		{
 			RichText rt;
-			rt.ptSize = 13u << 6u;
+			rt.ptSize = 24u << 6u;
 			rt.font = 0;
 			rt.offset = 0;
 			rt.length = textSize;
@@ -131,13 +131,90 @@ namespace Crystal
 		m_glyphsDirty[state] = false;
 	}
 	//-------------------------------------------------------------------------
-	UiVertex* Label::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-											 const Ogre::Vector2 &parentPos,
-											 const Ogre::Matrix3 &parentRot )
+	inline void Label::addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
+								Ogre::Vector2 topLeft,
+								Ogre::Vector2 bottomRight,
+								uint16_t glyphWidth,
+								uint16_t glyphHeight,
+								uint8_t *rgbaColour,
+								Ogre::Vector2 parentDerivedTL,
+								Ogre::Vector2 parentDerivedBR,
+								Ogre::Vector2 invSize,
+								uint32_t offset )
 	{
+		TODO_this_is_a_workaround_neg_y;
+		#define CRYSTAL_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
+									clipDistanceRight, clipDistanceBottom ) \
+			vertexBuffer->x = _x; \
+			vertexBuffer->y = -_y; \
+			vertexBuffer->width = glyphWidth; \
+			vertexBuffer->height = glyphHeight; \
+			vertexBuffer->offset = offset;\
+			vertexBuffer->rgbaColour[0] = rgbaColour[0]; \
+			vertexBuffer->rgbaColour[1] = rgbaColour[1]; \
+			vertexBuffer->rgbaColour[2] = rgbaColour[2]; \
+			vertexBuffer->rgbaColour[3] = rgbaColour[3]; \
+			vertexBuffer->clipDistance[Borders::Top]	= clipDistanceTop; \
+			vertexBuffer->clipDistance[Borders::Left]	= clipDistanceLeft; \
+			vertexBuffer->clipDistance[Borders::Right]	= clipDistanceRight; \
+			vertexBuffer->clipDistance[Borders::Bottom]	= clipDistanceBottom; \
+			++vertexBuffer;
+
+		CRYSTAL_ADD_VERTEX( topLeft.x, topLeft.y,
+							0u, 0u,
+							(topLeft.y - parentDerivedTL.y) * invSize.y,
+							(topLeft.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - topLeft.x) * invSize.x,
+							(parentDerivedBR.y - topLeft.y) * invSize.y );
+
+		CRYSTAL_ADD_VERTEX( topLeft.x, bottomRight.y,
+							0u, glyphHeight,
+							(bottomRight.y - parentDerivedTL.y) * invSize.y,
+							(topLeft.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - topLeft.x) * invSize.x,
+							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+
+		CRYSTAL_ADD_VERTEX( bottomRight.x, bottomRight.y,
+							glyphWidth, glyphHeight,
+							(bottomRight.y - parentDerivedTL.y) * invSize.y,
+							(bottomRight.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - bottomRight.x) * invSize.x,
+							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+
+		CRYSTAL_ADD_VERTEX( bottomRight.x, bottomRight.y,
+							glyphWidth, glyphHeight,
+							(bottomRight.y - parentDerivedTL.y) * invSize.y,
+							(bottomRight.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - bottomRight.x) * invSize.x,
+							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+
+		CRYSTAL_ADD_VERTEX( bottomRight.x, topLeft.y,
+							glyphWidth, 0u,
+							(topLeft.y - parentDerivedTL.y) * invSize.y,
+							(bottomRight.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - bottomRight.x) * invSize.x,
+							(parentDerivedBR.y - topLeft.y) * invSize.y );
+
+		CRYSTAL_ADD_VERTEX( topLeft.x, topLeft.y,
+							0u, 0u,
+							(topLeft.y - parentDerivedTL.y) * invSize.y,
+							(topLeft.x - parentDerivedTL.x) * invSize.x,
+							(parentDerivedBR.x - topLeft.x) * invSize.x,
+							(parentDerivedBR.y - topLeft.y) * invSize.y );
+
+		#undef CRYSTAL_ADD_VERTEX
+	}
+	//-------------------------------------------------------------------------
+	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
+										GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
+										const Ogre::Vector2 &parentPos,
+										const Ogre::Matrix3 &parentRot )
+	{
+		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
+
 		m_numVertices = 0;
 		if( !m_parent->intersectsChild( this ) )
-			return vertexBuffer;
+			return;
 
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -172,10 +249,11 @@ namespace Crystal
 													   topLeft.y + shapedGlyph.glyph->height *
 													   invWindowRes.y );
 
-			Ogre::Vector4 uv( 1.0f );
-			addQuad( vertexBuffer, topLeft, bottomRight, uv, rgbaColour,
-					 parentDerivedTL, parentDerivedBR, invSize );
-			vertexBuffer += 6u;
+			addQuad( textVertBuffer, topLeft, bottomRight,
+					 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
+					 shapedGlyph.glyph->offsetStart );
+			textVertBuffer += 6u;
 
 			caretPos += shapedGlyph.advance * invWindowRes;
 
@@ -184,7 +262,7 @@ namespace Crystal
 			++itor;
 		}
 
-		return vertexBuffer;
+		*_textVertBuffer = textVertBuffer;
 	}
 	//-------------------------------------------------------------------------
 	bool Label::_updateDirtyGlyphs()

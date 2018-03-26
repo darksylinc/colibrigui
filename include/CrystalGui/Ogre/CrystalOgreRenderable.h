@@ -18,6 +18,7 @@ namespace Ogre
 	{
 	public:
 		static VertexArrayObject* createVao( uint32 vertexCount, VaoManager *vaoManager );
+		static VertexArrayObject* createTextVao( uint32 vertexCount, VaoManager *vaoManager );
 		static void destroyVao( VertexArrayObject *vao, VaoManager *vaoManager );
 	protected:
 		void setVao( VertexArrayObject *vao );

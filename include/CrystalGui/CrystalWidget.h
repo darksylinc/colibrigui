@@ -11,6 +11,7 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 namespace Crystal
 {
 	struct UiVertex;
+	struct GlyphVertex;
 	typedef std::vector<Widget*> WidgetVec;
 	typedef std::vector<Window*> WindowVec;
 
@@ -203,11 +204,14 @@ namespace Crystal
 		/// Input must be in NDC space i.e. in range [-1; 1]
 		bool intersects( const Ogre::Vector2 &posNdc ) const;
 
-		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
-		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot );
+		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											 vertexBuffer,
+											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											 textVertBuffer,
+											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Matrix3 &parentRot );
 
 		/** Sets the new state, which affects skins.
 			The state is is broadcasted to our children.

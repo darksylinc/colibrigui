@@ -379,24 +379,24 @@ namespace Crystal
 				  posNdc.y > m_derivedBottomRight.y );
 	}
 	//-------------------------------------------------------------------------
-	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao )
+	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )
 	{
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
 		while( itor != end )
 		{
-			(*itor)->broadcastNewVao( vao );
+			(*itor)->broadcastNewVao( vao, textVao );
 			++itor;
 		}
 	}
 	//-------------------------------------------------------------------------
-	UiVertex* Widget::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-											  const Ogre::Vector2 &parentPos,
-											  const Ogre::Matrix3 &parentRot )
+	void Widget::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
+										 GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
+										 const Ogre::Vector2 &parentPos,
+										 const Ogre::Matrix3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
-		return vertexBuffer;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setState( States::States state, bool smartHighlight )

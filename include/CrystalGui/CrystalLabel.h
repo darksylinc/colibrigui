@@ -30,6 +30,17 @@ namespace Crystal
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
+		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
+							 Ogre::Vector2 topLeft,
+							 Ogre::Vector2 bottomRight,
+							 uint16_t glyphWidth,
+							 uint16_t glyphHeight,
+							 uint8_t *rgbaColour,
+							 Ogre::Vector2 parentDerivedTL,
+							 Ogre::Vector2 parentDerivedBR,
+							 Ogre::Vector2 invSize,
+							 uint32_t offset );
+
 	public:
 		Label( CrystalManager *manager );
 
@@ -57,9 +68,12 @@ namespace Crystal
 		*/
 		void setText( const std::string &text, States::States forState=States::NumStates );
 
-		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot );
+		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											 RESTRICT_ALIAS vertexBuffer,
+											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											 RESTRICT_ALIAS textVertBuffer,
+											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Matrix3 &parentRot );
 	};
 }
 

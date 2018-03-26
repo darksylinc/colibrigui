@@ -27,7 +27,7 @@ namespace Crystal
 	CrystalManager::CrystalManager( LogListener *logListener ) :
 		m_numWidgets( 0 ),
 		m_numLabels( 0 ),
-		m_numTextGlyphs( 0 ),
+		m_numTextGlyphs( 0u ),
 		m_logListener( &DefaultLogListener ),
 		m_windowNavigationDirty( false ),
 		m_root( 0 ),
@@ -108,6 +108,7 @@ namespace Crystal
 			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
 			//m_defaultIndexBuffer = Ogre::CrystalOgreRenderable::createIndexBuffer( vaoManager );
 			m_vao = Ogre::CrystalOgreRenderable::createVao( 6u * 9u, vaoManager );
+			m_textVao = Ogre::CrystalOgreRenderable::createTextVao( 6u * 16u, vaoManager );
 			size_t requiredBytes = 1u * sizeof( Ogre::CbDrawStrip );
 			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
 																   Ogre::BT_DYNAMIC_PERSISTENT,
@@ -455,36 +456,68 @@ namespace Crystal
 	{
 		CRYSTAL_ASSERT_LOW( m_dirtyLabels.empty() && "updateDirtyLabels has not been called!" );
 
-		const Ogre::uint32 requiredVertexCount =
-				static_cast<Ogre::uint32>( (m_numWidgets - m_numLabels) * (6u * 9u) +
-										   (m_numTextGlyphs * 6u) );
+		bool anyVaoChanged = false;
 
-		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
-		const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
-		if( requiredVertexCount > vertexBuffer->getNumElements() )
+		if( m_numWidgets * sizeof( Ogre::CbDrawStrip ) > m_indirectBuffer->getNumElements() )
 		{
-			const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
-														  currVertexCount + (currVertexCount >> 1u) );
-			Ogre::CrystalOgreRenderable::destroyVao( m_vao, m_vaoManager );
-			m_vao = Ogre::CrystalOgreRenderable::createVao( newVertexCount, m_vaoManager );
+			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
+				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
+			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
+			const size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
+			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
+																   Ogre::BT_DYNAMIC_PERSISTENT,
+																   0, false );
+		}
 
+		{
+			//Vertex buffer for most widgets
+			const Ogre::uint32 requiredVertexCount =
+					static_cast<Ogre::uint32>( (m_numWidgets - m_numLabels) * (6u * 9u) );
+
+			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+			if( requiredVertexCount > currVertexCount )
+			{
+				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
+															  currVertexCount +
+															  (currVertexCount >> 1u) );
+				Ogre::CrystalOgreRenderable::destroyVao( m_vao, m_vaoManager );
+				m_vao = Ogre::CrystalOgreRenderable::createVao( newVertexCount, m_vaoManager );
+
+				anyVaoChanged = true;
+			}
+		}
+
+		{
+			//Vertex buffer for text
+			const Ogre::uint32 requiredVertexCount =
+					static_cast<Ogre::uint32>( m_numTextGlyphs * 6u );
+
+			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+			if( requiredVertexCount > currVertexCount )
+			{
+				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
+															  currVertexCount +
+															  (currVertexCount >> 1u) );
+				Ogre::CrystalOgreRenderable::destroyVao( m_textVao, m_vaoManager );
+				m_textVao = Ogre::CrystalOgreRenderable::createTextVao( newVertexCount, m_vaoManager );
+				anyVaoChanged = true;
+			}
+		}
+
+		if( anyVaoChanged )
+		{
 			WindowVec::const_iterator itor = m_windows.begin();
 			WindowVec::const_iterator end  = m_windows.end();
 
 			while( itor != end )
 			{
-				(*itor)->broadcastNewVao( m_vao );
+				(*itor)->broadcastNewVao( m_vao, m_textVao );
 				++itor;
 			}
-
-			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
-				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
-			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
-			size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
-			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
-																   Ogre::BT_DYNAMIC_PERSISTENT,
-																   0, false );
 		}
+
 	}
 	//-------------------------------------------------------------------------
 	template <typename T>
@@ -704,24 +737,33 @@ namespace Crystal
 	void CrystalManager::prepareRenderCommands()
 	{
 		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+		Ogre::VertexBufferPacked *vertexBufferText = m_textVao->getBaseVertexBuffer();
 
-		UiVertex * RESTRICT_ALIAS vertex = reinterpret_cast<UiVertex * RESTRICT_ALIAS>(
-											   vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
-		UiVertex * RESTRICT_ALIAS startOffset = vertex;
+		UiVertex *vertex = reinterpret_cast<UiVertex*>(
+							   vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
+		UiVertex *startOffset = vertex;
+
+		GlyphVertex *vertexText = reinterpret_cast<GlyphVertex*>(
+									  vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
+		GlyphVertex *startOffsetText = vertexText;
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
 
 		while( itor != end )
 		{
-			vertex = (*itor)->fillBuffersAndCommands( vertex, -Ogre::Vector2::UNIT_SCALE,
-													  Ogre::Matrix3::IDENTITY );
+			(*itor)->fillBuffersAndCommands( &vertex, &vertexText,
+											 -Ogre::Vector2::UNIT_SCALE,
+											 Ogre::Matrix3::IDENTITY );
 			++itor;
 		}
 
 		const size_t elementsWritten = vertex - startOffset;
+		const size_t elementsWrittenText = vertexText - startOffsetText;
 		CRYSTAL_ASSERT( elementsWritten <= vertexBuffer->getNumElements() );
+		CRYSTAL_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
+		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::render()
@@ -758,11 +800,11 @@ namespace Crystal
 			apiObjects.baseInstanceAndIndirectBuffers = 2;
 		else if( m_vaoManager->supportsBaseInstance() )
 			apiObjects.baseInstanceAndIndirectBuffers = 1;
-		apiObjects.vao = m_vao;
 		apiObjects.drawCmd = 0;
 		apiObjects.drawCountPtr = 0;
 		apiObjects.primCount = 0;
-		apiObjects.accumPrimCount = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.accumPrimCount[0] = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.accumPrimCount[1] = m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();

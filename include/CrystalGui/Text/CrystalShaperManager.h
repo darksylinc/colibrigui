@@ -73,6 +73,7 @@ namespace Crystal
 		bool		m_useVerticalLayoutWhenAvailable;
 
 		typedef std::vector<Shaper*> ShaperVec;
+		/// m_shapers[0] is the default and not a strong reference
 		ShaperVec	m_shapers;
 
 		Ogre::TexBufferPacked * crystalgui_nullable m_glyphAtlasBuffer;

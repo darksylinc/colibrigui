@@ -2,6 +2,7 @@
 
 @property( crystal_text )
 	@piece( custom_VStoPS )
+		float2 uvText;
 		flat uint glyphOffsetStart;
 		flat uint pixelsPerRow;
 	@end

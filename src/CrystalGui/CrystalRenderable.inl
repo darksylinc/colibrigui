@@ -10,6 +10,8 @@
 #define TODO_borderRepeatSize
 #define TODO_this_is_a_workaround_neg_y
 
+CRYSTALGUI_ASSUME_NONNULL_BEGIN
+
 namespace Crystal
 {
 	//-------------------------------------------------------------------------
@@ -84,20 +86,25 @@ namespace Crystal
         #undef CRYSTAL_ADD_VERTEX
     }
 	//-------------------------------------------------------------------------
-	inline UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-														 const Ogre::Vector2 &parentPos,
-														 const Ogre::Matrix3 &parentRot,
-														 bool forWindows )
+	inline void Renderable::fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+													_vertexBuffer,
+													GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+													_textVertBuffer,
+													const Ogre::Vector2 &parentPos,
+													const Ogre::Matrix3 &parentRot,
+													bool forWindows )
 	{
+		UiVertex * RESTRICT_ALIAS vertexBuffer = *_vertexBuffer;
+
 		if( forWindows )
 		{
 			if( m_parent && !m_parent->intersectsChild( this ) )
-				return vertexBuffer;
+				return;
 		}
 		else
 		{
 			if( !m_parent->intersectsChild( this ) )
-				return vertexBuffer;
+				return;
 		}
 
 		updateDerivedTransform( parentPos, parentRot );
@@ -202,16 +209,19 @@ namespace Crystal
 				 rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
 		vertexBuffer += 6u;
 
+		*_vertexBuffer = vertexBuffer;
+
 		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
 		while( itor != end )
 		{
-			vertexBuffer = (*itor)->fillBuffersAndCommands( vertexBuffer, outerTopLeft, finalRot );
+			(*itor)->fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
+											 outerTopLeft, finalRot );
 			++itor;
 		}
-
-		return vertexBuffer;
 	}
 }
+
+CRYSTALGUI_ASSUME_NONNULL_END

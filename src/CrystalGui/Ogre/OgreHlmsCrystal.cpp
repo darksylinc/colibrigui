@@ -68,12 +68,14 @@ namespace Ogre
 		HlmsUnlit( dataFolder, libraryFolders ),
 		mGlyphAtlasBuffer( 0 )
 	{
+		mTexUnitSlotStart = 3u;
     }
 	HlmsCrystal::HlmsCrystal( Archive *dataFolder, ArchiveVec *libraryFolders,
 							  HlmsTypes type, const String &typeName ) :
 		HlmsUnlit( dataFolder, libraryFolders, type, typeName ),
 		mGlyphAtlasBuffer( 0 )
 	{
+		mTexUnitSlotStart = 3u;
     }
     //-----------------------------------------------------------------------------------
 	HlmsCrystal::~HlmsCrystal()
@@ -89,7 +91,10 @@ namespace Ogre
 																	 finalHash, queuedRenderable );
 		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 		if( getProperty( "crystal_text" ) )
+		{
 			psParams->setNamedConstant( "glyphAtlas", 3 );
+			mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
+		}
 		return retVal;
 	}
 	//-----------------------------------------------------------------------------------
@@ -237,7 +242,7 @@ namespace Ogre
             if( datablock->mTexturesDescSet != mLastDescTexture )
             {
                 //Bind textures
-                size_t texUnit = 3;
+				size_t texUnit = mTexUnitSlotStart;
 
                 if( datablock->mTexturesDescSet )
                 {
@@ -262,7 +267,7 @@ namespace Ogre
                 if( datablock->mSamplersDescSet )
                 {
                     //Bind samplers
-                    size_t texUnit = 3;
+					size_t texUnit = mTexUnitSlotStart;
                     *commandBuffer->addCommand<CbSamplers>() =
                             CbSamplers( texUnit, datablock->mSamplersDescSet );
                     mLastDescSampler = datablock->mSamplersDescSet;

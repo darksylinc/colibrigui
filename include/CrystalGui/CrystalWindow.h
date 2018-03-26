@@ -75,9 +75,12 @@ namespace Crystal
 
 		FocusPair setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas );
 
-		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot );
+		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											 vertexBuffer,
+											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											 textVertBuffer,
+											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Matrix3 &parentRot );
 	};
 }
 

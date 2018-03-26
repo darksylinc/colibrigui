@@ -51,6 +51,7 @@ namespace Crystal
 		Ogre::ObjectMemoryManager	* crystalgui_nullable m_objectMemoryManager;
 		Ogre::SceneManager			* crystalgui_nullable m_sceneManager;
 		Ogre::VertexArrayObject		* crystalgui_nullable m_vao;
+		Ogre::VertexArrayObject		* crystalgui_nullable m_textVao;
 		Ogre::IndirectBufferPacked	* crystalgui_nullable m_indirectBuffer;
 		Ogre::CommandBuffer			* crystalgui_nullable m_commandBuffer;
 

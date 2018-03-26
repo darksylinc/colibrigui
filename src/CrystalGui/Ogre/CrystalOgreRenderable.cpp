@@ -156,6 +156,30 @@ namespace Ogre
 		return vao;
 	}
 	//-----------------------------------------------------------------------------------
+	VertexArrayObject* CrystalOgreRenderable::createTextVao( uint32 vertexCount, VaoManager *vaoManager )
+	{
+		//Vertex declaration
+		VertexElement2Vec vertexElements;
+		vertexElements.push_back( VertexElement2( VET_FLOAT2, VES_POSITION ) );
+		vertexElements.push_back( VertexElement2( VET_USHORT2, VES_BLEND_INDICES ) );
+		vertexElements.push_back( VertexElement2( VET_UINT1, VES_TANGENT ) );
+		vertexElements.push_back( VertexElement2( VET_UBYTE4_NORM, VES_DIFFUSE ) );
+		vertexElements.push_back( VertexElement2( VET_FLOAT4, VES_NORMAL ) );
+
+		//Create the actual vertex buffer.
+		Ogre::VertexBufferPacked *vertexBuffer = 0;
+		vertexBuffer = vaoManager->createVertexBuffer( vertexElements, vertexCount,
+													   BT_DYNAMIC_PERSISTENT,
+													   0, false );
+
+		VertexBufferPackedVec vertexBuffers;
+		vertexBuffers.push_back( vertexBuffer );
+		Ogre::VertexArrayObject *vao = vaoManager->createVertexArrayObject(
+					vertexBuffers, 0, OT_TRIANGLE_LIST );
+
+		return vao;
+	}
+	//-----------------------------------------------------------------------------------
 	void CrystalOgreRenderable::destroyVao( VertexArrayObject *vao, VaoManager *vaoManager )
 	{
 		const VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();

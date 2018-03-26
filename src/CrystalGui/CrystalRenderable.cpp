@@ -94,10 +94,10 @@ namespace Crystal
 			setDatablock( m_stateInformation[m_currentState].materialName );
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::broadcastNewVao( Ogre::VertexArrayObject *vao )
+	void Renderable::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )
 	{
-		setVao( vao );
-		Widget::broadcastNewVao( vao );
+		setVao( !isLabel() ? vao : textVao );
+		Widget::broadcastNewVao( vao, textVao );
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject )
@@ -109,7 +109,7 @@ namespace Crystal
 		QueuedRenderable queuedRenderable( 0u, this, this );
 
 		uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
-		VertexArrayObject *vao = apiObject.vao;
+		VertexArrayObject *vao = mVaoPerLod[0].back();
 		const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
 																  *apiObject.passCache,
 																  queuedRenderable,
@@ -125,8 +125,11 @@ namespace Crystal
 			apiObject.lastVaoName = 0;
 		}
 
+		const size_t widgetType = isLabel() ? 1u : 0u;
+
 		uint32 baseInstance = apiObject.hlms->fillBuffersForCrystal(
-								  hlmsCache, queuedRenderable, false, apiObject.accumPrimCount,
+								  hlmsCache, queuedRenderable, false,
+								  apiObject.accumPrimCount[widgetType],
 								  lastHlmsCacheHash, apiObject.commandBuffer );
 
 		if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
@@ -145,7 +148,7 @@ namespace Crystal
 
 			CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
 			*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers,
-										 apiObject.vao, offset );
+										 vao, offset );
 			drawCall->numDraws = 1u;
 			apiObject.drawCmd = drawCall;
 			apiObject.primCount = 0;
@@ -153,13 +156,13 @@ namespace Crystal
 			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 			apiObject.drawCountPtr->primCount		= 0;
 			apiObject.drawCountPtr->instanceCount	= 1u;
-			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount;
+			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
 			apiObject.drawCountPtr->baseInstance	= baseInstance;
 			apiObject.indirectDraw += sizeof( CbDrawStrip );
 		}
 
 		apiObject.primCount += m_numVertices;
-		apiObject.accumPrimCount += m_numVertices;
+		apiObject.accumPrimCount[widgetType] += m_numVertices;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
 		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
@@ -174,10 +177,13 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	UiVertex* Renderable::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot )
+	void Renderable::fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											 vertexBuffer,
+											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											 textVertBuffer,
+											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Matrix3 &parentRot )
 	{
-		return fillBuffersAndCommands( vertexBuffer, parentPos, parentRot, false );
+		fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos, parentRot, false );
 	}
 }

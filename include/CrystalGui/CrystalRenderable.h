@@ -40,8 +40,8 @@ namespace Crystal
 	{
 		float x;
 		float y;
-		uint16_t u;
-		uint16_t v;
+		uint16_t width;
+		uint16_t height;
 		uint32_t offset;
 		uint8_t rgbaColour[4];
 		float clipDistance[Borders::NumBorders];
@@ -59,11 +59,10 @@ namespace Crystal
 		uint8_t						*indirectDraw;
 		uint8_t						*startIndirectDraw;
 		int							baseInstanceAndIndirectBuffers;
-		Ogre::VertexArrayObject		*vao;
 		Ogre::CbDrawCallStrip		* crystalgui_nullable drawCmd;
 		Ogre::CbDrawStrip			* crystalgui_nullable drawCountPtr;
 		uint16_t primCount;
-		uint32_t accumPrimCount;
+		uint32_t accumPrimCount[2]; //[0] = regular widgets, [1] = text
 	};
 
 	/**
@@ -104,17 +103,23 @@ namespace Crystal
 
 		virtual void setState( States::States state, bool smartHighlight=true );
 
-		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao );
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
 		virtual bool isRenderable() const	{ return true; }
 
-		inline UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												 const Ogre::Vector2 &parentPos,
-												 const Ogre::Matrix3 &parentRot,
-												 bool forWindows );
-		virtual UiVertex* fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-												  const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot );
+		inline void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											vertexBuffer,
+											GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											RESTRICT_ALIAS textVertBuffer,
+											const Ogre::Vector2 &parentPos,
+											const Ogre::Matrix3 &parentRot,
+											bool forWindows );
+		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											 vertexBuffer,
+											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											 textVertBuffer,
+											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Matrix3 &parentRot );
 	};
 }
 

@@ -48,6 +48,23 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	ShaperManager::~ShaperManager()
 	{
+		if( !m_shapers.empty() )
+		{
+			ShaperVec::const_iterator itor = m_shapers.begin() + 1u;
+			ShaperVec::const_iterator end  = m_shapers.end();
+
+			while( itor != end )
+				delete *itor++;
+
+			m_shapers.clear();
+		}
+
+		if( m_glyphAtlas )
+		{
+			free( m_glyphAtlas );
+			m_glyphAtlas = 0;
+		}
+
 		setOgre( 0, 0 );
 
 		ubidi_close( m_bidi );
@@ -70,15 +87,6 @@ namespace Crystal
 
 		m_hlms = hlms;
 		m_vaoManager = vaoManager;
-
-		if( m_vaoManager )
-		{
-			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
-																Ogre::BT_DEFAULT, 0, false );
-		}
-
-		if( m_hlms )
-			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
 	}
 	//-------------------------------------------------------------------------
 	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
@@ -446,11 +454,13 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void ShaperManager::updateGpuBuffers()
 	{
-		if( m_atlasCapacity !=
+		if( !m_glyphAtlasBuffer ||
+			m_atlasCapacity !=
 			m_glyphAtlasBuffer->getNumElements() * m_glyphAtlasBuffer->getBytesPerElement() )
 		{
 			//Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
-			m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
+			if( m_glyphAtlasBuffer )
+				m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
 			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
 																Ogre::BT_DEFAULT, 0, false );
 			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
@@ -465,7 +475,7 @@ namespace Crystal
 
 			while( itor != end )
 			{
-				m_glyphAtlasBuffer->upload( m_glyphAtlas, itor->offset, itor->size );
+				m_glyphAtlasBuffer->upload( m_glyphAtlas + itor->offset, itor->offset, itor->size );
 				++itor;
 			}
 

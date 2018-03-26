@@ -56,7 +56,8 @@ namespace Crystal
 		m_hbFont( 0 ),
 		m_buffer( 0 ),
 		m_library( shaperManager->getFreeTypeLibrary() ),
-		m_shaperManager( shaperManager )
+		m_shaperManager( shaperManager ),
+		m_ptSize( 0 )
 	{
 		FT_Error errorCode = FT_New_Face( m_library, fontLocation, 0, &m_ftFont );
 		if( errorCode )
@@ -71,7 +72,7 @@ namespace Crystal
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
 
-		setFontSizeFloat( 13.0f );
+		setFontSizeFloat( 24.0f );
 		force_ucs2_charmap( m_ftFont );
 
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );

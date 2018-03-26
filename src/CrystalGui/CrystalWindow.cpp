@@ -189,11 +189,12 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	UiVertex* Window::fillBuffersAndCommands( UiVertex * RESTRICT_ALIAS vertexBuffer,
-											  const Ogre::Vector2 &parentPos,
-											  const Ogre::Matrix3 &parentRot )
+	void Window::fillBuffersAndCommands( UiVertex **vertexBuffer,
+										 GlyphVertex **textVertBuffer,
+										 const Ogre::Vector2 &parentPos,
+										 const Ogre::Matrix3 &parentRot )
 	{
-		return Renderable::fillBuffersAndCommands( vertexBuffer, parentPos, parentRot, true );
+		Renderable::fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos, parentRot, true );
 	}
 	//-------------------------------------------------------------------------
 	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas )
