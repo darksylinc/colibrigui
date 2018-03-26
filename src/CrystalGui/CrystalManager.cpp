@@ -84,6 +84,8 @@ namespace Crystal
 		m_commandBuffer = 0;
 		if( m_indirectBuffer )
 		{
+			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
+				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
 			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
 			m_indirectBuffer = 0;
 		}
@@ -506,7 +508,7 @@ namespace Crystal
 			const Ogre::uint32 requiredVertexCount =
 					static_cast<Ogre::uint32>( m_numTextGlyphs * 6u );
 
-			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
+			Ogre::VertexBufferPacked *vertexBuffer = m_textVao->getBaseVertexBuffer();
 			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
 			if( requiredVertexCount > currVertexCount )
 			{

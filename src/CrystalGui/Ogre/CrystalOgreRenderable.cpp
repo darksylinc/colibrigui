@@ -188,6 +188,8 @@ namespace Ogre
 
 		while( itBuffers != enBuffers )
 		{
+			if( (*itBuffers)->getMappingState() != MS_UNMAPPED )
+				(*itBuffers)->unmap( UO_UNMAP_ALL );
 			vaoManager->destroyVertexBuffer( *itBuffers );
 			++itBuffers;
 		}
