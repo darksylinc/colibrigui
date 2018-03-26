@@ -37,6 +37,7 @@ namespace Crystal
 		m_vao( 0 ),
 		m_indirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
+		m_defaultTextDatablock( 0 ),
 		m_mouseCursorButtonDown( false ),
 		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
 		m_primaryButtonDown( false ),
@@ -126,6 +127,18 @@ namespace Crystal
 				Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
 				CRYSTAL_ASSERT_HIGH( dynamic_cast<Ogre::HlmsCrystal*>( hlms ) );
 				hlmsCrystal = static_cast<Ogre::HlmsCrystal*>( hlms );
+
+				Ogre::HlmsMacroblock macroblock;
+				Ogre::HlmsBlendblock blendblock;
+
+				macroblock.mDepthCheck = false;
+				macroblock.mDepthWrite = false;
+				blendblock.setBlendType( Ogre::SBT_TRANSPARENT_ALPHA );
+
+				m_defaultTextDatablock = hlms->createDatablock( "## Crystal Default Text ##",
+																"## Crystal Default Text ##",
+																macroblock, blendblock,
+																Ogre::HlmsParamVec() );
 			}
 			m_shaperManager->setOgre( hlmsCrystal, vaoManager );
 		}

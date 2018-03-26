@@ -20,6 +20,11 @@ namespace Crystal
 		m_numVertices = 0;
 
 		setCustomParameter( 6373, Ogre::Vector4( 1.0f ) );
+
+		for( size_t i=0; i<States::NumStates; ++i )
+			m_stateInformation[i].materialName = "## Crystal Default Text ##";
+
+		setDatablock( manager->getDefaultTextDatablock() );
 	}
 	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )

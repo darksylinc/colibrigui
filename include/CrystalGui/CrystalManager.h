@@ -54,6 +54,7 @@ namespace Crystal
 		Ogre::VertexArrayObject		* crystalgui_nullable m_textVao;
 		Ogre::IndirectBufferPacked	* crystalgui_nullable m_indirectBuffer;
 		Ogre::CommandBuffer			* crystalgui_nullable m_commandBuffer;
+		Ogre::HlmsDatablock			* crystalgui_nullable m_defaultTextDatablock;
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
@@ -97,6 +98,7 @@ namespace Crystal
 		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
+		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
 
 		/** Sets the size of the virtual canvas. All widgets are relative to this canvas
 			For example if the canvas is 1920x1080, then a widget at x = 960 is in the

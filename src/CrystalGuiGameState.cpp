@@ -76,7 +76,6 @@ namespace Demo
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
-		label->setSkinPack( "ButtonSkin" );
 		label->setText( "Hola" );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
