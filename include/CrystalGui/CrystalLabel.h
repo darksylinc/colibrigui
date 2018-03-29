@@ -30,7 +30,7 @@ namespace Crystal
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
-		uint16_t findLineMaxHeight( ShapedGlyphVec::const_iterator start );
+		float findLineMaxHeight( ShapedGlyphVec::const_iterator start );
 
 		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,

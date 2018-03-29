@@ -210,26 +210,26 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
-	uint16_t Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start )
+	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start )
 	{
 		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
 							start <= m_shapes[m_currentState].end() );
 
-		uint16_t largestHeight = 0;
+		float largestHeight = 0;
 
 		ShapedGlyphVec::const_iterator itor = start;
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
 		while( itor != end && !itor->isNewline )
 		{
-			largestHeight = std::max( itor->glyph->height, largestHeight );
+			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 			++itor;
 		}
 
 		//The newline itself has its own height, make sure it's considered
 		if( itor != end )
-			largestHeight = std::max( itor->glyph->height, largestHeight );
+			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 
-		return largestHeight;
+		return largestHeight * 1.20f;
 	}
 	//-------------------------------------------------------------------------
 	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
@@ -248,7 +248,7 @@ namespace Crystal
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
 
 		Ogre::Vector2 caretPos = m_derivedTopLeft;
-		uint16_t largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
+		float largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
 		caretPos.y += largestHeight * invWindowRes.y;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
