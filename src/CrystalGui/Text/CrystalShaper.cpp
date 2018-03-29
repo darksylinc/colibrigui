@@ -177,7 +177,7 @@ namespace Crystal
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
-			if( glyphInfo[i].codepoint == '\n' )
+			if( utf16Str[glyphInfo[i].cluster] == L'\n' )
 			{
 				ShapedGlyph shapedGlyph;
 				memset( &shapedGlyph, 0, sizeof( ShapedGlyph ) );

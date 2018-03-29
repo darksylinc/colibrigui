@@ -10,6 +10,7 @@
 #include "Vao/OgreVertexArrayObject.h"
 #include "OgreRenderQueue.h"
 #include "OgreHlms.h"
+#include "OgreHlmsDatablock.h"
 
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalManager.h"
