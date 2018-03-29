@@ -177,26 +177,18 @@ namespace Crystal
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
-			if( utf16Str[glyphInfo[i].cluster] == L'\n' )
-			{
-				ShapedGlyph shapedGlyph;
-				memset( &shapedGlyph, 0, sizeof( ShapedGlyph ) );
-				shapesVec.push_back( shapedGlyph );
-			}
-			else
-			{
-				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
-																		  glyphInfo[i].codepoint,
-																		  m_ptSize );
+			const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
+																	  glyphInfo[i].codepoint,
+																	  m_ptSize );
 
-				ShapedGlyph shapedGlyph;
-				shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
-													 glyphPos[i].y_advance ) / 64.0f;
-				shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
-													glyphPos[i].y_offset ) / 64.0f;
-				shapedGlyph.glyph = glyph;
-				shapesVec.push_back( shapedGlyph );
-			}
+			ShapedGlyph shapedGlyph;
+			shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
+												 glyphPos[i].y_advance ) / 64.0f;
+			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
+												glyphPos[i].y_offset ) / 64.0f;
+			shapedGlyph.isNewline = utf16Str[glyphInfo[i].cluster] == L'\n';
+			shapedGlyph.glyph = glyph;
+			shapesVec.push_back( shapedGlyph );
 		}
 
 		shapesVec.swap( outShapes );

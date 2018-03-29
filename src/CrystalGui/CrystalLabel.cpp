@@ -210,6 +210,28 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
+	uint16_t Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start )
+	{
+		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
+							start <= m_shapes[m_currentState].end() );
+
+		uint16_t largestHeight = 0;
+
+		ShapedGlyphVec::const_iterator itor = start;
+		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		while( itor != end && !itor->isNewline )
+		{
+			largestHeight = std::max( itor->glyph->height, largestHeight );
+			++itor;
+		}
+
+		//The newline itself has its own height, make sure it's considered
+		if( itor != end )
+			largestHeight = std::max( itor->glyph->height, largestHeight );
+
+		return largestHeight;
+	}
+	//-------------------------------------------------------------------------
 	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
 										GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
 										const Ogre::Vector2 &parentPos,
@@ -226,7 +248,8 @@ namespace Crystal
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
 
 		Ogre::Vector2 caretPos = m_derivedTopLeft;
-		caretPos.y += m_shapes[m_currentState][0].glyph->height * invWindowRes.y;
+		uint16_t largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
+		caretPos.y += largestHeight * invWindowRes.y;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
@@ -245,24 +268,33 @@ namespace Crystal
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			Ogre::Vector2 topLeft = caretPos +
-									(shapedGlyph.offset +
-									 Ogre::Vector2( shapedGlyph.glyph->bearingX,
-													-shapedGlyph.glyph->bearingY )) * invWindowRes;
-			Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
-													   invWindowRes.x,
-													   topLeft.y + shapedGlyph.glyph->height *
-													   invWindowRes.y );
+			if( !shapedGlyph.isNewline )
+			{
+				Ogre::Vector2 topLeft = caretPos +
+										(shapedGlyph.offset +
+										 Ogre::Vector2( shapedGlyph.glyph->bearingX,
+														-shapedGlyph.glyph->bearingY )) * invWindowRes;
+				Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
+														   invWindowRes.x,
+														   topLeft.y + shapedGlyph.glyph->height *
+														   invWindowRes.y );
 
-			addQuad( textVertBuffer, topLeft, bottomRight,
-					 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
-					 shapedGlyph.glyph->offsetStart );
-			textVertBuffer += 6u;
+				addQuad( textVertBuffer, topLeft, bottomRight,
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
+						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
+						 shapedGlyph.glyph->offsetStart );
+				textVertBuffer += 6u;
 
-			caretPos += shapedGlyph.advance * invWindowRes;
+				caretPos += shapedGlyph.advance * invWindowRes;
 
-			m_numVertices += 6u;
+				m_numVertices += 6u;
+			}
+			else
+			{
+				caretPos.x = m_derivedTopLeft.x;
+				caretPos.y += largestHeight * invWindowRes.y;
+				largestHeight = findLineMaxHeight( itor + 1u );
+			}
 
 			++itor;
 		}
