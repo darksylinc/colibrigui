@@ -24,7 +24,7 @@ namespace Crystal
 		m_offsetPtr( 0 ),
 		m_atlasCapacity( 0 ),
 		m_bidi( 0 ),
-		m_defaultDirection( UBIDI_DEFAULT_LTR ),
+		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
@@ -44,6 +44,7 @@ namespace Crystal
 		}
 
 		m_bidi = ubidi_open();
+		ubidi_orderParagraphsLTR( m_bidi, 1 );
 	}
 	//-------------------------------------------------------------------------
 	ShaperManager::~ShaperManager()
@@ -388,14 +389,28 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::renderString( const char *utf8Str, const RichText &richText,
-									  VertReadingDir::VertReadingDir vertReadingDir,
-									  ShapedGlyphVec &outShapes )
+	TextHorizAlignment::TextHorizAlignment ShaperManager::renderString(
+			const char *utf8Str, const RichText &richText,
+			VertReadingDir::VertReadingDir vertReadingDir,
+			ShapedGlyphVec &outShapes )
 	{
+		UBiDiDirection retVal = UBIDI_NEUTRAL;
+
 		UnicodeString uStr( utf8Str, (int32_t)richText.length );
 
+		UBiDiLevel textHorizDir = m_defaultDirection;
+
+		switch( richText.readingDir )
+		{
+		case HorizReadingDir::Default:	textHorizDir = m_defaultDirection;	break;
+		case HorizReadingDir::AutoLTR:	textHorizDir = UBIDI_DEFAULT_LTR;	break;
+		case HorizReadingDir::AutoRTL:	textHorizDir = UBIDI_DEFAULT_RTL;	break;
+		case HorizReadingDir::LTR:		textHorizDir = UBIDI_LTR;			break;
+		case HorizReadingDir::RTL:		textHorizDir = UBIDI_RTL;			break;
+		}
+
 		UErrorCode errorCode = U_ZERO_ERROR;
-		ubidi_setPara( m_bidi, uStr.getBuffer(), uStr.length(), m_defaultDirection, 0, &errorCode );
+		ubidi_setPara( m_bidi, uStr.getBuffer(), uStr.length(), textHorizDir, 0, &errorCode );
 
 		if( crystalgui_unlikely( !U_SUCCESS(errorCode) ) )
 		{
@@ -408,7 +423,7 @@ namespace Crystal
 						" Desc: ", u_errorName( errorCode ), "\n[UBiDi error] String:" );
 			log->log( errorMsg.c_str(), LogSeverity::Warning );
 			log->log( utf8Str, LogSeverity::Warning );
-			return;
+			return getDefaultTextDirection();
 		}
 
 		Shaper *shaper = 0;
@@ -446,10 +461,36 @@ namespace Crystal
 				hbDir = HB_DIRECTION_TTB;
 			}
 
+			if( retVal == UBIDI_NEUTRAL )
+				retVal = dir;
+			/*else if( retVal != dir )
+				retVal = UBIDI_MIXED;*/
+
 			const uint16_t *utf16Str = temp.getBuffer();
 			shaper->setFontSize26d6( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, outShapes );
 		}
+
+		TextHorizAlignment::TextHorizAlignment finalRetVal;
+		switch( retVal )
+		{
+		case UBIDI_LTR:
+			finalRetVal = TextHorizAlignment::Left;		break;
+		case UBIDI_RTL:
+			finalRetVal = TextHorizAlignment::Right;	break;
+		case UBIDI_MIXED:
+		case UBIDI_NEUTRAL:
+			finalRetVal = TextHorizAlignment::Mixed;
+			break;
+		}
+
+		return finalRetVal;
+	}
+	//-------------------------------------------------------------------------
+	TextHorizAlignment::TextHorizAlignment ShaperManager::getDefaultTextDirection() const
+	{
+		return (m_defaultDirection == UBIDI_DEFAULT_LTR || m_defaultDirection == UBIDI_LTR) ?
+					TextHorizAlignment::Left : TextHorizAlignment::Right;
 	}
 	//-------------------------------------------------------------------------
 	void ShaperManager::updateGpuBuffers()

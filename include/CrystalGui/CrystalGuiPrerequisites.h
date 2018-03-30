@@ -129,42 +129,80 @@ namespace Crystal
 		FocusPair() : window( 0 ), widget( 0 ) {}
 	};
 
-	struct RichText
-	{
-		uint32_t ptSize;
-		uint32_t offset;
-		uint32_t length;
-		uint16_t font;
-
-		bool operator == ( const RichText &other ) const;
-	};
-
 	namespace HorizReadingDir
 	{
 		enum HorizReadingDir
 		{
-			/// When default langauge is LTR, it will display LTR unless the string is fully RTL.
-			/// If the string is mixed, text starts from the left but the reading directions will
-			/// be respected for RTL characters.
-			/// CJK languages are LTR unless overriden by VertReadingDir
+			/// Use same setting as ShaperManager
+			Default,
+			/// The base direction depends on the first strong directional character in the
+			/// text according to the Unicode Bidirectional Algorithm. If no strong directional
+			/// character is present, then set the paragraph level to 1 (LTR or RTL respectively)
 			///
-			/// When default langauge is RTL, it will display RTL unless the string is fully LTR
-			/// If the string is mixed, text starts from the right but the reading directions will
-			/// be respected for LTR characters.
-			Natural,
-			/// Text always starts from the left. RTL character directions will be respected.
-			/// Can be overriden by VertReadingDir
+			/// For example the text (which 1st strong directional char. is LTR from the h in hello):
+			///		hello ARABIC person FARSI
+			/// Will be displayed as:
+			/// 	hello CIBARA person ISRAF
+			///
+			/// While the text (which 1st strong directional char. is RTL from A in ARABIC):
+			///		ARABIC hello FARSI person
+			/// Will be displayed as:
+			/// 	person ISRAF hello CIBARA
+			AutoLTR,
+			AutoRTL,
+			/// Text is strongly LTR
+			/// The text:
+			///		hello ARABIC person FARSI
+			/// Will be displayed as:
+			/// 	hello CIBARA person ISRAF
+			///
+			/// While the text
+			///		ARABIC hello FARSI person
+			/// Will be displayed as:
+			/// 	CIBARA hello ISRAF person
 			LTR,
-			/// Text always starts from the right. LTR character directions will be respected.
-			/// Can be overriden by VertReadingDir
+			/// Text is strongly RTL
+			/// The text:
+			///		hello ARABIC person FARSI
+			/// Will be displayed as:
+			/// 	ISRAF person CIBARA hello
+			///
+			/// While the text
+			///		ARABIC hello FARSI person
+			/// Will be displayed as:
+			/// 	person ISRAF hello CIBARA
 			RTL
+		};
+	}
+	namespace TextHorizAlignment
+	{
+		enum TextHorizAlignment
+		{
+			/// When default langauge is LTR, it will display text aligned Left unless the string
+			/// is fully RTL.
+			/// If the string is mixed, text is aligned to the Left but the reading directions
+			/// will be respected for RTL words according to HorizReadingDir.
+			/// CJK languages are Left unless overriden by VertReadingDir
+			///
+			/// When default langauge is RTL, it will display text aligned Right unless the string
+			/// is fully LTR.
+			/// If the string is mixed, text is aligned to the Right but the reading directions
+			/// will be respected for LTR words according to HorizReadingDir.
+			Natural,
+			Mixed = Natural,
+			/// Text always starts from the left. Can be overriden by VertReadingDir
+			Left,
+			/// Text is always centered
+			Center,
+			/// Text always starts from the right. Can be overriden by VertReadingDir
+			Right
 		};
 	}
 	namespace VertReadingDir
 	{
 		enum VertReadingDir
 		{
-			/// Always obey HorizReadingDir
+			/// Always obey HorizReadingDir & TextHorizAlignment
 			Disabled,
 			/// When default language is not CJK, same as Disabled
 			/// When default language is CJK, same aligns top to bottom, newlines right to left
@@ -177,6 +215,17 @@ namespace Crystal
 			ForceBTT,
 		};
 	}
+
+	struct RichText
+	{
+		uint32_t ptSize;
+		uint32_t offset;
+		uint32_t length;
+		HorizReadingDir::HorizReadingDir readingDir;
+		uint16_t font;
+
+		bool operator == ( const RichText &other ) const;
+	};
 
 	namespace LinebreakMode
 	{

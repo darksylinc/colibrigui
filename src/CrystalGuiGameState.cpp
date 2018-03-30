@@ -76,7 +76,34 @@ namespace Demo
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
-		label->setText( "Hola\n\nQue tal?" );
+		label->setText( "The path of the righteous man is beset on all sides by the iniquities\n"
+						"of the selfish and the tyranny of evil men. Blessed is he who, in the\n"
+						"name of charity and good will, shepherds the weak through the valley \n"
+						"of darkness, for he is truly his brother's keeper and the finder of \n"
+						"lost children. And I will strike down upon thee with great vengeance \n"
+						"and furious anger those who would attempt to poison and destroy My \n"
+						"brothers. And you will know My name is the Lord when I lay My \n"
+						"vengeance upon thee." );
+		//label->setText( "من أنا لاستجواب أولئك الذين يكتبونh\nola" );
+//		label->setText( "من أنا لاستجواب ""\n\r"
+//						"أولئك الذين يكتبونhola" );
+		{
+			std::ifstream file( "/home/matias/Desktop/Text2", std::ios::in|std::ios::binary );
+			file.seekg( 0, std::ios::end );
+			const size_t fileSize = file.tellg();
+			file.seekg( 0, std::ios::beg );
+			std::string text;
+			text.resize( fileSize );
+			file.read( &text[0], fileSize );
+			label->setText( text );
+			//label->setText( "Hola\nQue tal sin paragraph?" );
+			//label->setText( "Hola\u2029\nQue tal?" );
+			//label->setText( "تجوستجوستجThisتجوستجوستج is a ستجو word ستجوستجوستجوستج" );
+			//label->setText( "الذي يحيي ذكرى احتجاجات مواطنين فلسطينيين من مدن" );
+		}
+		label->setTextHorizAlignment( Crystal::TextHorizAlignment::Right );
+		//label->setText( "The path of the righteous man is beset on all sides by" );
+		label->setSize( Ogre::Vector2( 0.5f, 1.0f ) );
 
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
 		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button0 );

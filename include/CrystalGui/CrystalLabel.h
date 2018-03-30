@@ -18,9 +18,11 @@ namespace Crystal
 
 		bool m_glyphsDirty[States::NumStates];
 
-		LinebreakMode::LinebreakMode		m_linebreakMode;
-		HorizReadingDir::HorizReadingDir	m_horizReadingDir;
-		VertReadingDir::VertReadingDir		m_vertReadingDir;
+		LinebreakMode::LinebreakMode			m_linebreakMode;
+		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
+		VertReadingDir::VertReadingDir			m_vertReadingDir;
+
+		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
 
 		//Renderable	*m_background;
 
@@ -30,6 +32,7 @@ namespace Crystal
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
+		float findCaretStart( ShapedGlyphVec::const_iterator start );
 		float findLineMaxHeight( ShapedGlyphVec::const_iterator start );
 
 		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
@@ -47,6 +50,9 @@ namespace Crystal
 		Label( CrystalManager *manager );
 
 		virtual bool isLabel() const		{ return true; }
+
+		void setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment );
+		TextHorizAlignment::TextHorizAlignment getTextHorizAlignment() const;
 
 		/** Called by CrystalManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.

@@ -135,9 +135,24 @@ namespace Crystal
 
 		void flushReleasedGlyphs();
 
-		void renderString( const char *utf8Str, const RichText &richText,
-						   VertReadingDir::VertReadingDir vertReadingDir,
-						   ShapedGlyphVec &outShapes );
+		/**
+		@brief renderString
+		@param utf8Str
+		@param richText
+		@param vertReadingDir
+		@param outShapes
+		@return
+			If string is fully LTR, returns Left
+			If string is fully RTL, returns Right
+			If string is mixed, it returns Mixed
+			If string is empty or couldn't be analyzed, it returns Mixed
+		*/
+		TextHorizAlignment::TextHorizAlignment renderString(
+				const char *utf8Str, const RichText &richText,
+				VertReadingDir::VertReadingDir vertReadingDir,
+				ShapedGlyphVec &outShapes );
+
+		TextHorizAlignment::TextHorizAlignment getDefaultTextDirection() const;
 
 		void updateGpuBuffers();
 

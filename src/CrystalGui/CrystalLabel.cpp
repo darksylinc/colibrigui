@@ -10,10 +10,14 @@ namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
 		Renderable( manager ),
-		m_horizReadingDir( HorizReadingDir::Natural ),
+		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertReadingDir( VertReadingDir::Disabled ),
 		m_linebreakMode( LinebreakMode::CharWrap )
 	{
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		for( size_t i=0; i<States::NumStates; ++i )
+			m_actualHorizAlignment[i] = shaperManager->getDefaultTextDirection();
+
 		for( size_t i=0; i<States::NumStates; ++i )
 			 m_glyphsDirty[i] = false;
 
@@ -27,6 +31,16 @@ namespace Crystal
 		setDatablock( manager->getDefaultTextDatablock() );
 	}
 	//-------------------------------------------------------------------------
+	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
+	{
+		m_horizAlignment = horizAlignment;
+	}
+	//-------------------------------------------------------------------------
+	TextHorizAlignment::TextHorizAlignment Label::getTextHorizAlignment() const
+	{
+		return m_horizAlignment;
+	}
+	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )
 	{
 		const size_t textSize = m_text[state].size();
@@ -37,6 +51,7 @@ namespace Crystal
 			rt.font = 0;
 			rt.offset = 0;
 			rt.length = textSize;
+			rt.readingDir = HorizReadingDir::Default;
 			m_richText[state].push_back( rt );
 		}
 		else
@@ -105,6 +120,7 @@ namespace Crystal
 				if( m_text[state] == m_text[i] && m_richText[state] == m_richText[i] )
 				{
 					m_shapes[state] = m_shapes[i];
+					m_actualHorizAlignment[state] = m_actualHorizAlignment[i];
 
 					ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
 					ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
@@ -122,15 +138,40 @@ namespace Crystal
 
 		if( !reusableFound )
 		{
+			bool alignmentUnknown = true;
+			TextHorizAlignment::TextHorizAlignment actualHorizAlignment = TextHorizAlignment::Mixed;
+
 			RichTextVec::const_iterator itor = m_richText[state].begin();
 			RichTextVec::const_iterator end  = m_richText[state].end();
 			while( itor != end )
 			{
 				const RichText &richText = *itor;
 				const char *utf8Str = m_text[state].c_str() + richText.offset;
-				shaperManager->renderString( utf8Str, richText, m_vertReadingDir, m_shapes[state] );
+				TextHorizAlignment::TextHorizAlignment actualDir =
+						shaperManager->renderString( utf8Str, richText, m_vertReadingDir,
+													 m_shapes[state] );
+
+				if( alignmentUnknown )
+				{
+					actualHorizAlignment = actualDir;
+					alignmentUnknown = true;
+				}
+				else if( actualHorizAlignment != actualDir )
+					actualHorizAlignment = TextHorizAlignment::Mixed;
+
 				++itor;
 			}
+
+			if( m_horizAlignment == TextHorizAlignment::Natural )
+			{
+				if( actualHorizAlignment == TextHorizAlignment::Mixed )
+					m_actualHorizAlignment[state] = shaperManager->getDefaultTextDirection();
+				else
+					m_actualHorizAlignment[state] = actualHorizAlignment;
+			}
+			else
+				m_actualHorizAlignment[state] = m_horizAlignment;
+
 		}
 
 		m_glyphsDirty[state] = false;
@@ -210,6 +251,44 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
+	float Label::findCaretStart( ShapedGlyphVec::const_iterator start )
+	{
+		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
+							start <= m_shapes[m_currentState].end() );
+
+		if( m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Left )
+			return m_derivedTopLeft.x;
+
+		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
+
+		Ogre::Vector2 caretPos = m_derivedTopLeft;
+		float lastCharWidth = 0;
+
+		ShapedGlyphVec::const_iterator itor = start;
+		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		while( itor != end && !itor->isNewline )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			const float charWidth = shapedGlyph.glyph->width * invWindowRes.x;
+
+			if( m_linebreakMode == LinebreakMode::CharWrap &&
+				caretPos.x + charWidth > m_derivedBottomRight.x )
+			{
+				break;
+			}
+
+			caretPos += shapedGlyph.advance * invWindowRes;
+			lastCharWidth = charWidth;
+
+			++itor;
+		}
+
+		caretPos.x += lastCharWidth;
+
+		return m_derivedBottomRight.x - caretPos.x;
+	}
+	//-------------------------------------------------------------------------
 	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start )
 	{
 		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
@@ -245,9 +324,17 @@ namespace Crystal
 
 		updateDerivedTransform( parentPos, parentRot );
 
+		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Left ||
+							 m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Right ||
+							 m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Center) &&
+							"m_actualHorizAlignment not set! updateGlyphs not called?" );
+
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
 
 		Ogre::Vector2 caretPos = m_derivedTopLeft;
+		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Left )
+			caretPos.x = findCaretStart( m_shapes[m_currentState].begin() );
+
 		float largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
 		caretPos.y += largestHeight * invWindowRes.y;
 
@@ -273,7 +360,7 @@ namespace Crystal
 				if( m_linebreakMode == LinebreakMode::CharWrap &&
 					caretPos.x + shapedGlyph.glyph->width * invWindowRes.x > m_derivedBottomRight.x )
 				{
-					caretPos.x = m_derivedTopLeft.x;
+					caretPos.x = findCaretStart( itor );
 					caretPos.y += largestHeight * invWindowRes.y;
 				}
 
@@ -298,7 +385,7 @@ namespace Crystal
 			}
 			else
 			{
-				caretPos.x = m_derivedTopLeft.x;
+				caretPos.x = findCaretStart( itor );
 				caretPos.y += largestHeight * invWindowRes.y;
 				largestHeight = findLineMaxHeight( itor + 1u );
 			}
