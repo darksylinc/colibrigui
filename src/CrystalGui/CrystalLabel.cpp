@@ -270,6 +270,13 @@ namespace Crystal
 
 			if( !shapedGlyph.isNewline )
 			{
+				if( m_linebreakMode == LinebreakMode::CharWrap &&
+					caretPos.x + shapedGlyph.glyph->width * invWindowRes.x > m_derivedBottomRight.x )
+				{
+					caretPos.x = m_derivedTopLeft.x;
+					caretPos.y += largestHeight * invWindowRes.y;
+				}
+
 				Ogre::Vector2 topLeft = caretPos +
 										(shapedGlyph.offset +
 										 Ogre::Vector2( shapedGlyph.glyph->bearingX,
