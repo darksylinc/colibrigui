@@ -397,6 +397,7 @@ namespace Crystal
 		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
 		nextWord.oldCaretPos = nextWord.caretPos;
+		bool multipleWordsInLine = false;
 
 		while( findNextWord( nextWord ) )
 		{
@@ -404,17 +405,21 @@ namespace Crystal
 			{
 				float caretAtEndOfWord = nextWord.caretPos.x - nextWord.lastAdvance.x +
 										 nextWord.lastCharWidth;
+				float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
 				if( caretAtEndOfWord > m_derivedBottomRight.x &&
+					(distBetweenWords <= m_derivedBottomRight.x || multipleWordsInLine) &&
 					!m_shapes[m_currentState][nextWord.offset].isNewline )
 				{
-					float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
 					nextWord.caretPos.x -= nextWord.oldCaretPos.x;
 					nextWord.caretPos.x = findCaretStart( nextWord );
 					nextWord.caretPos.y += largestHeight * invWindowRes.y;
 					nextWord.oldCaretPos = nextWord.caretPos;
 					nextWord.caretPos.x += distBetweenWords;
+					multipleWordsInLine = false;
 				}
 			}
+
+			multipleWordsInLine = true;
 
 			Ogre::Vector2 caretPos = nextWord.oldCaretPos;
 
@@ -467,6 +472,7 @@ namespace Crystal
 					nextWord.caretPos.y += largestHeight * invWindowRes.y;
 					nextWord.oldCaretPos = nextWord.caretPos;
 					nextWord.caretPos.x += distBetweenWords;
+					multipleWordsInLine = false;
 				}
 
 				++itor;
