@@ -373,6 +373,7 @@ namespace Crystal
 							 m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Center) &&
 							"m_actualHorizAlignment not set! updateGlyphs not called?" );
 
+		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
 
 		Word nextWord;
@@ -449,6 +450,16 @@ namespace Crystal
 															   invWindowRes.x,
 															   topLeft.y + shapedGlyph.glyph->height *
 															   invWindowRes.y );
+
+					//Snap to pixels
+					topLeft = topLeft * halfWindowRes;
+					topLeft.x = roundf( topLeft.x );
+					topLeft.y = roundf( topLeft.y );
+					bottomRight = bottomRight * halfWindowRes;
+					bottomRight.x = roundf( bottomRight.x );
+					bottomRight.y = roundf( bottomRight.y );
+					topLeft = topLeft * invWindowRes;
+					bottomRight = bottomRight * invWindowRes;
 
 					addQuad( textVertBuffer, topLeft, bottomRight,
 							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,

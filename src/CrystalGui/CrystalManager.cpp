@@ -153,6 +153,7 @@ namespace Crystal
 		m_canvasSize = canvasSize;
 		m_invCanvasSize2x = 2.0f / canvasSize;
 		m_pixelSize = pixelSize / canvasSize;
+		m_halfWindowResolution	= windowResolution / 2.0f;
 		m_invWindowResolution2x = 2.0f / windowResolution;
 	}
 	//-------------------------------------------------------------------------
