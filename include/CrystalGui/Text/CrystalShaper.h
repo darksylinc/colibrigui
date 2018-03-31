@@ -21,6 +21,8 @@ namespace Crystal
 		Ogre::Vector2 advance;
 		Ogre::Vector2 offset;
 		bool isNewline;
+		bool isWordBreaker;
+		bool isRtl;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;

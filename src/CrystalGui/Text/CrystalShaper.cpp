@@ -181,12 +181,20 @@ namespace Crystal
 																	  glyphInfo[i].codepoint,
 																	  m_ptSize );
 
+			size_t cluster = glyphInfo[i].cluster;
+
 			ShapedGlyph shapedGlyph;
 			shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
 												 glyphPos[i].y_advance ) / 64.0f;
 			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
 												glyphPos[i].y_offset ) / 64.0f;
-			shapedGlyph.isNewline = utf16Str[glyphInfo[i].cluster] == L'\n';
+			shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
+			shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
+										utf16Str[cluster] == L'\t'	||
+										utf16Str[cluster] == L'.'	||
+										utf16Str[cluster] == L';'	||
+										utf16Str[cluster] == L',';
+			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
 			shapedGlyph.glyph = glyph;
 			shapesVec.push_back( shapedGlyph );
 		}

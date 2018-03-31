@@ -12,7 +12,7 @@ namespace Crystal
 		Renderable( manager ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertReadingDir( VertReadingDir::Disabled ),
-		m_linebreakMode( LinebreakMode::CharWrap )
+		m_linebreakMode( LinebreakMode::WordWrap )
 	{
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		for( size_t i=0; i<States::NumStates; ++i )
@@ -251,45 +251,90 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
-	float Label::findCaretStart( ShapedGlyphVec::const_iterator start )
+	bool Label::findNextWord( Word &inOutWord ) const
 	{
-		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
-							start <= m_shapes[m_currentState].end() );
+		CRYSTAL_ASSERT_LOW( inOutWord.offset <= m_shapes[m_currentState].size() &&
+							inOutWord.offset + inOutWord.length <= m_shapes[m_currentState].size() );
+
+		Word word = inOutWord;
+
+		if( word.offset == m_shapes[m_currentState].size() ||
+			word.offset + word.length == m_shapes[m_currentState].size() )
+		{
+			word.oldCaretPos	= word.caretPos;
+			word.length			= 0;
+			word.lastAdvance	= 0;
+			word.lastCharWidth	= 0;
+			//word.caretPos		= Ogre::Vector2::ZERO;
+			return false;
+		}
+
+		word.offset = word.offset + word.length;
+
+		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
+
+		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + word.offset;
+		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+
+		ShapedGlyph firstGlyph = *itor;
+		word.oldCaretPos	= word.caretPos;
+		word.caretPos		+= firstGlyph.advance * invWindowRes;
+		word.lastAdvance	= firstGlyph.advance * invWindowRes;
+		word.lastCharWidth	= firstGlyph.glyph->width;
+		const bool isRtl	= firstGlyph.isRtl;
+		++itor;
+
+		if( !firstGlyph.isNewline && !firstGlyph.isWordBreaker )
+		{
+			while( itor != end && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
+			{
+				const ShapedGlyph &shapedGlyph = *itor;
+				word.caretPos		+= shapedGlyph.advance * invWindowRes;
+				word.lastAdvance	= shapedGlyph.advance * invWindowRes;
+				word.lastCharWidth	= shapedGlyph.glyph->width;
+				++itor;
+			}
+		}
+
+		word.length = itor - (m_shapes[m_currentState].begin() + word.offset);
+		word.lastCharWidth *= invWindowRes.x;
+
+		inOutWord = word;
+
+		return word.length != 0;
+	}
+	//-------------------------------------------------------------------------
+	float Label::findCaretStart( const Word &firstWord ) const
+	{
+		CRYSTAL_ASSERT_LOW( firstWord.offset <= m_shapes[m_currentState].size() &&
+							firstWord.offset + firstWord.length <= m_shapes[m_currentState].size() );
 
 		if( m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Left )
 			return m_derivedTopLeft.x;
 
-		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
+		Word prevWord = firstWord;
+		Word nextWord = firstWord;
 
-		Ogre::Vector2 caretPos = m_derivedTopLeft;
-		float lastCharWidth = 0;
-
-		ShapedGlyphVec::const_iterator itor = start;
-		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
-		while( itor != end && !itor->isNewline )
+		while( findNextWord( nextWord ) )
 		{
-			const ShapedGlyph &shapedGlyph = *itor;
+			float mostRight = nextWord.caretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
 
-			const float charWidth = shapedGlyph.glyph->width * invWindowRes.x;
-
-			if( m_linebreakMode == LinebreakMode::CharWrap &&
-				caretPos.x + charWidth > m_derivedBottomRight.x )
+			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][nextWord.offset];
+			if( shapedGlyph.isNewline ||
+				mostRight > m_derivedBottomRight.x )
 			{
 				break;
 			}
 
-			caretPos += shapedGlyph.advance * invWindowRes;
-			lastCharWidth = charWidth;
-
-			++itor;
+			prevWord = nextWord;
 		}
 
-		caretPos.x += lastCharWidth;
+		float mostRight = prevWord.caretPos.x;
 
-		return m_derivedBottomRight.x - caretPos.x;
+		return m_derivedBottomRight.x - mostRight;
 	}
 	//-------------------------------------------------------------------------
-	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start )
+	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start ) const
 	{
 		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
 							start <= m_shapes[m_currentState].end() );
@@ -331,12 +376,15 @@ namespace Crystal
 
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
 
-		Ogre::Vector2 caretPos = m_derivedTopLeft;
+		Word nextWord;
+		memset( &nextWord, 0, sizeof(Word) );
+		nextWord.caretPos = m_derivedTopLeft;
+
 		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Left )
-			caretPos.x = findCaretStart( m_shapes[m_currentState].begin() );
+			nextWord.caretPos.x = findCaretStart( nextWord );
 
 		float largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
-		caretPos.y += largestHeight * invWindowRes.y;
+		nextWord.caretPos.y += largestHeight * invWindowRes.y;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
@@ -348,49 +396,81 @@ namespace Crystal
 		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
 		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
-		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
-		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		nextWord.oldCaretPos = nextWord.caretPos;
 
-		while( itor != end )
+		while( findNextWord( nextWord ) )
 		{
-			const ShapedGlyph &shapedGlyph = *itor;
-
-			if( !shapedGlyph.isNewline )
+			if( m_linebreakMode == LinebreakMode::WordWrap )
 			{
-				if( m_linebreakMode == LinebreakMode::CharWrap &&
-					caretPos.x + shapedGlyph.glyph->width * invWindowRes.x > m_derivedBottomRight.x )
+				float caretAtEndOfWord = nextWord.caretPos.x - nextWord.lastAdvance.x +
+										 nextWord.lastCharWidth;
+				if( caretAtEndOfWord > m_derivedBottomRight.x &&
+					!m_shapes[m_currentState][nextWord.offset].isNewline )
 				{
-					caretPos.x = findCaretStart( itor );
-					caretPos.y += largestHeight * invWindowRes.y;
+					float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
+					nextWord.caretPos.x -= nextWord.oldCaretPos.x;
+					nextWord.caretPos.x = findCaretStart( nextWord );
+					nextWord.caretPos.y += largestHeight * invWindowRes.y;
+					nextWord.oldCaretPos = nextWord.caretPos;
+					nextWord.caretPos.x += distBetweenWords;
+				}
+			}
+
+			Ogre::Vector2 caretPos = nextWord.oldCaretPos;
+
+			ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + nextWord.offset;
+			ShapedGlyphVec::const_iterator end  = itor + nextWord.length;
+
+			while( itor != end )
+			{
+				const ShapedGlyph &shapedGlyph = *itor;
+
+				if( !shapedGlyph.isNewline )
+				{
+					Ogre::Vector2 topLeft = caretPos +
+											(shapedGlyph.offset +
+											 Ogre::Vector2( shapedGlyph.glyph->bearingX,
+															-shapedGlyph.glyph->bearingY )) * invWindowRes;
+					Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
+															   invWindowRes.x,
+															   topLeft.y + shapedGlyph.glyph->height *
+															   invWindowRes.y );
+
+					if( !shapedGlyph.isRtl )
+					{
+						rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
+						rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 128.0f + 0.5f );
+						rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 128.0f + 0.5f );
+					}
+					else
+					{
+						rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
+						rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
+						rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
+					}
+
+					addQuad( textVertBuffer, topLeft, bottomRight,
+							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
+							 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
+							 shapedGlyph.glyph->offsetStart );
+					textVertBuffer += 6u;
+
+					caretPos += shapedGlyph.advance * invWindowRes;
+
+					m_numVertices += 6u;
+				}
+				else
+				{
+					float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
+					nextWord.caretPos.x -= nextWord.oldCaretPos.x;
+					nextWord.caretPos.x = findCaretStart( nextWord );
+					nextWord.caretPos.y += largestHeight * invWindowRes.y;
+					nextWord.oldCaretPos = nextWord.caretPos;
+					nextWord.caretPos.x += distBetweenWords;
 				}
 
-				Ogre::Vector2 topLeft = caretPos +
-										(shapedGlyph.offset +
-										 Ogre::Vector2( shapedGlyph.glyph->bearingX,
-														-shapedGlyph.glyph->bearingY )) * invWindowRes;
-				Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
-														   invWindowRes.x,
-														   topLeft.y + shapedGlyph.glyph->height *
-														   invWindowRes.y );
-
-				addQuad( textVertBuffer, topLeft, bottomRight,
-						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
-						 shapedGlyph.glyph->offsetStart );
-				textVertBuffer += 6u;
-
-				caretPos += shapedGlyph.advance * invWindowRes;
-
-				m_numVertices += 6u;
+				++itor;
 			}
-			else
-			{
-				caretPos.x = findCaretStart( itor );
-				caretPos.y += largestHeight * invWindowRes.y;
-				largestHeight = findLineMaxHeight( itor + 1u );
-			}
-
-			++itor;
 		}
 
 		*_textVertBuffer = textVertBuffer;

@@ -231,8 +231,8 @@ namespace Crystal
 	{
 		enum LinebreakMode
 		{
-			/// Letters will be broken into the next newline.
-			CharWrap,
+			/// Words will be broken into the next newline.
+			WordWrap,
 			/// Text outside bounds will disapear
 			Clip
 			/// Unsupported: WordWrap would need us to include very big unicode datafiles

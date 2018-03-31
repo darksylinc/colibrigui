@@ -12,6 +12,16 @@ namespace Crystal
 
 	class Label : public Renderable
 	{
+		struct Word
+		{
+			size_t offset;
+			size_t length;
+			Ogre::Vector2 oldCaretPos;
+			Ogre::Vector2 caretPos;
+			Ogre::Vector2 lastAdvance;
+			float lastCharWidth;
+		};
+
 		std::string		m_text[States::NumStates];
 		RichTextVec		m_richText[States::NumStates];
 		ShapedGlyphVec	m_shapes[States::NumStates];
@@ -32,8 +42,10 @@ namespace Crystal
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
-		float findCaretStart( ShapedGlyphVec::const_iterator start );
-		float findLineMaxHeight( ShapedGlyphVec::const_iterator start );
+		/// Returns false when there are no more words (and output is now empty)
+		bool findNextWord( Word &inOutWord ) const;
+		float findCaretStart( const Word &firstWord ) const;
+		float findLineMaxHeight( ShapedGlyphVec::const_iterator start ) const;
 
 		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,
