@@ -337,7 +337,10 @@ namespace Crystal
 
 		float mostRight = prevWord.endCaretPos.x;
 
-		return m_derivedBottomRight.x - mostRight;
+		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Center )
+			return m_derivedBottomRight.x - mostRight;
+		else
+			return (m_derivedBottomRight.x - mostRight) * 0.5f;
 	}
 	//-------------------------------------------------------------------------
 	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start ) const
