@@ -175,6 +175,96 @@ namespace Crystal
 		}
 
 		m_glyphsDirty[state] = false;
+
+		buildGlyphs( state );
+	}
+	//-------------------------------------------------------------------------
+	void Label::buildGlyphs( States::States state )
+	{
+		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
+							"m_actualHorizAlignment not set! updateGlyphs not called?" );
+
+		const Ogre::Vector2 bottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
+													m_manager->getCanvasSize());
+
+		Word nextWord;
+		memset( &nextWord, 0, sizeof(Word) );
+
+		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
+		{
+			nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
+			nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
+		}
+
+		float largestHeight = findLineMaxHeight( m_shapes[state].begin(), state );
+		nextWord.endCaretPos.y += largestHeight;
+
+		bool multipleWordsInLine = false;
+
+		while( findNextWord( nextWord, state ) )
+		{
+			if( m_linebreakMode == LinebreakMode::WordWrap )
+			{
+				float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
+										 nextWord.lastCharWidth;
+				float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+				if( caretAtEndOfWord > bottomRight.x &&
+					(distBetweenWords <= bottomRight.x || multipleWordsInLine) &&
+					!m_shapes[state][nextWord.offset].isNewline )
+				{
+					float caretReturn = nextWord.startCaretPos.x;
+					float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+
+					//Return to left.
+					nextWord.startCaretPos.x -= caretReturn;
+					nextWord.endCaretPos.x	 -= caretReturn;
+					//Calculate alignment
+					nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
+					nextWord.startCaretPos.y	+= largestHeight;
+					nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
+					nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+
+					multipleWordsInLine = false;
+				}
+			}
+
+			multipleWordsInLine = true;
+
+			Ogre::Vector2 caretPos = nextWord.startCaretPos;
+
+			ShapedGlyphVec::iterator itor = m_shapes[state].begin() + nextWord.offset;
+			ShapedGlyphVec::iterator end  = itor + nextWord.length;
+
+			while( itor != end )
+			{
+				ShapedGlyph &shapedGlyph = *itor;
+
+				if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
+				{
+					shapedGlyph.caretPos = caretPos;
+					caretPos += shapedGlyph.advance;
+				}
+				else if( shapedGlyph.isTab )
+				{
+					// findNextWord already took care of this
+				}
+				else/* if( shapedGlyph.isNewline )*/
+				{
+					//Return to left. Newlines are zero width.
+					nextWord.startCaretPos.x = 0.0f;
+					nextWord.endCaretPos.x	 = 0.0f;
+					//Calculate alignment
+					nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
+					nextWord.startCaretPos.y	+= largestHeight;
+					nextWord.endCaretPos		= nextWord.startCaretPos;
+					multipleWordsInLine = false;
+				}
+
+				++itor;
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	inline void Label::addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
@@ -251,15 +341,15 @@ namespace Crystal
 		#undef CRYSTAL_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
-	bool Label::findNextWord( Word &inOutWord ) const
+	bool Label::findNextWord( Word &inOutWord, States::States state ) const
 	{
-		CRYSTAL_ASSERT_LOW( inOutWord.offset <= m_shapes[m_currentState].size() &&
-							inOutWord.offset + inOutWord.length <= m_shapes[m_currentState].size() );
+		CRYSTAL_ASSERT_LOW( inOutWord.offset <= m_shapes[state].size() &&
+							inOutWord.offset + inOutWord.length <= m_shapes[state].size() );
 
 		Word word = inOutWord;
 
-		if( word.offset == m_shapes[m_currentState].size() ||
-			word.offset + word.length == m_shapes[m_currentState].size() )
+		if( word.offset == m_shapes[state].size() ||
+			word.offset + word.length == m_shapes[state].size() )
 		{
 			word.length			= 0;
 			word.lastAdvance	= 0;
@@ -270,15 +360,13 @@ namespace Crystal
 
 		word.offset = word.offset + word.length;
 
-		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
-
-		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + word.offset;
-		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		ShapedGlyphVec::const_iterator itor = m_shapes[state].begin() + word.offset;
+		ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
 
 		ShapedGlyph firstGlyph = *itor;
 		word.startCaretPos	= word.endCaretPos;
-		word.endCaretPos	+= firstGlyph.advance * invWindowRes;
-		word.lastAdvance	= firstGlyph.advance * invWindowRes;
+		word.endCaretPos	+= firstGlyph.advance;
+		word.lastAdvance	= firstGlyph.advance;
 		word.lastCharWidth	= firstGlyph.glyph->width;
 		const bool isRtl	= firstGlyph.isRtl;
 		++itor;
@@ -288,8 +376,8 @@ namespace Crystal
 			while( itor != end && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
 			{
 				const ShapedGlyph &shapedGlyph = *itor;
-				word.endCaretPos	+= shapedGlyph.advance * invWindowRes;
-				word.lastAdvance	= shapedGlyph.advance * invWindowRes;
+				word.endCaretPos	+= shapedGlyph.advance;
+				word.lastAdvance	= shapedGlyph.advance;
 				word.lastCharWidth	= shapedGlyph.glyph->width;
 				++itor;
 			}
@@ -297,37 +385,37 @@ namespace Crystal
 		else if( firstGlyph.isTab )
 		{
 			word.endCaretPos.x = ceilf( (word.startCaretPos.x +
-										 firstGlyph.advance.x * 0.25f * invWindowRes.x) /
-										(firstGlyph.advance.x * 2.0f * invWindowRes.x) ) *
-								 (firstGlyph.advance.x * 2.0f * invWindowRes.x);
+										 firstGlyph.advance.x * 0.25f) /
+										(firstGlyph.advance.x * 2.0f) ) *
+								 (firstGlyph.advance.x * 2.0f);
 		}
 
-		word.length = itor - (m_shapes[m_currentState].begin() + word.offset);
-		word.lastCharWidth *= invWindowRes.x;
+		word.length = itor - (m_shapes[state].begin() + word.offset);
 
 		inOutWord = word;
 
 		return word.length != 0;
 	}
 	//-------------------------------------------------------------------------
-	float Label::findCaretStart( const Word &firstWord ) const
+	float Label::findCaretStart( const Word &firstWord, States::States state,
+								 const Ogre::Vector2 bottomRight ) const
 	{
-		CRYSTAL_ASSERT_LOW( firstWord.offset <= m_shapes[m_currentState].size() &&
-							firstWord.offset + firstWord.length <= m_shapes[m_currentState].size() );
+		CRYSTAL_ASSERT_LOW( firstWord.offset <= m_shapes[state].size() &&
+							firstWord.offset + firstWord.length <= m_shapes[state].size() );
 
-		if( m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Left )
-			return m_derivedTopLeft.x;
+		if( m_actualHorizAlignment[state] == TextHorizAlignment::Left )
+			return 0.0f;
 
 		Word prevWord = firstWord;
 		Word nextWord = firstWord;
 
-		while( findNextWord( nextWord ) )
+		while( findNextWord( nextWord, state ) )
 		{
 			float mostRight = nextWord.endCaretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
 
-			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][nextWord.offset];
+			const ShapedGlyph &shapedGlyph = m_shapes[state][nextWord.offset];
 			if( shapedGlyph.isNewline ||
-				mostRight > m_derivedBottomRight.x )
+				mostRight > bottomRight.x )
 			{
 				break;
 			}
@@ -337,21 +425,22 @@ namespace Crystal
 
 		float mostRight = prevWord.endCaretPos.x;
 
-		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Center )
-			return m_derivedBottomRight.x - mostRight;
+		if( m_actualHorizAlignment[state] != TextHorizAlignment::Center )
+			return bottomRight.x - mostRight;
 		else
-			return (m_derivedBottomRight.x - mostRight) * 0.5f;
+			return (bottomRight.x - mostRight) * 0.5f;
 	}
 	//-------------------------------------------------------------------------
-	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start ) const
+	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start,
+									States::States state ) const
 	{
-		CRYSTAL_ASSERT_LOW( start >= m_shapes[m_currentState].begin() &&
-							start <= m_shapes[m_currentState].end() );
+		CRYSTAL_ASSERT_LOW( start >= m_shapes[state].begin() &&
+							start <= m_shapes[state].end() );
 
 		float largestHeight = 0;
 
 		ShapedGlyphVec::const_iterator itor = start;
-		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
 		while( itor != end && !itor->isNewline )
 		{
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
@@ -378,27 +467,8 @@ namespace Crystal
 
 		updateDerivedTransform( parentPos, parentRot );
 
-		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Left ||
-							 m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Right ||
-							 m_actualHorizAlignment[m_currentState] == TextHorizAlignment::Center) &&
-							"m_actualHorizAlignment not set! updateGlyphs not called?" );
-
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
-
-		Word nextWord;
-		memset( &nextWord, 0, sizeof(Word) );
-		nextWord.startCaretPos = m_derivedTopLeft;
-		nextWord.endCaretPos = m_derivedTopLeft;
-
-		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Left )
-		{
-			nextWord.startCaretPos.x	= findCaretStart( nextWord );
-			nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
-		}
-
-		float largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
-		nextWord.endCaretPos.y += largestHeight * invWindowRes.y;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
@@ -410,96 +480,46 @@ namespace Crystal
 		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
 		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
-		bool multipleWordsInLine = false;
+		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
+		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
 
-		while( findNextWord( nextWord ) )
+		while( itor != end )
 		{
-			if( m_linebreakMode == LinebreakMode::WordWrap )
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
 			{
-				float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
-										 nextWord.lastCharWidth;
-				float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
-				if( caretAtEndOfWord > m_derivedBottomRight.x &&
-					(distBetweenWords <= m_derivedBottomRight.x || multipleWordsInLine) &&
-					!m_shapes[m_currentState][nextWord.offset].isNewline )
-				{
-					float caretReturn = nextWord.startCaretPos.x - m_derivedTopLeft.x;
-					float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+				Ogre::Vector2 topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
+										Ogre::Vector2( shapedGlyph.glyph->bearingX,
+													   -shapedGlyph.glyph->bearingY );
+				Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
+														   shapedGlyph.glyph->width,
+														   topLeft.y + shapedGlyph.glyph->height );
 
-					//Return to left.
-					nextWord.startCaretPos.x -= caretReturn;
-					nextWord.endCaretPos.x	 -= caretReturn;
-					//Calculate alignment
-					nextWord.startCaretPos.x	= findCaretStart( nextWord );
-					nextWord.startCaretPos.y	+= largestHeight * invWindowRes.y;
-					nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
-					nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+				topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
+				bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
-					multipleWordsInLine = false;
-				}
+				//Snap to pixels
+				topLeft = topLeft * halfWindowRes;
+				topLeft.x = roundf( topLeft.x );
+				topLeft.y = roundf( topLeft.y );
+				bottomRight = bottomRight * halfWindowRes;
+				bottomRight.x = roundf( bottomRight.x );
+				bottomRight.y = roundf( bottomRight.y );
+				topLeft = topLeft * invWindowRes;
+				bottomRight = bottomRight * invWindowRes;
+
+				addQuad( textVertBuffer, topLeft, bottomRight,
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
+						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
+						 shapedGlyph.glyph->offsetStart );
+				textVertBuffer += 6u;
+
+				m_numVertices += 6u;
 			}
 
-			multipleWordsInLine = true;
-
-			Ogre::Vector2 caretPos = nextWord.startCaretPos;
-
-			ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + nextWord.offset;
-			ShapedGlyphVec::const_iterator end  = itor + nextWord.length;
-
-			while( itor != end )
-			{
-				const ShapedGlyph &shapedGlyph = *itor;
-
-				if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
-				{
-					Ogre::Vector2 topLeft = caretPos +
-											(shapedGlyph.offset +
-											 Ogre::Vector2( shapedGlyph.glyph->bearingX,
-															-shapedGlyph.glyph->bearingY )) * invWindowRes;
-					Ogre::Vector2 bottomRight = Ogre::Vector2( caretPos.x + shapedGlyph.glyph->width *
-															   invWindowRes.x,
-															   topLeft.y + shapedGlyph.glyph->height *
-															   invWindowRes.y );
-					//Snap to pixels
-					topLeft = topLeft * halfWindowRes;
-					topLeft.x = roundf( topLeft.x );
-					topLeft.y = roundf( topLeft.y );
-					bottomRight = bottomRight * halfWindowRes;
-					bottomRight.x = roundf( bottomRight.x );
-					bottomRight.y = roundf( bottomRight.y );
-					topLeft = topLeft * invWindowRes;
-					bottomRight = bottomRight * invWindowRes;
-
-					addQuad( textVertBuffer, topLeft, bottomRight,
-							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-							 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
-							 shapedGlyph.glyph->offsetStart );
-					textVertBuffer += 6u;
-
-					caretPos += shapedGlyph.advance * invWindowRes;
-
-					m_numVertices += 6u;
-				}
-				else if( shapedGlyph.isTab )
-				{
-					// findNextWord already took care of this
-				}
-				else/* if( shapedGlyph.isNewline )*/
-				{
-					//Return to left. Newlines are zero width.
-					nextWord.startCaretPos.x = m_derivedTopLeft.x;
-					nextWord.endCaretPos.x	 = m_derivedTopLeft.x;
-					//Calculate alignment
-					nextWord.startCaretPos.x	= findCaretStart( nextWord );
-					nextWord.startCaretPos.y	+= largestHeight * invWindowRes.y;
-					nextWord.endCaretPos		= nextWord.startCaretPos;
-					multipleWordsInLine = false;
-				}
-
-				++itor;
-			}
+			++itor;
 		}
-
 		*_textVertBuffer = textVertBuffer;
 	}
 	//-------------------------------------------------------------------------

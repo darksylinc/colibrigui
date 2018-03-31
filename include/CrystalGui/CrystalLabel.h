@@ -38,14 +38,25 @@ namespace Crystal
 
 		void validateRichText( States::States state );
 		void updateGlyphs( States::States state );
+		void buildGlyphs( States::States state );
 
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
 		/// Returns false when there are no more words (and output is now empty)
-		bool findNextWord( Word &inOutWord ) const;
-		float findCaretStart( const Word &firstWord ) const;
-		float findLineMaxHeight( ShapedGlyphVec::const_iterator start ) const;
+		bool findNextWord( Word &inOutWord, States::States state ) const;
+		/**
+		@brief findCaretStart
+		@param firstWord
+		@param state
+		@param bottomRight
+			It is a hardcopy, not a reference for performance reasons
+		@return
+		*/
+		float findCaretStart( const Word &firstWord, States::States state,
+							  const Ogre::Vector2 bottomRight ) const;
+		float findLineMaxHeight( ShapedGlyphVec::const_iterator start,
+								 States::States state ) const;
 
 		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,

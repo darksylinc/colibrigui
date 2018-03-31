@@ -20,6 +20,7 @@ namespace Crystal
 	{
 		Ogre::Vector2 advance;
 		Ogre::Vector2 offset;
+		Ogre::Vector2 caretPos;
 		bool isNewline;
 		bool isWordBreaker;
 		bool isRtl;

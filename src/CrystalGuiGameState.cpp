@@ -84,6 +84,21 @@ namespace Demo
 						"and furious anger those who would attempt to poison and destroy My \n"
 						"brothers. And you will know My name is the Lord when I lay My \n"
 						"vengeance upon thee." );
+		/*label->setText( "The path of the righteous man is beset on all sides by the iniquities "
+						"of the selfish and the tyranny of evil men. Blessed is he who, in the "
+						"name of charity and good will, shepherds the weak through the valley "
+						"of darkness, for he is truly his brother's keeper and the finder of "
+						"lost children. And I will strike down upon thee with great vengeance "
+						"and furious anger those who would attempt to poison and destroy My "
+						"brothers. And you will know My name is the Lord when I lay My "
+						"vengeance upon thee." );*/
+//		label->setText( "The path of the righteous man is beset on all sides by the iniquities "
+//						"of the selfish and the tyranny of evil men. Blessed is he who, in the" );
+		//label->setText( "The path of the righteous man is beset on all sides by the iniquities" );
+		//label->setText( "Hoooooooooooooooooooooo ooooooooooooooooooooooooooooooooooooooooooooola" );
+		//label->setText( "Hello\nHola" );
+		//label->setText( "Hello\t\tTest\nHello2\t\tTest" );
+		//label->setText( "\tHello\n    asd" );
 		//label->setText( "من أنا لاستجواب أولئك الذين يكتبونh\nola" );
 //		label->setText( "من أنا لاستجواب ""\n\r"
 //						"أولئك الذين يكتبونhola" );
@@ -95,13 +110,14 @@ namespace Demo
 			std::string text;
 			text.resize( fileSize );
 			file.read( &text[0], fileSize );
-			label->setText( text );
+			//label->setText( text );
 			//label->setText( "Hola\nQue tal sin paragraph?" );
 			//label->setText( "Hola\u2029\nQue tal?" );
 			//label->setText( "تجوستجوستجThisتجوستجوستج is a ستجو word ستجوستجوستجوستج" );
 			//label->setText( "الذي يحيي ذكرى احتجاجات مواطنين فلسطينيين من مدن" );
 		}
 		label->setTextHorizAlignment( Crystal::TextHorizAlignment::Right );
+		//label->setTextHorizAlignment( Crystal::TextHorizAlignment::Left );
 		//label->setText( "The path of the righteous man is beset on all sides by" );
 		label->setSize( Ogre::Vector2( 0.5f, 1.0f ) );
 
