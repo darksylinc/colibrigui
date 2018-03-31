@@ -194,6 +194,7 @@ namespace Crystal
 										utf16Str[cluster] == L'.'	||
 										utf16Str[cluster] == L';'	||
 										utf16Str[cluster] == L',';
+			shapedGlyph.isTab = utf16Str[cluster] == L'\t';
 			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
 			shapedGlyph.glyph = glyph;
 			shapesVec.push_back( shapedGlyph );

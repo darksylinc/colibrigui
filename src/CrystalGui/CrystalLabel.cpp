@@ -288,11 +288,18 @@ namespace Crystal
 			while( itor != end && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
 			{
 				const ShapedGlyph &shapedGlyph = *itor;
-				word.endCaretPos		+= shapedGlyph.advance * invWindowRes;
+				word.endCaretPos	+= shapedGlyph.advance * invWindowRes;
 				word.lastAdvance	= shapedGlyph.advance * invWindowRes;
 				word.lastCharWidth	= shapedGlyph.glyph->width;
 				++itor;
 			}
+		}
+		else if( firstGlyph.isTab )
+		{
+			word.endCaretPos.x = ceilf( (word.startCaretPos.x +
+										 firstGlyph.advance.x * 0.25f * invWindowRes.x) /
+										(firstGlyph.advance.x * 2.0f * invWindowRes.x) ) *
+								 (firstGlyph.advance.x * 2.0f * invWindowRes.x);
 		}
 
 		word.length = itor - (m_shapes[m_currentState].begin() + word.offset);
@@ -440,7 +447,7 @@ namespace Crystal
 			{
 				const ShapedGlyph &shapedGlyph = *itor;
 
-				if( !shapedGlyph.isNewline )
+				if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
 				{
 					Ogre::Vector2 topLeft = caretPos +
 											(shapedGlyph.offset +
@@ -450,7 +457,6 @@ namespace Crystal
 															   invWindowRes.x,
 															   topLeft.y + shapedGlyph.glyph->height *
 															   invWindowRes.y );
-
 					//Snap to pixels
 					topLeft = topLeft * halfWindowRes;
 					topLeft.x = roundf( topLeft.x );
@@ -471,7 +477,11 @@ namespace Crystal
 
 					m_numVertices += 6u;
 				}
-				else
+				else if( shapedGlyph.isTab )
+				{
+					// findNextWord already took care of this
+				}
+				else/* if( shapedGlyph.isNewline )*/
 				{
 					//Return to left. Newlines are zero width.
 					nextWord.startCaretPos.x = m_derivedTopLeft.x;

@@ -23,6 +23,7 @@ namespace Crystal
 		bool isNewline;
 		bool isWordBreaker;
 		bool isRtl;
+		bool isTab;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;
