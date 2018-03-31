@@ -20,6 +20,8 @@ namespace Crystal
 	{
 		Ogre::Vector2 advance;
 		Ogre::Vector2 offset;
+		/// The caret position at which this shape should be placed at. Calculated by Label.
+		/// It's in physical pixels i.e. valid range [0; CrystalManager::getHalfWindowResolution() * 2)
 		Ogre::Vector2 caretPos;
 		bool isNewline;
 		bool isWordBreaker;
