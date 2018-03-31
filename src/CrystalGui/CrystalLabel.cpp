@@ -261,11 +261,10 @@ namespace Crystal
 		if( word.offset == m_shapes[m_currentState].size() ||
 			word.offset + word.length == m_shapes[m_currentState].size() )
 		{
-			word.oldCaretPos	= word.caretPos;
 			word.length			= 0;
 			word.lastAdvance	= 0;
 			word.lastCharWidth	= 0;
-			//word.caretPos		= Ogre::Vector2::ZERO;
+			//word.endCaretPos		= Ogre::Vector2::ZERO;
 			return false;
 		}
 
@@ -277,8 +276,8 @@ namespace Crystal
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
 
 		ShapedGlyph firstGlyph = *itor;
-		word.oldCaretPos	= word.caretPos;
-		word.caretPos		+= firstGlyph.advance * invWindowRes;
+		word.startCaretPos	= word.endCaretPos;
+		word.endCaretPos	+= firstGlyph.advance * invWindowRes;
 		word.lastAdvance	= firstGlyph.advance * invWindowRes;
 		word.lastCharWidth	= firstGlyph.glyph->width;
 		const bool isRtl	= firstGlyph.isRtl;
@@ -289,7 +288,7 @@ namespace Crystal
 			while( itor != end && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
 			{
 				const ShapedGlyph &shapedGlyph = *itor;
-				word.caretPos		+= shapedGlyph.advance * invWindowRes;
+				word.endCaretPos		+= shapedGlyph.advance * invWindowRes;
 				word.lastAdvance	= shapedGlyph.advance * invWindowRes;
 				word.lastCharWidth	= shapedGlyph.glyph->width;
 				++itor;
@@ -317,7 +316,7 @@ namespace Crystal
 
 		while( findNextWord( nextWord ) )
 		{
-			float mostRight = nextWord.caretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
+			float mostRight = nextWord.endCaretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
 
 			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][nextWord.offset];
 			if( shapedGlyph.isNewline ||
@@ -329,7 +328,7 @@ namespace Crystal
 			prevWord = nextWord;
 		}
 
-		float mostRight = prevWord.caretPos.x;
+		float mostRight = prevWord.endCaretPos.x;
 
 		return m_derivedBottomRight.x - mostRight;
 	}
@@ -378,13 +377,17 @@ namespace Crystal
 
 		Word nextWord;
 		memset( &nextWord, 0, sizeof(Word) );
-		nextWord.caretPos = m_derivedTopLeft;
+		nextWord.startCaretPos = m_derivedTopLeft;
+		nextWord.endCaretPos = m_derivedTopLeft;
 
 		if( m_actualHorizAlignment[m_currentState] != TextHorizAlignment::Left )
-			nextWord.caretPos.x = findCaretStart( nextWord );
+		{
+			nextWord.startCaretPos.x	= findCaretStart( nextWord );
+			nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
+		}
 
 		float largestHeight = findLineMaxHeight( m_shapes[m_currentState].begin() );
-		nextWord.caretPos.y += largestHeight * invWindowRes.y;
+		nextWord.endCaretPos.y += largestHeight * invWindowRes.y;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
@@ -396,32 +399,38 @@ namespace Crystal
 		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
 		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
-		nextWord.oldCaretPos = nextWord.caretPos;
 		bool multipleWordsInLine = false;
 
 		while( findNextWord( nextWord ) )
 		{
 			if( m_linebreakMode == LinebreakMode::WordWrap )
 			{
-				float caretAtEndOfWord = nextWord.caretPos.x - nextWord.lastAdvance.x +
+				float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
 										 nextWord.lastCharWidth;
-				float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
+				float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
 				if( caretAtEndOfWord > m_derivedBottomRight.x &&
 					(distBetweenWords <= m_derivedBottomRight.x || multipleWordsInLine) &&
 					!m_shapes[m_currentState][nextWord.offset].isNewline )
 				{
-					nextWord.caretPos.x -= nextWord.oldCaretPos.x;
-					nextWord.caretPos.x = findCaretStart( nextWord );
-					nextWord.caretPos.y += largestHeight * invWindowRes.y;
-					nextWord.oldCaretPos = nextWord.caretPos;
-					nextWord.caretPos.x += distBetweenWords;
+					float caretReturn = nextWord.startCaretPos.x - m_derivedTopLeft.x;
+					float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+
+					//Return to left.
+					nextWord.startCaretPos.x -= caretReturn;
+					nextWord.endCaretPos.x	 -= caretReturn;
+					//Calculate alignment
+					nextWord.startCaretPos.x	= findCaretStart( nextWord );
+					nextWord.startCaretPos.y	+= largestHeight * invWindowRes.y;
+					nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
+					nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+
 					multipleWordsInLine = false;
 				}
 			}
 
 			multipleWordsInLine = true;
 
-			Ogre::Vector2 caretPos = nextWord.oldCaretPos;
+			Ogre::Vector2 caretPos = nextWord.startCaretPos;
 
 			ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + nextWord.offset;
 			ShapedGlyphVec::const_iterator end  = itor + nextWord.length;
@@ -441,19 +450,6 @@ namespace Crystal
 															   topLeft.y + shapedGlyph.glyph->height *
 															   invWindowRes.y );
 
-					if( !shapedGlyph.isRtl )
-					{
-						rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-						rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 128.0f + 0.5f );
-						rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 128.0f + 0.5f );
-					}
-					else
-					{
-						rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-						rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-						rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-					}
-
 					addQuad( textVertBuffer, topLeft, bottomRight,
 							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
 							 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
@@ -466,12 +462,13 @@ namespace Crystal
 				}
 				else
 				{
-					float distBetweenWords = nextWord.caretPos.x - nextWord.oldCaretPos.x;
-					nextWord.caretPos.x -= nextWord.oldCaretPos.x;
-					nextWord.caretPos.x = findCaretStart( nextWord );
-					nextWord.caretPos.y += largestHeight * invWindowRes.y;
-					nextWord.oldCaretPos = nextWord.caretPos;
-					nextWord.caretPos.x += distBetweenWords;
+					//Return to left. Newlines are zero width.
+					nextWord.startCaretPos.x = m_derivedTopLeft.x;
+					nextWord.endCaretPos.x	 = m_derivedTopLeft.x;
+					//Calculate alignment
+					nextWord.startCaretPos.x	= findCaretStart( nextWord );
+					nextWord.startCaretPos.y	+= largestHeight * invWindowRes.y;
+					nextWord.endCaretPos		= nextWord.startCaretPos;
 					multipleWordsInLine = false;
 				}
 

@@ -16,8 +16,8 @@ namespace Crystal
 		{
 			size_t offset;
 			size_t length;
-			Ogre::Vector2 oldCaretPos;
-			Ogre::Vector2 caretPos;
+			Ogre::Vector2 startCaretPos;
+			Ogre::Vector2 endCaretPos;
 			Ogre::Vector2 lastAdvance;
 			float lastCharWidth;
 		};
