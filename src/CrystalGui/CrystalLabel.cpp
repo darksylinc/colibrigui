@@ -11,6 +11,7 @@ namespace Crystal
 	Label::Label( CrystalManager *manager ) :
 		Renderable( manager ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
+		m_vertAlignment( TextVertAlignment::Natural ),
 		m_vertReadingDir( VertReadingDir::Disabled ),
 		m_linebreakMode( LinebreakMode::WordWrap )
 	{
@@ -19,7 +20,13 @@ namespace Crystal
 			m_actualHorizAlignment[i] = shaperManager->getDefaultTextDirection();
 
 		for( size_t i=0; i<States::NumStates; ++i )
-			 m_glyphsDirty[i] = false;
+		{
+			m_glyphsDirty[i] = false;
+			m_glyphsPlaced[i] = true;
+#if CRYSTALGUI_DEBUG_MEDIUM
+			m_glyphsAligned[i] = true;
+#endif
+		}
 
 		m_numVertices = 0;
 
@@ -33,7 +40,17 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
 	{
-		m_horizAlignment = horizAlignment;
+		if( m_horizAlignment != horizAlignment )
+		{
+			m_horizAlignment = horizAlignment;
+			for( size_t i=0; i<States::NumStates; ++i )
+			{
+				m_glyphsPlaced[i] = false;
+#if CRYSTALGUI_DEBUG_MEDIUM
+				m_glyphsAligned[i] = false;
+#endif
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	TextHorizAlignment::TextHorizAlignment Label::getTextHorizAlignment() const
@@ -47,7 +64,7 @@ namespace Crystal
 		if( m_richText[state].empty() )
 		{
 			RichText rt;
-			rt.ptSize = 24u << 6u;
+			rt.ptSize = 16u << 6u;
 			rt.font = 0;
 			rt.offset = 0;
 			rt.length = textSize;
@@ -91,7 +108,7 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Label::updateGlyphs( States::States state )
+	void Label::updateGlyphs( States::States state, bool bPlaceGlyphs )
 	{
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 
@@ -120,6 +137,10 @@ namespace Crystal
 				if( m_text[state] == m_text[i] && m_richText[state] == m_richText[i] )
 				{
 					m_shapes[state] = m_shapes[i];
+					m_glyphsPlaced[state] = m_glyphsPlaced[i];
+#if CRYSTALGUI_DEBUG_MEDIUM
+					m_glyphsAligned[state] = m_glyphsAligned[i];
+#endif
 					m_actualHorizAlignment[state] = m_actualHorizAlignment[i];
 
 					ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
@@ -176,27 +197,17 @@ namespace Crystal
 
 		m_glyphsDirty[state] = false;
 
-		buildGlyphs( state );
+		if( bPlaceGlyphs && !m_glyphsPlaced[state] )
+			placeGlyphs( state );
 	}
 	//-------------------------------------------------------------------------
-	void Label::buildGlyphs( States::States state )
+	void Label::placeGlyphs( States::States state, bool performAlignment )
 	{
-		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
-							"m_actualHorizAlignment not set! updateGlyphs not called?" );
-
 		const Ogre::Vector2 bottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
 													m_manager->getCanvasSize());
 
 		Word nextWord;
 		memset( &nextWord, 0, sizeof(Word) );
-
-		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
-		{
-			nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
-			nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
-		}
 
 		float largestHeight = findLineMaxHeight( m_shapes[state].begin(), state );
 		nextWord.endCaretPos.y += largestHeight;
@@ -221,7 +232,7 @@ namespace Crystal
 					nextWord.startCaretPos.x -= caretReturn;
 					nextWord.endCaretPos.x	 -= caretReturn;
 					//Calculate alignment
-					nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
+					nextWord.startCaretPos.x	= 0.0f;
 					nextWord.startCaretPos.y	+= largestHeight;
 					nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
 					nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
@@ -256,7 +267,7 @@ namespace Crystal
 					nextWord.startCaretPos.x = 0.0f;
 					nextWord.endCaretPos.x	 = 0.0f;
 					//Calculate alignment
-					nextWord.startCaretPos.x	= findCaretStart( nextWord, state, bottomRight );
+					nextWord.startCaretPos.x	= 0.0f;
 					nextWord.startCaretPos.y	+= largestHeight;
 					nextWord.endCaretPos		= nextWord.startCaretPos;
 					multipleWordsInLine = false;
@@ -265,6 +276,105 @@ namespace Crystal
 				++itor;
 			}
 		}
+
+		m_glyphsPlaced[state] = true;
+#if CRYSTALGUI_DEBUG_MEDIUM
+		m_glyphsAligned[state] = false;
+#endif
+
+		if( performAlignment )
+			alignGlyphs( state );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Label::alignGlyphs( States::States state )
+	{
+		CRYSTAL_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
+							   "Calling alignGlyphs twice! updateGlyphs not called?" );
+		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
+							"m_actualHorizAlignment not set! updateGlyphs not called?" );
+		CRYSTAL_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
+
+		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+
+		float lineWidth = 0;
+		float prevCaretY = 0;
+
+		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
+														  m_manager->getCanvasSize());
+
+		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
+		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
+		ShapedGlyphVec::iterator end  = m_shapes[state].end();
+
+		while( itor != end )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
+			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
+													   shapedGlyph.glyph->width,
+													   top + shapedGlyph.glyph->height );
+
+			if( (shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y) &&
+				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
+			{
+				//Displace horizontally, the we line we just were in
+				float newLeft = widgetBottomRight.x - lineWidth;
+				if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
+					newLeft *= 0.5f;
+
+				while( lineBegin != itor )
+				{
+					lineBegin->caretPos.x += newLeft;
+					++lineBegin;
+				}
+
+				prevCaretY	= shapedGlyph.caretPos.y;
+				lineWidth	= 0;
+			}
+
+			lineWidth = Ogre::max( lineWidth, bottomRight.x );
+			maxWidthHeight.makeCeil( bottomRight );
+
+			++itor;
+		}
+
+		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
+		{
+			//Displace horizontally, last line
+			float newLeft = widgetBottomRight.x - lineWidth;
+			if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
+				newLeft *= 0.5f;
+
+			while( lineBegin != end )
+			{
+				lineBegin->caretPos.x += newLeft;
+				++lineBegin;
+			}
+		}
+
+		if( m_vertAlignment != TextVertAlignment::Top && m_vertAlignment != TextVertAlignment::Natural )
+		{
+			//Iterate again, to vertically displace the entire string
+			float newTop = widgetBottomRight.y - maxWidthHeight.y;
+			if( m_vertAlignment == TextVertAlignment::Center )
+				newTop *= 0.5f;
+
+			itor = m_shapes[state].begin();
+			while( itor != end )
+			{
+				lineBegin->caretPos.y += newTop;
+				++itor;
+			}
+		}
+
+#if CRYSTALGUI_DEBUG_MEDIUM
+		m_glyphsAligned[state] = true;
+#endif
+
+		return maxWidthHeight;
 	}
 	//-------------------------------------------------------------------------
 	inline void Label::addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
@@ -397,40 +507,6 @@ namespace Crystal
 		return word.length != 0;
 	}
 	//-------------------------------------------------------------------------
-	float Label::findCaretStart( const Word &firstWord, States::States state,
-								 const Ogre::Vector2 bottomRight ) const
-	{
-		CRYSTAL_ASSERT_LOW( firstWord.offset <= m_shapes[state].size() &&
-							firstWord.offset + firstWord.length <= m_shapes[state].size() );
-
-		if( m_actualHorizAlignment[state] == TextHorizAlignment::Left )
-			return 0.0f;
-
-		Word prevWord = firstWord;
-		Word nextWord = firstWord;
-
-		while( findNextWord( nextWord, state ) )
-		{
-			float mostRight = nextWord.endCaretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
-
-			const ShapedGlyph &shapedGlyph = m_shapes[state][nextWord.offset];
-			if( shapedGlyph.isNewline ||
-				mostRight > bottomRight.x )
-			{
-				break;
-			}
-
-			prevWord = nextWord;
-		}
-
-		float mostRight = prevWord.endCaretPos.x;
-
-		if( m_actualHorizAlignment[state] != TextHorizAlignment::Center )
-			return bottomRight.x - mostRight;
-		else
-			return (bottomRight.x - mostRight) * 0.5f;
-	}
-	//-------------------------------------------------------------------------
 	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start,
 									States::States state ) const
 	{
@@ -537,6 +613,9 @@ namespace Crystal
 				if( currNumGlyphs > prevNumGlyphs )
 					retVal = true;
 			}
+
+			if( !m_glyphsPlaced[i] )
+				placeGlyphs( static_cast<States::States>( i ) );
 		}
 
 		return retVal;
@@ -556,6 +635,10 @@ namespace Crystal
 		if( !isAnyStateDirty() )
 			m_manager->_addDirtyLabel( this );
 		m_glyphsDirty[state] = true;
+		m_glyphsPlaced[state] = false;
+#if CRYSTALGUI_DEBUG_MEDIUM
+		m_glyphsAligned[state] = false;
+#endif
 	}
 	//-------------------------------------------------------------------------
 	size_t Label::getMaxNumGlyphs() const
@@ -589,6 +672,81 @@ namespace Crystal
 				m_richText[forState].clear();
 				flagDirty( forState );
 			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Label::sizeToFit( States::States baseState, float maxAllowedWidth,
+						   TextHorizAlignment::TextHorizAlignment newHorizPos,
+						   TextVertAlignment::TextVertAlignment newVertPos )
+	{
+		CRYSTAL_ASSERT_LOW( baseState < States::NumStates );
+
+		if( m_glyphsDirty[baseState] )
+			updateGlyphs( baseState, false );
+
+		//Replace the glyphs forced to the Top-Left so we can gather the width & height
+		const float oldWidth = m_size.x;
+		m_size.x = maxAllowedWidth;
+		placeGlyphs( baseState, false );
+		m_size.x = oldWidth;
+
+		//Gather width & height
+		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+
+		ShapedGlyphVec::iterator itor = m_shapes[baseState].begin();
+		ShapedGlyphVec::iterator end  = m_shapes[baseState].end();
+
+		while( itor != end )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
+			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
+													   shapedGlyph.glyph->width,
+													   top + shapedGlyph.glyph->height );
+			maxWidthHeight.makeCeil( bottomRight );
+			++itor;
+		}
+
+		//Set new dimensions
+		const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();
+		const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
+
+		Ogre::Vector2 oldSize = m_size;
+		m_size = maxWidthHeight * invWindowRes * canvasSize;
+
+		//Align the glyphs so horizontal & vertical alignment are respected
+		alignGlyphs( baseState );
+
+		//Now reposition the widget based on input newHorizPos & newVertPos
+		if( newHorizPos == TextHorizAlignment::Natural )
+			newHorizPos = m_actualHorizAlignment[baseState];
+		if( newVertPos == TextVertAlignment::Natural )
+			newVertPos = TextVertAlignment::Top;
+
+		switch( newHorizPos )
+		{
+		case TextHorizAlignment::Natural:
+		case TextHorizAlignment::Left:
+			break;
+		case TextHorizAlignment::Center:
+			m_position.x = (m_position.x + oldSize.x - maxWidthHeight.x) * 0.5f;
+			break;
+		case TextHorizAlignment::Right:
+			m_position.x = m_position.x + oldSize.x - maxWidthHeight.x;
+			break;
+		}
+		switch( newHorizPos )
+		{
+		case TextVertAlignment::Natural:
+		case TextVertAlignment::Top:
+			break;
+		case TextVertAlignment::Center:
+			m_position.y = (m_position.y + oldSize.y - maxWidthHeight.y) * 0.5f;
+			break;
+		case TextVertAlignment::Bottom:
+			m_position.y = m_position.y + oldSize.y - maxWidthHeight.y;
+			break;
 		}
 	}
 	//-------------------------------------------------------------------------

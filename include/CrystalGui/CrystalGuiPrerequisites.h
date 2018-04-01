@@ -215,6 +215,21 @@ namespace Crystal
 			ForceBTT,
 		};
 	}
+	namespace TextVertAlignment
+	{
+		enum TextVertAlignment
+		{
+			/// Always equal to Top. It's there just in case there's ever a bottom to top language
+			/// Also useful for "use the default" in Label::sizeToFit
+			Natural,
+			/// Note: Anything other than 'Top' is SLIGHTLY slower for text rendering, as we need
+			/// to first calculate the height of the entire text before iterating through
+			/// each character to upload position data to GPU.
+			Top,
+			Center,
+			Bottom
+		};
+	}
 
 	struct RichText
 	{

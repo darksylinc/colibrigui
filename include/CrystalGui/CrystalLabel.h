@@ -27,34 +27,58 @@ namespace Crystal
 		ShapedGlyphVec	m_shapes[States::NumStates];
 
 		bool m_glyphsDirty[States::NumStates];
+		bool m_glyphsPlaced[States::NumStates];
+#if CRYSTALGUI_DEBUG_MEDIUM
+		bool m_glyphsAligned[States::NumStates];
+#endif
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
+		TextVertAlignment::TextVertAlignment	m_vertAlignment;
 		VertReadingDir::VertReadingDir			m_vertReadingDir;
 
 		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
 
 		//Renderable	*m_background;
 
+		/** Checks RichText doesn't go out of bounds, and patches it if it does.
+			If m_richText[state] is empty we'll create a default one for the whole string.
+		@param state
+		*/
 		void validateRichText( States::States state );
-		void updateGlyphs( States::States state );
-		void buildGlyphs( States::States state );
+
+		/** Checks if the string has changed. If so, requests the ShaperManager a new
+			set of glyphs we can use
+
+			If we already have calculated the glyphs for another state (i.e. States::States)
+			we will reuse that data (unless the strings or its RichText are different)
+		@param state
+		@param bPlaceGlyphs
+			When true, we will also call placeGlyphs
+		*/
+		void updateGlyphs( States::States state, bool bPlaceGlyphs=true );
+
+		/** Places the glyphs obtained from updateGlyphs at the correct position
+			(always assuming TextHorizAlignment::Left) considering word wrap
+			and size bounds.
+		@param state
+		@param performAlignment
+			When true, we will also call alignGlyphs
+		*/
+		void placeGlyphs( States::States state, bool performAlignment=true );
+
+		/** After calling placeGlyphs, this function realigns the text based on
+			TextHorizAlignment & TextVertAlignment
+		@param state
+		@return
+		*/
+		Ogre::Vector2 alignGlyphs( States::States state );
 
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
 
 		/// Returns false when there are no more words (and output is now empty)
 		bool findNextWord( Word &inOutWord, States::States state ) const;
-		/**
-		@brief findCaretStart
-		@param firstWord
-		@param state
-		@param bottomRight
-			It is a hardcopy, not a reference for performance reasons
-		@return
-		*/
-		float findCaretStart( const Word &firstWord, States::States state,
-							  const Ogre::Vector2 bottomRight ) const;
 		float findLineMaxHeight( ShapedGlyphVec::const_iterator start,
 								 States::States state ) const;
 
@@ -98,6 +122,29 @@ namespace Crystal
 			Use NumStates to affect all states
 		*/
 		void setText( const std::string &text, States::States forState=States::NumStates );
+
+		/** Recalculates the size of the widget based on the text contents to fit tightly.
+			It may also reposition the Widget depending on newHorizPos & newVertPos
+		@remarks
+			TBD this function is slow as it requires synchronization with the rendering
+			thread (not implemented yet hence TBD).
+		@param baseState
+			The state used to calculate the size
+		@param maxAllowedWidth
+			How large (in virtual canvas units) is the text allowed to grow.
+			If a line of text requires more than maxAllowedWidth, it will be break into
+			a newline.
+		@param newHorizPos
+			Specify the horizontal pivot point. If the value is other than
+			TextHorizAlignment::Left, the widget will be repositioned.
+		@param newVertPos
+			Specify the vertical pivot point. If the value is other than
+			TextHorizAlignment::Top, the widget will be repositioned.
+		*/
+		void sizeToFit( States::States baseState,
+						float maxAllowedWidth=std::numeric_limits<float>::max(),
+						TextHorizAlignment::TextHorizAlignment newHorizPos=TextHorizAlignment::Left,
+						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top );
 
 		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 RESTRICT_ALIAS vertexBuffer,
