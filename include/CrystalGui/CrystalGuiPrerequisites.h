@@ -237,6 +237,7 @@ namespace Crystal
 		uint32_t offset;
 		uint32_t length;
 		HorizReadingDir::HorizReadingDir readingDir;
+		uint32_t rgba32;
 		uint16_t font;
 
 		bool operator == ( const RichText &other ) const;

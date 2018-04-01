@@ -43,7 +43,7 @@ namespace Crystal
 		uint16_t width;
 		uint16_t height;
 		uint32_t offset;
-		uint8_t rgbaColour[4];
+		uint32_t rgbaColour;
 		float clipDistance[Borders::NumBorders];
 	};
 

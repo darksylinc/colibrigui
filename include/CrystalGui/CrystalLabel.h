@@ -31,6 +31,9 @@ namespace Crystal
 #if CRYSTALGUI_DEBUG_MEDIUM
 		bool m_glyphsAligned[States::NumStates];
 #endif
+		bool m_shadowOutline;
+		Ogre::ColourValue m_shadowColour;
+		Ogre::Vector2 m_shadowDisplace;
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
@@ -87,7 +90,7 @@ namespace Crystal
 							 Ogre::Vector2 bottomRight,
 							 uint16_t glyphWidth,
 							 uint16_t glyphHeight,
-							 uint8_t *rgbaColour,
+							 uint32_t rgbaColour,
 							 Ogre::Vector2 parentDerivedTL,
 							 Ogre::Vector2 parentDerivedBR,
 							 Ogre::Vector2 invSize,

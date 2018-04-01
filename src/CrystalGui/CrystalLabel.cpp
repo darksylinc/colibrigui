@@ -10,10 +10,13 @@ namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
 		Renderable( manager ),
+		m_shadowOutline( false ),
+		m_shadowColour( Ogre::ColourValue::Black ),
+		m_shadowDisplace( 1.0f ),
+		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
-		m_vertReadingDir( VertReadingDir::Disabled ),
-		m_linebreakMode( LinebreakMode::WordWrap )
+		m_vertReadingDir( VertReadingDir::Disabled )
 	{
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		for( size_t i=0; i<States::NumStates; ++i )
@@ -65,6 +68,7 @@ namespace Crystal
 		{
 			RichText rt;
 			rt.ptSize = 16u << 6u;
+			rt.rgba32 = m_colour.getAsABGR();
 			rt.font = 0;
 			rt.offset = 0;
 			rt.length = textSize;
@@ -382,7 +386,7 @@ namespace Crystal
 								Ogre::Vector2 bottomRight,
 								uint16_t glyphWidth,
 								uint16_t glyphHeight,
-								uint8_t *rgbaColour,
+								uint32_t rgbaColour,
 								Ogre::Vector2 parentDerivedTL,
 								Ogre::Vector2 parentDerivedBR,
 								Ogre::Vector2 invSize,
@@ -396,10 +400,7 @@ namespace Crystal
 			vertexBuffer->width = glyphWidth; \
 			vertexBuffer->height = glyphHeight; \
 			vertexBuffer->offset = offset;\
-			vertexBuffer->rgbaColour[0] = rgbaColour[0]; \
-			vertexBuffer->rgbaColour[1] = rgbaColour[1]; \
-			vertexBuffer->rgbaColour[2] = rgbaColour[2]; \
-			vertexBuffer->rgbaColour[3] = rgbaColour[3]; \
+			vertexBuffer->rgbaColour = rgbaColour; \
 			vertexBuffer->clipDistance[Borders::Top]	= clipDistanceTop; \
 			vertexBuffer->clipDistance[Borders::Left]	= clipDistanceLeft; \
 			vertexBuffer->clipDistance[Borders::Right]	= clipDistanceRight; \
@@ -543,18 +544,16 @@ namespace Crystal
 
 		updateDerivedTransform( parentPos, parentRot );
 
+		uint32_t shadowColour = m_shadowColour.getAsABGR();
+
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
+
+		const Ogre::Vector2 shadowDisplacement = invWindowRes * m_shadowDisplace;
 
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
-
-		uint8_t rgbaColour[4];
-		rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
-		rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );
-		rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
-		rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
@@ -585,9 +584,21 @@ namespace Crystal
 				topLeft = topLeft * invWindowRes;
 				bottomRight = bottomRight * invWindowRes;
 
+				if( m_shadowOutline )
+				{
+					addQuad( textVertBuffer,
+							 topLeft + shadowDisplacement,
+							 bottomRight + shadowDisplacement,
+							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
+							 shadowColour, parentDerivedTL, parentDerivedBR, invSize,
+							 shapedGlyph.glyph->offsetStart );
+					textVertBuffer += 6u;
+					m_numVertices += 6u;
+				}
+
 				addQuad( textVertBuffer, topLeft, bottomRight,
 						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,
+						 shapedGlyph.rgba32, parentDerivedTL, parentDerivedBR, invSize,
 						 shapedGlyph.glyph->offsetStart );
 				textVertBuffer += 6u;
 
@@ -646,6 +657,9 @@ namespace Crystal
 		size_t retVal = 0;
 		for( size_t i=0; i<States::NumStates; ++i )
 			retVal = std::max( m_shapes[i].size(), retVal );
+
+		if( m_shadowOutline )
+			retVal <<= 1u;
 
 		return retVal;
 	}

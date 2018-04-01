@@ -27,6 +27,7 @@ namespace Crystal
 		bool isWordBreaker;
 		bool isRtl;
 		bool isTab;
+		uint32_t rgba32;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;
@@ -63,8 +64,8 @@ namespace Crystal
 		float getFontSizeFloat() const;
 		uint32_t getFontSize26d6() const;
 
-		void renderString( const uint16_t *utf16Str, size_t stringLength,
-						   hb_direction_t dir, ShapedGlyphVec &outShapes );
+		void renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
+						   uint32_t rgba32, ShapedGlyphVec &outShapes );
 
 		bool operator < ( const Shaper &other ) const;
 

@@ -468,7 +468,7 @@ namespace Crystal
 
 			const uint16_t *utf16Str = temp.getBuffer();
 			shaper->setFontSize26d6( richText.ptSize );
-			shaper->renderString( utf16Str, temp.length(), hbDir, outShapes );
+			shaper->renderString( utf16Str, temp.length(), hbDir, richText.rgba32, outShapes );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;
