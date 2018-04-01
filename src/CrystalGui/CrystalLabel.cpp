@@ -730,22 +730,22 @@ namespace Crystal
 		case TextHorizAlignment::Left:
 			break;
 		case TextHorizAlignment::Center:
-			m_position.x = (m_position.x + oldSize.x - maxWidthHeight.x) * 0.5f;
+			m_position.x = (m_position.x + oldSize.x - m_size.x) * 0.5f;
 			break;
 		case TextHorizAlignment::Right:
-			m_position.x = m_position.x + oldSize.x - maxWidthHeight.x;
+			m_position.x = m_position.x + oldSize.x - m_size.x;
 			break;
 		}
-		switch( newHorizPos )
+		switch( newVertPos )
 		{
 		case TextVertAlignment::Natural:
 		case TextVertAlignment::Top:
 			break;
 		case TextVertAlignment::Center:
-			m_position.y = (m_position.y + oldSize.y - maxWidthHeight.y) * 0.5f;
+			m_position.y = (m_position.y + oldSize.y - m_size.y) * 0.5f;
 			break;
 		case TextVertAlignment::Bottom:
-			m_position.y = m_position.y + oldSize.y - maxWidthHeight.y;
+			m_position.y = m_position.y + oldSize.y - m_size.y;
 			break;
 		}
 	}
