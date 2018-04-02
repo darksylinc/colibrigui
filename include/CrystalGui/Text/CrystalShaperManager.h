@@ -35,6 +35,7 @@ namespace Crystal
 		uint16_t width;
 		uint16_t height;
 		float newlineSize;
+		float regionUp;
 		uint32_t refCount;
 
 		size_t getSizeBytes() const;
@@ -139,6 +140,7 @@ namespace Crystal
 		@brief renderString
 		@param utf8Str
 		@param richText
+		@param richTextIdx
 		@param vertReadingDir
 		@param outShapes
 		@return
@@ -148,7 +150,7 @@ namespace Crystal
 			If string is empty or couldn't be analyzed, it returns Mixed
 		*/
 		TextHorizAlignment::TextHorizAlignment renderString(
-				const char *utf8Str, const RichText &richText,
+				const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
 				VertReadingDir::VertReadingDir vertReadingDir,
 				ShapedGlyphVec &outShapes );
 

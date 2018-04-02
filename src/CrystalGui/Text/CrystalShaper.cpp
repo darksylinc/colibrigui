@@ -157,7 +157,7 @@ namespace Crystal
 	}
 	//-------------------------------------------------------------------------
 	void Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
-							   hb_direction_t dir, uint32_t rgba32,
+							   hb_direction_t dir, uint32_t richTextIdx,
 							   ShapedGlyphVec &outShapes )
 	{
 		ShapedGlyphVec shapesVec;
@@ -190,7 +190,6 @@ namespace Crystal
 			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
 												glyphPos[i].y_offset ) / 64.0f;
 			shapedGlyph.caretPos = Ogre::Vector2::ZERO;
-			shapedGlyph.rgba32 = rgba32;
 			shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 			shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
 										utf16Str[cluster] == L'\t'	||
@@ -199,6 +198,7 @@ namespace Crystal
 										utf16Str[cluster] == L',';
 			shapedGlyph.isTab = utf16Str[cluster] == L'\t';
 			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
+			shapedGlyph.richTextIdx = richTextIdx;
 			shapedGlyph.glyph = glyph;
 			shapesVec.push_back( shapedGlyph );
 		}

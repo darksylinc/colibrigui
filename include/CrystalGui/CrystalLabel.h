@@ -31,9 +31,15 @@ namespace Crystal
 #if CRYSTALGUI_DEBUG_MEDIUM
 		bool m_glyphsAligned[States::NumStates];
 #endif
+		/// For internal use. Set to true if any of RichText uses background, false otherwise.
+		bool m_usesBackground;
+
 		bool m_shadowOutline;
 		Ogre::ColourValue m_shadowColour;
 		Ogre::Vector2 m_shadowDisplace;
+
+		Ogre::Vector2 m_backgroundSize;
+		Ogre::ColourValue m_defaultBackgroundColour;
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;

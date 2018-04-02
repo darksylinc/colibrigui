@@ -237,8 +237,13 @@ namespace Crystal
 		uint32_t offset;
 		uint32_t length;
 		HorizReadingDir::HorizReadingDir readingDir;
-		uint32_t rgba32;
+		uint32_t rgba32;			//Not part of operator ==
+		uint32_t backgroundRgba32;	//Not part of operator ==
 		uint16_t font;
+		bool noBackground;		//Not part of operator ==
+
+		uint32_t glyphStart;	//Not part of operator ==
+		uint32_t glyphEnd;		//Not part of operator ==
 
 		bool operator == ( const RichText &other ) const;
 	};

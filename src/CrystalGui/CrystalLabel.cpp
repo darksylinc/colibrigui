@@ -10,9 +10,12 @@ namespace Crystal
 {
 	Label::Label( CrystalManager *manager ) :
 		Renderable( manager ),
+		m_usesBackground( false ),
 		m_shadowOutline( false ),
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
+		m_backgroundSize( Ogre::Vector2::ZERO ),
+		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
@@ -69,11 +72,16 @@ namespace Crystal
 			RichText rt;
 			rt.ptSize = 16u << 6u;
 			rt.rgba32 = m_colour.getAsABGR();
+			rt.noBackground = true;
+			rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
 			rt.font = 0;
 			rt.offset = 0;
 			rt.length = textSize;
 			rt.readingDir = HorizReadingDir::Default;
+			rt.glyphStart = rt.glyphEnd = 0;
 			m_richText[state].push_back( rt );
+
+			m_usesBackground = false;
 		}
 		else
 		{
@@ -93,6 +101,9 @@ namespace Crystal
 					itor->length = textSize - itor->offset;
 					invalidRtDetected = true;
 				}
+
+				m_usesBackground |= !itor->noBackground;
+
 				++itor;
 			}
 
@@ -156,6 +167,13 @@ namespace Crystal
 						++itor;
 					}
 
+					const size_t numRichText = m_richText[state].size();
+					for( size_t j=0; j<numRichText; ++j )
+					{
+						m_richText[state][j].glyphStart = m_richText[i][j].glyphStart;
+						m_richText[state][j].glyphEnd = m_richText[i][j].glyphEnd;
+					}
+
 					reusableFound = true;
 				}
 			}
@@ -166,15 +184,17 @@ namespace Crystal
 			bool alignmentUnknown = true;
 			TextHorizAlignment::TextHorizAlignment actualHorizAlignment = TextHorizAlignment::Mixed;
 
-			RichTextVec::const_iterator itor = m_richText[state].begin();
-			RichTextVec::const_iterator end  = m_richText[state].end();
+			RichTextVec::iterator itor = m_richText[state].begin();
+			RichTextVec::iterator end  = m_richText[state].end();
 			while( itor != end )
 			{
-				const RichText &richText = *itor;
+				RichText &richText = *itor;
+				richText.glyphStart = m_shapes[state].size();
 				const char *utf8Str = m_text[state].c_str() + richText.offset;
 				TextHorizAlignment::TextHorizAlignment actualDir =
-						shaperManager->renderString( utf8Str, richText, m_vertReadingDir,
-													 m_shapes[state] );
+						shaperManager->renderString( utf8Str, richText, itor - m_richText[state].begin(),
+													 m_vertReadingDir, m_shapes[state] );
+				richText.glyphEnd = m_shapes[state].size();
 
 				if( alignmentUnknown )
 				{
@@ -264,9 +284,13 @@ namespace Crystal
 				else if( shapedGlyph.isTab )
 				{
 					// findNextWord already took care of this
+					shapedGlyph.caretPos = caretPos;
+					caretPos += shapedGlyph.advance;
 				}
 				else/* if( shapedGlyph.isNewline )*/
 				{
+					largestHeight = findLineMaxHeight( itor + 1u, state );
+
 					//Return to left. Newlines are zero width.
 					nextWord.startCaretPos.x = 0.0f;
 					nextWord.endCaretPos.x	 = 0.0f;
@@ -324,7 +348,7 @@ namespace Crystal
 			if( (shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y) &&
 				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 			{
-				//Displace horizontally, the we line we just were in
+				//Displace horizontally, the line we just were in
 				float newLeft = widgetBottomRight.x - lineWidth;
 				if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
 					newLeft *= 0.5f;
@@ -528,7 +552,7 @@ namespace Crystal
 		if( itor != end )
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 
-		return largestHeight * 1.20f;
+		return largestHeight;
 	}
 	//-------------------------------------------------------------------------
 	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
@@ -544,7 +568,7 @@ namespace Crystal
 
 		updateDerivedTransform( parentPos, parentRot );
 
-		uint32_t shadowColour = m_shadowColour.getAsABGR();
+		const uint32_t shadowColour = m_shadowColour.getAsABGR();
 
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
@@ -554,6 +578,102 @@ namespace Crystal
 		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
 		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
+
+		if( m_usesBackground )
+		{
+			RichTextVec::const_iterator itRichText = m_richText[m_currentState].begin();
+			RichTextVec::const_iterator enRichText = m_richText[m_currentState].end();
+
+			while( itRichText != enRichText )
+			{
+				if( !itRichText->noBackground )
+				{
+					float prevCaretY = 0;
+
+					const uint32_t backgroundColour = itRichText->backgroundRgba32;
+					const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundSize;
+
+					float lineHeight = 0;
+					float mostLeft = std::numeric_limits<float>::max();
+					float mostRight = -std::numeric_limits<float>::max();
+					float mostBottom = std::numeric_limits<float>::max();
+
+					ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() +
+														  itRichText->glyphStart;
+					ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].begin() +
+														  itRichText->glyphEnd;
+
+					if( itor != end )
+						prevCaretY = itor->caretPos.y;
+
+					while( itor != end )
+					{
+						const ShapedGlyph &shapedGlyph = *itor;
+
+						if( itor + 1u == end ||
+							shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y )
+						{
+							if( itor + 1u == end )
+							{
+								lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
+								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x );
+								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+													   shapedGlyph.glyph->width );
+								mostBottom = Ogre::min( mostBottom, shapedGlyph.caretPos.y );
+							}
+
+							//New line found. Render the background and reset the counters
+							Ogre::Vector2 topLeft =
+									Ogre::Vector2( mostLeft, mostBottom -
+												   lineHeight * shapedGlyph.glyph->regionUp );
+							Ogre::Vector2 bottomRight =
+									Ogre::Vector2( mostRight, mostBottom +
+												   lineHeight * (1.0f - shapedGlyph.glyph->regionUp) );
+							topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
+							bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
+
+							//Snap to pixels
+							topLeft = topLeft * halfWindowRes;
+							topLeft.x = ceilf( topLeft.x );
+							topLeft.y = ceilf( topLeft.y );
+							bottomRight = bottomRight * halfWindowRes;
+							bottomRight.x = ceilf( bottomRight.x );
+							bottomRight.y = ceilf( bottomRight.y );
+							topLeft = topLeft * invWindowRes;
+							bottomRight = bottomRight * invWindowRes;
+
+							addQuad( textVertBuffer,
+									 topLeft - backgroundDisplacement,
+									 bottomRight + backgroundDisplacement,
+									 1, 1,
+									 backgroundColour, parentDerivedTL, parentDerivedBR, invSize,
+									 0 );
+							textVertBuffer += 6u;
+							m_numVertices += 6u;
+
+							prevCaretY	= shapedGlyph.caretPos.y;
+							lineHeight = 0;
+							mostLeft = std::numeric_limits<float>::max();
+							mostRight = -std::numeric_limits<float>::max();
+							mostBottom = std::numeric_limits<float>::max();
+						}
+
+						if( !shapedGlyph.isNewline )
+						{
+							lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
+							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x );
+							mostRight = Ogre::max( mostRight,
+												   shapedGlyph.caretPos.x + shapedGlyph.glyph->width );
+							mostBottom = Ogre::min( mostBottom, shapedGlyph.caretPos.y );
+						}
+
+						++itor;
+					}
+				}
+
+				++itRichText;
+			}
+		}
 
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
@@ -576,11 +696,11 @@ namespace Crystal
 
 				//Snap to pixels
 				topLeft = topLeft * halfWindowRes;
-				topLeft.x = roundf( topLeft.x );
-				topLeft.y = roundf( topLeft.y );
+				topLeft.x = ceilf( topLeft.x );
+				topLeft.y = ceilf( topLeft.y );
 				bottomRight = bottomRight * halfWindowRes;
-				bottomRight.x = roundf( bottomRight.x );
-				bottomRight.y = roundf( bottomRight.y );
+				bottomRight.x = ceilf( bottomRight.x );
+				bottomRight.y = ceilf( bottomRight.y );
 				topLeft = topLeft * invWindowRes;
 				bottomRight = bottomRight * invWindowRes;
 
@@ -596,9 +716,11 @@ namespace Crystal
 					m_numVertices += 6u;
 				}
 
+				const RichText &richText = m_richText[m_currentState][shapedGlyph.richTextIdx];
+
 				addQuad( textVertBuffer, topLeft, bottomRight,
 						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-						 shapedGlyph.rgba32, parentDerivedTL, parentDerivedBR, invSize,
+						 richText.rgba32, parentDerivedTL, parentDerivedBR, invSize,
 						 shapedGlyph.glyph->offsetStart );
 				textVertBuffer += 6u;
 
@@ -650,6 +772,7 @@ namespace Crystal
 #if CRYSTALGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = false;
 #endif
+		m_usesBackground = false;
 	}
 	//-------------------------------------------------------------------------
 	size_t Label::getMaxNumGlyphs() const
@@ -658,8 +781,12 @@ namespace Crystal
 		for( size_t i=0; i<States::NumStates; ++i )
 			retVal = std::max( m_shapes[i].size(), retVal );
 
+		const size_t maxGlyphs = retVal;
+
 		if( m_shadowOutline )
-			retVal <<= 1u;
+			retVal += maxGlyphs;
+		if( m_usesBackground )
+			retVal += maxGlyphs;
 
 		return retVal;
 	}
@@ -771,6 +898,7 @@ namespace Crystal
 		return	this->ptSize == other.ptSize &&
 				this->offset == other.offset &&
 				this->length == other.length &&
+				this->readingDir == other.readingDir &&
 				this->font == other.font;
 	}
 }

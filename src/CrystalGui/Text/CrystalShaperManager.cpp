@@ -21,7 +21,7 @@ namespace Crystal
 		m_ftLibrary( 0 ),
 		m_crystalManager( crystalManager ),
 		m_glyphAtlas( 0 ),
-		m_offsetPtr( 0 ),
+		m_offsetPtr( 1 ), //The 1st byte is taken. See ShaperManager::updateGpuBuffers
 		m_atlasCapacity( 0 ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
@@ -225,7 +225,9 @@ namespace Crystal
 		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
 		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
 		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
-		newGlyph.newlineSize= slot->metrics.height / 64.0f;
+		newGlyph.newlineSize= font->size->metrics.height / 64.0f;
+		newGlyph.regionUp = (float)font->size->metrics.ascender / (font->size->metrics.ascender -
+																   font->size->metrics.descender);
 		newGlyph.refCount	= 0;
 
 		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
@@ -390,7 +392,7 @@ namespace Crystal
 	}
 	//-------------------------------------------------------------------------
 	TextHorizAlignment::TextHorizAlignment ShaperManager::renderString(
-			const char *utf8Str, const RichText &richText,
+			const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
 			VertReadingDir::VertReadingDir vertReadingDir,
 			ShapedGlyphVec &outShapes )
 	{
@@ -468,7 +470,7 @@ namespace Crystal
 
 			const uint16_t *utf16Str = temp.getBuffer();
 			shaper->setFontSize26d6( richText.ptSize );
-			shaper->renderString( utf16Str, temp.length(), hbDir, richText.rgba32, outShapes );
+			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx, outShapes );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;
@@ -505,6 +507,11 @@ namespace Crystal
 			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
 																Ogre::BT_DEFAULT, 0, false );
 			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
+
+			// The 1st byte is taken. We use this byte to render arbitrary fixed-colour
+			// stuff without having to switch shaders and would complicate rendering.
+			// It's mostly used for the background colour by Label.
+			m_glyphAtlas[0] = 0xff;
 
 			m_glyphAtlasBuffer->upload( m_glyphAtlas, 0, m_offsetPtr );
 			m_dirtyRanges.clear();
