@@ -17,13 +17,20 @@ compiled multiple times iteratively until both dependencies are met. We chose to
 for static libs.
 
 
-Missing text features
-=====================
+Missing text features and Limitations
+=====================================
 
 1. Automatically substitute fonts when a string has mixed characters, and the selected
-font cannot represent that character, while another font can.
+font cannot represent that character, while another font can. In other words, no font
+detection: If you have multiple fonts e.g. Latin and Japanese, and you use
+a japanese character while using the latin font, we won't automatically use the japanese
+font and end up displaying a box instead.
 1. CJK Top to Bottom: Draw 2-digit numbers at the same height instead of two.
-1. LinebreakMode::WordWrap. By design this feature is not wanted. It would need us to
-include _very_ big unicode datafiles for word recognition (which bloats binary size and
-memory consumption) or depend on system files to do it. Both solutions go against
-CrystalGui's philosophy.
+1. LinebreakMode::WordWrap assumes space and tabs is what separate words, which is not
+always true for all languages.
+
+Known issues
+============
+
+1. Mixing multiple font sizes into the same Label, the correct height for the newline
+will not always be correctly calculated and thus be overestimated.
