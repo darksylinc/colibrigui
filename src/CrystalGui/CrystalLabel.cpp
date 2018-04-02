@@ -59,9 +59,32 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Label::setTextVertAlignment( TextVertAlignment::TextVertAlignment vertAlignment )
+	{
+		if( m_vertAlignment != vertAlignment )
+		{
+			m_vertAlignment = vertAlignment;
+			for( size_t i=0; i<States::NumStates; ++i )
+			{
+				m_glyphsPlaced[i] = false;
+#if CRYSTALGUI_DEBUG_MEDIUM
+				m_glyphsAligned[i] = false;
+#endif
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	TextHorizAlignment::TextHorizAlignment Label::getTextHorizAlignment() const
 	{
 		return m_horizAlignment;
+	}
+	//-------------------------------------------------------------------------
+	void Label::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
+								  const Ogre::Vector2 shadowDisplace )
+	{
+		m_shadowOutline = enable;
+		m_shadowColour = shadowColour;
+		m_shadowDisplace = shadowDisplace;
 	}
 	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )

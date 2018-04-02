@@ -107,8 +107,34 @@ namespace Crystal
 
 		virtual bool isLabel() const		{ return true; }
 
+		/// Aligns the text horizontally relative to the widget's m_size
+		/// Requires recalculating glyphs (i.e. same as setText)
 		void setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment );
 		TextHorizAlignment::TextHorizAlignment getTextHorizAlignment() const;
+
+		/// Aligns the text vertically relative to the widget's m_size
+		/// /// Requires recalculating glyphs (i.e. same as setText)
+		void setTextVertAlignment( TextVertAlignment::TextVertAlignment vertAlignment );
+		TextVertAlignment::TextVertAlignment getTextVertAlignment() const;
+
+		/** Enables a shadow of the text behind each character, for highlighting or
+			making the text easier to read, specially against backgrounds of the same
+			colour as the text.
+		@remarks
+			This feature is controlled per Label, not per RichText entry.
+			There is no overhead for calling this function often.
+			Drawing the shadow may incur in higher GPU cost though, due to overdraw.
+		@param enable
+			True to enable. False to disable.
+		@param shadowColour
+			The colour of the shadow.
+		@param shadowDisplace
+			The direction to which to displace.
+			Positive values displace towards bottom right.
+			Value is in pixels.
+		*/
+		void setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
+							   const Ogre::Vector2 shadowDisplace );
 
 		/** Called by CrystalManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.
