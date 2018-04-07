@@ -876,9 +876,10 @@ namespace Crystal
 						else
 							prevCaretY	= shapedGlyph.caretPos.y;
 						lineHeight = 0;
-						mostLeft = std::numeric_limits<float>::max();
-						mostRight = -std::numeric_limits<float>::max();
-						mostBottom = -std::numeric_limits<float>::max();
+						mostTop		= std::numeric_limits<float>::max();
+						mostLeft	= std::numeric_limits<float>::max();
+						mostRight	= -std::numeric_limits<float>::max();
+						mostBottom	= -std::numeric_limits<float>::max();
 					}
 
 					if( !shapedGlyph.isNewline )
