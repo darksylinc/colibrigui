@@ -256,7 +256,11 @@ namespace Crystal
 
 			if( m_horizAlignment == TextHorizAlignment::Natural )
 			{
-				if( actualHorizAlignment == TextHorizAlignment::Mixed )
+				if( m_vertReadingDir == VertReadingDir::ForceTTB )
+					m_actualHorizAlignment[state] = TextHorizAlignment::Right;
+				else if( m_vertReadingDir == VertReadingDir::ForceTTBLTR )
+					m_actualHorizAlignment[state] = TextHorizAlignment::Left;
+				else if( actualHorizAlignment == TextHorizAlignment::Mixed )
 					m_actualHorizAlignment[state] = shaperManager->getDefaultTextDirection();
 				else
 					m_actualHorizAlignment[state] = actualHorizAlignment;
@@ -267,7 +271,7 @@ namespace Crystal
 			if( m_vertReadingDir != VertReadingDir::Disabled )
 			{
 				if( m_vertReadingDir == VertReadingDir::ForceTTB ||
-					m_vertReadingDir == VertReadingDir::ForceBTT )
+					m_vertReadingDir == VertReadingDir::ForceTTBLTR )
 				{
 					m_actualVertReadingDir[state] = m_vertReadingDir;
 				}
@@ -299,6 +303,9 @@ namespace Crystal
 			nextWord.endCaretPos.x += largestHeight * 0.5f;
 
 		bool multipleWordsInLine = false;
+
+		const float vertReadDirSign =
+				m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ? -1.0f : 1.0f;
 
 		while( findNextWord( nextWord, state ) )
 		{
@@ -343,7 +350,7 @@ namespace Crystal
 						nextWord.startCaretPos.y -= caretReturn;
 						nextWord.endCaretPos.y	 -= caretReturn;
 						//Calculate alignment
-						nextWord.startCaretPos.x	+= largestHeight;
+						nextWord.startCaretPos.x += largestHeight * vertReadDirSign;
 						nextWord.startCaretPos.y	= 0.0f;
 						nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
 						nextWord.endCaretPos.y		= nextWord.startCaretPos.y + wordLength;
@@ -393,7 +400,7 @@ namespace Crystal
 						nextWord.startCaretPos.y = 0.0f;
 						nextWord.endCaretPos.y	 = 0.0f;
 						//Calculate alignment
-						nextWord.startCaretPos.x	+= largestHeight;
+						nextWord.startCaretPos.x	+= largestHeight * vertReadDirSign;
 						nextWord.startCaretPos.y	= 0.0f;
 					}
 					nextWord.endCaretPos		= nextWord.startCaretPos;
@@ -813,35 +820,36 @@ namespace Crystal
 				{
 					const ShapedGlyph &shapedGlyph = *itor;
 
-					if( itor + 1u == end ||
-						shapedGlyph.isNewline ||
-						(prevCaretY != shapedGlyph.caretPos.y && isHorizontal) ||
-						(prevCaretY != shapedGlyph.caretPos.x && !isHorizontal) )
-					{
-						if( itor + 1u == end )
-						{
-							lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
-							if( isHorizontal )
-							{
-								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
-													  shapedGlyph.offset.x +
-													  shapedGlyph.glyph->bearingX );
-								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-													   shapedGlyph.offset.x +
-													   shapedGlyph.glyph->bearingX +
-													   shapedGlyph.glyph->width );
-							}
-							else
-							{
-								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
-													  lineHeight * 0.5f );
-								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-													   lineHeight * 0.5f );
-							}
-							mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
-							mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
-						}
+					const bool changesLine = shapedGlyph.isNewline ||
+											 (prevCaretY != shapedGlyph.caretPos.y && isHorizontal) ||
+											 (prevCaretY != shapedGlyph.caretPos.x && !isHorizontal);
 
+					if( !shapedGlyph.isNewline && !changesLine )
+					{
+						lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
+						mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
+						mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
+						if( isHorizontal )
+						{
+							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
+												  shapedGlyph.offset.x +
+												  shapedGlyph.glyph->bearingX );
+							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+												   shapedGlyph.offset.x +
+												   shapedGlyph.glyph->bearingX +
+												   shapedGlyph.glyph->width );
+						}
+						else
+						{
+							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
+												  lineHeight * 0.5f );
+							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+												   lineHeight * 0.5f );
+						}
+					}
+
+					if( itor + 1u == end || changesLine )
+					{
 						const float regionUp = isHorizontal ? shapedGlyph.glyph->regionUp : 0.0f;
 
 						//New line found. Render the background and reset the counters
@@ -871,39 +879,24 @@ namespace Crystal
 						textVertBuffer += 6u;
 						m_numVertices += 6u;
 
+						Ogre::Vector2 nextCaret = shapedGlyph.caretPos;
+						if( shapedGlyph.isNewline && itor + 1u != end )
+							nextCaret = (itor + 1u)->caretPos;
+
 						if( !isHorizontal )
-							prevCaretY	= shapedGlyph.caretPos.x;
+							prevCaretY	= nextCaret.x;
 						else
-							prevCaretY	= shapedGlyph.caretPos.y;
+							prevCaretY	= nextCaret.y;
 						lineHeight = 0;
 						mostTop		= std::numeric_limits<float>::max();
 						mostLeft	= std::numeric_limits<float>::max();
 						mostRight	= -std::numeric_limits<float>::max();
 						mostBottom	= -std::numeric_limits<float>::max();
-					}
 
-					if( !shapedGlyph.isNewline )
-					{
-						lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
-						if( isHorizontal )
-						{
-							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
-												  shapedGlyph.offset.x +
-												  shapedGlyph.glyph->bearingX );
-							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-												   shapedGlyph.offset.x +
-												   shapedGlyph.glyph->bearingX +
-												   shapedGlyph.glyph->width );
-						}
-						else
-						{
-							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
-												  lineHeight * 0.5f );
-							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-												   lineHeight * 0.5f );
-						}
-						mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
-						mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
+						//Step backwards and reprocess this glyph again,
+						//as part of the new line and not the current one.
+						if( !shapedGlyph.isNewline && changesLine )
+							--itor;
 					}
 
 					++itor;

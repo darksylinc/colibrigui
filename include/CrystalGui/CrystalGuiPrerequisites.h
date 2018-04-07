@@ -209,10 +209,12 @@ namespace Crystal
 			IfNeededTTB,
 			/// Aligns top to bottom, newlines right to left, regardless of language
 			ForceTTB,
+			/// Aligns top to bottom, newlines left to right, regardless of language
+			ForceTTBLTR,
 			/// Not used
-			IfNeededBTT,
+			//IfNeededBTT,
 			/// Not used
-			ForceBTT,
+			//ForceBTT,
 		};
 	}
 	namespace TextVertAlignment
