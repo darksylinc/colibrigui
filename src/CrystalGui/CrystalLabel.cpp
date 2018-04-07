@@ -103,7 +103,7 @@ namespace Crystal
 	}
 	//-------------------------------------------------------------------------
 	void Label::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
-								  const Ogre::Vector2 shadowDisplace )
+								  const Ogre::Vector2 &shadowDisplace )
 	{
 		m_shadowOutline = enable;
 		m_shadowColour = shadowColour;
@@ -415,6 +415,14 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Label::alignGlyphs( States::States state )
 	{
+		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+			return alignGlyphsHorizReadingDir( state );
+		else
+			return alignGlyphsVertReadingDir( state );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Label::alignGlyphsHorizReadingDir( States::States state )
+	{
 		CRYSTAL_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
 							   "Calling alignGlyphs twice! updateGlyphs not called?" );
 		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
@@ -492,7 +500,98 @@ namespace Crystal
 			itor = m_shapes[state].begin();
 			while( itor != end )
 			{
+				itor->caretPos.y += newTop;
+				++itor;
+			}
+		}
+
+#if CRYSTALGUI_DEBUG_MEDIUM
+		m_glyphsAligned[state] = true;
+#endif
+
+		return maxWidthHeight;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Label::alignGlyphsVertReadingDir( States::States state )
+	{
+		CRYSTAL_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
+							   "Calling alignGlyphs twice! updateGlyphs not called?" );
+		CRYSTAL_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
+							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
+							"m_actualHorizAlignment not set! updateGlyphs not called?" );
+		CRYSTAL_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
+
+		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+
+		float lineWidth = 0;
+		float prevCaretX = 0;
+
+		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
+														  m_manager->getCanvasSize());
+
+		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
+		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
+		ShapedGlyphVec::iterator end  = m_shapes[state].end();
+
+		while( itor != end )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
+			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
+													   shapedGlyph.glyph->width,
+													   top + shapedGlyph.glyph->height );
+
+			if( (shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x) &&
+				m_vertAlignment > TextVertAlignment::Top )
+			{
+				//Displace horizontally, the line we just were in
+				float newTop = widgetBottomRight.y - lineWidth;
+				if( m_vertAlignment == TextVertAlignment::Center )
+					newTop *= 0.5f;
+
+				while( lineBegin != itor )
+				{
+					lineBegin->caretPos.y += newTop;
+					++lineBegin;
+				}
+
+				prevCaretX	= shapedGlyph.caretPos.x;
+				lineWidth	= 0;
+			}
+
+			lineWidth = Ogre::max( lineWidth, bottomRight.y );
+			maxWidthHeight.makeCeil( bottomRight );
+
+			++itor;
+		}
+
+		if( m_vertAlignment > TextVertAlignment::Top )
+		{
+			//Displace vertically, last line
+			float newTop = widgetBottomRight.y - lineWidth;
+			if( m_vertAlignment == TextVertAlignment::Center )
+				newTop *= 0.5f;
+
+			while( lineBegin != end )
+			{
 				lineBegin->caretPos.y += newTop;
+				++lineBegin;
+			}
+		}
+
+		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
+		{
+			//Iterate again, to horizontally displace the entire string
+			float newLeft = widgetBottomRight.x - maxWidthHeight.x;
+			if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
+				newLeft *= 0.5f;
+
+			itor = m_shapes[state].begin();
+			while( itor != end )
+			{
+				itor->caretPos.x += newLeft;
 				++itor;
 			}
 		}
@@ -635,8 +734,8 @@ namespace Crystal
 			{
 				word.endCaretPos.y = ceilf( (word.startCaretPos.y +
 											 firstGlyph.advance.y * 0.25f) /
-											(firstGlyph.advance.y * 2.0f) ) *
-									 (firstGlyph.advance.y * 2.0f);
+											(firstGlyph.advance.y * 4.0f) ) *
+									 (firstGlyph.advance.y * 4.0f);
 			}
 		}
 

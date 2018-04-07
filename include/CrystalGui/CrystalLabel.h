@@ -83,6 +83,8 @@ namespace Crystal
 		@return
 		*/
 		Ogre::Vector2 alignGlyphs( States::States state );
+		Ogre::Vector2 alignGlyphsHorizReadingDir( States::States state );
+		Ogre::Vector2 alignGlyphsVertReadingDir( States::States state );
 
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
@@ -137,8 +139,8 @@ namespace Crystal
 			Positive values displace towards bottom right.
 			Value is in pixels.
 		*/
-		void setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
-							   const Ogre::Vector2 shadowDisplace );
+		void setShadowOutline( bool enable, Ogre::ColourValue shadowColour=Ogre::ColourValue::Black,
+							   const Ogre::Vector2 &shadowDisplace=Ogre::Vector2::UNIT_SCALE );
 
 		/** Called by CrystalManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.
