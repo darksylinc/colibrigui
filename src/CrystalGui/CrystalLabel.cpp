@@ -766,10 +766,153 @@ namespace Crystal
 		if( itor != end )
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 
-		if( m_actualVertReadingDir[state] != VertReadingDir::Disabled )
-			largestHeight *= 1.5f;
-
 		return largestHeight;
+	}
+	//-------------------------------------------------------------------------
+	GlyphVertex* Label::fillBackground( GlyphVertex * RESTRICT_ALIAS textVertBuffer,
+										const Ogre::Vector2 halfWindowRes,
+										const Ogre::Vector2 invWindowRes,
+										const Ogre::Vector2 parentDerivedTL,
+										const Ogre::Vector2 parentDerivedBR,
+										const bool isHorizontal )
+	{
+		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
+
+		RichTextVec::const_iterator itRichText = m_richText[m_currentState].begin();
+		RichTextVec::const_iterator enRichText = m_richText[m_currentState].end();
+
+		while( itRichText != enRichText )
+		{
+			if( !itRichText->noBackground )
+			{
+				float prevCaretY = 0;
+
+				const uint32_t backgroundColour = itRichText->backgroundRgba32;
+				const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundSize;
+
+				float lineHeight = 0;
+				float mostTop	= std::numeric_limits<float>::max();
+				float mostLeft	= std::numeric_limits<float>::max();
+				float mostRight	= -std::numeric_limits<float>::max();
+				float mostBottom= -std::numeric_limits<float>::max();
+
+				ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() +
+													  itRichText->glyphStart;
+				ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].begin() +
+													  itRichText->glyphEnd;
+
+				if( itor != end )
+				{
+					if( isHorizontal )
+						prevCaretY = itor->caretPos.y;
+					else
+						prevCaretY = itor->caretPos.x;
+				}
+
+				while( itor != end )
+				{
+					const ShapedGlyph &shapedGlyph = *itor;
+
+					if( itor + 1u == end ||
+						shapedGlyph.isNewline ||
+						(prevCaretY != shapedGlyph.caretPos.y && isHorizontal) ||
+						(prevCaretY != shapedGlyph.caretPos.x && !isHorizontal) )
+					{
+						if( itor + 1u == end )
+						{
+							lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
+							if( isHorizontal )
+							{
+								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
+													  shapedGlyph.offset.x +
+													  shapedGlyph.glyph->bearingX );
+								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+													   shapedGlyph.offset.x +
+													   shapedGlyph.glyph->bearingX +
+													   shapedGlyph.glyph->width );
+							}
+							else
+							{
+								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
+													  lineHeight * 0.5f );
+								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+													   lineHeight * 0.5f );
+							}
+							mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
+							mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
+						}
+
+						const float regionUp = isHorizontal ? shapedGlyph.glyph->regionUp : 0.0f;
+
+						//New line found. Render the background and reset the counters
+						Ogre::Vector2 topLeft =
+								Ogre::Vector2( mostLeft, mostTop - lineHeight * regionUp );
+						Ogre::Vector2 bottomRight =
+								Ogre::Vector2( mostRight, mostBottom + lineHeight * (1.0f - regionUp) );
+						topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
+						bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
+
+						//Snap to pixels
+						topLeft = topLeft * halfWindowRes;
+						topLeft.x = ceilf( topLeft.x );
+						topLeft.y = ceilf( topLeft.y );
+						bottomRight = bottomRight * halfWindowRes;
+						bottomRight.x = ceilf( bottomRight.x );
+						bottomRight.y = ceilf( bottomRight.y );
+						topLeft = topLeft * invWindowRes;
+						bottomRight = bottomRight * invWindowRes;
+
+						addQuad( textVertBuffer,
+								 topLeft - backgroundDisplacement,
+								 bottomRight + backgroundDisplacement,
+								 1, 1,
+								 backgroundColour, parentDerivedTL, parentDerivedBR, invSize,
+								 0 );
+						textVertBuffer += 6u;
+						m_numVertices += 6u;
+
+						if( !isHorizontal )
+							prevCaretY	= shapedGlyph.caretPos.x;
+						else
+							prevCaretY	= shapedGlyph.caretPos.y;
+						lineHeight = 0;
+						mostLeft = std::numeric_limits<float>::max();
+						mostRight = -std::numeric_limits<float>::max();
+						mostBottom = -std::numeric_limits<float>::max();
+					}
+
+					if( !shapedGlyph.isNewline )
+					{
+						lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
+						if( isHorizontal )
+						{
+							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
+												  shapedGlyph.offset.x +
+												  shapedGlyph.glyph->bearingX );
+							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+												   shapedGlyph.offset.x +
+												   shapedGlyph.glyph->bearingX +
+												   shapedGlyph.glyph->width );
+						}
+						else
+						{
+							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
+												  lineHeight * 0.5f );
+							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
+												   lineHeight * 0.5f );
+						}
+						mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
+						mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
+					}
+
+					++itor;
+				}
+			}
+
+			++itRichText;
+		}
+
+		return textVertBuffer;
 	}
 	//-------------------------------------------------------------------------
 	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
@@ -798,110 +941,9 @@ namespace Crystal
 
 		if( m_usesBackground )
 		{
-			RichTextVec::const_iterator itRichText = m_richText[m_currentState].begin();
-			RichTextVec::const_iterator enRichText = m_richText[m_currentState].end();
-
-			while( itRichText != enRichText )
-			{
-				if( !itRichText->noBackground )
-				{
-					float prevCaretY = 0;
-
-					const uint32_t backgroundColour = itRichText->backgroundRgba32;
-					const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundSize;
-
-					float lineHeight = 0;
-					float mostLeft = std::numeric_limits<float>::max();
-					float mostRight = -std::numeric_limits<float>::max();
-					float mostBottom = std::numeric_limits<float>::max();
-
-					ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() +
-														  itRichText->glyphStart;
-					ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].begin() +
-														  itRichText->glyphEnd;
-
-					if( itor != end )
-					{
-						if( m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled )
-							prevCaretY = itor->caretPos.y;
-						else
-							prevCaretY = itor->caretPos.x;
-					}
-
-					while( itor != end )
-					{
-						const ShapedGlyph &shapedGlyph = *itor;
-
-						if( itor + 1u == end ||
-							shapedGlyph.isNewline ||
-							(prevCaretY != shapedGlyph.caretPos.y &&
-							 m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled) ||
-							(prevCaretY != shapedGlyph.caretPos.x &&
-							 m_actualVertReadingDir[m_currentState] != VertReadingDir::Disabled) )
-						{
-							if( itor + 1u == end )
-							{
-								lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
-								mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x );
-								mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-													   shapedGlyph.glyph->width );
-								mostBottom = Ogre::min( mostBottom, shapedGlyph.caretPos.y );
-							}
-
-							//New line found. Render the background and reset the counters
-							Ogre::Vector2 topLeft =
-									Ogre::Vector2( mostLeft, mostBottom -
-												   lineHeight * shapedGlyph.glyph->regionUp );
-							Ogre::Vector2 bottomRight =
-									Ogre::Vector2( mostRight, mostBottom +
-												   lineHeight * (1.0f - shapedGlyph.glyph->regionUp) );
-							topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
-							bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
-
-							//Snap to pixels
-							topLeft = topLeft * halfWindowRes;
-							topLeft.x = ceilf( topLeft.x );
-							topLeft.y = ceilf( topLeft.y );
-							bottomRight = bottomRight * halfWindowRes;
-							bottomRight.x = ceilf( bottomRight.x );
-							bottomRight.y = ceilf( bottomRight.y );
-							topLeft = topLeft * invWindowRes;
-							bottomRight = bottomRight * invWindowRes;
-
-							addQuad( textVertBuffer,
-									 topLeft - backgroundDisplacement,
-									 bottomRight + backgroundDisplacement,
-									 1, 1,
-									 backgroundColour, parentDerivedTL, parentDerivedBR, invSize,
-									 0 );
-							textVertBuffer += 6u;
-							m_numVertices += 6u;
-
-							if( m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled )
-								prevCaretY	= shapedGlyph.caretPos.x;
-							else
-								prevCaretY	= shapedGlyph.caretPos.y;
-							lineHeight = 0;
-							mostLeft = std::numeric_limits<float>::max();
-							mostRight = -std::numeric_limits<float>::max();
-							mostBottom = std::numeric_limits<float>::max();
-						}
-
-						if( !shapedGlyph.isNewline )
-						{
-							lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
-							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x );
-							mostRight = Ogre::max( mostRight,
-												   shapedGlyph.caretPos.x + shapedGlyph.glyph->width );
-							mostBottom = Ogre::min( mostBottom, shapedGlyph.caretPos.y );
-						}
-
-						++itor;
-					}
-				}
-
-				++itRichText;
-			}
+			const bool isHoriz = m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled;
+			textVertBuffer = fillBackground( textVertBuffer, halfWindowRes, invWindowRes,
+											 parentDerivedTL, parentDerivedBR, isHoriz );
 		}
 
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
@@ -916,8 +958,7 @@ namespace Crystal
 				Ogre::Vector2 topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
 										Ogre::Vector2( shapedGlyph.glyph->bearingX,
 													   -shapedGlyph.glyph->bearingY );
-				Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
-														   shapedGlyph.glyph->width,
+				Ogre::Vector2 bottomRight = Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width,
 														   topLeft.y + shapedGlyph.glyph->height );
 
 				topLeft		= m_derivedTopLeft + topLeft * invWindowRes;

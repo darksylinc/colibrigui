@@ -187,6 +187,13 @@ namespace Crystal
 						TextHorizAlignment::TextHorizAlignment newHorizPos=TextHorizAlignment::Left,
 						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top );
 
+		GlyphVertex* fillBackground( GlyphVertex * RESTRICT_ALIAS textVertBuffer,
+									 const Ogre::Vector2 halfWindowRes,
+									 const Ogre::Vector2 invWindowRes,
+									 const Ogre::Vector2 parentDerivedTL,
+									 const Ogre::Vector2 parentDerivedBR,
+									 const bool isHorizontal );
+
 		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 RESTRICT_ALIAS vertexBuffer,
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
