@@ -306,16 +306,16 @@ namespace Crystal
 		Word nextWord;
 		memset( &nextWord, 0, sizeof(Word) );
 
+		const float vertReadDirSign =
+				m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ? -1.0f : 1.0f;
+
 		float largestHeight = findLineMaxHeight( m_shapes[state].begin(), state );
 		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 			nextWord.endCaretPos.y += largestHeight;
 		else
-			nextWord.endCaretPos.x += largestHeight * 0.5f;
+			nextWord.endCaretPos.x += largestHeight * 0.5f * vertReadDirSign;
 
 		bool multipleWordsInLine = false;
-
-		const float vertReadDirSign =
-				m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ? -1.0f : 1.0f;
 
 		while( findNextWord( nextWord, state ) )
 		{
@@ -582,7 +582,7 @@ namespace Crystal
 			if( (shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x) &&
 				m_vertAlignment > TextVertAlignment::Top )
 			{
-				//Displace horizontally, the line we just were in
+				//Displace vertically, the line we just were in
 				float newTop = widgetBottomRight.y - lineWidth;
 				if( m_vertAlignment == TextVertAlignment::Center )
 					newTop *= 0.5f;
@@ -625,12 +625,31 @@ namespace Crystal
 		{
 			//Iterate again, to horizontally displace the entire string
 			float newLeft = widgetBottomRight.x - maxWidthHeight.x;
-			if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
-				newLeft *= 0.5f;
-			else if( m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
-					 m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
+			if( m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
 			{
-				newLeft = maxWidthHeight.x;
+				switch( m_actualHorizAlignment[state] )
+				{
+				case TextHorizAlignment::Left:
+					newLeft = maxWidthHeight.x; break;
+				case TextHorizAlignment::Center:
+					newLeft = (widgetBottomRight.x + maxWidthHeight.x) * 0.5f; break;
+				case TextHorizAlignment::Natural:
+				case TextHorizAlignment::Right:
+					newLeft = widgetBottomRight.x; break;
+				}
+			}
+			else
+			{
+				switch( m_actualHorizAlignment[state] )
+				{
+				case TextHorizAlignment::Natural:
+				case TextHorizAlignment::Left:
+					newLeft = 0.0f; break;
+				case TextHorizAlignment::Center:
+					newLeft = (widgetBottomRight.x - maxWidthHeight.x) * 0.5f; break;
+				case TextHorizAlignment::Right:
+					newLeft = widgetBottomRight.x - maxWidthHeight.x; break;
+				}
 			}
 
 			itor = m_shapes[state].begin();
