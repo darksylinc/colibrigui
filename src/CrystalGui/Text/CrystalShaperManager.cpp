@@ -459,7 +459,8 @@ namespace Crystal
 			hb_direction_t hbDir = dir == UBIDI_LTR ? HB_DIRECTION_LTR : HB_DIRECTION_RTL;
 
 			if( (vertReadingDir == VertReadingDir::IfNeededTTB && m_useVerticalLayoutWhenAvailable) ||
-				vertReadingDir == VertReadingDir::ForceTTB )
+				vertReadingDir == VertReadingDir::ForceTTB ||
+				vertReadingDir == VertReadingDir::ForceTTBLTR )
 			{
 				hbDir = HB_DIRECTION_TTB;
 			}
