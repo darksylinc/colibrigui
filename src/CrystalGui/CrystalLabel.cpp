@@ -8,6 +8,16 @@
 
 namespace Crystal
 {
+	inline void getCorners( const ShapedGlyph &shapedGlyph,
+							Ogre::Vector2 &topLeft, Ogre::Vector2 &bottomRight )
+	{
+		topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
+								Ogre::Vector2( shapedGlyph.glyph->bearingX,
+											   -shapedGlyph.glyph->bearingY );
+		bottomRight = Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width,
+									 topLeft.y + shapedGlyph.glyph->height );
+	}
+
 	Label::Label( CrystalManager *manager ) :
 		Renderable( manager ),
 		m_usesBackground( false ),
@@ -420,15 +430,15 @@ namespace Crystal
 			alignGlyphs( state );
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Label::alignGlyphs( States::States state )
+	void Label::alignGlyphs( States::States state )
 	{
 		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
-			return alignGlyphsHorizReadingDir( state );
+			alignGlyphsHorizReadingDir( state );
 		else
-			return alignGlyphsVertReadingDir( state );
+			alignGlyphsVertReadingDir( state );
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Label::alignGlyphsHorizReadingDir( States::States state )
+	void Label::alignGlyphsHorizReadingDir( States::States state )
 	{
 		CRYSTAL_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
 							   "Calling alignGlyphs twice! updateGlyphs not called?" );
@@ -438,13 +448,22 @@ namespace Crystal
 							"m_actualHorizAlignment not set! updateGlyphs not called?" );
 		CRYSTAL_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
 
-		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+		if( m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
+			m_vertAlignment == TextVertAlignment::Top )
+		{
+			//Nothing to align
+			return;
+		}
 
 		float lineWidth = 0;
 		float prevCaretY = 0;
 
 		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
 														  m_manager->getCanvasSize());
+
+		//To gather width & height
+		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
+		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
 		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
@@ -454,10 +473,8 @@ namespace Crystal
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
-			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
-													   shapedGlyph.glyph->width,
-													   top + shapedGlyph.glyph->height );
+			Ogre::Vector2 topLeft, bottomRight;
+			getCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( (shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y) &&
 				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
@@ -478,10 +495,13 @@ namespace Crystal
 			}
 
 			lineWidth = Ogre::max( lineWidth, bottomRight.x );
-			maxWidthHeight.makeCeil( bottomRight );
+			minTopLeft.makeFloor( topLeft );
+			maxBottomRight.makeCeil( bottomRight );
 
 			++itor;
 		}
+
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
 
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 		{
@@ -515,11 +535,9 @@ namespace Crystal
 #if CRYSTALGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
-
-		return maxWidthHeight;
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Label::alignGlyphsVertReadingDir( States::States state )
+	void Label::alignGlyphsVertReadingDir( States::States state )
 	{
 		CRYSTAL_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
 							   "Calling alignGlyphs twice! updateGlyphs not called?" );
@@ -527,15 +545,28 @@ namespace Crystal
 							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
 							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
 							"m_actualHorizAlignment not set! updateGlyphs not called?" );
+		CRYSTAL_ASSERT_LOW( (m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ||
+							 m_actualVertReadingDir[state] == VertReadingDir::ForceTTBLTR) &&
+							"m_actualVertReadingDir not set! updateGlyphs not called?" );
 		CRYSTAL_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
 
-		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+		if( m_vertAlignment == TextVertAlignment::Top &&
+			m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
+			m_actualVertReadingDir[state] == VertReadingDir::ForceTTBLTR )
+		{
+			//Nothing to align
+			return;
+		}
 
 		float lineWidth = 0;
 		float prevCaretX = 0;
 
 		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
 														  m_manager->getCanvasSize());
+
+		//To gather width & height
+		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
+		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
 		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
@@ -545,10 +576,8 @@ namespace Crystal
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
-			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
-													   shapedGlyph.glyph->width,
-													   top + shapedGlyph.glyph->height );
+			Ogre::Vector2 topLeft, bottomRight;
+			getCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( (shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x) &&
 				m_vertAlignment > TextVertAlignment::Top )
@@ -569,7 +598,8 @@ namespace Crystal
 			}
 
 			lineWidth = Ogre::max( lineWidth, bottomRight.y );
-			maxWidthHeight.makeCeil( bottomRight );
+			minTopLeft.makeFloor( topLeft );
+			maxBottomRight.makeCeil( bottomRight );
 
 			++itor;
 		}
@@ -588,12 +618,20 @@ namespace Crystal
 			}
 		}
 
-		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
+
+		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left ||
+			m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
 		{
 			//Iterate again, to horizontally displace the entire string
 			float newLeft = widgetBottomRight.x - maxWidthHeight.x;
 			if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
 				newLeft *= 0.5f;
+			else if( m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
+					 m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
+			{
+				newLeft = maxWidthHeight.x;
+			}
 
 			itor = m_shapes[state].begin();
 			while( itor != end )
@@ -606,8 +644,6 @@ namespace Crystal
 #if CRYSTALGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
-
-		return maxWidthHeight;
 	}
 	//-------------------------------------------------------------------------
 	inline void Label::addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
@@ -949,11 +985,8 @@ namespace Crystal
 
 			if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
 			{
-				Ogre::Vector2 topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
-										Ogre::Vector2( shapedGlyph.glyph->bearingX,
-													   -shapedGlyph.glyph->bearingY );
-				Ogre::Vector2 bottomRight = Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width,
-														   topLeft.y + shapedGlyph.glyph->height );
+				Ogre::Vector2 topLeft, bottomRight;
+				getCorners( shapedGlyph, topLeft, bottomRight );
 
 				topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
 				bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
@@ -1089,6 +1122,9 @@ namespace Crystal
 		if( m_glyphsDirty[baseState] )
 			updateGlyphs( baseState, false );
 
+		if( m_shapes[baseState].empty() )
+			return;
+
 		//Replace the glyphs forced to the Top-Left so we can gather the width & height
 		const float oldWidth = m_size.x;
 		m_size.x = maxAllowedWidth;
@@ -1096,22 +1132,25 @@ namespace Crystal
 		m_size.x = oldWidth;
 
 		//Gather width & height
-		Ogre::Vector2 maxWidthHeight( Ogre::Vector2::ZERO );
+		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
+		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator itor = m_shapes[baseState].begin();
 		ShapedGlyphVec::iterator end  = m_shapes[baseState].end();
 
 		while( itor != end )
 		{
-			const ShapedGlyph &shapedGlyph = *itor;
-
-			float top = shapedGlyph.caretPos.y + shapedGlyph.offset.y + -shapedGlyph.glyph->bearingY;
-			Ogre::Vector2 bottomRight = Ogre::Vector2( shapedGlyph.caretPos.x +
-													   shapedGlyph.glyph->width,
-													   top + shapedGlyph.glyph->height );
-			maxWidthHeight.makeCeil( bottomRight );
+			Ogre::Vector2 topLeft, bottomRight;
+			getCorners( *itor, topLeft, bottomRight );
+			minTopLeft.makeFloor( topLeft );
+			maxBottomRight.makeCeil( bottomRight );
 			++itor;
 		}
+
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
+
+		if( maxWidthHeight.x < 0 || maxWidthHeight.y < 0 )
+			return;
 
 		//Set new dimensions
 		const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();

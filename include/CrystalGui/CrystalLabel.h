@@ -82,9 +82,9 @@ namespace Crystal
 		@param state
 		@return
 		*/
-		Ogre::Vector2 alignGlyphs( States::States state );
-		Ogre::Vector2 alignGlyphsHorizReadingDir( States::States state );
-		Ogre::Vector2 alignGlyphsVertReadingDir( States::States state );
+		void alignGlyphs( States::States state );
+		void alignGlyphsHorizReadingDir( States::States state );
+		void alignGlyphsVertReadingDir( States::States state );
 
 		bool isAnyStateDirty() const;
 		void flagDirty( States::States state );
