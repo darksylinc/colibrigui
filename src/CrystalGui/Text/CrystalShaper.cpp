@@ -11,6 +11,9 @@
 
 #include "hb-ft.h"
 
+#include "utf16.h"
+#include "uscript.h"
+
 namespace Crystal
 {
 	/*  See http://www.microsoft.com/typography/otspec/name.htm
@@ -186,9 +189,9 @@ namespace Crystal
 
 			ShapedGlyph shapedGlyph;
 			shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
-												 glyphPos[i].y_advance ) / 64.0f;
+												 -glyphPos[i].y_advance ) / 64.0f;
 			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
-												glyphPos[i].y_offset ) / 64.0f;
+												-glyphPos[i].y_offset ) / 64.0f;
 			shapedGlyph.caretPos = Ogre::Vector2::ZERO;
 			shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 			shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
@@ -196,6 +199,17 @@ namespace Crystal
 										utf16Str[cluster] == L'.'	||
 										utf16Str[cluster] == L';'	||
 										utf16Str[cluster] == L',';
+			{
+				//Ask ICU if this character correspond to a language we can
+				//break by single letters (e.g. CJK characters, Thai)
+				//Word breaking is actually very complex, so we just assume
+				//these languages can be broken at any character
+				uint32_t utf32Char;
+				U16_GET_UNSAFE( utf16Str, cluster, utf32Char );
+				UErrorCode ignoredError = U_ZERO_ERROR;
+				UScriptCode scriptCode = uscript_getScript( utf32Char, &ignoredError );
+				shapedGlyph.isWordBreaker |= uscript_breaksBetweenLetters( scriptCode );
+			}
 			shapedGlyph.isTab = utf16Str[cluster] == L'\t';
 			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
 			shapedGlyph.richTextIdx = richTextIdx;

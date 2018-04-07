@@ -69,6 +69,8 @@ namespace Crystal
 		size_t		m_atlasCapacity;
 		RangeVec	m_dirtyRanges; //NOT sorted?
 
+		VertReadingDir::VertReadingDir m_preferredVertReadingDir;
+
 		UBiDi		*m_bidi;
 		UBiDiLevel	m_defaultDirection;
 		bool		m_useVerticalLayoutWhenAvailable;
@@ -155,6 +157,7 @@ namespace Crystal
 				ShapedGlyphVec &outShapes );
 
 		TextHorizAlignment::TextHorizAlignment getDefaultTextDirection() const;
+		VertReadingDir::VertReadingDir getPreferredVertReadingDir() const;
 
 		void updateGpuBuffers();
 

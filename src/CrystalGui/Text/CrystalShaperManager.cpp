@@ -23,6 +23,7 @@ namespace Crystal
 		m_glyphAtlas( 0 ),
 		m_offsetPtr( 1 ), //The 1st byte is taken. See ShaperManager::updateGpuBuffers
 		m_atlasCapacity( 0 ),
+		m_preferredVertReadingDir( VertReadingDir::Disabled ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
@@ -493,6 +494,11 @@ namespace Crystal
 	{
 		return (m_defaultDirection == UBIDI_DEFAULT_LTR || m_defaultDirection == UBIDI_LTR) ?
 					TextHorizAlignment::Left : TextHorizAlignment::Right;
+	}
+	//-------------------------------------------------------------------------
+	VertReadingDir::VertReadingDir ShaperManager::getPreferredVertReadingDir() const
+	{
+		return m_preferredVertReadingDir;
 	}
 	//-------------------------------------------------------------------------
 	void ShaperManager::updateGpuBuffers()

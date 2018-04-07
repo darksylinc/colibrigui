@@ -47,6 +47,7 @@ namespace Crystal
 		VertReadingDir::VertReadingDir			m_vertReadingDir;
 
 		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
+		VertReadingDir::VertReadingDir			m_actualVertReadingDir[States::NumStates];
 
 		//Renderable	*m_background;
 
@@ -113,9 +114,12 @@ namespace Crystal
 		TextHorizAlignment::TextHorizAlignment getTextHorizAlignment() const;
 
 		/// Aligns the text vertically relative to the widget's m_size
-		/// /// Requires recalculating glyphs (i.e. same as setText)
+		/// Requires recalculating glyphs (i.e. same as setText)
 		void setTextVertAlignment( TextVertAlignment::TextVertAlignment vertAlignment );
 		TextVertAlignment::TextVertAlignment getTextVertAlignment() const;
+
+		void setVertReadingDir( VertReadingDir::VertReadingDir vertReadingDir );
+		VertReadingDir::VertReadingDir getVertReadingDir() const;
 
 		/** Enables a shadow of the text behind each character, for highlighting or
 			making the text easier to read, specially against backgrounds of the same

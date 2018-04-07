@@ -23,7 +23,10 @@ namespace Crystal
 	{
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		for( size_t i=0; i<States::NumStates; ++i )
+		{
 			m_actualHorizAlignment[i] = shaperManager->getDefaultTextDirection();
+			m_actualVertReadingDir[i] = VertReadingDir::Disabled;
+		}
 
 		for( size_t i=0; i<States::NumStates; ++i )
 		{
@@ -77,6 +80,26 @@ namespace Crystal
 	TextHorizAlignment::TextHorizAlignment Label::getTextHorizAlignment() const
 	{
 		return m_horizAlignment;
+	}
+	//-------------------------------------------------------------------------
+	void Label::setVertReadingDir( VertReadingDir::VertReadingDir vertReadingDir )
+	{
+		if( m_vertReadingDir != vertReadingDir )
+		{
+			m_vertReadingDir = vertReadingDir;
+			for( size_t i=0; i<States::NumStates; ++i )
+			{
+				m_glyphsPlaced[i] = false;
+#if CRYSTALGUI_DEBUG_MEDIUM
+				m_glyphsAligned[i] = false;
+#endif
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	VertReadingDir::VertReadingDir Label::getVertReadingDir() const
+	{
+		return m_vertReadingDir;
 	}
 	//-------------------------------------------------------------------------
 	void Label::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
@@ -180,6 +203,7 @@ namespace Crystal
 					m_glyphsAligned[state] = m_glyphsAligned[i];
 #endif
 					m_actualHorizAlignment[state] = m_actualHorizAlignment[i];
+					m_actualVertReadingDir[state] = m_actualVertReadingDir[i];
 
 					ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
 					ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
@@ -240,6 +264,18 @@ namespace Crystal
 			else
 				m_actualHorizAlignment[state] = m_horizAlignment;
 
+			if( m_vertReadingDir != VertReadingDir::Disabled )
+			{
+				if( m_vertReadingDir == VertReadingDir::ForceTTB ||
+					m_vertReadingDir == VertReadingDir::ForceBTT )
+				{
+					m_actualVertReadingDir[state] = m_vertReadingDir;
+				}
+				else
+					m_actualVertReadingDir[state] = shaperManager->getPreferredVertReadingDir();
+			}
+			else
+				m_actualVertReadingDir[state] = m_vertReadingDir;
 		}
 
 		m_glyphsDirty[state] = false;
@@ -257,7 +293,10 @@ namespace Crystal
 		memset( &nextWord, 0, sizeof(Word) );
 
 		float largestHeight = findLineMaxHeight( m_shapes[state].begin(), state );
-		nextWord.endCaretPos.y += largestHeight;
+		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+			nextWord.endCaretPos.y += largestHeight;
+		else
+			nextWord.endCaretPos.x += largestHeight * 0.25f;
 
 		bool multipleWordsInLine = false;
 
@@ -265,26 +304,51 @@ namespace Crystal
 		{
 			if( m_linebreakMode == LinebreakMode::WordWrap )
 			{
-				float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
-										 nextWord.lastCharWidth;
-				float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
-				if( caretAtEndOfWord > bottomRight.x &&
-					(distBetweenWords <= bottomRight.x || multipleWordsInLine) &&
-					!m_shapes[state][nextWord.offset].isNewline )
+				if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 				{
-					float caretReturn = nextWord.startCaretPos.x;
-					float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+					float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
+											 nextWord.lastCharWidth;
+					float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
+					if( caretAtEndOfWord > bottomRight.x &&
+						(distBetweenWords <= bottomRight.x || multipleWordsInLine) &&
+						!m_shapes[state][nextWord.offset].isNewline )
+					{
+						float caretReturn = nextWord.startCaretPos.x;
+						float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
 
-					//Return to left.
-					nextWord.startCaretPos.x -= caretReturn;
-					nextWord.endCaretPos.x	 -= caretReturn;
-					//Calculate alignment
-					nextWord.startCaretPos.x	= 0.0f;
-					nextWord.startCaretPos.y	+= largestHeight;
-					nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
-					nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+						//Return to left.
+						nextWord.startCaretPos.x -= caretReturn;
+						nextWord.endCaretPos.x	 -= caretReturn;
+						//Calculate alignment
+						nextWord.startCaretPos.x	= 0.0f;
+						nextWord.startCaretPos.y	+= largestHeight;
+						nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
+						nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+						multipleWordsInLine = false;
+					}
+				}
+				else
+				{
+					float caretAtEndOfWord = nextWord.endCaretPos.y - nextWord.lastAdvance.y +
+											 nextWord.lastCharWidth;
+					float distBetweenWords = nextWord.endCaretPos.y - nextWord.startCaretPos.y;
+					if( caretAtEndOfWord > bottomRight.y &&
+						(distBetweenWords <= bottomRight.y || multipleWordsInLine) &&
+						!m_shapes[state][nextWord.offset].isNewline )
+					{
+						float caretReturn = nextWord.startCaretPos.y;
+						float wordLength = nextWord.endCaretPos.y - nextWord.startCaretPos.y;
 
-					multipleWordsInLine = false;
+						//Return to top.
+						nextWord.startCaretPos.y -= caretReturn;
+						nextWord.endCaretPos.y	 -= caretReturn;
+						//Calculate alignment
+						nextWord.startCaretPos.x	+= largestHeight;
+						nextWord.startCaretPos.y	= 0.0f;
+						nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
+						nextWord.endCaretPos.y		= nextWord.startCaretPos.y + wordLength;
+						multipleWordsInLine = false;
+					}
 				}
 			}
 
@@ -314,12 +378,24 @@ namespace Crystal
 				{
 					largestHeight = findLineMaxHeight( itor + 1u, state );
 
-					//Return to left. Newlines are zero width.
-					nextWord.startCaretPos.x = 0.0f;
-					nextWord.endCaretPos.x	 = 0.0f;
-					//Calculate alignment
-					nextWord.startCaretPos.x	= 0.0f;
-					nextWord.startCaretPos.y	+= largestHeight;
+					if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+					{
+						//Return to left. Newlines are zero width.
+						nextWord.startCaretPos.x = 0.0f;
+						nextWord.endCaretPos.x	 = 0.0f;
+						//Calculate alignment
+						nextWord.startCaretPos.x	= 0.0f;
+						nextWord.startCaretPos.y	+= largestHeight;
+					}
+					else
+					{
+						//Return to top. Newlines are zero width.
+						nextWord.startCaretPos.y = 0.0f;
+						nextWord.endCaretPos.y	 = 0.0f;
+						//Calculate alignment
+						nextWord.startCaretPos.x	+= largestHeight;
+						nextWord.startCaretPos.y	= 0.0f;
+					}
 					nextWord.endCaretPos		= nextWord.startCaretPos;
 					multipleWordsInLine = false;
 				}
@@ -525,7 +601,10 @@ namespace Crystal
 		word.startCaretPos	= word.endCaretPos;
 		word.endCaretPos	+= firstGlyph.advance;
 		word.lastAdvance	= firstGlyph.advance;
-		word.lastCharWidth	= firstGlyph.glyph->width;
+		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+			word.lastCharWidth	= firstGlyph.glyph->width;
+		else
+			word.lastCharWidth	= firstGlyph.glyph->height;
 		const bool isRtl	= firstGlyph.isRtl;
 		++itor;
 
@@ -536,16 +615,29 @@ namespace Crystal
 				const ShapedGlyph &shapedGlyph = *itor;
 				word.endCaretPos	+= shapedGlyph.advance;
 				word.lastAdvance	= shapedGlyph.advance;
-				word.lastCharWidth	= shapedGlyph.glyph->width;
+				if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+					word.lastCharWidth	= shapedGlyph.glyph->width;
+				else
+					word.lastCharWidth	= shapedGlyph.glyph->height;
 				++itor;
 			}
 		}
 		else if( firstGlyph.isTab )
 		{
-			word.endCaretPos.x = ceilf( (word.startCaretPos.x +
-										 firstGlyph.advance.x * 0.25f) /
-										(firstGlyph.advance.x * 2.0f) ) *
-								 (firstGlyph.advance.x * 2.0f);
+			if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
+			{
+				word.endCaretPos.x = ceilf( (word.startCaretPos.x +
+											 firstGlyph.advance.x * 0.25f) /
+											(firstGlyph.advance.x * 2.0f) ) *
+									 (firstGlyph.advance.x * 2.0f);
+			}
+			else
+			{
+				word.endCaretPos.y = ceilf( (word.startCaretPos.y +
+											 firstGlyph.advance.y * 0.25f) /
+											(firstGlyph.advance.y * 2.0f) ) *
+									 (firstGlyph.advance.y * 2.0f);
+			}
 		}
 
 		word.length = itor - (m_shapes[state].begin() + word.offset);
@@ -574,6 +666,9 @@ namespace Crystal
 		//The newline itself has its own height, make sure it's considered
 		if( itor != end )
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
+
+		if( m_actualVertReadingDir[state] != VertReadingDir::Disabled )
+			largestHeight *= 1.5f;
 
 		return largestHeight;
 	}
@@ -627,14 +722,23 @@ namespace Crystal
 														  itRichText->glyphEnd;
 
 					if( itor != end )
-						prevCaretY = itor->caretPos.y;
+					{
+						if( m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled )
+							prevCaretY = itor->caretPos.y;
+						else
+							prevCaretY = itor->caretPos.x;
+					}
 
 					while( itor != end )
 					{
 						const ShapedGlyph &shapedGlyph = *itor;
 
 						if( itor + 1u == end ||
-							shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y )
+							shapedGlyph.isNewline ||
+							(prevCaretY != shapedGlyph.caretPos.y &&
+							 m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled) ||
+							(prevCaretY != shapedGlyph.caretPos.x &&
+							 m_actualVertReadingDir[m_currentState] != VertReadingDir::Disabled) )
 						{
 							if( itor + 1u == end )
 							{
@@ -674,7 +778,10 @@ namespace Crystal
 							textVertBuffer += 6u;
 							m_numVertices += 6u;
 
-							prevCaretY	= shapedGlyph.caretPos.y;
+							if( m_actualVertReadingDir[m_currentState] == VertReadingDir::Disabled )
+								prevCaretY	= shapedGlyph.caretPos.x;
+							else
+								prevCaretY	= shapedGlyph.caretPos.y;
 							lineHeight = 0;
 							mostLeft = std::numeric_limits<float>::max();
 							mostRight = -std::numeric_limits<float>::max();
