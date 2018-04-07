@@ -296,7 +296,7 @@ namespace Crystal
 		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 			nextWord.endCaretPos.y += largestHeight;
 		else
-			nextWord.endCaretPos.x += largestHeight * 0.25f;
+			nextWord.endCaretPos.x += largestHeight * 0.5f;
 
 		bool multipleWordsInLine = false;
 
