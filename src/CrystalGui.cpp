@@ -168,11 +168,57 @@ namespace Demo
         virtual void setupResources(void)
         {
 			TODO_fix_leak;
+
+			struct ShaperSettings
+			{
+				const char *locale;
+				const char *fullpath;
+				hb_script_t script;
+				Crystal::HorizReadingDir::HorizReadingDir horizReadingDir;
+				bool useKerning;
+				bool allowsVerticalLayout;
+				ShaperSettings( const char *_locale, const char *_fullpath, hb_script_t _script,
+								bool _useKerning=false,
+								Crystal::HorizReadingDir::HorizReadingDir _horizReadingDir=
+						Crystal::HorizReadingDir::LTR,
+								bool _allowsVerticalLayout=false ) :
+					locale( _locale ),
+					fullpath( _fullpath ),
+					script( _script ),
+					horizReadingDir( _horizReadingDir ),
+					useKerning( _useKerning ),
+					allowsVerticalLayout( _allowsVerticalLayout )
+				{
+
+				}
+			};
+
+			ShaperSettings shaperSettings[3] =
+			{
+				ShaperSettings( "en", "../Data/Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
+				ShaperSettings( "ar", "../Data/Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
+				Crystal::HorizReadingDir::RTL ),
+				ShaperSettings( "ch", "../Data/Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
+				Crystal::HorizReadingDir::LTR, true )
+			};
+
 			crystalManager = new Crystal::CrystalManager( &g_crystalLogListener );
 			Crystal::ShaperManager *shaperManager = crystalManager->getShaperManager();
-			Crystal::Shaper *shaper = shaperManager->addShaper( HB_SCRIPT_LATIN,
-																"../Data/Fonts/DejaVuSerif.ttf", "en" );
-			shaper->addFeatures( Crystal::Shaper::KerningOn );
+
+			for( size_t i=0; i<sizeof( shaperSettings ) / sizeof( shaperSettings[0] ); ++i )
+			{
+				Crystal::Shaper *shaper;
+				shaper = shaperManager->addShaper( shaperSettings[i].script, shaperSettings[i].fullpath,
+												   shaperSettings[i].locale );
+				if( shaperSettings[i].useKerning )
+					shaper->addFeatures( Crystal::Shaper::KerningOn );
+			}
+
+			size_t defaultFont = 0; //"en"
+			shaperManager->setDefaultShaper( defaultFont + 1u,
+											 shaperSettings[defaultFont].horizReadingDir,
+											 shaperSettings[defaultFont].allowsVerticalLayout );
+
 			Ogre::CompositorPassCrystalGuiProvider *compoProvider =
 					OGRE_NEW Ogre::CompositorPassCrystalGuiProvider( crystalManager );
 			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();

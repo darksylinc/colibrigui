@@ -9,8 +9,14 @@ namespace Crystal
 {
 	class Button : public Renderable
 	{
+		Label	*m_label;
+
 	public:
 		Button( CrystalManager *manager );
+
+		virtual void _destroy();
+
+		Label* getLabel();
 	};
 }
 

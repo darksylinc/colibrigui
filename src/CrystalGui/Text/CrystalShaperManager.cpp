@@ -102,6 +102,24 @@ namespace Crystal
 		return shaper;
 	}
 	//-------------------------------------------------------------------------
+	void ShaperManager::setDefaultShaper( uint16_t font,
+										  HorizReadingDir::HorizReadingDir horizReadingDir,
+										  bool useVerticalLayoutWhenAvailable )
+	{
+		CRYSTAL_ASSERT_LOW( font < m_shapers.size() );
+
+		m_shapers[font] = m_shapers[font];
+		switch( horizReadingDir )
+		{
+		case HorizReadingDir::Default:	m_defaultDirection = UBIDI_DEFAULT_LTR;	break;
+		case HorizReadingDir::AutoLTR:	m_defaultDirection = UBIDI_DEFAULT_LTR;	break;
+		case HorizReadingDir::AutoRTL:	m_defaultDirection = UBIDI_DEFAULT_RTL;	break;
+		case HorizReadingDir::LTR:		m_defaultDirection = UBIDI_LTR;			break;
+		case HorizReadingDir::RTL:		m_defaultDirection = UBIDI_RTL;			break;
+		}
+		m_useVerticalLayoutWhenAvailable = useVerticalLayoutWhenAvailable;
+	}
+	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
 	{
 		return m_crystalManager->getLogListener();

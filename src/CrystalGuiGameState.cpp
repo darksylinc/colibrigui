@@ -95,8 +95,12 @@ namespace Demo
 //		label->setText( "The path of the righteous man is beset on all sides by the iniquities "
 //						"of the selfish and the tyranny of evil men. Blessed is he who, in the" );
 		//label->setText( "The path of the righteous man is beset on all sides by the iniquities" );
-		//label->setText( "Hoooooooooooooooooooooo ooooooooooooooooooooooooooooooooooooooooooooola" );
-		//label->setText( "Hello\nHola" );
+		//label->setText( "\tHola qué tal?\t\tHola2\n  Hola qué tal?\tHola2\n" );
+		//label->setText( "H\nH" );
+		//label->setText( "\tHola\t\tQ\nQue Tal\nHola2\nHola3" );
+		//label->setText( "懶惰的姜貓懶惰的姜貓懶惰97\t的姜貓懶惰的姜貓懶惰的姜貓Hola\n懶惰的姜貓Hello\n懶惰的姜貓" );
+		//label->setText( "H\tH" );
+		//label->setText( "aaa\naaa\n\naga\nagaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" );
 		//label->setText( "Hello\t\tTest\nHello2\t\tTest" );
 		//label->setText( "\tHello\n    asd" );
 		//label->setText( "من أنا لاستجواب أولئك الذين يكتبونh\nola" );
