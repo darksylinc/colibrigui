@@ -916,14 +916,14 @@ namespace Crystal
 						bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
 						//Snap to pixels
-						topLeft = topLeft * halfWindowRes;
-						topLeft.x = ceilf( topLeft.x );
-						topLeft.y = ceilf( topLeft.y );
-						bottomRight = bottomRight * halfWindowRes;
-						bottomRight.x = ceilf( bottomRight.x );
-						bottomRight.y = ceilf( bottomRight.y );
-						topLeft = topLeft * invWindowRes;
-						bottomRight = bottomRight * invWindowRes;
+						topLeft = (topLeft + 1.0f) * halfWindowRes;
+						topLeft.x = roundf( topLeft.x );
+						topLeft.y = roundf( topLeft.y );
+						bottomRight = (bottomRight + 1.0f) * halfWindowRes;
+						bottomRight.x = roundf( bottomRight.x );
+						bottomRight.y = roundf( bottomRight.y );
+						topLeft = topLeft * invWindowRes - 1.0f;
+						bottomRight = bottomRight * invWindowRes - 1.0f;
 
 						addQuad( textVertBuffer,
 								 topLeft - backgroundDisplacement,
@@ -1011,14 +1011,14 @@ namespace Crystal
 				bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
 				//Snap to pixels
-				topLeft = topLeft * halfWindowRes;
-				topLeft.x = ceilf( topLeft.x );
-				topLeft.y = ceilf( topLeft.y );
-				bottomRight = bottomRight * halfWindowRes;
-				bottomRight.x = ceilf( bottomRight.x );
-				bottomRight.y = ceilf( bottomRight.y );
-				topLeft = topLeft * invWindowRes;
-				bottomRight = bottomRight * invWindowRes;
+				topLeft = (topLeft + 1.0f) * halfWindowRes;
+				topLeft.x = roundf( topLeft.x );
+				topLeft.y = roundf( topLeft.y );
+				bottomRight = (bottomRight + 1.0f) * halfWindowRes;
+				bottomRight.x = roundf( bottomRight.x );
+				bottomRight.y = roundf( bottomRight.y );
+				topLeft = topLeft * invWindowRes - 1.0f;
+				bottomRight = bottomRight * invWindowRes - 1.0f;
 
 				if( m_shadowOutline )
 				{
