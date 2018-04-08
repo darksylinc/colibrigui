@@ -76,6 +76,8 @@ namespace Crystal
 		Widget * crystalgui_nullable	m_nextWidget[Borders::NumBorders];
 		bool							m_autoSetNextWidget[Borders::NumBorders];
 		bool					m_hidden;
+		/// Can be highlighted & pressed
+		bool					m_navigable;
 
 		States::States			m_currentState;
 
@@ -177,6 +179,24 @@ namespace Crystal
 			See setNextWidget
 		*/
 		virtual void setWidgetNavigationDirty();
+
+		/** When false, this widget cannot be highlighted or pressed. It's similar to being disabled,
+			except it's faster in CPU terms, and disabled objects change their skin; whereas
+			you can explicitly change the state without the user being able to hit or highlight
+			this widget with the HIDs (keyboard, mouse, etc).
+
+			For example a Label may not be navigable, but you still want to toggle between Idle and
+			Disabled states based on other criteria, thus visually graying out the text while
+			disabled.
+
+			Default: Depends on the Widget. Base class defaults to false.
+			Derived classes may override it.
+
+			Note: This implicitly calls setWidgetNavigationDirty
+		@param bNavigable
+		*/
+		void setNavigable( bool bNavigable );
+		bool isNavigable() const;
 
 		/** Sets the next widget to go to. For example if calling
 				a->setNextWidget( b, Borders::Right, true );

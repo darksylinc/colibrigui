@@ -551,7 +551,7 @@ namespace Crystal
 			Widget *widget = *itor;
 			for( size_t i=0; i<4u; ++i )
 			{
-				if( widget->m_autoSetNextWidget[i] )
+				if( widget->m_navigable && widget->m_autoSetNextWidget[i] )
 					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
 			}
 			++itor;
@@ -564,88 +564,94 @@ namespace Crystal
 		{
 			Widget *widget = *itor;
 
-			Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
-			float closestSiblingDistances[Borders::NumBorders] =
+			if( widget->m_navigable )
 			{
-				std::numeric_limits<float>::max(),
-				std::numeric_limits<float>::max(),
-				std::numeric_limits<float>::max(),
-				std::numeric_limits<float>::max()
-			};
-
-			typename std::vector<T>::const_iterator it2 = itor + 1u;
-			while( it2 != end )
-			{
-				Widget *widget2 = *it2;
-
-				const Ogre::Vector2 cornerToCorner[4] =
+				Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
+				float closestSiblingDistances[Borders::NumBorders] =
 				{
-					widget2->m_position -
-					widget->m_position,
-
-					Ogre::Vector2( widget2->getRight(), widget2->m_position.y ) -
-					Ogre::Vector2( widget->getRight(), widget->m_position.y ),
-
-					Ogre::Vector2( widget2->m_position.x, widget2->getBottom() ) -
-					Ogre::Vector2( widget->m_position.x, widget->getBottom() ),
-
-					Ogre::Vector2( widget2->getRight(), widget2->getBottom() ) -
-					Ogre::Vector2( widget->getRight(), widget->getBottom() ),
+					std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max()
 				};
+
+				typename std::vector<T>::const_iterator it2 = itor + 1u;
+				while( it2 != end )
+				{
+					Widget *widget2 = *it2;
+
+					if( widget2->m_navigable )
+					{
+						const Ogre::Vector2 cornerToCorner[4] =
+						{
+							widget2->m_position -
+							widget->m_position,
+
+							Ogre::Vector2( widget2->getRight(), widget2->m_position.y ) -
+							Ogre::Vector2( widget->getRight(), widget->m_position.y ),
+
+							Ogre::Vector2( widget2->m_position.x, widget2->getBottom() ) -
+							Ogre::Vector2( widget->m_position.x, widget->getBottom() ),
+
+							Ogre::Vector2( widget2->getRight(), widget2->getBottom() ) -
+							Ogre::Vector2( widget->getRight(), widget->getBottom() ),
+						};
+
+						for( size_t i=0; i<4u; ++i )
+						{
+							Ogre::Vector2 dirTo = cornerToCorner[i];
+
+							const float dirLength = dirTo.normalise();
+
+							const float cosAngle( dirTo.dotProduct( Ogre::Vector2::UNIT_X ) );
+
+							if( dirLength < closestSiblingDistances[Borders::Right] &&
+								cosAngle >= cosf( Ogre::Degree( 45.0f ).valueRadians() ) )
+							{
+								closestSiblings[Borders::Right] = widget2;
+								closestSiblingDistances[Borders::Right] = dirLength;
+							}
+
+							if( dirLength < closestSiblingDistances[Borders::Left] &&
+								cosAngle <= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
+							{
+								closestSiblings[Borders::Left] = widget2;
+								closestSiblingDistances[Borders::Left] = dirLength;
+							}
+
+							if( cosAngle <= cosf( Ogre::Degree( 45.0f ).valueRadians() ) &&
+								cosAngle >= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
+							{
+								float crossProduct = dirTo.crossProduct( Ogre::Vector2::UNIT_X );
+
+								if( crossProduct >= 0.0f )
+								{
+									if( dirLength < closestSiblingDistances[Borders::Top] )
+									{
+										closestSiblings[Borders::Top] = widget2;
+										closestSiblingDistances[Borders::Top] = dirLength;
+									}
+								}
+								else
+								{
+									if( dirLength < closestSiblingDistances[Borders::Bottom] )
+									{
+										closestSiblings[Borders::Bottom] = widget2;
+										closestSiblingDistances[Borders::Bottom] = dirLength;
+									}
+								}
+							}
+						}
+					}
+
+					++it2;
+				}
 
 				for( size_t i=0; i<4u; ++i )
 				{
-					Ogre::Vector2 dirTo = cornerToCorner[i];
-
-					const float dirLength = dirTo.normalise();
-
-					const float cosAngle( dirTo.dotProduct( Ogre::Vector2::UNIT_X ) );
-
-					if( dirLength < closestSiblingDistances[Borders::Right] &&
-						cosAngle >= cosf( Ogre::Degree( 45.0f ).valueRadians() ) )
-					{
-						closestSiblings[Borders::Right] = widget2;
-						closestSiblingDistances[Borders::Right] = dirLength;
-					}
-
-					if( dirLength < closestSiblingDistances[Borders::Left] &&
-						cosAngle <= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
-					{
-						closestSiblings[Borders::Left] = widget2;
-						closestSiblingDistances[Borders::Left] = dirLength;
-					}
-
-					if( cosAngle <= cosf( Ogre::Degree( 45.0f ).valueRadians() ) &&
-						cosAngle >= cosf( Ogre::Degree( 135.0f ).valueRadians() ) )
-					{
-						float crossProduct = dirTo.crossProduct( Ogre::Vector2::UNIT_X );
-
-						if( crossProduct >= 0.0f )
-						{
-							if( dirLength < closestSiblingDistances[Borders::Top] )
-							{
-								closestSiblings[Borders::Top] = widget2;
-								closestSiblingDistances[Borders::Top] = dirLength;
-							}
-						}
-						else
-						{
-							if( dirLength < closestSiblingDistances[Borders::Bottom] )
-							{
-								closestSiblings[Borders::Bottom] = widget2;
-								closestSiblingDistances[Borders::Bottom] = dirLength;
-							}
-						}
-					}
+					if( widget->m_autoSetNextWidget[i] && !widget->m_nextWidget[i] )
+						widget->setNextWidget( closestSiblings[i], static_cast<Borders::Borders>( i ) );
 				}
-
-				++it2;
-			}
-
-			for( size_t i=0; i<4u; ++i )
-			{
-				if( widget->m_autoSetNextWidget[i] && !widget->m_nextWidget[i] )
-					widget->setNextWidget( closestSiblings[i], static_cast<Borders::Borders>( i ) );
 			}
 
 			++itor;

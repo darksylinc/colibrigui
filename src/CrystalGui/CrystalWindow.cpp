@@ -224,10 +224,10 @@ namespace Crystal
 		while( itor != end && !retVal.widget )
 		{
 			Widget *widget = *itor;
-			if( this->intersectsChild( widget ) &&
+			if( widget->isNavigable() &&
+				this->intersectsChild( widget ) &&
 				widget->intersects( newPosInCanvas ) )
 			{
-
 				retVal.widget = widget;
 			}
 			++itor;

@@ -23,6 +23,7 @@ namespace Crystal
 		m_numWidgets( 0 ),
 		m_manager( manager ),
 		m_hidden( false ),
+		m_navigable( false ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( manager->getCanvasSize() ),
@@ -316,6 +317,20 @@ namespace Crystal
 	void Widget::setWidgetNavigationDirty(void)
 	{
 		m_parent->setWidgetNavigationDirty();
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setNavigable( bool bNavigable )
+	{
+		if( m_navigable != bNavigable )
+		{
+			m_navigable = bNavigable;
+			setWidgetNavigationDirty();
+		}
+	}
+	//-------------------------------------------------------------------------
+	bool Widget::isNavigable() const
+	{
+		return m_navigable;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setNextWidget( Widget * crystalgui_nullable nextWidget,
