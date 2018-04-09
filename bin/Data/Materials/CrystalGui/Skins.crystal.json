@@ -12,7 +12,7 @@
             },
             "borders" :
             {
-                "all" : [120, 120]
+                "all" : [10, 10]
             }
         },
         "ButtonSkinHighlightedCursor" :
@@ -25,7 +25,7 @@
             },
             "borders" :
             {
-                "all" : [120, 120]
+                "all" : [10, 10]
             }
         },
         "ButtonSkinHighlightedButton" :
@@ -38,7 +38,7 @@
             },
             "borders" :
             {
-                "all" : [120, 120]
+                "all" : [10, 10]
             }
         },
         "ButtonSkinHighlightedButtonAndCursor" :
@@ -51,7 +51,7 @@
             },
             "borders" :
             {
-                "all" : [120, 120]
+                "all" : [10, 10]
             }
         },
         "ButtonSkinPressed" :
@@ -64,7 +64,7 @@
             },
             "borders" :
             {
-                "all" : [120, 120]
+                "all" : [10, 10]
             }
         }
     },

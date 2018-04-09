@@ -984,8 +984,11 @@ namespace Crystal
 
 		const Ogre::Vector2 shadowDisplacement = invWindowRes * m_shadowDisplace;
 
-		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft;
-		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight;
+		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+		const Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft +
+											  m_parent->m_clipBorderTL * invCanvasSize2x;
+		const Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight -
+											  m_parent->m_clipBorderBR * invCanvasSize2x;
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
 		if( m_usesBackground )

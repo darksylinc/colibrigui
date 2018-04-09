@@ -30,7 +30,9 @@ namespace Crystal
 		m_orientation( Ogre::Matrix3::IDENTITY ),
 		m_derivedTopLeft( Ogre::Vector2::ZERO ),
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
-		m_derivedOrientation( Ogre::Matrix3::IDENTITY )
+		m_derivedOrientation( Ogre::Matrix3::IDENTITY ),
+		m_clipBorderTL( Ogre::Vector2::ZERO ),
+		m_clipBorderBR( Ogre::Vector2::ZERO )
   #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 	,	m_transformOutOfDate( false ),
 		m_destructionStarted( false )
@@ -510,6 +512,30 @@ namespace Crystal
 	Ogre::Vector2 Widget::getCenter() const
 	{
 		return m_position + this->m_size * 0.5f;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setClipBorders( float clipBorders[Borders::NumBorders] )
+	{
+		m_clipBorderTL.x = clipBorders[Borders::Left];
+		m_clipBorderTL.y = clipBorders[Borders::Top];
+		m_clipBorderBR.x = clipBorders[Borders::Right];
+		m_clipBorderBR.y = clipBorders[Borders::Bottom];
+		setTransformDirty();
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getTopLeftAfterClipping() const
+	{
+		return m_position + m_clipBorderTL;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getBottomRightAfterClipping() const
+	{
+		return m_position + m_size - m_clipBorderBR;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getSizeAfterClipping() const
+	{
+		return m_size - (m_clipBorderTL + m_clipBorderBR);
 	}
 	//-------------------------------------------------------------------------
 	void Widget::updateDerivedTransformFromParent()

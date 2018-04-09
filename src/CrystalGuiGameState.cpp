@@ -64,6 +64,7 @@ namespace Demo
 		mainWindow->setSkinPack( "ButtonSkin" );
 
 		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
+		mainWindow->setClipBordersMatchSkin();
 
 		button0 = crystalManager->createWidget<Crystal::Button>( mainWindow );
 		button0->setSkinPack( "ButtonSkin" );
@@ -120,15 +121,15 @@ namespace Demo
 			//label->setText( "تجوستجوستجThisتجوستجوستج is a ستجو word ستجوستجوستجوستج" );
 			//label->setText( "الذي يحيي ذكرى احتجاجات مواطنين فلسطينيين من مدن" );
 		}
-		label->setTextHorizAlignment( Crystal::TextHorizAlignment::Right );
+		//label->setTextHorizAlignment( Crystal::TextHorizAlignment::Left );
+//		label->setTextVertAlignment( Crystal::TextVertAlignment::Center );
 		//label->setTextHorizAlignment( Crystal::TextHorizAlignment::Left );
 		//label->setText( "The path of the righteous man is beset on all sides by" );
-		label->setSize( Ogre::Vector2( 0.5f, 1.0f ) );
-
-		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( mainWindow );
-		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button0 );
-		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( button1 );
-		mGraphicsSystem->getSceneManager()->getRootSceneNode()->attachObject( label );
+		label->setSize( mainWindow->getSizeAfterClipping() );
+		//label->setVertReadingDir( Crystal::VertReadingDir::ForceTTBLTR );
+//		label->sizeToFit( Crystal::States::Idle, 0.5f,
+//						  Crystal::TextHorizAlignment::Center, Crystal::TextVertAlignment::Center );
+		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
 
         TutorialGameState::createScene01();
     }

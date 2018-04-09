@@ -103,6 +103,15 @@ namespace Crystal
 
 		virtual void setState( States::States state, bool smartHighlight=true );
 
+		/** Calls setClipBorders and makes the clipping region to match that of the current skin
+
+			IMPORTANT: Skins' border size is dependent on real resolution (not canvas), thus
+			this function should be called again and widgets be repositioned (and maybe even resized)
+			if you change the real resolution.
+		*/
+		void setClipBordersMatchSkin();
+		void setClipBordersMatchSkin( States::States state );
+
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
 		virtual bool isRenderable() const	{ return true; }

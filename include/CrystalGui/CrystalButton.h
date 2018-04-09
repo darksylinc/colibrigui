@@ -17,6 +17,8 @@ namespace Crystal
 		virtual void _destroy();
 
 		Label* getLabel();
+
+		virtual void setTransformDirty();
 	};
 }
 

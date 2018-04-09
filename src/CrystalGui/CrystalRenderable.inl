@@ -118,6 +118,8 @@ namespace Crystal
 		Ogre::Vector2 parentDerivedTL;
 		Ogre::Vector2 parentDerivedBR;
 
+		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+
 		if( forWindows )
 		{
 			parentDerivedTL = -1.0f;
@@ -125,8 +127,10 @@ namespace Crystal
 		}
 		else
 		{
-			parentDerivedTL = m_parent->m_derivedTopLeft;
-			parentDerivedBR = m_parent->m_derivedBottomRight;
+			parentDerivedTL = m_parent->m_derivedTopLeft +
+							  m_parent->m_clipBorderTL * invCanvasSize2x;
+			parentDerivedBR = m_parent->m_derivedBottomRight -
+							  m_parent->m_clipBorderBR * invCanvasSize2x;
 		}
 
 		Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
@@ -136,12 +140,12 @@ namespace Crystal
 
 		const StateInformation stateInfo = m_stateInformation[m_currentState];
 
-		const Ogre::Vector2 canvasSize = m_manager->getPixelSize();
+		const Ogre::Vector2 &pixelSize2x = m_manager->getPixelSize2x();
 
-		const Ogre::Vector2 borderTopLeft( stateInfo.borderSize[Borders::Left] * canvasSize.x,
-		                                   stateInfo.borderSize[Borders::Top] * canvasSize.y );
-		const Ogre::Vector2 borderBottomRight( stateInfo.borderSize[Borders::Right] * canvasSize.x,
-		                                       stateInfo.borderSize[Borders::Bottom] * canvasSize.y );
+		const Ogre::Vector2 borderTopLeft( stateInfo.borderSize[Borders::Left] * pixelSize2x.x,
+										   stateInfo.borderSize[Borders::Top] * pixelSize2x.y );
+		const Ogre::Vector2 borderBottomRight( stateInfo.borderSize[Borders::Right] * pixelSize2x.x,
+											   stateInfo.borderSize[Borders::Bottom] * pixelSize2x.y );
 		const Ogre::Vector2 innerTopLeft		= outerTopLeft + mul( this->m_derivedOrientation,
 																	  borderTopLeft );
 		const Ogre::Vector2 innerBottomRight	= outerBottomRight - mul( this->m_derivedOrientation,
@@ -215,10 +219,12 @@ namespace Crystal
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft + m_clipBorderTL * invCanvasSize2x;
+
 		while( itor != end )
 		{
 			(*itor)->fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
-											 outerTopLeft, finalRot );
+											 outerTopLeftWithClipping, finalRot );
 			++itor;
 		}
 	}

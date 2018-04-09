@@ -95,6 +95,25 @@ namespace Crystal
 			setDatablock( m_stateInformation[m_currentState].materialName );
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::setClipBordersMatchSkin()
+	{
+		setClipBordersMatchSkin( m_currentState );
+	}
+	//-------------------------------------------------------------------------
+	void Renderable::setClipBordersMatchSkin( States::States state )
+	{
+		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
+
+		const StateInformation &stateInfo = m_stateInformation[state];
+
+		float clipBorders[Borders::NumBorders];
+		clipBorders[Borders::Left]	= stateInfo.borderSize[Borders::Left] * pixelSize.x;
+		clipBorders[Borders::Top]	= stateInfo.borderSize[Borders::Top] * pixelSize.y;
+		clipBorders[Borders::Right]	= stateInfo.borderSize[Borders::Right] * pixelSize.x;
+		clipBorders[Borders::Bottom]= stateInfo.borderSize[Borders::Bottom] * pixelSize.y;
+		setClipBorders( clipBorders );
+	}
+	//-------------------------------------------------------------------------
 	void Renderable::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )
 	{
 		setVao( !isLabel() ? vao : textVao );

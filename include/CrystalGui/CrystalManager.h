@@ -59,6 +59,7 @@ namespace Crystal
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
 		Ogre::Vector2				m_pixelSize;
+		Ogre::Vector2				m_pixelSize2x;
 		Ogre::Vector2				m_halfWindowResolution;
 		Ogre::Vector2				m_invWindowResolution2x;
 
@@ -124,6 +125,7 @@ namespace Crystal
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
+		const Ogre::Vector2& getPixelSize2x() const					{ return m_pixelSize2x; }
 		const Ogre::Vector2& getHalfWindowResolution() const		{ return m_halfWindowResolution; }
 		const Ogre::Vector2& getInvWindowResolution2x() const		{ return m_invWindowResolution2x; }
 

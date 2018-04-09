@@ -92,6 +92,9 @@ namespace Crystal
 		Ogre::Vector2	m_derivedBottomRight;
 		Ogre::Matrix3	m_derivedOrientation;
 
+		Ogre::Vector2	m_clipBorderTL;
+		Ogre::Vector2	m_clipBorderBR;
+
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		bool	m_transformOutOfDate;
 		bool	m_destructionStarted;
@@ -113,7 +116,7 @@ namespace Crystal
 
 		virtual void stateChanged( States::States newState ) {}
 
-		void setTransformDirty();
+		virtual void setTransformDirty();
 
 	public:
 		Widget( CrystalManager *manager );
@@ -264,6 +267,35 @@ namespace Crystal
 		const Ogre::Vector2& getPosition() const				{ return m_position; }
 		const Ogre::Vector2& getSize() const					{ return m_size; }
 		const Ogre::Matrix3& getOrientation() const				{ return m_orientation; }
+
+		/** Establishes the clipping area to apply to our children widgets. Childrens
+			will be clipped against:
+			Legend:
+			m_pos = m_position
+			clipB = clipBorder
+
+			m_pos-----------------------------------------------------------------------------
+			|							m_pos.y+clipBTop									  |
+			|					--------------------------------							  |
+			|m_pos.x+clipBLeft |								|							  |
+			|                  |								| m_pos.x+m_size.x-clipBRight |
+			|					--------------------------------							  |
+			|						m_pos.y+m_size.y-clipBBottom							  |
+			--------------------------------------------------------------------m_pos + m_size
+
+			Results are undefined if:
+				clipBorders[Borders::Left] + clipBorders[Borders::Right] > m_size.x
+				clipBorders[Borders::Top] + clipBorders[Borders::Bottom] > m_size.y
+		@param clipBorders
+		*/
+		void setClipBorders( float clipBorders[crystalgui_nonnull Borders::NumBorders] );
+		/// Returns m_position + clipBorderTopLeft; aka where the working area for children starts
+		Ogre::Vector2 getTopLeftAfterClipping() const;
+		/// Returns m_position + m_size - clipBorderBottomRight;
+		/// aka where the working area for children ends
+		Ogre::Vector2 getBottomRightAfterClipping() const;
+		/// Returns the working area. clipBorderTopLeft + clipBorderBottomRight
+		Ogre::Vector2 getSizeAfterClipping() const;
 
 		/// Call this function before calling getDerivedTopLeft & co and it was asserting.
 		/// Do not do it too often as it is not the most efficient solution.

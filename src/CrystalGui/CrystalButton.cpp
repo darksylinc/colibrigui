@@ -23,8 +23,23 @@ namespace Crystal
 	Label* Button::getLabel()
 	{
 		if( !m_label )
+		{
 			m_label = m_manager->createWidget<Label>( this );
+			m_label->setSize( getSizeAfterClipping() );
+			m_label->setTextHorizAlignment( TextHorizAlignment::Center );
+			m_label->setTextVertAlignment( TextVertAlignment::Center );
+		}
 
 		return m_label;
+	}
+	//-------------------------------------------------------------------------
+	void Button::setTransformDirty()
+	{
+		if( m_label )
+		{
+			if( m_label->getSize() != m_size )
+				m_label->setSize( m_size );
+		}
+		Renderable::setTransformDirty();
 	}
 }
