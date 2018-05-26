@@ -13,7 +13,7 @@ namespace Crystal
 		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_nextScroll( Ogre::Vector2::ZERO ),
-		m_maxScroll( Ogre::Vector2::ZERO + 1000.0f ),
+		m_maxScroll( Ogre::Vector2::ZERO ),
 		m_allowsFocusWithChildren( true ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),

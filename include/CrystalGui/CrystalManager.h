@@ -85,6 +85,9 @@ namespace Crystal
 
 		void autosetNavigation( Window *window );
 
+		/// Ensure its immediate parent window has the given widget within its visible bounds.
+		void scrollToWidget( Widget *widget );
+
 	public:
 		CrystalManager( LogListener *logListener );
 		~CrystalManager();

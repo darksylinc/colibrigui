@@ -188,7 +188,7 @@ namespace Crystal
 		return m_parent->getFirstParentWindow();
 	}
 	//-------------------------------------------------------------------------
-	const Ogre::Vector2& Widget::getCurrentScroll(void) const
+	const Ogre::Vector2& Widget::getCurrentScroll() const
 	{
 		return Ogre::Vector2::ZERO;
 	}
@@ -332,7 +332,7 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setWidgetNavigationDirty(void)
+	void Widget::setWidgetNavigationDirty()
 	{
 		m_parent->setWidgetNavigationDirty();
 	}

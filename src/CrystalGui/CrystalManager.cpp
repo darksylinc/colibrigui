@@ -259,6 +259,8 @@ namespace Crystal
 			m_keyboardFocusedPair.widget->callActionListeners( Action::Hold );
 
 			overrideCursorFocusWith( m_keyboardFocusedPair );
+
+			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -271,6 +273,8 @@ namespace Crystal
 
 			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
 				m_keyboardFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
+
+			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 		m_primaryButtonDown = false;
 	}
@@ -335,6 +339,8 @@ namespace Crystal
 				m_keyboardFocusedPair.widget = nextWidget;
 				overrideCursorFocusWith( m_keyboardFocusedPair );
 			}
+
+			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -459,7 +465,7 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideCursorFocusWith( const FocusPair &focusedPair )
 	{
-		//Keyboard can cancel mouse actions, but it won't still his focus.
+		//Keyboard can cancel mouse actions, but it won't steal his focus.
 		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget != focusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor, false );
@@ -743,6 +749,38 @@ namespace Crystal
 		m_dirtyLabels.push_back( label );
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::scrollToWidget( Widget *widget )
+	{
+		//Only scroll if the immediate parent is a window.
+		Window *parentWindow = widget->getParent()->getAsWindow();
+		if( parentWindow )
+		{
+			//Ensure the widget is up to date. The window is implicitly going to be updated.
+			//widget->updateDerivedTransformFromParent();
+
+			const Ogre::Vector2 currentScroll = parentWindow->getCurrentScroll();
+
+			const Ogre::Vector2 parentTL = parentWindow->getTopLeftAfterClipping();
+			const Ogre::Vector2 parentBR = parentWindow->getBottomRightAfterClipping();
+			const Ogre::Vector2 widgetTL = parentTL - currentScroll + widget->getLocalTopLeft();
+			const Ogre::Vector2 widgetBR = parentTL - currentScroll + widget->getLocalBottomRight();
+
+			Ogre::Vector2 scrollOffset( Ogre::Vector2::ZERO );
+
+			if( widgetBR.y > parentBR.y )
+				scrollOffset.y = widgetBR.y - parentBR.y;
+			if( widgetTL.y < parentTL.y )
+				scrollOffset.y = widgetTL.y - parentTL.y;
+			if( widgetBR.x > parentBR.x )
+				scrollOffset.x = widgetBR.x - parentBR.x;
+			if( widgetTL.x < parentTL.x )
+				scrollOffset.x = widgetTL.x - parentTL.x;
+
+			if( scrollOffset != Ogre::Vector2::ZERO )
+				parentWindow->setScrollAnimated( currentScroll + scrollOffset );
+		}
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::update( float timeSinceLast )
 	{
 		autosetNavigation();
@@ -752,40 +790,8 @@ namespace Crystal
 			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
-		}
 
-		if( m_keyboardFocusedPair.widget )
-		{
-			//Only scroll if the immediate parent is a window.
-			Window *parentWindow = m_keyboardFocusedPair.widget->getParent()->getAsWindow();
-			if( parentWindow )
-			{
-				//Ensure the widget is up to date. The window is implicitly going to be updated.
-				//m_keyboardFocusedPair.widget->updateDerivedTransformFromParent();
-
-				const Ogre::Vector2 currentScroll = parentWindow->getCurrentScroll();
-
-				const Ogre::Vector2 parentTL = parentWindow->getTopLeftAfterClipping();
-				const Ogre::Vector2 parentBR = parentWindow->getBottomRightAfterClipping();
-				const Ogre::Vector2 widgetTL = parentTL - currentScroll +
-											   m_keyboardFocusedPair.widget->getLocalTopLeft();
-				const Ogre::Vector2 widgetBR = parentTL - currentScroll +
-											   m_keyboardFocusedPair.widget->getLocalBottomRight();
-
-				Ogre::Vector2 scrollOffset( Ogre::Vector2::ZERO );
-
-				if( widgetBR.y > parentBR.y )
-					scrollOffset.y = widgetBR.y - parentBR.y;
-				if( widgetTL.y < parentTL.y )
-					scrollOffset.y = widgetTL.y - parentTL.y;
-				if( widgetBR.x > parentBR.x )
-					scrollOffset.x = widgetBR.x - parentBR.x;
-				if( widgetTL.x < parentTL.x )
-					scrollOffset.x = widgetTL.x - parentTL.x;
-
-				if( scrollOffset != Ogre::Vector2::ZERO )
-					parentWindow->setScrollAnimated( currentScroll + scrollOffset );
-			}
+			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 
 		WindowVec::const_iterator itor = m_windows.begin();

@@ -126,7 +126,7 @@ namespace Crystal
 
 		/// Do not call directly. 'this' cannot be a Window
 		void _setParent( Widget *parent );
-		Widget * crystalgui_nonnull getParent(void) const			{ return m_parent; }
+		Widget * crystalgui_nonnull getParent() const				{ return m_parent; }
 
 		virtual bool isRenderable() const	{ return false; }
 		virtual bool isWindow() const		{ return false; }
@@ -142,7 +142,7 @@ namespace Crystal
 
 		/// See Window::getCurrentScroll. For most widgets, this returns
 		/// zero (i.e. when scrolling is not supported)
-		virtual const Ogre::Vector2& getCurrentScroll(void) const;
+		virtual const Ogre::Vector2& getCurrentScroll() const;
 
 		// WidgetListener overload
 		virtual void notifyWidgetDestroyed( Widget *widget );
