@@ -98,7 +98,6 @@ namespace Crystal
 	void Window::sizeScrollToFit()
 	{
 		Ogre::Vector2 scrollableArea( Ogre::Vector2::ZERO );
-		const Ogre::Vector2 clipBorderTL = m_clipBorderTL;
 
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
@@ -106,7 +105,7 @@ namespace Crystal
 		while( itor != end )
 		{
 			Widget *widget = *itor;
-			scrollableArea.makeCeil( clipBorderTL + widget->getLocalTopLeft() + widget->getSize() );
+			scrollableArea.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
 			++itor;
 		}
 

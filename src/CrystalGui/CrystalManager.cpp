@@ -344,6 +344,13 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::setScroll( const Ogre::Vector2 &scrollAmount )
+	{
+		Window *window = m_cursorFocusedPair.window;
+		if( window )
+			window->setScrollAnimated( window->getNextScroll() + scrollAmount );
+	}
+	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
 	{
 		CRYSTAL_ASSERT( (!parent || parent->isWindow()) &&

@@ -139,6 +139,7 @@ namespace Crystal
 		void setKeyboardPrimaryReleased();
 		void setCancel();
 		void setKeyDirection( Borders::Borders direction );
+		void setScroll( const Ogre::Vector2 &scrollAmount );
 
 		void setLogListener( LogListener *logListener );
 		LogListener* getLogListener() const		{ return m_logListener; }

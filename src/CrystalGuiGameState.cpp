@@ -181,8 +181,17 @@ namespace Demo
 		float width  = static_cast<float>( mGraphicsSystem->getRenderWindow()->getWidth() );
 		float height = static_cast<float>( mGraphicsSystem->getRenderWindow()->getHeight() );
 
-		Ogre::Vector2 mousePos( arg.motion.x / width, arg.motion.y / height );
-		crystalManager->setMouseCursorMoved( mousePos * crystalManager->getCanvasSize() );
+		if( arg.type == SDL_MOUSEMOTION )
+		{
+			Ogre::Vector2 mousePos( arg.motion.x / width, arg.motion.y / height );
+			crystalManager->setMouseCursorMoved( mousePos * crystalManager->getCanvasSize() );
+		}
+		else if( arg.type == SDL_MOUSEWHEEL )
+		{
+			Ogre::Vector2 mouseScroll( 0.0f, -arg.wheel.y );
+			crystalManager->setScroll( mouseScroll * 50.0f * crystalManager->getPixelSize() );
+		}
+
 		TutorialGameState::mouseMoved( arg );
 	}
 	//-----------------------------------------------------------------------------------
