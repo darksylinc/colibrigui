@@ -151,7 +151,7 @@ namespace Demo
 			tried = true;
 		}
 
-		crystalManager->update();
+		crystalManager->update( timeSinceLast );
 
 		/*static float angle = 0;
 		Ogre::Matrix3 rotMat;

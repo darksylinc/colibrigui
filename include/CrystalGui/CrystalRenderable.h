@@ -74,6 +74,8 @@ namespace Crystal
 	protected:
 		StateInformation m_stateInformation[States::NumStates];
 
+		bool m_culled;
+
 		Ogre::ColourValue	m_colour;
 
 		/// WARNING: Most of the code assumes m_numVertices is hardcoded to 6*9;
@@ -121,14 +123,16 @@ namespace Crystal
 											GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											RESTRICT_ALIAS textVertBuffer,
 											const Ogre::Vector2 &parentPos,
-											const Ogre::Vector2 &currentScrollPos,
+											const Ogre::Vector2 &parentCurrentScrollPos,
 											const Ogre::Matrix3 &parentRot,
+											const Ogre::Vector2 &currentScrollPos,
 											bool forWindows );
 		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 vertexBuffer,
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot );
 	};
 }

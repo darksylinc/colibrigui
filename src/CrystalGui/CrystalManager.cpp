@@ -743,7 +743,7 @@ namespace Crystal
 		m_dirtyLabels.push_back( label );
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::update()
+	void CrystalManager::update( float timeSinceLast )
 	{
 		autosetNavigation();
 
@@ -752,6 +752,49 @@ namespace Crystal
 			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+		}
+
+		if( m_keyboardFocusedPair.widget )
+		{
+			//Only scroll if the immediate parent is a window.
+			Window *parentWindow = m_keyboardFocusedPair.widget->getParent()->getAsWindow();
+			if( parentWindow )
+			{
+				//Ensure the widget is up to date. The window is implicitly going to be updated.
+				//m_keyboardFocusedPair.widget->updateDerivedTransformFromParent();
+
+				const Ogre::Vector2 currentScroll = parentWindow->getCurrentScroll();
+
+				const Ogre::Vector2 parentTL = parentWindow->getTopLeftAfterClipping();
+				const Ogre::Vector2 parentBR = parentWindow->getBottomRightAfterClipping();
+				const Ogre::Vector2 widgetTL = parentTL - currentScroll +
+											   m_keyboardFocusedPair.widget->getLocalTopLeft();
+				const Ogre::Vector2 widgetBR = parentTL - currentScroll +
+											   m_keyboardFocusedPair.widget->getLocalBottomRight();
+
+				Ogre::Vector2 scrollOffset( Ogre::Vector2::ZERO );
+
+				if( widgetBR.y > parentBR.y )
+					scrollOffset.y = widgetBR.y - parentBR.y;
+				if( widgetTL.y < parentTL.y )
+					scrollOffset.y = widgetTL.y - parentTL.y;
+				if( widgetBR.x > parentBR.x )
+					scrollOffset.x = widgetBR.x - parentBR.x;
+				if( widgetTL.x < parentTL.x )
+					scrollOffset.x = widgetTL.x - parentTL.x;
+
+				if( scrollOffset != Ogre::Vector2::ZERO )
+					parentWindow->setScrollAnimated( currentScroll + scrollOffset );
+			}
+		}
+
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+			(*itor)->update( timeSinceLast );
+			++itor;
 		}
 
 		m_shaperManager->updateGpuBuffers();
@@ -777,6 +820,7 @@ namespace Crystal
 		{
 			(*itor)->fillBuffersAndCommands( &vertex, &vertexText,
 											 -Ogre::Vector2::UNIT_SCALE,
+											 Ogre::Vector2::ZERO,
 											 Ogre::Matrix3::IDENTITY );
 			++itor;
 		}

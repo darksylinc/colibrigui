@@ -5,12 +5,15 @@
 
 #include "CrystalRenderable.inl"
 
+#define TODO_should_flag_transforms_dirty
+
 namespace Crystal
 {
 	Window::Window( CrystalManager *manager ) :
 		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
-		m_maxScroll( Ogre::Vector2::ZERO ),
+		m_nextScroll( Ogre::Vector2::ZERO ),
+		m_maxScroll( Ogre::Vector2::ZERO + 1000.0f ),
 		m_allowsFocusWithChildren( true ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
@@ -57,6 +60,42 @@ namespace Crystal
 		}
 
 		Renderable::_destroy();
+	}
+	//-------------------------------------------------------------------------
+	void Window::setScrollAnimated( const Ogre::Vector2 &nextScroll )
+	{
+		m_nextScroll = nextScroll;
+		m_nextScroll.makeFloor( m_maxScroll );
+		m_nextScroll.makeCeil( Ogre::Vector2::ZERO );
+	}
+	//-------------------------------------------------------------------------
+	void Window::setScrollImmediate( const Ogre::Vector2 &scroll )
+	{
+		m_currentScroll = scroll;
+		m_currentScroll.makeFloor( m_maxScroll );
+		m_currentScroll.makeCeil( Ogre::Vector2::ZERO );
+		m_nextScroll = m_currentScroll;
+	}
+	//-------------------------------------------------------------------------
+	const Ogre::Vector2& Window::getCurrentScroll() const
+	{
+		return m_currentScroll;
+	}
+	//-------------------------------------------------------------------------
+	void Window::update( float timeSinceLast )
+	{
+		TODO_should_flag_transforms_dirty; //??? should we?
+		m_currentScroll = Ogre::Math::lerp( m_nextScroll, m_currentScroll,
+											exp2f( -10.0f * timeSinceLast ) );
+
+		WindowVec::const_iterator itor = m_childWindows.begin();
+		WindowVec::const_iterator end  = m_childWindows.end();
+
+		while( itor != end )
+		{
+			(*itor)->update( timeSinceLast );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	size_t Window::notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved )
@@ -192,10 +231,11 @@ namespace Crystal
 	void Window::fillBuffersAndCommands( UiVertex **vertexBuffer,
 										 GlyphVertex **textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
+										 const Ogre::Vector2 &parentCurrentScrollPos,
 										 const Ogre::Matrix3 &parentRot )
 	{
 		Renderable::fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
-											m_currentScroll, parentRot, true );
+											parentCurrentScrollPos, parentRot, m_currentScroll, true );
 	}
 	//-------------------------------------------------------------------------
 	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas )
@@ -226,7 +266,7 @@ namespace Crystal
 		{
 			Widget *widget = *itor;
 			if( widget->isNavigable() &&
-				this->intersectsChild( widget ) &&
+				this->intersectsChild( widget, m_currentScroll ) &&
 				widget->intersects( newPosInCanvas ) )
 			{
 				retVal.widget = widget;

@@ -199,6 +199,7 @@ namespace Crystal
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot );
 	};
 }

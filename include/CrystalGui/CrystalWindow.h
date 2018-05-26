@@ -18,6 +18,9 @@ namespace Crystal
 		friend class CrystalManager;
 
 		Ogre::Vector2 m_currentScroll;
+		/// For smooth scrolling, m_nextScroll contains the scroll destination,
+		/// eventually over time m_currentScroll = m_nextScroll.
+		Ogre::Vector2 m_nextScroll;
 		Ogre::Vector2 m_maxScroll;
 
 		/// The Window can be focused onto even if it has child windows.
@@ -48,6 +51,16 @@ namespace Crystal
 
 		virtual void _destroy();
 		virtual bool isWindow() const	{ return true; }
+
+		void setScrollAnimated( const Ogre::Vector2 &nextScroll );
+		void setScrollImmediate( const Ogre::Vector2 &scroll );
+		/// Return the current scroll position. Note that it may not be the final one, if it's still animating
+		/// To get the final scroll to achieve once animation finishes, use getNextScroll
+		virtual const Ogre::Vector2& getCurrentScroll() const;
+		/// Returns the final scroll position. See getCurrentScroll
+		const Ogre::Vector2& getNextScroll() const						{ return m_nextScroll; }
+
+		void update( float timeSinceLast );
 
 		/// See Widget::setWidgetNavigationDirty
 		/// Notifies all of our children widgets are dirty and we need to recalculate them.
@@ -80,6 +93,7 @@ namespace Crystal
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot );
 	};
 }

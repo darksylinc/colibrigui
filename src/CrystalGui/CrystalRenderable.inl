@@ -91,22 +91,27 @@ namespace Crystal
 													GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 													_textVertBuffer,
 													const Ogre::Vector2 &parentPos,
-													const Ogre::Vector2 &currentScrollPos,
+													const Ogre::Vector2 &parentScrollPos,
 													const Ogre::Matrix3 &parentRot,
+													const Ogre::Vector2 &currentScrollPos,
 													bool forWindows )
 	{
 		UiVertex * RESTRICT_ALIAS vertexBuffer = *_vertexBuffer;
 
+		m_culled = true;
+
 		if( forWindows )
 		{
-			if( m_parent && !m_parent->intersectsChild( this ) )
+			if( m_parent && !m_parent->intersectsChild( this, parentScrollPos ) )
 				return;
 		}
 		else
 		{
-			if( !m_parent->intersectsChild( this ) )
+			if( !m_parent->intersectsChild( this, parentScrollPos ) )
 				return;
 		}
+
+		m_culled = false;
 
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -220,12 +225,14 @@ namespace Crystal
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
-		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft + m_clipBorderTL * invCanvasSize2x;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
+													   (m_clipBorderTL - currentScrollPos) *
+													   invCanvasSize2x;
 
 		while( itor != end )
 		{
 			(*itor)->fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
-											 outerTopLeftWithClipping + currentScrollPos, finalRot );
+											 outerTopLeftWithClipping, currentScrollPos, finalRot );
 			++itor;
 		}
 	}

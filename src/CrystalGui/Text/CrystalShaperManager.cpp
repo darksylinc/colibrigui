@@ -522,9 +522,10 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void ShaperManager::updateGpuBuffers()
 	{
-		if( !m_glyphAtlasBuffer ||
-			m_atlasCapacity !=
-			m_glyphAtlasBuffer->getNumElements() * m_glyphAtlasBuffer->getBytesPerElement() )
+		if( (!m_glyphAtlasBuffer ||
+			 m_atlasCapacity !=
+			 m_glyphAtlasBuffer->getNumElements() * m_glyphAtlasBuffer->getBytesPerElement()) &&
+			m_atlasCapacity > 0u )
 		{
 			//Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
 			if( m_glyphAtlasBuffer )

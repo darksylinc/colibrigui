@@ -967,12 +967,13 @@ namespace Crystal
 	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
 										GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
 										const Ogre::Vector2 &parentPos,
+										const Ogre::Vector2 &parentCurrentScrollPos,
 										const Ogre::Matrix3 &parentRot )
 	{
 		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
 
 		m_numVertices = 0;
-		if( !m_parent->intersectsChild( this ) )
+		if( !m_parent->intersectsChild( this, parentCurrentScrollPos ) )
 			return;
 
 		updateDerivedTransform( parentPos, parentRot );

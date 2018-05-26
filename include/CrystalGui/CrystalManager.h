@@ -158,7 +158,7 @@ namespace Crystal
 		void _setWindowNavigationDirty();
 		void _addDirtyLabel( Label *label );
 
-		void update();
+		void update( float timeSinceLast );
 		void prepareRenderCommands();
 		void render();
 

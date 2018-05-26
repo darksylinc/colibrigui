@@ -166,6 +166,17 @@ namespace Crystal
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
+	Window * crystalgui_nullable Widget::getAsWindow()
+	{
+		if( isWindow() )
+		{
+			CRYSTAL_ASSERT_HIGH( dynamic_cast<Window*>( this ) );
+			return static_cast<Window*>( this );
+		}
+
+		return 0;
+	}
+	//-------------------------------------------------------------------------
 	Window* Widget::getFirstParentWindow()
 	{
 		if( isWindow() )
@@ -175,6 +186,11 @@ namespace Crystal
 		}
 
 		return m_parent->getFirstParentWindow();
+	}
+	//-------------------------------------------------------------------------
+	const Ogre::Vector2& Widget::getCurrentScroll(void) const
+	{
+		return Ogre::Vector2::ZERO;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::notifyWidgetDestroyed( Widget *widget )
@@ -377,13 +393,13 @@ namespace Crystal
 		return m_position.y + m_size.y;
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::intersectsChild( Widget *child ) const
+	bool Widget::intersectsChild( Widget *child, const Ogre::Vector2 &currentScroll ) const
 	{
 		CRYSTAL_ASSERT( this == child->m_parent );
-		return !( 0.0f > child->m_position.x + child->m_size.x	||
-				  0.0f > child->m_position.y + child->m_size.y	||
-				  this->m_size.x < child->m_position.x	||
-				  this->m_size.y < child->m_position.y );
+		return !( 0.0f > child->m_position.x - currentScroll.x + child->m_size.x	||
+				  0.0f > child->m_position.y - currentScroll.y + child->m_size.y	||
+				  this->m_size.x < child->m_position.x - currentScroll.x			||
+				  this->m_size.y < child->m_position.y - currentScroll.y );
 	}
 	//-------------------------------------------------------------------------
 	bool Widget::intersects( const Ogre::Vector2 &posNdc ) const
@@ -411,6 +427,7 @@ namespace Crystal
 	void Widget::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
 										 GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
+										 const Ogre::Vector2 &parentCurrentScrollPos,
 										 const Ogre::Matrix3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
@@ -543,7 +560,12 @@ namespace Crystal
 		if( m_parent )
 		{
 			m_parent->updateDerivedTransformFromParent();
-			updateDerivedTransform( m_parent->m_derivedTopLeft, m_parent->m_derivedOrientation );
+
+			Ogre::Vector2 currentScroll = m_parent->getCurrentScroll();
+			const Ogre::Vector2 &invCanvasSize2x = m_manager->getInvCanvasSize2x();
+			updateDerivedTransform( m_parent->m_derivedTopLeft +
+									(m_parent->m_clipBorderTL - currentScroll) * invCanvasSize2x,
+									m_parent->m_derivedOrientation );
 		}
 		else
 			updateDerivedTransform( Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );

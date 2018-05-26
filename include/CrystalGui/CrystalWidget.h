@@ -126,15 +126,23 @@ namespace Crystal
 
 		/// Do not call directly. 'this' cannot be a Window
 		void _setParent( Widget *parent );
+		Widget * crystalgui_nonnull getParent(void) const			{ return m_parent; }
 
 		virtual bool isRenderable() const	{ return false; }
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 
+		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
+		Window * crystalgui_nullable getAsWindow();
+
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns its
 		/// parent (or its parent's parent) until we find a window. Cannot
 		/// return null
 		Window* getFirstParentWindow();
+
+		/// See Window::getCurrentScroll. For most widgets, this returns
+		/// zero (i.e. when scrolling is not supported)
+		virtual const Ogre::Vector2& getCurrentScroll(void) const;
 
 		// WidgetListener overload
 		virtual void notifyWidgetDestroyed( Widget *widget );
@@ -221,7 +229,7 @@ namespace Crystal
 		@return
 			True if the given widget is partially intersecting or fully inside this, or viceversa.
 		*/
-		bool intersectsChild( Widget *child ) const;
+		bool intersectsChild( Widget *child, const Ogre::Vector2 &currentScroll ) const;
 		//bool intersects( Widget *widget ) const;
 
 		/// Input must be in NDC space i.e. in range [-1; 1]
@@ -229,11 +237,29 @@ namespace Crystal
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
+		/** Fills vertexBuffer & textVertBuffer for rendering, perfoming occlussion culling.
+			It also updates derived transforms. Derived classes change their functionality.
+			This function is mostly relevant in Renderable and its derived classes
+		@param vertexBuffer
+			Filled by most Renderable classes.
+		@param textVertBuffer
+			Only filled by Label
+		@param parentPos
+			Derived position m_parent, in clip space. If the parent supports scrolling (e.g. windows)
+			then this position is already offsetted by the scroll.
+			Implementations should not try to implement parentCurrentScrollPos twice!
+		@param parentCurrentScrollPos
+			Amount of scroll from m_parent, in canvas space.
+			This is required needed so we can perform certain computations.
+		@param parentRot
+			Derived orientation of m_parent
+		*/
 		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 vertexBuffer,
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot );
 
 		/** Sets the new state, which affects skins.
@@ -264,7 +290,8 @@ namespace Crystal
 		void setCenter( const Ogre::Vector2 &center );
 		Ogre::Vector2 getCenter() const;
 
-		const Ogre::Vector2& getPosition() const				{ return m_position; }
+		const Ogre::Vector2& getLocalTopLeft() const			{ return m_position; }
+		Ogre::Vector2 getLocalBottomRight() const				{ return m_position + m_size; }
 		const Ogre::Vector2& getSize() const					{ return m_size; }
 		const Ogre::Matrix3& getOrientation() const				{ return m_orientation; }
 
@@ -296,6 +323,9 @@ namespace Crystal
 		Ogre::Vector2 getBottomRightAfterClipping() const;
 		/// Returns the working area. clipBorderTopLeft + clipBorderBottomRight
 		Ogre::Vector2 getSizeAfterClipping() const;
+
+		const Ogre::Vector2& getBorderTopLeft() const		{ return m_clipBorderTL; }
+		const Ogre::Vector2& getBorderBottomRight() const	{ return m_clipBorderBR; }
 
 		/// Call this function before calling getDerivedTopLeft & co and it was asserting.
 		/// Do not do it too often as it is not the most efficient solution.

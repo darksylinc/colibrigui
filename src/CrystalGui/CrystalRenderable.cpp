@@ -29,6 +29,7 @@ namespace Crystal
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u, manager ),
+		m_culled( false ),
 		m_colour( Ogre::ColourValue::White ),
 		m_numVertices( 6u * 9u )
 	{
@@ -122,6 +123,9 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject )
 	{
+		if( m_culled )
+			return;
+
 		using namespace Ogre;
 
 		CommandBuffer *commandBuffer = apiObject.commandBuffer;
@@ -202,9 +206,10 @@ namespace Crystal
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
+											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot )
 	{
 		fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
-								Ogre::Vector2::ZERO, parentRot, false );
+								parentCurrentScrollPos, parentRot, Ogre::Vector2::ZERO, false );
 	}
 }
