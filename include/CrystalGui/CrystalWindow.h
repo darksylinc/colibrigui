@@ -60,6 +60,21 @@ namespace Crystal
 		/// Returns the final scroll position. See getCurrentScroll
 		const Ogre::Vector2& getNextScroll() const						{ return m_nextScroll; }
 
+		/// Sets the maximum scroll setScrollImmediate/setScrollAnimated can go. 0 to disable scrolling
+		/// The value is in canvas space.
+		void setMaxScroll( const Ogre::Vector2 &maxScroll );
+		/// Calls setMaxScroll by calculating how much scroll is needed based on the current size,
+		/// the clipping borders, and the input scrollable area you want the window to contain
+		void calculateMaxScrollFromScrollableArea( const Ogre::Vector2 &scrollableArea );
+
+		const Ogre::Vector2& getMaxScroll() const						{ return m_maxScroll; }
+		Ogre::Vector2 getScrollableArea() const;
+
+		/// Calculates & sets the required scrollable area based on the current size of all child
+		/// widgets & windows; and our current size.
+		/// This function will not call sizeToFit on children. You'll likely want to call this last.
+		void sizeScrollToFit();
+
 		void update( float timeSinceLast );
 
 		/// See Widget::setWidgetNavigationDirty

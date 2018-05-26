@@ -138,6 +138,8 @@ namespace Demo
 		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
 
 #endif
+		mainWindow->sizeScrollToFit();
+
         TutorialGameState::createScene01();
     }
 	//-----------------------------------------------------------------------------------

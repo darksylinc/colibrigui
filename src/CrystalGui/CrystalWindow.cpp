@@ -77,6 +77,42 @@ namespace Crystal
 		m_nextScroll = m_currentScroll;
 	}
 	//-------------------------------------------------------------------------
+	void Window::setMaxScroll( const Ogre::Vector2 &maxScroll )
+	{
+		CRYSTAL_ASSERT_LOW( maxScroll.x >= 0 && maxScroll.y >= 0 );
+		m_maxScroll = maxScroll;
+	}
+	//-------------------------------------------------------------------------
+	void Window::calculateMaxScrollFromScrollableArea( const Ogre::Vector2 &scrollableArea )
+	{
+		Ogre::Vector2 maxScroll = scrollableArea - m_size + m_clipBorderTL + m_clipBorderBR;
+		maxScroll.makeCeil( Ogre::Vector2::ZERO );
+		setMaxScroll( maxScroll );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Window::getScrollableArea() const
+	{
+		return m_maxScroll + m_size - m_clipBorderTL - m_clipBorderBR;
+	}
+	//-------------------------------------------------------------------------
+	void Window::sizeScrollToFit()
+	{
+		Ogre::Vector2 scrollableArea( Ogre::Vector2::ZERO );
+		const Ogre::Vector2 clipBorderTL = m_clipBorderTL;
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			Widget *widget = *itor;
+			scrollableArea.makeCeil( clipBorderTL + widget->getLocalTopLeft() + widget->getSize() );
+			++itor;
+		}
+
+		calculateMaxScrollFromScrollableArea( scrollableArea );
+	}
+	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Window::getCurrentScroll() const
 	{
 		return m_currentScroll;
