@@ -18,7 +18,7 @@ namespace Crystal
 		friend class CrystalManager;
 
 		Ogre::Vector2 m_currentScroll;
-		Ogre::Vector2 m_scrollArea;
+		Ogre::Vector2 m_maxScroll;
 
 		/// The Window can be focused onto even if it has child windows.
 		/// Does not work if a Window is currently modal.

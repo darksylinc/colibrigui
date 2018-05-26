@@ -204,6 +204,7 @@ namespace Crystal
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Matrix3 &parentRot )
 	{
-		fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos, parentRot, false );
+		fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
+								Ogre::Vector2::ZERO, parentRot, false );
 	}
 }

@@ -10,7 +10,7 @@ namespace Crystal
 	Window::Window( CrystalManager *manager ) :
 		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
-		m_scrollArea( Ogre::Vector2::ZERO ),
+		m_maxScroll( Ogre::Vector2::ZERO ),
 		m_allowsFocusWithChildren( true ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
@@ -194,7 +194,8 @@ namespace Crystal
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Matrix3 &parentRot )
 	{
-		Renderable::fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos, parentRot, true );
+		Renderable::fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
+											m_currentScroll, parentRot, true );
 	}
 	//-------------------------------------------------------------------------
 	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas )

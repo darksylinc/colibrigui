@@ -91,6 +91,7 @@ namespace Crystal
 													GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 													_textVertBuffer,
 													const Ogre::Vector2 &parentPos,
+													const Ogre::Vector2 &currentScrollPos,
 													const Ogre::Matrix3 &parentRot,
 													bool forWindows )
 	{
@@ -224,7 +225,7 @@ namespace Crystal
 		while( itor != end )
 		{
 			(*itor)->fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
-											 outerTopLeftWithClipping, finalRot );
+											 outerTopLeftWithClipping + currentScrollPos, finalRot );
 			++itor;
 		}
 	}
