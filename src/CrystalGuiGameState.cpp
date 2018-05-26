@@ -76,6 +76,12 @@ namespace Demo
 		button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 ) );
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
+		button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button1->setSkinPack( "ButtonSkin" );
+		button1->setTopLeft( Ogre::Vector2( 0.1 + 0.25, 0.1 + 0.1 + 0.25 + 0.1 ) );
+		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+
+#if 1
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
 		label->setText( "The path of the righteous man is beset on all sides by the iniquities\n"
 						"of the selfish and the tyranny of evil men. Blessed is he who, in the\n"
@@ -108,13 +114,13 @@ namespace Demo
 //		label->setText( "من أنا لاستجواب ""\n\r"
 //						"أولئك الذين يكتبونhola" );
 		{
-			std::ifstream file( "/home/matias/Desktop/Text2", std::ios::in|std::ios::binary );
+			/*std::ifstream file( "/home/matias/Desktop/Text2", std::ios::in|std::ios::binary );
 			file.seekg( 0, std::ios::end );
 			const size_t fileSize = file.tellg();
 			file.seekg( 0, std::ios::beg );
 			std::string text;
 			text.resize( fileSize );
-			file.read( &text[0], fileSize );
+			file.read( &text[0], fileSize );*/
 			//label->setText( text );
 			//label->setText( "Hola\nQue tal sin paragraph?" );
 			//label->setText( "Hola\u2029\nQue tal?" );
@@ -131,6 +137,7 @@ namespace Demo
 //						  Crystal::TextHorizAlignment::Center, Crystal::TextVertAlignment::Center );
 		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
 
+#endif
         TutorialGameState::createScene01();
     }
 	//-----------------------------------------------------------------------------------

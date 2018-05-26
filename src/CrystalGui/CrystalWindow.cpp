@@ -85,8 +85,18 @@ namespace Crystal
 	void Window::update( float timeSinceLast )
 	{
 		TODO_should_flag_transforms_dirty; //??? should we?
-		m_currentScroll = Ogre::Math::lerp( m_nextScroll, m_currentScroll,
-											exp2f( -10.0f * timeSinceLast ) );
+		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
+
+		if( fabs( m_currentScroll.x - m_nextScroll.x ) >= pixelSize.x ||
+			fabs( m_currentScroll.y - m_nextScroll.y ) >= pixelSize.y )
+		{
+			m_currentScroll = Ogre::Math::lerp( m_nextScroll, m_currentScroll,
+												exp2f( -15.0f * timeSinceLast ) );
+		}
+		else
+		{
+			m_currentScroll = m_nextScroll;
+		}
 
 		WindowVec::const_iterator itor = m_childWindows.begin();
 		WindowVec::const_iterator end  = m_childWindows.end();
