@@ -348,7 +348,7 @@ namespace Crystal
 	{
 		Window *window = m_cursorFocusedPair.window;
 		if( window )
-			window->setScrollAnimated( window->getNextScroll() + scrollAmount );
+			window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
@@ -784,7 +784,7 @@ namespace Crystal
 				scrollOffset.x = widgetTL.x - parentTL.x;
 
 			if( scrollOffset != Ogre::Vector2::ZERO )
-				parentWindow->setScrollAnimated( currentScroll + scrollOffset );
+				parentWindow->setScrollAnimated( currentScroll + scrollOffset, false );
 		}
 	}
 	//-------------------------------------------------------------------------

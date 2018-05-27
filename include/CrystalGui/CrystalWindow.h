@@ -52,12 +52,24 @@ namespace Crystal
 		virtual void _destroy();
 		virtual bool isWindow() const	{ return true; }
 
-		void setScrollAnimated( const Ogre::Vector2 &nextScroll );
+		/** Smoothly scrolls from current location towards input destination.
+		@param nextScroll
+		@param animateOutOfRange
+			When true, if the input is outside the range [0; m_maxScroll] this will be
+			allowed and a small "bump" will be animated.
+			When false, the input gets clamped and no bump is animated.
+		*/
+		void setScrollAnimated( const Ogre::Vector2 &nextScroll, bool animateOutOfRange );
+		/// Immediately sets the scroll to the input destination.
+		/// If the input is outside the range [0; m_maxScroll], it will be clamped.
 		void setScrollImmediate( const Ogre::Vector2 &scroll );
-		/// Return the current scroll position. Note that it may not be the final one, if it's still animating
+		/// Return the current scroll position. Note that it may not be the final one,
+		/// if it's still animating.
 		/// To get the final scroll to achieve once animation finishes, use getNextScroll
+		/// This value may be temporarily outside the range [0; m_maxScroll]
 		virtual const Ogre::Vector2& getCurrentScroll() const;
 		/// Returns the final scroll position. See getCurrentScroll
+		/// This value may be temporarily outside the range [0; m_maxScroll]
 		const Ogre::Vector2& getNextScroll() const						{ return m_nextScroll; }
 
 		/// Sets the maximum scroll setScrollImmediate/setScrollAnimated can go. 0 to disable scrolling

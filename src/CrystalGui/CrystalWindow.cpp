@@ -62,11 +62,14 @@ namespace Crystal
 		Renderable::_destroy();
 	}
 	//-------------------------------------------------------------------------
-	void Window::setScrollAnimated( const Ogre::Vector2 &nextScroll )
+	void Window::setScrollAnimated( const Ogre::Vector2 &nextScroll, bool animateOutOfRange )
 	{
 		m_nextScroll = nextScroll;
-		m_nextScroll.makeFloor( m_maxScroll );
-		m_nextScroll.makeCeil( Ogre::Vector2::ZERO );
+		if( !animateOutOfRange )
+		{
+			m_nextScroll.makeFloor( m_maxScroll );
+			m_nextScroll.makeCeil( Ogre::Vector2::ZERO );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Window::setScrollImmediate( const Ogre::Vector2 &scroll )
@@ -121,6 +124,27 @@ namespace Crystal
 	{
 		TODO_should_flag_transforms_dirty; //??? should we?
 		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
+
+		if( m_nextScroll.y < 0.0f )
+		{
+			m_nextScroll.y = Ogre::Math::lerp( 0.0f, m_nextScroll.y,
+											   exp2f( -15.0f * timeSinceLast ) );
+		}
+		if( m_nextScroll.y > m_maxScroll.y )
+		{
+			m_nextScroll.y = Ogre::Math::lerp( m_maxScroll.y, m_nextScroll.y,
+											   exp2f( -15.0f * timeSinceLast ) );
+		}
+		if( m_nextScroll.x < 0.0f )
+		{
+			m_nextScroll.x = Ogre::Math::lerp( 0.0f, m_nextScroll.x,
+											   exp2f( -15.0f * timeSinceLast ) );
+		}
+		if( m_nextScroll.x > m_maxScroll.x )
+		{
+			m_nextScroll.x = Ogre::Math::lerp( m_maxScroll.x, m_nextScroll.x,
+											   exp2f( -15.0f * timeSinceLast ) );
+		}
 
 		if( fabs( m_currentScroll.x - m_nextScroll.x ) >= pixelSize.x ||
 			fabs( m_currentScroll.y - m_nextScroll.y ) >= pixelSize.y )
