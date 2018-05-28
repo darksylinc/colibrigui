@@ -237,6 +237,9 @@ namespace Crystal
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
+		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot );
+
 		/** Fills vertexBuffer & textVertBuffer for rendering, perfoming occlussion culling.
 			It also updates derived transforms. Derived classes change their functionality.
 			This function is mostly relevant in Renderable and its derived classes
@@ -254,13 +257,13 @@ namespace Crystal
 		@param parentRot
 			Derived orientation of m_parent
 		*/
-		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-											 vertexBuffer,
-											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											 textVertBuffer,
-											 const Ogre::Vector2 &parentPos,
-											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot );
+		virtual void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											  vertexBuffer,
+											  GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											  textVertBuffer,
+											  const Ogre::Vector2 &parentPos,
+											  const Ogre::Vector2 &parentCurrentScrollPos,
+											  const Ogre::Matrix3 &parentRot );
 
 		/** Sets the new state, which affects skins.
 			The state is is broadcasted to our children.

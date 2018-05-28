@@ -118,22 +118,22 @@ namespace Crystal
 
 		virtual bool isRenderable() const	{ return true; }
 
-		inline void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-											vertexBuffer,
-											GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											RESTRICT_ALIAS textVertBuffer,
-											const Ogre::Vector2 &parentPos,
-											const Ogre::Vector2 &parentCurrentScrollPos,
-											const Ogre::Matrix3 &parentRot,
-											const Ogre::Vector2 &currentScrollPos,
-											bool forWindows );
-		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+		inline void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 vertexBuffer,
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											 textVertBuffer,
+											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot );
+											 const Ogre::Matrix3 &parentRot,
+											 const Ogre::Vector2 &currentScrollPos,
+											 bool forWindows );
+		virtual void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											  vertexBuffer,
+											  GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											  textVertBuffer,
+											  const Ogre::Vector2 &parentPos,
+											  const Ogre::Vector2 &parentCurrentScrollPos,
+											  const Ogre::Matrix3 &parentRot );
 	};
 }
 

@@ -90,7 +90,9 @@ namespace Crystal
 		/// This function will not call sizeToFit on children. You'll likely want to call this last.
 		void sizeScrollToFit();
 
-		void update( float timeSinceLast );
+		/// Returns true if it's still updating its scroll and the
+		/// focused widget by the mouse cursor is potentially dirty
+		bool update( float timeSinceLast );
 
 		/// See Widget::setWidgetNavigationDirty
 		/// Notifies all of our children widgets are dirty and we need to recalculate them.
@@ -116,15 +118,18 @@ namespace Crystal
 		void setDefault( Widget * crystalgui_nullable widget );
 		Widget* crystalgui_nullable getDefaultWidget() const;
 
-		FocusPair setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas );
+		FocusPair setIdleCursorMoved( const Ogre::Vector2 &newPosNdc );
 
-		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-											 vertexBuffer,
-											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											 textVertBuffer,
-											 const Ogre::Vector2 &parentPos,
-											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot );
+		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
+												  const Ogre::Matrix3 &parentRot );
+
+		virtual void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											  vertexBuffer,
+											  GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											  textVertBuffer,
+											  const Ogre::Vector2 &parentPos,
+											  const Ogre::Vector2 &parentCurrentScrollPos,
+											  const Ogre::Matrix3 &parentRot );
 	};
 }
 

@@ -194,13 +194,13 @@ namespace Crystal
 									 const Ogre::Vector2 parentDerivedBR,
 									 const bool isHorizontal );
 
-		virtual void fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-											 RESTRICT_ALIAS vertexBuffer,
-											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											 RESTRICT_ALIAS textVertBuffer,
-											 const Ogre::Vector2 &parentPos,
-											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot );
+		virtual void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+											  RESTRICT_ALIAS vertexBuffer,
+											  GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
+											  RESTRICT_ALIAS textVertBuffer,
+											  const Ogre::Vector2 &parentPos,
+											  const Ogre::Vector2 &parentCurrentScrollPos,
+											  const Ogre::Matrix3 &parentRot );
 	};
 }
 

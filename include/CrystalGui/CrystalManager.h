@@ -75,6 +75,9 @@ namespace Crystal
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
 
+		void updateWidgetsFocusedByCursor();
+		void updateAllDerivedTransforms();
+
 		/// When pressing a mouse button on a widget, that overrides whatever keyboard was on.
 		void overrideKeyboardFocusWith( const FocusPair &focusedPair );
 		void overrideCursorFocusWith( const FocusPair &focusedPair );
@@ -106,6 +109,8 @@ namespace Crystal
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
+
+		const Ogre::Vector2& getMouseCursorPosNdc() const			{ return m_mouseCursorPosNdc; }
 
 		/** Sets the size of the virtual canvas. All widgets are relative to this canvas
 			For example if the canvas is 1920x1080, then a widget at x = 960 is in the

@@ -201,7 +201,7 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+	void Renderable::_fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 											 vertexBuffer,
 											 GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 											 textVertBuffer,
@@ -209,7 +209,7 @@ namespace Crystal
 											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Ogre::Matrix3 &parentRot )
 	{
-		fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
+		_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
 								parentCurrentScrollPos, parentRot, Ogre::Vector2::ZERO, false );
 	}
 }

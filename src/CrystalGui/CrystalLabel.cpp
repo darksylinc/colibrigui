@@ -964,11 +964,11 @@ namespace Crystal
 		return textVertBuffer;
 	}
 	//-------------------------------------------------------------------------
-	void Label::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
-										GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
-										const Ogre::Vector2 &parentPos,
-										const Ogre::Vector2 &parentCurrentScrollPos,
-										const Ogre::Matrix3 &parentRot )
+	void Label::_fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
+										 GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
+										 const Ogre::Vector2 &parentPos,
+										 const Ogre::Vector2 &parentCurrentScrollPos,
+										 const Ogre::Matrix3 &parentRot )
 	{
 		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
 

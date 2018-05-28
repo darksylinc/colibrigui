@@ -125,8 +125,10 @@ namespace Crystal
 		return m_currentScroll;
 	}
 	//-------------------------------------------------------------------------
-	void Window::update( float timeSinceLast )
+	bool Window::update( float timeSinceLast )
 	{
+		bool cursorFocusDirty = false;
+
 		TODO_should_flag_transforms_dirty; //??? should we?
 		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
 
@@ -156,6 +158,10 @@ namespace Crystal
 		{
 			m_currentScroll = Ogre::Math::lerp( m_nextScroll, m_currentScroll,
 												exp2f( -15.0f * timeSinceLast ) );
+
+			const Ogre::Vector2& mouseCursorPosNdc = m_manager->getMouseCursorPosNdc();
+			if( this->intersects( mouseCursorPosNdc ) && m_allowsFocusWithChildren )
+				cursorFocusDirty = true;
 		}
 		else
 		{
@@ -167,9 +173,11 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->update( timeSinceLast );
+			cursorFocusDirty |= (*itor)->update( timeSinceLast );
 			++itor;
 		}
+
+		return cursorFocusDirty;
 	}
 	//-------------------------------------------------------------------------
 	size_t Window::notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved )
@@ -302,17 +310,39 @@ namespace Crystal
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	void Window::fillBuffersAndCommands( UiVertex **vertexBuffer,
+	void Window::_updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
+											  const Ogre::Matrix3 &parentRot )
+	{
+		updateDerivedTransform( parentPos, parentRot );
+
+		const Ogre::Vector2 invCanvasSize2x	= m_manager->getInvCanvasSize2x();
+		const Ogre::Vector2 outerTopLeft	= this->m_derivedTopLeft;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
+													   (m_clipBorderTL - m_currentScroll) *
+													   invCanvasSize2x;
+
+		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->_updateDerivedTransformOnly( outerTopLeftWithClipping, finalRot );
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Window::_fillBuffersAndCommands( UiVertex **vertexBuffer,
 										 GlyphVertex **textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Vector2 &parentCurrentScrollPos,
 										 const Ogre::Matrix3 &parentRot )
 	{
-		Renderable::fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
+		Renderable::_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
 											parentCurrentScrollPos, parentRot, m_currentScroll, true );
 	}
 	//-------------------------------------------------------------------------
-	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosInCanvas )
+	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosNdc )
 	{
 		FocusPair retVal;
 
@@ -322,7 +352,7 @@ namespace Crystal
 
 		while( ritor != rend && !retVal.widget )
 		{
-			retVal = (*ritor)->setIdleCursorMoved( newPosInCanvas );
+			retVal = (*ritor)->setIdleCursorMoved( newPosNdc );
 			++ritor;
 		}
 
@@ -330,7 +360,7 @@ namespace Crystal
 		if( retVal.widget )
 			return retVal;
 
-		if( !this->intersects( newPosInCanvas ) || !m_allowsFocusWithChildren )
+		if( !this->intersects( newPosNdc ) || !m_allowsFocusWithChildren )
 			return FocusPair();
 
 		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
@@ -341,7 +371,7 @@ namespace Crystal
 			Widget *widget = *itor;
 			if( widget->isNavigable() &&
 				this->intersectsChild( widget, m_currentScroll ) &&
-				widget->intersects( newPosInCanvas ) )
+				widget->intersects( newPosNdc ) )
 			{
 				retVal.widget = widget;
 			}

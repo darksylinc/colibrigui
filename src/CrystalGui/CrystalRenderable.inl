@@ -86,7 +86,7 @@ namespace Crystal
         #undef CRYSTAL_ADD_VERTEX
     }
 	//-------------------------------------------------------------------------
-	inline void Renderable::fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
+	inline void Renderable::_fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
 													_vertexBuffer,
 													GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
 													_textVertBuffer,
@@ -97,6 +97,8 @@ namespace Crystal
 													bool forWindows )
 	{
 		UiVertex * RESTRICT_ALIAS vertexBuffer = *_vertexBuffer;
+
+		updateDerivedTransform( parentPos, parentRot );
 
 		m_culled = true;
 
@@ -112,8 +114,6 @@ namespace Crystal
 		}
 
 		m_culled = false;
-
-		updateDerivedTransform( parentPos, parentRot );
 
 		uint8_t rgbaColour[4];
 		rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
@@ -231,7 +231,7 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
+			(*itor)->_fillBuffersAndCommands( _vertexBuffer, _textVertBuffer,
 											 outerTopLeftWithClipping, currentScrollPos, finalRot );
 			++itor;
 		}

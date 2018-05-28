@@ -424,11 +424,31 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Widget::fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
-										 GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
-										 const Ogre::Vector2 &parentPos,
-										 const Ogre::Vector2 &parentCurrentScrollPos,
-										 const Ogre::Matrix3 &parentRot )
+	void Widget::_updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
+											  const Ogre::Matrix3 &parentRot )
+	{
+		updateDerivedTransform( parentPos, parentRot );
+
+		const Ogre::Vector2 invCanvasSize2x	= m_manager->getInvCanvasSize2x();
+		const Ogre::Vector2 outerTopLeft	= this->m_derivedTopLeft;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft + m_clipBorderTL * invCanvasSize2x;
+
+		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->_updateDerivedTransformOnly( outerTopLeftWithClipping, finalRot );
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Widget::_fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
+										  GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
+										  const Ogre::Vector2 &parentPos,
+										  const Ogre::Vector2 &parentCurrentScrollPos,
+										  const Ogre::Matrix3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
 	}

@@ -160,20 +160,9 @@ namespace Crystal
 		m_invWindowResolution2x = 2.0f / windowResolution;
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
+	void CrystalManager::updateWidgetsFocusedByCursor()
 	{
-		const Ogre::Vector2 oldPos = m_mouseCursorPosNdc;
-		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
-		m_mouseCursorPosNdc = newPosInCanvas;
-
-		if( m_allowingScrollGestureWhileButtonDown && (m_allowingScrollAlways ||
-			(m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll())) )
-		{
-			setCancel();
-			//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
-			m_allowingScrollGestureWhileButtonDown = true;
-			setScroll( oldPos - newPosInCanvas );
-		}
+		const Ogre::Vector2 newPosNdc = m_mouseCursorPosNdc;
 
 		FocusPair focusedPair;
 
@@ -183,7 +172,7 @@ namespace Crystal
 
 		while( ritor != rend && !focusedPair.widget )
 		{
-			focusedPair = (*ritor)->setIdleCursorMoved( newPosInCanvas );
+			focusedPair = (*ritor)->setIdleCursorMoved( newPosNdc );
 			++ritor;
 		}
 
@@ -226,6 +215,27 @@ namespace Crystal
 		}
 
 		m_cursorFocusedPair = focusedPair;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
+	{
+		const Ogre::Vector2 oldPos = m_mouseCursorPosNdc;
+		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
+		m_mouseCursorPosNdc = newPosInCanvas;
+
+		if( m_allowingScrollGestureWhileButtonDown && (m_allowingScrollAlways ||
+			(m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll())) )
+		{
+			setCancel();
+			//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
+			m_allowingScrollGestureWhileButtonDown = true;
+			setScroll( (oldPos - m_mouseCursorPosNdc) * 0.5f * m_canvasSize );
+			//^^ setScroll will call updateWidgetsFocusedByCursor if necessary
+		}
+		else
+		{
+			updateWidgetsFocusedByCursor();
+		}
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorPressed( bool allowScrollGesture, bool alwaysAllowScroll )
@@ -361,11 +371,30 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void CrystalManager::updateAllDerivedTransforms()
+	{
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+			(*itor)->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE,
+												  Ogre::Matrix3::IDENTITY );
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::setScroll( const Ogre::Vector2 &scrollAmount )
 	{
 		Window *window = m_cursorFocusedPair.window;
 		if( window )
+		{
 			window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
+
+			updateAllDerivedTransforms();
+			//If is possible the button we were highlighting is no longer behind the cursor
+			updateWidgetsFocusedByCursor();
+		}
 	}
 	//-------------------------------------------------------------------------
 	Window* CrystalManager::createWindow( Window * crystalgui_nullable parent )
@@ -818,13 +847,21 @@ namespace Crystal
 			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 
+		bool cursorFocusDirty = false;
+
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
 
 		while( itor != end )
 		{
-			(*itor)->update( timeSinceLast );
+			cursorFocusDirty |= (*itor)->update( timeSinceLast );
 			++itor;
+		}
+
+		if( cursorFocusDirty )
+		{
+			updateAllDerivedTransforms();
+			updateWidgetsFocusedByCursor();
 		}
 
 		m_shaperManager->updateGpuBuffers();
@@ -848,10 +885,10 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->fillBuffersAndCommands( &vertex, &vertexText,
-											 -Ogre::Vector2::UNIT_SCALE,
-											 Ogre::Vector2::ZERO,
-											 Ogre::Matrix3::IDENTITY );
+			(*itor)->_fillBuffersAndCommands( &vertex, &vertexText,
+											  -Ogre::Vector2::UNIT_SCALE,
+											  Ogre::Vector2::ZERO,
+											  Ogre::Matrix3::IDENTITY );
 			++itor;
 		}
 
