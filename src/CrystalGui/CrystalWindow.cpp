@@ -98,6 +98,11 @@ namespace Crystal
 		return m_maxScroll + m_size - m_clipBorderTL - m_clipBorderBR;
 	}
 	//-------------------------------------------------------------------------
+	bool Window::hasScroll() const
+	{
+		return m_maxScroll.x > 0 && m_maxScroll.y > 0;
+	}
+	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()
 	{
 		Ogre::Vector2 scrollableArea( Ogre::Vector2::ZERO );

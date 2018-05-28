@@ -38,6 +38,8 @@ namespace Crystal
 		m_indirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
 		m_defaultTextDatablock( 0 ),
+		m_allowingScrollAlways( false ),
+		m_allowingScrollGestureWhileButtonDown( false ),
 		m_mouseCursorButtonDown( false ),
 		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
 		m_primaryButtonDown( false ),
@@ -160,8 +162,18 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
+		const Ogre::Vector2 oldPos = m_mouseCursorPosNdc;
 		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
 		m_mouseCursorPosNdc = newPosInCanvas;
+
+		if( m_allowingScrollGestureWhileButtonDown && (m_allowingScrollAlways ||
+			(m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll())) )
+		{
+			setCancel();
+			//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
+			m_allowingScrollGestureWhileButtonDown = true;
+			setScroll( oldPos - newPosInCanvas );
+		}
 
 		FocusPair focusedPair;
 
@@ -216,7 +228,7 @@ namespace Crystal
 		m_cursorFocusedPair = focusedPair;
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setMouseCursorPressed()
+	void CrystalManager::setMouseCursorPressed( bool allowScrollGesture, bool alwaysAllowScroll )
 	{
 		if( m_cursorFocusedPair.widget )
 		{
@@ -231,6 +243,9 @@ namespace Crystal
 			//User clicked outside any widget while keyboard was being hold down. Cancel that key.
 			setCancel();
 		}
+
+		m_allowingScrollGestureWhileButtonDown = allowScrollGesture;
+		m_allowingScrollAlways = alwaysAllowScroll;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setMouseCursorReleased()
@@ -248,6 +263,7 @@ namespace Crystal
 			setCancel();
 		}
 		m_mouseCursorButtonDown = false;
+		m_allowingScrollGestureWhileButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setKeyboardPrimaryPressed()
@@ -298,6 +314,7 @@ namespace Crystal
 				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 		}
 		m_mouseCursorButtonDown = false;
+		m_allowingScrollGestureWhileButtonDown = false;
 
 		//Highlight with keyboard
 		if( m_keyboardFocusedPair.widget )

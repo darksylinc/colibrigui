@@ -66,6 +66,8 @@ namespace Crystal
 		/// Window and/or Widget currently being in focus
 		FocusPair		m_cursorFocusedPair;
 		FocusPair		m_keyboardFocusedPair;
+		bool			m_allowingScrollAlways;
+		bool			m_allowingScrollGestureWhileButtonDown;
 		bool			m_mouseCursorButtonDown;
 		Ogre::Vector2	m_mouseCursorPosNdc; ///NDC = Normalized Device Coordinates
 		bool			m_primaryButtonDown;
@@ -133,7 +135,20 @@ namespace Crystal
 		const Ogre::Vector2& getInvWindowResolution2x() const		{ return m_invWindowResolution2x; }
 
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
-		void setMouseCursorPressed();
+		/**
+		@param allowScrollGesture
+			When true, moving the mouse cursor (or moving your finger, if touch) allows controlling
+			scroll. This will cancel any hold/press of buttons.
+			Typically you want this always true for touch interfaces, while for mouse cursors
+			it depends on taste and how the interface was designed.
+		@param alwaysAllowScroll
+			When true, moving the mouse cursor always while holding the button (or your finger) will
+			cancel the button being hold or hit; and will start scrolling instead even if the
+			window in the foreground is not scrollable.
+			When false, the action is only cancelled if the window is actually scrollable.
+			The recommended value for touch screen is true, while false for mouse interfaces.
+		*/
+		void setMouseCursorPressed( bool allowScrollGesture, bool alwaysAllowScroll );
 		void setMouseCursorReleased();
 		void setKeyboardPrimaryPressed();
 		void setKeyboardPrimaryReleased();

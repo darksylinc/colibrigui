@@ -202,7 +202,7 @@ namespace Demo
 
 		Ogre::Vector2 mousePos( arg.x / width, arg.y / height );
 		crystalManager->setMouseCursorMoved( mousePos * crystalManager->getCanvasSize() );
-		crystalManager->setMouseCursorPressed();
+		crystalManager->setMouseCursorPressed( true, false );
 	}
 	//-----------------------------------------------------------------------------------
 	void CrystalGuiGameState::mouseReleased( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )

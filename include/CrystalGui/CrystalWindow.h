@@ -82,6 +82,9 @@ namespace Crystal
 		const Ogre::Vector2& getMaxScroll() const						{ return m_maxScroll; }
 		Ogre::Vector2 getScrollableArea() const;
 
+		/// Returns true if getMaxScroll() is non-zero in any direction.
+		bool hasScroll() const;
+
 		/// Calculates & sets the required scrollable area based on the current size of all child
 		/// widgets & windows; and our current size.
 		/// This function will not call sizeToFit on children. You'll likely want to call this last.
