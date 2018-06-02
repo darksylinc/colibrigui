@@ -87,9 +87,9 @@ namespace Crystal
     }
 	//-------------------------------------------------------------------------
 	inline void Renderable::_fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-													_vertexBuffer,
+													RESTRICT_ALIAS _vertexBuffer,
 													GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-													_textVertBuffer,
+													RESTRICT_ALIAS _textVertBuffer,
 													const Ogre::Vector2 &parentPos,
 													const Ogre::Vector2 &parentScrollPos,
 													const Ogre::Matrix3 &parentRot,

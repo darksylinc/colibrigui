@@ -332,8 +332,8 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Window::_fillBuffersAndCommands( UiVertex **vertexBuffer,
-										 GlyphVertex **textVertBuffer,
+	void Window::_fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
+										 GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Vector2 &parentCurrentScrollPos,
 										 const Ogre::Matrix3 &parentRot )

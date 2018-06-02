@@ -7,7 +7,7 @@
 
 namespace Ogre
 {
-	class _OgreExport CompositorPassCrystalGuiDef : public CompositorPassDef
+	class CompositorPassCrystalGuiDef : public CompositorPassDef
 	{
 	public:
 		CompositorPassCrystalGuiDef( CompositorTargetDef *parentTargetDef ) :

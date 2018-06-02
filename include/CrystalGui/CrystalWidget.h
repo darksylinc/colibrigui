@@ -258,9 +258,9 @@ namespace Crystal
 			Derived orientation of m_parent
 		*/
 		virtual void _fillBuffersAndCommands( UiVertex * crystalgui_nonnull * crystalgui_nonnull
-											  vertexBuffer,
+											  RESTRICT_ALIAS vertexBuffer,
 											  GlyphVertex * crystalgui_nonnull * crystalgui_nonnull
-											  textVertBuffer,
+											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
 											  const Ogre::Matrix3 &parentRot );
