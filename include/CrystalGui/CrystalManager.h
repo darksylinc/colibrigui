@@ -216,6 +216,9 @@ namespace Crystal
 	#pragma clang diagnostic pop
 #endif
 	};
+
+	template <>
+	Label * crystalgui_nonnull CrystalManager::createWidget<Label>( Widget * crystalgui_nonnull parent );
 }
 
 CRYSTALGUI_ASSUME_NONNULL_END
