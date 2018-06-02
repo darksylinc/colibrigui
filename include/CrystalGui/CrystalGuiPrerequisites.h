@@ -23,6 +23,7 @@
 #endif
 
 #include <stdint.h>
+#include "math_round.h"
 
 CRYSTALGUI_ASSUME_NONNULL_BEGIN
 

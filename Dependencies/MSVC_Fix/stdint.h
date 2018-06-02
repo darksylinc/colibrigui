@@ -1,5 +1,8 @@
 /* stdint.h standard header */
 #pragma once
+
+#ifndef _MSC_STDINT_H_
+#define _MSC_STDINT_H_
 #ifndef _STDINT
 #define _STDINT
 #ifndef RC_INVOKED
@@ -117,8 +120,8 @@ typedef unsigned long long uintmax_t;
 #define SIG_ATOMIC_MIN   INT32_MIN
 #define SIG_ATOMIC_MAX   INT32_MAX
 
-#define WCHAR_MIN        0x0000
-#define WCHAR_MAX        0xffff
+//#define WCHAR_MIN        0x0000
+//#define WCHAR_MAX        0xffff
 
 #define WINT_MIN         0x0000
 #define WINT_MAX         0xffff
@@ -137,6 +140,7 @@ typedef unsigned long long uintmax_t;
 #define UINTMAX_C(x) UINT64_C(x)
 #endif /* RC_INVOKED */
 #endif /* _STDINT */
+#endif /* _MSC_STDINT_H_ */
 
 /*
  * Copyright (c) 1992-2012 by P.J. Plauger.  ALL RIGHTS RESERVED.

@@ -30,6 +30,11 @@ include_directories( ${ZLIB_INCLUDE_DIRS} )
 include_directories( ${HARFBUZZ_INCLUDE_DIRS} )
 include_directories( ${FREETYPE_INCLUDE_DIRS} )
 
+include_directories( "./Dependencies/MSVC_Fix/2012" )
+if( MSVC90 )
+	include_directories( "./Dependencies/MSVC_Fix" )
+endif()
+
 add_recursive( ./src SOURCES )
 add_recursive( ./include HEADERS )
 

@@ -3,8 +3,8 @@
 @property( crystal_text )
 	@piece( custom_VStoPS )
 		float2 uvText;
-		flat uint glyphOffsetStart;
-		flat uint pixelsPerRow;
+		NO_INTERPOLATION_PREFIX uint glyphOffsetStart	NO_INTERPOLATION_SUFFIX;
+		NO_INTERPOLATION_PREFIX uint pixelsPerRow		NO_INTERPOLATION_SUFFIX;
 	@end
 @end
 

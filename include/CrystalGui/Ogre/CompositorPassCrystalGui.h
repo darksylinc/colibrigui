@@ -18,7 +18,7 @@ namespace Ogre
 	@version
 		1.0
 	*/
-	class _OgreExport CompositorPassCrystalGui : public CompositorPass
+	class CompositorPassCrystalGui : public CompositorPass
 	{
 	protected:
 		SceneManager    *mSceneManager;

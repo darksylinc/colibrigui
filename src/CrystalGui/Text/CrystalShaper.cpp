@@ -208,7 +208,7 @@ namespace Crystal
 				U16_GET_UNSAFE( utf16Str, cluster, utf32Char );
 				UErrorCode ignoredError = U_ZERO_ERROR;
 				UScriptCode scriptCode = uscript_getScript( utf32Char, &ignoredError );
-				shapedGlyph.isWordBreaker |= uscript_breaksBetweenLetters( scriptCode );
+				shapedGlyph.isWordBreaker |= uscript_breaksBetweenLetters( scriptCode ) != 0;
 			}
 			shapedGlyph.isTab = utf16Str[cluster] == L'\t';
 			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;

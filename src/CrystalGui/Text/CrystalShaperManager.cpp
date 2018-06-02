@@ -239,8 +239,8 @@ namespace Crystal
 		CachedGlyph newGlyph;
 		newGlyph.codepoint	= codepoint;
 		newGlyph.ptSize		= ptSize;
-		newGlyph.bearingX	= slot->bitmap_left;
-		newGlyph.bearingY	= slot->bitmap_top;
+		newGlyph.bearingX	= static_cast<float>( slot->bitmap_left );
+		newGlyph.bearingY	= static_cast<float>( slot->bitmap_top );
 		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
 		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
 		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
@@ -467,7 +467,7 @@ namespace Crystal
 		UnicodeString uniStr( false, ubidi_getText( m_bidi ), ubidi_getLength( m_bidi ) );
 
 		const int32_t numBlocks = ubidi_countRuns( m_bidi, &errorCode );
-		for( size_t i=0; i<numBlocks; ++i )
+		for( int32_t i=0; i<numBlocks; ++i )
 		{
 			int32_t logicalStart, length;
 			UBiDiDirection dir = ubidi_getVisualRun( m_bidi, i, &logicalStart, &length );
@@ -488,7 +488,11 @@ namespace Crystal
 			/*else if( retVal != dir )
 				retVal = UBIDI_MIXED;*/
 
+#if U_SIZEOF_WCHAR_T == 2
+			const uint16_t *utf16Str = reinterpret_cast<const uint16_t*>( temp.getBuffer() );
+#else
 			const uint16_t *utf16Str = temp.getBuffer();
+#endif
 			shaper->setFontSize26d6( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx, outShapes );
 		}
