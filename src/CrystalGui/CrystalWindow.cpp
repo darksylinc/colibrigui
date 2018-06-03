@@ -366,7 +366,7 @@ namespace Crystal
 		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
 		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
 
-		while( itor != end && !retVal.widget )
+		while( itor != end )
 		{
 			Widget *widget = *itor;
 			if( widget->isNavigable() &&

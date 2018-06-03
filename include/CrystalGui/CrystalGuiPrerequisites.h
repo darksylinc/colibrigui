@@ -203,7 +203,7 @@ namespace Crystal
 	{
 		enum VertReadingDir
 		{
-			/// Always obey HorizReadingDir & TextHorizAlignment
+			/// Always obey HorizReadingDir & TextHorizAlignment (Default)
 			Disabled,
 			/// When default language is not CJK, same as Disabled
 			/// When default language is CJK, same aligns top to bottom, newlines right to left
