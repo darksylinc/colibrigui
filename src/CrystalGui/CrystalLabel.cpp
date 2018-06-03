@@ -31,6 +31,8 @@ namespace Crystal
 		m_vertAlignment( TextVertAlignment::Natural ),
 		m_vertReadingDir( VertReadingDir::Disabled )
 	{
+		setVao( m_manager->getTextVao() );
+
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		for( size_t i=0; i<States::NumStates; ++i )
 		{

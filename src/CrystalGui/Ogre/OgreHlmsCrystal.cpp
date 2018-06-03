@@ -89,12 +89,17 @@ namespace Ogre
 	{
 		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry( renderableHash, passCache,
 																	 finalHash, queuedRenderable );
+
+		if( mShaderProfile == "hlsl" || mShaderProfile == "metal" )
+			return retVal; //D3D embeds the texture slots in the shader.
+
 		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 		if( getProperty( "crystal_text" ) )
 		{
 			psParams->setNamedConstant( "glyphAtlas", 3 );
 			mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
 		}
+
 		return retVal;
 	}
 	//-----------------------------------------------------------------------------------
@@ -267,7 +272,7 @@ namespace Ogre
                 if( datablock->mSamplersDescSet )
                 {
                     //Bind samplers
-					size_t texUnit = mTexUnitSlotStart;
+					size_t texUnit = mSamplerUnitSlotStart;
                     *commandBuffer->addCommand<CbSamplers>() =
                             CbSamplers( texUnit, datablock->mSamplersDescSet );
                     mLastDescSampler = datablock->mSamplersDescSet;

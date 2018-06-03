@@ -4,7 +4,6 @@
 	in float4 normal;
 
 	@property( crystal_text )
-		in uint2 uvText;
 		in uint tangent;
 		in uint2 blendIndices;
 	@end

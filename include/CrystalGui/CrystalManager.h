@@ -108,6 +108,7 @@ namespace Crystal
 		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
+		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
 		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
 
 		const Ogre::Vector2& getMouseCursorPosNdc() const			{ return m_mouseCursorPosNdc; }
