@@ -38,7 +38,7 @@ namespace Crystal
 		if( m_label )
 		{
 			if( m_label->getSize() != m_size )
-				m_label->setSize( m_size );
+				m_label->setSize( getSizeAfterClipping() );
 		}
 		Renderable::setTransformDirty();
 	}

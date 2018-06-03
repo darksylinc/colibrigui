@@ -32,7 +32,9 @@ namespace Crystal
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
 		m_derivedOrientation( Ogre::Matrix3::IDENTITY ),
 		m_clipBorderTL( Ogre::Vector2::ZERO ),
-		m_clipBorderBR( Ogre::Vector2::ZERO )
+		m_clipBorderBR( Ogre::Vector2::ZERO ),
+		m_accumMinClipTL( -1.0f ),
+		m_accumMaxClipBR( 1.0f )
   #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 	,	m_transformOutOfDate( false ),
 		m_destructionStarted( false )
@@ -79,6 +81,10 @@ namespace Crystal
 		CRYSTAL_ASSERT_MEDIUM( itor != m_children.end() || m_destructionStarted );
 
 		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::_initialize()
+	{
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_destroy()

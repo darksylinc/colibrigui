@@ -95,6 +95,11 @@ namespace Crystal
 		Ogre::Vector2	m_clipBorderTL;
 		Ogre::Vector2	m_clipBorderBR;
 
+		/// Without m_accumMinClipTL & m_accumMaxClipBR, 'this' will be visible
+		/// even if our parent is partially obscured by our parent's parent
+		Ogre::Vector2	m_accumMinClipTL;
+		Ogre::Vector2	m_accumMaxClipBR;
+
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		bool	m_transformOutOfDate;
 		bool	m_destructionStarted;
@@ -122,6 +127,7 @@ namespace Crystal
 		Widget( CrystalManager *manager );
 		virtual ~Widget();
 
+		virtual void _initialize();
 		virtual void _destroy();
 
 		/// Do not call directly. 'this' cannot be a Window

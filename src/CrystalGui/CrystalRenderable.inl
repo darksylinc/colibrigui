@@ -130,6 +130,9 @@ namespace Crystal
 		{
 			parentDerivedTL = -1.0f;
 			parentDerivedBR = 1.0f;
+
+			m_accumMinClipTL = -1.0f;
+			m_accumMaxClipBR = 1.0f;
 		}
 		else
 		{
@@ -137,6 +140,11 @@ namespace Crystal
 							  m_parent->m_clipBorderTL * invCanvasSize2x;
 			parentDerivedBR = m_parent->m_derivedBottomRight -
 							  m_parent->m_clipBorderBR * invCanvasSize2x;
+
+			parentDerivedTL.makeCeil( m_parent->m_accumMinClipTL );
+			parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );
+			m_accumMinClipTL = parentDerivedTL;
+			m_accumMaxClipBR = parentDerivedBR;
 		}
 
 		Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);

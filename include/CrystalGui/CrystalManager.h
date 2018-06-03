@@ -201,6 +201,7 @@ namespace Crystal
 			T *retVal = new T( this );
 
 			retVal->_setParent( parent );
+			retVal->_initialize();
 
 			++m_numWidgets;
 
