@@ -96,7 +96,7 @@ namespace Ogre
 		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 		if( getProperty( "crystal_text" ) )
 		{
-			psParams->setNamedConstant( "glyphAtlas", 3 );
+			psParams->setNamedConstant( "glyphAtlas", 2 );
 			mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
 		}
 
@@ -173,7 +173,7 @@ namespace Ogre
 			if( mGlyphAtlasBuffer )
 			{
 				*commandBuffer->addCommand<CbShaderBuffer>() =
-						CbShaderBuffer( PixelShader, 3, mGlyphAtlasBuffer, 0, 0 );
+						CbShaderBuffer( PixelShader, 2, mGlyphAtlasBuffer, 0, 0 );
 			}
 
             rebindTexBuffer( commandBuffer );

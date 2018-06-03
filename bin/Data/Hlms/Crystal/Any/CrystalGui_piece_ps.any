@@ -2,13 +2,13 @@
 
 @piece( custom_ps_uniformDeclaration )
 	@property( syntax == glsl )
-		/*layout(binding = 3) */uniform samplerBuffer glyphAtlas;
+		/*layout(binding = 2) */uniform samplerBuffer glyphAtlas;
 	@end
 	@property( syntax == hlsl )
-		Buffer<unorm float> glyphAtlas : register(t3);
+		Buffer<unorm float> glyphAtlas : register(t2);
 	@end
 	@property( syntax == metal )
-		, device const uchar *glyphAtlas [[buffer(TEX_SLOT_START+3)]]
+		, device const uchar *glyphAtlas [[buffer(TEX_SLOT_START+2)]]
 	@end
 @end
 
