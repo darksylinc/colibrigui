@@ -81,5 +81,14 @@
             "highlighted_button_and_cursor" : "ButtonSkinHighlightedButtonAndCursor",
             "pressed" : "ButtonSkinPressed"
         }
+    },
+
+    "default_skin_packs" :
+    {
+        "Window"                : "ButtonSkin",
+        "Button"                : "ButtonSkin",
+        "Spinner"               : "ButtonSkin",
+        "SpinnerBtnDecrement"   : "ButtonSkin",
+        "SpinnerBtnIncrement"   : "ButtonSkin"
     }
 }

@@ -101,7 +101,16 @@ namespace Crystal
 		Renderable( CrystalManager *manager );
 
 		void setSkin( Ogre::IdString skinName, States::States forState );
+
 		void setSkinPack( Ogre::IdString skinPackName );
+
+		/** Directly set the skins via pointers instead of requiring map lookups.
+		@param skinInfo
+			Must not be null.
+			skinInfo[i] can be null
+			skinInfo must be able to hold States::NumStates elements
+		*/
+		void _setSkinPack( SkinInfo const * crystalgui_nonnull const * crystalgui_nullable skinInfos );
 
 		virtual void setState( States::States state, bool smartHighlight=true );
 

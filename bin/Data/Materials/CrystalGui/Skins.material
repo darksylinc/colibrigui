@@ -4,6 +4,6 @@ hlms ButtonSkin unlit
 }
 hlms ButtonSkinBrighter unlit
 {
-    diffuse 2 2 2 2
+    diffuse 2 2 2 1
     diffuse_map ButtonSkin.png
 }

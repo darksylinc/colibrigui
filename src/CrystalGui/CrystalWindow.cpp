@@ -34,6 +34,12 @@ namespace Crystal
 		return parentWindow;
 	}
 	//-------------------------------------------------------------------------
+	void Window::_initialize()
+	{
+		_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::Window ) );
+		Renderable::_initialize();
+	}
+	//-------------------------------------------------------------------------
 	void Window::_destroy()
 	{
 		m_destructionStarted = true;

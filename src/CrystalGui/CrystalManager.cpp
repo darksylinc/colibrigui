@@ -46,6 +46,8 @@ namespace Crystal
 		m_skinManager( 0 ),
 		m_shaperManager( 0 )
 	{
+		memset( m_defaultSkins, 0, sizeof(m_defaultSkins) );
+
 		setLogListener( logListener );
 
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ),
@@ -146,6 +148,40 @@ namespace Crystal
 			}
 			m_shaperManager->setOgre( hlmsCrystal, vaoManager );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setDefaultSkins(
+			std::string defaultSkinPacks[SkinWidgetTypes::NumSkinWidgetTypes] )
+	{
+		const SkinInfoMap &skins = m_skinManager->getSkins();
+		const SkinPackMap &skinPacks = m_skinManager->getSkinPacks();
+
+		for( size_t widgetType=0; widgetType<SkinWidgetTypes::NumSkinWidgetTypes; ++widgetType )
+		{
+			const std::string &skinName = defaultSkinPacks[widgetType];
+
+			if( !skinName.empty() )
+			{
+				SkinPackMap::const_iterator itor = skinPacks.find( skinName );
+				if( itor != skinPacks.end() )
+				{
+					const SkinPack &pack = itor->second;
+
+					for( size_t i=0; i<States::NumStates; ++i )
+					{
+						SkinInfoMap::const_iterator itSkinInfo = skins.find( pack.skinInfo[i] );
+						if( itSkinInfo != skins.end() )
+							m_defaultSkins[widgetType][i] = &itSkinInfo->second;
+					}
+				}
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	SkinInfo const * crystalgui_nonnull const * crystalgui_nullable CrystalManager::getDefaultSkin(
+			SkinWidgetTypes::SkinWidgetTypes widgetType ) const
+	{
+		return m_defaultSkins[widgetType];
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize,
@@ -412,6 +448,8 @@ namespace Crystal
 			parent->m_childWindows.push_back( retVal );
 			parent->_setParent( retVal );
 		}
+
+		retVal->_initialize();
 
 		retVal->setWindowNavigationDirty();
 		retVal->setTransformDirty();

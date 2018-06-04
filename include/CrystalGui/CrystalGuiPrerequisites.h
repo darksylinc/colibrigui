@@ -38,6 +38,7 @@ namespace Crystal
 	struct ShapedGlyph;
 	class Shaper;
 	class ShaperManager;
+	struct SkinInfo;
 	class SkinManager;
 	class Widget;
 	class Window;
@@ -264,6 +265,20 @@ namespace Crystal
 			/// depend on system files to do it. Both solutions go against CrystalGui's
 			/// philosophy
 			/// WordWrap
+		};
+	}
+
+	namespace SkinWidgetTypes
+	{
+		/// KEEP THIS IN SYNC WITH SkinManager::loadDefaultSkinPacks !!!
+		enum SkinWidgetTypes
+		{
+			Window,
+			Button,
+			Spinner,
+			SpinnerBtnDecrement,
+			SpinnerBtnIncrement,
+			NumSkinWidgetTypes
 		};
 	}
 }

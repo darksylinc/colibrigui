@@ -12,6 +12,12 @@ namespace Crystal
 		m_navigable = true;
 	}
 	//-------------------------------------------------------------------------
+	void Button::_initialize()
+	{
+		_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::Button ) );
+		Renderable::_initialize();
+	}
+	//-------------------------------------------------------------------------
 	void Button::_destroy()
 	{
 		Renderable::_destroy();

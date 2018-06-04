@@ -75,6 +75,9 @@ namespace Crystal
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
 
+		SkinInfo const * crystalgui_nullable
+				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
+
 		void updateWidgetsFocusedByCursor();
 		void updateAllDerivedTransforms();
 
@@ -110,6 +113,23 @@ namespace Crystal
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
 		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
+
+		/**	Sets the default skins to be used when creating a new widget.
+			Usage:
+			@code
+				std::string skins[SkinWidgetTypes::NumSkinWidgetTypes];
+				skins[SkinWidgetTypes::Button] = "MyDefaultButtonSkins";
+				manager->setDefaultSkins( skins );
+			@endcode
+		@param defaultSkinPacks
+			Array of skin pack names to use. It's the same as calling
+			widget->setSkinPack( "MyDefaultButtonSkins" );
+			Empty string means none (you'll have to assign the skin yourself)
+		*/
+		void setDefaultSkins( std::string defaultSkinPacks
+							  [crystalgui_nonnull SkinWidgetTypes::NumSkinWidgetTypes] );
+		SkinInfo const * crystalgui_nonnull const * crystalgui_nullable
+				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
 		const Ogre::Vector2& getMouseCursorPosNdc() const			{ return m_mouseCursorPosNdc; }
 

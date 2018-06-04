@@ -395,6 +395,7 @@ namespace Crystal
 				}
 				else/* if( shapedGlyph.isNewline )*/
 				{
+					shapedGlyph.caretPos = caretPos;
 					largestHeight = findLineMaxHeight( itor + 1u, state );
 
 					if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
@@ -503,7 +504,15 @@ namespace Crystal
 			++itor;
 		}
 
-		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
+		minTopLeft.x = Ogre::Math::Abs( minTopLeft.x );
+		minTopLeft.y = Ogre::Math::Abs( minTopLeft.y );
+		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
+		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
+
+		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		//that there is equal distance from m_position to the first glyph, and the last glyph to
+		//m_position + m_size
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 		{
@@ -620,7 +629,15 @@ namespace Crystal
 			}
 		}
 
-		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
+		minTopLeft.x = Ogre::Math::Abs( minTopLeft.x );
+		minTopLeft.y = Ogre::Math::Abs( minTopLeft.y );
+		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
+		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
+
+		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		//that there is equal distance from m_position to the first glyph, and the last glyph to
+		//m_position + m_size
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left ||
 			m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
@@ -1177,7 +1194,15 @@ namespace Crystal
 			++itor;
 		}
 
-		const Ogre::Vector2 maxWidthHeight( maxBottomRight - minTopLeft );
+		minTopLeft.x = Ogre::Math::Abs( minTopLeft.x );
+		minTopLeft.y = Ogre::Math::Abs( minTopLeft.y );
+		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
+		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
+
+		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		//that there is equal distance from m_position to the first glyph, and the last glyph to
+		//m_position + m_size
+		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( maxWidthHeight.x < 0 || maxWidthHeight.y < 0 )
 			return;

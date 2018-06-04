@@ -88,6 +88,20 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::_setSkinPack( SkinInfo const * crystalgui_nonnull
+								   const * crystalgui_nullable skinInfos )
+	{
+		for( size_t i=0; i<States::NumStates; ++i )
+		{
+			if( skinInfos[i] )
+			{
+				m_stateInformation[i] = skinInfos[i]->stateInfo;
+				if( i == m_currentState )
+					setDatablock( m_stateInformation[i].materialName );
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Renderable::setState( States::States state, bool smartHighlight )
 	{
 		Widget::setState( state, smartHighlight );

@@ -14,6 +14,7 @@ namespace Crystal
 	public:
 		Button( CrystalManager *manager );
 
+		virtual void _initialize();
 		virtual void _destroy();
 
 		Label* getLabel();

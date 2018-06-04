@@ -56,6 +56,7 @@ namespace Crystal
 
 		void loadSkins( const rapidjson::Value &skinsValue, const char *filename );
 		void loadSkinPacks( const rapidjson::Value &packsValue, const char *filename );
+		void loadDefaultSkinPacks( const rapidjson::Value &packsValue, const char *filename );
 
 	public:
 		SkinManager( CrystalManager *crystalManager );

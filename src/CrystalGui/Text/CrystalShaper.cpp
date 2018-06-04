@@ -199,6 +199,11 @@ namespace Crystal
 										utf16Str[cluster] == L'.'	||
 										utf16Str[cluster] == L';'	||
 										utf16Str[cluster] == L',';
+
+			//Ensure whitespace has zero offset, otherwise it messes up Right & Bottom alignment
+			if( utf16Str[cluster] == L' ' || utf16Str[cluster] == L'\t' )
+				shapedGlyph.offset = Ogre::Vector2::ZERO;
+
 			{
 				//Ask ICU if this character correspond to a language we can
 				//break by single letters (e.g. CJK characters, Thai)

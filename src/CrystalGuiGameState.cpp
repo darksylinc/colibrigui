@@ -30,6 +30,7 @@
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalButton.h"
 #include "CrystalGui/CrystalLabel.h"
+#include "CrystalGui/CrystalSpinner.h"
 
 using namespace Demo;
 
@@ -40,6 +41,7 @@ namespace Demo
 	Crystal::Window *mainWindow = 0;
 	Crystal::Button *button0 = 0;
 	Crystal::Button *button1 = 0;
+	Crystal::Spinner *spinner0 = 0;
 
     CrystalGuiGameState::CrystalGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -61,10 +63,20 @@ namespace Demo
 
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
-		mainWindow->setSkinPack( "ButtonSkin" );
 
 		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
 		mainWindow->setClipBordersMatchSkin();
+
+		/*button0 = crystalManager->createWidget<Crystal::Button>( mainWindow );
+		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );
+		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+
+		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
+		label->setText( "||\n||" );
+		label->setTextVertAlignment( Crystal::TextVertAlignment::Center );
+		label->setVertReadingDir( Crystal::VertReadingDir::ForceTTB );
+		label->sizeToFit( Crystal::States::Idle );
+		button0->setSize( label->getSize() );*/
 
 		button0 = crystalManager->createWidget<Crystal::Button>( mainWindow );
 		button0->setSkinPack( "ButtonSkin" );
@@ -82,6 +94,11 @@ namespace Demo
 		button1->setSkinPack( "ButtonSkin" );
 		button1->setTopLeft( Ogre::Vector2( 0.1 + 0.25, 0.1 + 0.1 + 0.25 + 0.1 ) );
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+
+		/*spinner0 = crystalManager->createWidget<Crystal::Spinner>( mainWindow );
+		spinner0->setSkinPack( "ButtonSkin" );
+		spinner0->setTopLeft( Ogre::Vector2::ZERO );
+		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
 
 #if 1
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );

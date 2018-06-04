@@ -353,6 +353,34 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void SkinManager::loadDefaultSkinPacks( const rapidjson::Value &packsValue, const char *filename )
+	{
+		const char *c_strSkinWidgetTypes[SkinWidgetTypes::NumSkinWidgetTypes] =
+		{
+			"Window",
+			"Button",
+			"Spinner",
+			"SpinnerBtnDecrement",
+			"SpinnerBtnIncrement"
+		};
+
+		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];
+
+		CRYSTAL_STATIC_ASSERT( (sizeof( c_strSkinWidgetTypes ) / sizeof( c_strSkinWidgetTypes[0] )) ==
+							   SkinWidgetTypes::NumSkinWidgetTypes );
+
+		for( size_t i=0; i<SkinWidgetTypes::NumSkinWidgetTypes; ++i )
+		{
+			rapidjson::Value::ConstMemberIterator itTmp;
+
+			itTmp = packsValue.FindMember( c_strSkinWidgetTypes[i] );
+			if( itTmp != packsValue.MemberEnd() && itTmp->value.IsString() )
+				defaultSkins[i] = itTmp->value.GetString();
+		}
+
+		m_crystalManager->setDefaultSkins( defaultSkins );
+	}
+	//-------------------------------------------------------------------------
 	void SkinManager::loadSkins( const char *fullPath )
 	{
 		LogListener *log = m_crystalManager->getLogListener();
@@ -421,6 +449,10 @@ namespace Crystal
 		itTmp = d.FindMember( "skin_packs" );
 		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
 			loadSkinPacks( itTmp->value, filename );
+
+		itTmp = d.FindMember( "default_skin_packs" );
+		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
+			loadDefaultSkinPacks( itTmp->value, filename );
 	}
 }
 

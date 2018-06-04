@@ -49,6 +49,7 @@ namespace Crystal
 		Window( CrystalManager *manager );
 		virtual ~Window();
 
+		virtual void _initialize();
 		virtual void _destroy();
 		virtual bool isWindow() const	{ return true; }
 
