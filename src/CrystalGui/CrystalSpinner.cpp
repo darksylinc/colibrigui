@@ -53,6 +53,9 @@ namespace Crystal
 		updateOptionLabel();
 
 		Renderable::_initialize();
+
+		m_decrement->addActionListener( this, ActionMask::PrimaryActionPerform );
+		m_increment->addActionListener( this, ActionMask::PrimaryActionPerform );
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::_destroy()
@@ -150,5 +153,22 @@ namespace Crystal
 		updateOptionLabel();
 
 		Renderable::setTransformDirty();
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::notifyWidgetAction( Widget *widget, Action::Action action )
+	{
+		if( action == Action::PrimaryActionPerform )
+		{
+			if( widget == m_decrement )
+			{
+				--m_currentValue;
+				updateOptionLabel();
+			}
+			else if( widget == m_increment )
+			{
+				++m_currentValue;
+				updateOptionLabel();
+			}
+		}
 	}
 }

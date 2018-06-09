@@ -237,18 +237,27 @@ namespace Crystal
 			{
 				if( !m_mouseCursorButtonDown || !focusedPair.widget->isPressable() )
 				{
-					focusedPair.widget->setState( States::HighlightedCursor );
-					focusedPair.widget->callActionListeners( Action::Highlighted );
-
 					if( m_mouseCursorButtonDown )
+					{
+						//This call may end up calling focusedPair.widget->getParent()->setState()
+						//which would override ours, thus it needs to be called first
 						overrideKeyboardFocusWith( focusedPair );
+					}
+
+					if( focusedPair.widget->isPressable() )
+						focusedPair.widget->setState( States::HighlightedCursor );
+					else
+						focusedPair.widget->setState( States::HighlightedButtonAndCursor );
+					focusedPair.widget->callActionListeners( Action::Highlighted );
 				}
 				else
 				{
+					//This call may end up calling focusedPair.widget->getParent()->setState()
+					//which would override ours, thus it needs to be called first
+					overrideKeyboardFocusWith( focusedPair );
+
 					focusedPair.widget->setState( States::Pressed );
 					focusedPair.widget->callActionListeners( Action::Hold );
-
-					overrideKeyboardFocusWith( focusedPair );
 				}
 			}
 		}
@@ -281,6 +290,10 @@ namespace Crystal
 	{
 		if( m_cursorFocusedPair.widget )
 		{
+			//This call may end up calling m_cursorFocusedPair.widget->getParent()->setState(),
+			//which would override ours, thus it needs to be called first
+			overrideKeyboardFocusWith( m_cursorFocusedPair );
+
 			if( m_cursorFocusedPair.widget->isPressable() )
 			{
 				m_mouseCursorButtonDown = true;
@@ -288,8 +301,6 @@ namespace Crystal
 				m_cursorFocusedPair.widget->setState( States::Pressed );
 				m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
 			}
-
-			overrideKeyboardFocusWith( m_cursorFocusedPair );
 		}
 		else if( m_primaryButtonDown )
 		{
@@ -556,6 +567,8 @@ namespace Crystal
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &_focusedPair )
 	{
+		const Widget *cursorWidget = _focusedPair.widget;
+
 		FocusPair focusedPair = _focusedPair;
 		focusedPair.widget = focusedPair.widget->getFirstKeyboardNavigableParent();
 
@@ -567,6 +580,15 @@ namespace Crystal
 		}
 		m_keyboardFocusedPair = focusedPair;
 		m_primaryButtonDown = false;
+
+		//If cursor clicked on a widget which is not navigable by the keyboard, then the cursor
+		//is setting a different state for that widget. We need to switch the keyboard one
+		//to highlighted
+		if( focusedPair.widget != cursorWidget )
+		{
+			m_keyboardFocusedPair.widget->setState( States::HighlightedButton, false );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+		}
 	}
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideCursorFocusWith( const FocusPair &focusedPair )

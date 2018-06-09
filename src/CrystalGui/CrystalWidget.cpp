@@ -175,7 +175,7 @@ namespace Crystal
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::setPressable( bool pressable )
+	void Widget::setPressable( bool pressable )
 	{
 		m_pressable = pressable;
 	}
@@ -303,7 +303,7 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Widget::addListener( WidgetActionListener *listener, uint32_t actionMask )
+	void Widget::addActionListener( WidgetActionListener *listener, uint32_t actionMask )
 	{
 		CRYSTAL_ASSERT( actionMask != 0 );
 		WidgetActionListenerRecordVec::iterator itor = m_actionListeners.begin();
@@ -318,7 +318,7 @@ namespace Crystal
 			itor->actionMask |= actionMask;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::removeListener( WidgetActionListener *listener, uint32_t actionMask )
+	void Widget::removeActionListener( WidgetActionListener *listener, uint32_t actionMask )
 	{
 		WidgetActionListenerRecordVec::iterator itor = m_actionListeners.begin();
 		WidgetActionListenerRecordVec::iterator end  = m_actionListeners.end();
@@ -351,7 +351,7 @@ namespace Crystal
 		while( itor != end )
 		{
 			if( itor->actionMask & actionMask )
-				itor->listener->notifyWidgetAction( action );
+				itor->listener->notifyWidgetAction( this, action );
 			++itor;
 		}
 	}

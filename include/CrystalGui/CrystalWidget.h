@@ -18,7 +18,7 @@ namespace Crystal
 	class WidgetActionListener
 	{
 	public:
-		virtual void notifyWidgetAction( Action::Action action ) = 0;
+		virtual void notifyWidgetAction( Widget *widget, Action::Action action ) = 0;
 	};
 
 	class WidgetListener
@@ -145,7 +145,7 @@ namespace Crystal
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 
-		bool setPressable( bool pressable );
+		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
@@ -189,7 +189,7 @@ namespace Crystal
 			See ActionMask::ActionMask. The mask defines what events will be notified.
 			Cannot be 0.
 		*/
-		void addListener( WidgetActionListener *listener, uint32_t actionMask );
+		void addActionListener( WidgetActionListener *listener, uint32_t actionMask=~0u );
 
 		/** Remove a registered listener. Does nothing but issue a warning if listener does
 			not exist.
@@ -200,7 +200,7 @@ namespace Crystal
 		@param actionMask
 			See ActionMask::ActionMask. The mask to remove.
 		*/
-		void removeListener( WidgetActionListener *listener, uint32_t actionMask=~0u );
+		void removeActionListener( WidgetActionListener *listener, uint32_t actionMask=~0u );
 
 		void callActionListeners( Action::Action action );
 

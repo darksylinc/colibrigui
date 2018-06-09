@@ -25,7 +25,7 @@ namespace Crystal
 			without dealing with floating point precision issues when decrementing, incrementing
 			and comparing.
 	*/
-	class Spinner : public Renderable
+	class Spinner : public Renderable, public WidgetActionListener
 	{
 		/// Displays the currently selected option
 		Label * crystalgui_nullable m_optionLabel;
@@ -56,6 +56,8 @@ namespace Crystal
 		Label* getLabel();
 
 		virtual void setTransformDirty();
+
+		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
 	};
 }
 
