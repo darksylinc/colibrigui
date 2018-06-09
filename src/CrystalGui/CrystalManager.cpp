@@ -244,7 +244,7 @@ namespace Crystal
 						overrideKeyboardFocusWith( focusedPair );
 					}
 
-					if( focusedPair.widget->isPressable() )
+					if( !m_mouseCursorButtonDown )
 						focusedPair.widget->setState( States::HighlightedCursor );
 					else
 						focusedPair.widget->setState( States::HighlightedButtonAndCursor );
@@ -300,6 +300,11 @@ namespace Crystal
 
 				m_cursorFocusedPair.widget->setState( States::Pressed );
 				m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
+			}
+			else
+			{
+				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
+				m_cursorFocusedPair.widget->callActionListeners( Action::Highlighted );
 			}
 		}
 		else if( m_primaryButtonDown )
