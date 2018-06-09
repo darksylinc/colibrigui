@@ -14,12 +14,12 @@ namespace Crystal
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_nextScroll( Ogre::Vector2::ZERO ),
 		m_maxScroll( Ogre::Vector2::ZERO ),
-		m_allowsFocusWithChildren( true ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
 		m_childrenNavigationDirty( false )
 	{
+		m_childrenClickable = true;
 	}
 	//-------------------------------------------------------------------------
 	Window::~Window()
@@ -166,7 +166,7 @@ namespace Crystal
 												exp2f( -15.0f * timeSinceLast ) );
 
 			const Ogre::Vector2& mouseCursorPosNdc = m_manager->getMouseCursorPosNdc();
-			if( this->intersects( mouseCursorPosNdc ) && m_allowsFocusWithChildren )
+			if( this->intersects( mouseCursorPosNdc ) )
 				cursorFocusDirty = true;
 		}
 		else
@@ -346,46 +346,5 @@ namespace Crystal
 	{
 		Renderable::_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
 											parentCurrentScrollPos, parentRot, m_currentScroll, true );
-	}
-	//-------------------------------------------------------------------------
-	FocusPair Window::setIdleCursorMoved( const Ogre::Vector2 &newPosNdc )
-	{
-		FocusPair retVal;
-
-		//The first window that our button is touching wins. We go in LIFO order.
-		WindowVec::const_reverse_iterator ritor = m_childWindows.rbegin();
-		WindowVec::const_reverse_iterator rend  = m_childWindows.rend();
-
-		while( ritor != rend && !retVal.widget )
-		{
-			retVal = (*ritor)->setIdleCursorMoved( newPosNdc );
-			++ritor;
-		}
-
-		//One of the child windows is being touched by the cursor. We're done.
-		if( retVal.widget )
-			return retVal;
-
-		if( !this->intersects( newPosNdc ) || !m_allowsFocusWithChildren )
-			return FocusPair();
-
-		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
-		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
-
-		while( itor != end )
-		{
-			Widget *widget = *itor;
-			if( widget->isNavigable() &&
-				this->intersectsChild( widget, m_currentScroll ) &&
-				widget->intersects( newPosNdc ) )
-			{
-				retVal.widget = widget;
-			}
-			++itor;
-		}
-
-		retVal.window = this;
-
-		return retVal;
 	}
 }

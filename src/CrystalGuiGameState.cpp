@@ -95,12 +95,12 @@ namespace Demo
 		button1->setTopLeft( Ogre::Vector2( 0.1 + 0.25, 0.1 + 0.1 + 0.25 + 0.1 ) );
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
-		/*spinner0 = crystalManager->createWidget<Crystal::Spinner>( mainWindow );
+		spinner0 = crystalManager->createWidget<Crystal::Spinner>( mainWindow );
 		spinner0->setSkinPack( "ButtonSkin" );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
+		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
-#if 1
+#if 0
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
 		label->setText( "The path of the righteous man is beset on all sides by the iniquities\n"
 						"of the selfish and the tyranny of evil men. Blessed is he who, in the\n"
@@ -157,7 +157,7 @@ namespace Demo
 		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
 
 #endif
-		mainWindow->sizeScrollToFit();
+		//mainWindow->sizeScrollToFit();
 
         TutorialGameState::createScene01();
     }

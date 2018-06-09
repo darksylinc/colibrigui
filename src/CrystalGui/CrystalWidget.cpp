@@ -23,7 +23,10 @@ namespace Crystal
 		m_numWidgets( 0 ),
 		m_manager( manager ),
 		m_hidden( false ),
-		m_navigable( false ),
+		m_clickable( false ),
+		m_keyboardNavigable( false ),
+		m_childrenClickable( false ),
+		m_pressable( true ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( manager->getCanvasSize() ),
@@ -172,6 +175,11 @@ namespace Crystal
 		setTransformDirty();
 	}
 	//-------------------------------------------------------------------------
+	bool Widget::setPressable( bool pressable )
+	{
+		m_pressable = pressable;
+	}
+	//-------------------------------------------------------------------------
 	Window * crystalgui_nullable Widget::getAsWindow()
 	{
 		if( isWindow() )
@@ -185,13 +193,23 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	Window* Widget::getFirstParentWindow()
 	{
-		if( isWindow() )
-		{
-			CRYSTAL_ASSERT( dynamic_cast<Window*>( this ) );
-			return static_cast<Window*>( this );
-		}
+		Widget *nextWidget = this;
 
-		return m_parent->getFirstParentWindow();
+		while( !nextWidget->isWindow() )
+			nextWidget = nextWidget->m_parent;
+
+		CRYSTAL_ASSERT_HIGH( dynamic_cast<Window*>( nextWidget ) );
+		return static_cast<Window*>( nextWidget );
+	}
+	//-------------------------------------------------------------------------
+	Widget * crystalgui_nullable Widget::getFirstKeyboardNavigableParent()
+	{
+		Widget *nextWidget = this;
+
+		while( !nextWidget->m_keyboardNavigable )
+			nextWidget = nextWidget->m_parent;
+
+		return nextWidget;
 	}
 	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getCurrentScroll() const
@@ -343,18 +361,23 @@ namespace Crystal
 		m_parent->setWidgetNavigationDirty();
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setNavigable( bool bNavigable )
+	void Widget::setKeyboardNavigable( bool bNavigable )
 	{
-		if( m_navigable != bNavigable )
+		if( m_keyboardNavigable != bNavigable )
 		{
-			m_navigable = bNavigable;
+			m_keyboardNavigable = bNavigable;
 			setWidgetNavigationDirty();
 		}
 	}
 	//-------------------------------------------------------------------------
-	bool Widget::isNavigable() const
+	bool Widget::isKeyboardNavigable() const
 	{
-		return m_navigable;
+		return m_keyboardNavigable;
+	}
+	//-------------------------------------------------------------------------
+	bool Widget::hasClickableChildren() const
+	{
+		return m_childrenClickable;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setNextWidget( Widget * crystalgui_nullable nextWidget,
@@ -416,6 +439,59 @@ namespace Crystal
 				  posNdc.y < m_derivedTopLeft.y ||
 				  posNdc.x > m_derivedBottomRight.x ||
 				  posNdc.y > m_derivedBottomRight.y );
+	}
+	//-------------------------------------------------------------------------
+	FocusPair Widget::_setIdleCursorMoved( const Ogre::Vector2 &newPosNdc )
+	{
+		FocusPair retVal;
+
+		//The first window that our button is touching wins. We go in LIFO order.
+		const size_t numWindows = m_children.size() - m_numWidgets;
+		WidgetVec::const_reverse_iterator ritor = m_children.rbegin();
+		WidgetVec::const_reverse_iterator rend  = m_children.rbegin() + numWindows;
+
+		while( ritor != rend && !retVal.widget )
+		{
+			retVal = (*ritor)->_setIdleCursorMoved( newPosNdc );
+			++ritor;
+		}
+
+		//One of the child windows is being touched by the cursor. We're done.
+		if( retVal.widget )
+			return retVal;
+
+		if( !this->intersects( newPosNdc ) )
+			return FocusPair();
+
+		Ogre::Vector2 currentScroll = getCurrentScroll();
+
+		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
+		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
+
+		while( itor != end )
+		{
+			Widget *widget = *itor;
+			if( (widget->m_clickable || widget->m_childrenClickable) &&
+				this->intersectsChild( widget, currentScroll ) &&
+				widget->intersects( newPosNdc ) )
+			{
+				if( widget->m_clickable )
+					retVal.widget = widget;
+
+				if( widget->m_childrenClickable )
+				{
+					FocusPair childFocusPair;
+					childFocusPair = widget->_setIdleCursorMoved( newPosNdc );
+					if( childFocusPair.widget )
+						retVal = childFocusPair;
+				}
+			}
+			++itor;
+		}
+
+		retVal.window = getFirstParentWindow();
+
+		return retVal;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )

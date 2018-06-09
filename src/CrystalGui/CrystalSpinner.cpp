@@ -26,23 +26,29 @@ namespace Crystal
 		m_valueLocationFraction( 0.8f, 0.5f ),
 		m_arrowButtonSize( -1 )
 	{
-		m_navigable = true;
+		m_clickable = true;
+		m_keyboardNavigable = true;
+		m_pressable = false;
+		m_childrenClickable = true;
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::_initialize()
 	{
 		this->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::Spinner ) );
 
-		m_optionLabel = m_manager->createWidget<Label>( this );
-		m_optionLabel->setSize( getSizeAfterClipping() );
-		m_optionLabel->setTextHorizAlignment( TextHorizAlignment::Left );
-		m_optionLabel->setTextVertAlignment( TextVertAlignment::Top );
-
 		m_decrement = m_manager->createWidget<Button>( this );
 		m_decrement->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SpinnerBtnDecrement ) );
 
 		m_increment = m_manager->createWidget<Button>( this );
 		m_increment->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SpinnerBtnIncrement ) );
+
+		m_optionLabel = m_manager->createWidget<Label>( this );
+		m_optionLabel->setSize( getSizeAfterClipping() );
+		m_optionLabel->setTextHorizAlignment( TextHorizAlignment::Center );
+		m_optionLabel->setTextVertAlignment( TextVertAlignment::Top );
+
+		m_decrement->setKeyboardNavigable( false );
+		m_increment->setKeyboardNavigable( false );
 
 		updateOptionLabel();
 
@@ -99,8 +105,7 @@ namespace Crystal
 			TODO_enable_increment;
 
 		Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
-		m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * (1.0f - m_valueLocationFraction.x),
-								  TextHorizAlignment::Left, TextVertAlignment::Top );
+		m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * (1.0f - m_valueLocationFraction.x) );
 		Ogre::Vector2 newCenter( sizeAfterClipping * m_valueLocationFraction );
 		m_optionLabel->setCenter( newCenter );
 
@@ -112,10 +117,10 @@ namespace Crystal
 		m_decrement->setSize( arrowButtonSize );
 		m_increment->setSize( arrowButtonSize );
 
-//		m_decrement->setTopLeft( m_optionLabel->getLocalTopLeft() - m_decrement->getSize() );
-//		m_decrement->setCenter( Ogre::Vector2( m_decrement->getCenter().x, m_optionLabel->getCenter().y ) );
-		m_decrement->setTopLeft( m_optionLabel->getLocalTopLeft() );
-		m_decrement->setSize( m_optionLabel->getSize() );
+		m_decrement->setTopLeft( m_optionLabel->getLocalTopLeft() - m_decrement->getSize() );
+		m_decrement->setCenter( Ogre::Vector2( m_decrement->getCenter().x, m_optionLabel->getCenter().y ) );
+//		m_decrement->setTopLeft( m_optionLabel->getLocalTopLeft() );
+//		m_decrement->setSize( m_optionLabel->getSize() );
 
 		m_increment->setTopLeft( m_optionLabel->getLocalBottomRight() );
 		m_increment->setCenter( Ogre::Vector2( m_increment->getCenter().x, m_optionLabel->getCenter().y ) );

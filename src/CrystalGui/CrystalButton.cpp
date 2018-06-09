@@ -9,7 +9,8 @@ namespace Crystal
 		Renderable( manager ),
 		m_label( 0 )
 	{
-		m_navigable = true;
+		m_clickable = true;
+		m_keyboardNavigable = true;
 	}
 	//-------------------------------------------------------------------------
 	void Button::_initialize()

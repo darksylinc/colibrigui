@@ -208,7 +208,7 @@ namespace Crystal
 
 		while( ritor != rend && !focusedPair.widget )
 		{
-			focusedPair = (*ritor)->setIdleCursorMoved( newPosNdc );
+			focusedPair = (*ritor)->_setIdleCursorMoved( newPosNdc );
 			++ritor;
 		}
 
@@ -235,10 +235,13 @@ namespace Crystal
 
 			if( focusedPair.widget && !newFullyFocusedByKey )
 			{
-				if( !m_mouseCursorButtonDown )
+				if( !m_mouseCursorButtonDown || !focusedPair.widget->isPressable() )
 				{
 					focusedPair.widget->setState( States::HighlightedCursor );
 					focusedPair.widget->callActionListeners( Action::Highlighted );
+
+					if( m_mouseCursorButtonDown )
+						overrideKeyboardFocusWith( focusedPair );
 				}
 				else
 				{
@@ -278,9 +281,13 @@ namespace Crystal
 	{
 		if( m_cursorFocusedPair.widget )
 		{
-			m_mouseCursorButtonDown = true;
-			m_cursorFocusedPair.widget->setState( States::Pressed );
-			m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
+			if( m_cursorFocusedPair.widget->isPressable() )
+			{
+				m_mouseCursorButtonDown = true;
+
+				m_cursorFocusedPair.widget->setState( States::Pressed );
+				m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
+			}
 
 			overrideKeyboardFocusWith( m_cursorFocusedPair );
 		}
@@ -299,7 +306,8 @@ namespace Crystal
 		if( m_cursorFocusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor );
-			m_cursorFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+			if( m_cursorFocusedPair.widget->isPressable() )
+				m_cursorFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
 
 			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
 				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
@@ -316,9 +324,12 @@ namespace Crystal
 	{
 		if( m_keyboardFocusedPair.widget )
 		{
-			m_primaryButtonDown = true;
-			m_keyboardFocusedPair.widget->setState( States::Pressed );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::Hold );
+			if( m_keyboardFocusedPair.widget->isPressable() )
+			{
+				m_primaryButtonDown = true;
+				m_keyboardFocusedPair.widget->setState( States::Pressed );
+				m_keyboardFocusedPair.widget->callActionListeners( Action::Hold );
+			}
 
 			overrideCursorFocusWith( m_keyboardFocusedPair );
 
@@ -331,7 +342,8 @@ namespace Crystal
 		if( m_primaryButtonDown && m_keyboardFocusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+			if( m_keyboardFocusedPair.widget->isPressable() )
+				m_keyboardFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
 
 			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
 				m_keyboardFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
@@ -388,7 +400,7 @@ namespace Crystal
 				m_keyboardFocusedPair.widget->setState( States::Idle );
 				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
 
-				if( !m_primaryButtonDown )
+				if( !m_primaryButtonDown || !m_keyboardFocusedPair.widget->isPressable() )
 				{
 					nextWidget->setState( States::HighlightedButton );
 					nextWidget->callActionListeners( Action::Highlighted );
@@ -542,8 +554,11 @@ namespace Crystal
 		}
 	}
 	//-----------------------------------------------------------------------------------
-	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &focusedPair )
+	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &_focusedPair )
 	{
+		FocusPair focusedPair = _focusedPair;
+		focusedPair.widget = focusedPair.widget->getFirstKeyboardNavigableParent();
+
 		//Mouse can steal focus from keyboard and force them to match.
 		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != focusedPair.widget )
 		{
@@ -649,7 +664,7 @@ namespace Crystal
 			Widget *widget = *itor;
 			for( size_t i=0; i<4u; ++i )
 			{
-				if( widget->m_navigable && widget->m_autoSetNextWidget[i] )
+				if( widget->m_keyboardNavigable && widget->m_autoSetNextWidget[i] )
 					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
 			}
 			++itor;
@@ -662,7 +677,7 @@ namespace Crystal
 		{
 			Widget *widget = *itor;
 
-			if( widget->m_navigable )
+			if( widget->m_keyboardNavigable )
 			{
 				Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
 				float closestSiblingDistances[Borders::NumBorders] =
@@ -678,7 +693,7 @@ namespace Crystal
 				{
 					Widget *widget2 = *it2;
 
-					if( widget2->m_navigable )
+					if( widget2->m_keyboardNavigable )
 					{
 						const Ogre::Vector2 cornerToCorner[4] =
 						{

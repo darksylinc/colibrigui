@@ -76,8 +76,15 @@ namespace Crystal
 		Widget * crystalgui_nullable	m_nextWidget[Borders::NumBorders];
 		bool							m_autoSetNextWidget[Borders::NumBorders];
 		bool					m_hidden;
-		/// Can be highlighted & pressed
-		bool					m_navigable;
+		/// Can be highlighted & pressed by mouse cursor
+		bool					m_clickable;
+		/// Can be highlighted & pressed by keyboard
+		bool					m_keyboardNavigable;
+		/// Widget has children which may be clickable, but are not navigable via keyboard
+		bool					m_childrenClickable;
+		/// Whether this widget can go into States::Pressed state via keyboard or mouse cursor.
+		/// (assuming it is either clickable or keyboard navigable, otherwise it would be impossible)
+		bool					m_pressable;
 
 		States::States			m_currentState;
 
@@ -138,6 +145,9 @@ namespace Crystal
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 
+		bool setPressable( bool pressable );
+		bool isPressable() const			{ return m_pressable; }
+
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
 		Window * crystalgui_nullable getAsWindow();
 
@@ -145,6 +155,11 @@ namespace Crystal
 		/// parent (or its parent's parent) until we find a window. Cannot
 		/// return null
 		Window* getFirstParentWindow();
+
+		/// Will return the first Widget in the hierarchy where m_keyboardNavigable == true
+		/// Note it can return nullptr if no widget matches the criteria.
+		/// Note it can return 'this'
+		Widget * crystalgui_nullable getFirstKeyboardNavigableParent();
 
 		/// See Window::getCurrentScroll. For most widgets, this returns
 		/// zero (i.e. when scrolling is not supported)
@@ -197,10 +212,10 @@ namespace Crystal
 		*/
 		virtual void setWidgetNavigationDirty();
 
-		/** When false, this widget cannot be highlighted or pressed. It's similar to being disabled,
-			except it's faster in CPU terms, and disabled objects change their skin; whereas
-			you can explicitly change the state without the user being able to hit or highlight
-			this widget with the HIDs (keyboard, mouse, etc).
+		/** When false, this widget cannot be highlighted or pressed via Keyboard.
+			It's similar to being disabled, except it's faster in CPU terms, and disabled objects
+			change their skin; whereas you can explicitly change the state without the user being
+			able to hit or highlight this widget with the HIDs (keyboard, mouse, etc).
 
 			For example a Label may not be navigable, but you still want to toggle between Idle and
 			Disabled states based on other criteria, thus visually graying out the text while
@@ -212,8 +227,11 @@ namespace Crystal
 			Note: This implicitly calls setWidgetNavigationDirty
 		@param bNavigable
 		*/
-		void setNavigable( bool bNavigable );
-		bool isNavigable() const;
+		void setKeyboardNavigable( bool bNavigable );
+		bool isKeyboardNavigable() const;
+
+		/// @copydoc m_childrenClickable
+		bool hasClickableChildren() const;
 
 		/** Sets the next widget to go to. For example if calling
 				a->setNextWidget( b, Borders::Right, true );
@@ -240,6 +258,8 @@ namespace Crystal
 
 		/// Input must be in NDC space i.e. in range [-1; 1]
 		bool intersects( const Ogre::Vector2 &posNdc ) const;
+
+		FocusPair _setIdleCursorMoved( const Ogre::Vector2 &newPosNdc );
 
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
