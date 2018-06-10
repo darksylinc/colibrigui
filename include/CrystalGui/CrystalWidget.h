@@ -148,6 +148,9 @@ namespace Crystal
 		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
 
+		void setHidden( bool hidden );
+		bool isHidden() const				{ return m_hidden; }
+
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
 		Window * crystalgui_nullable getAsWindow();
 
@@ -234,7 +237,10 @@ namespace Crystal
 		@param bNavigable
 		*/
 		void setKeyboardNavigable( bool bNavigable );
-		bool isKeyboardNavigable() const;
+		/// Returns m_keyboardNavigable. See isKeyboardNavigable
+		bool getKeyboardNavigable() const				{ return m_keyboardNavigable; }
+		/// Returns whether the widget is actually navigable
+		bool isKeyboardNavigable() const				{ return m_keyboardNavigable && !m_hidden; }
 
 		/// @copydoc m_childrenClickable
 		bool hasClickableChildren() const;

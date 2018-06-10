@@ -180,6 +180,23 @@ namespace Crystal
 		m_pressable = pressable;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setHidden( bool hidden )
+	{
+		if( m_hidden != hidden )
+		{
+			m_hidden = hidden;
+
+			if( m_currentState != States::Idle )
+			{
+				setState( States::Idle );
+				callActionListeners( Action::Cancel );
+			}
+
+			if( m_keyboardNavigable )
+				setWidgetNavigationDirty();
+		}
+	}
+	//-------------------------------------------------------------------------
 	Window * crystalgui_nullable Widget::getAsWindow()
 	{
 		if( isWindow() )
@@ -372,11 +389,6 @@ namespace Crystal
 			m_keyboardNavigable = bNavigable;
 			setWidgetNavigationDirty();
 		}
-	}
-	//-------------------------------------------------------------------------
-	bool Widget::isKeyboardNavigable() const
-	{
-		return m_keyboardNavigable;
 	}
 	//-------------------------------------------------------------------------
 	bool Widget::hasClickableChildren() const

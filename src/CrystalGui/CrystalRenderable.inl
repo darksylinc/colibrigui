@@ -104,12 +104,12 @@ namespace Crystal
 
 		if( forWindows )
 		{
-			if( m_parent && !m_parent->intersectsChild( this, parentScrollPos ) )
+			if( (m_parent && !m_parent->intersectsChild( this, parentScrollPos )) || m_hidden )
 				return;
 		}
 		else
 		{
-			if( !m_parent->intersectsChild( this, parentScrollPos ) )
+			if( !m_parent->intersectsChild( this, parentScrollPos ) || m_hidden )
 				return;
 		}
 

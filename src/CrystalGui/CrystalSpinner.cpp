@@ -88,14 +88,14 @@ namespace Crystal
 		m_optionLabel->setText( this->getCurrentValueStr() );
 
 		if( m_currentValue == m_minValue )
-			TODO_disable_decrement;
-		else //if( m_decrement->getHidden() )
-			TODO_enable_decrement;
+			m_decrement->setHidden( true );
+		else
+			m_decrement->setHidden( false );
 
 		if( m_currentValue == m_maxValue )
-			TODO_disable_increment;
-		else //if( m_increment->getHidden() )
-			TODO_enable_increment;
+			m_increment->setHidden( true );
+		else
+			m_increment->setHidden( false );
 
 		if( m_manager->swapRTLControls() )
 		{

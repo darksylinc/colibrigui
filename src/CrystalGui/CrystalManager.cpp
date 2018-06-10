@@ -726,7 +726,7 @@ namespace Crystal
 			Widget *widget = *itor;
 			for( size_t i=0; i<4u; ++i )
 			{
-				if( widget->m_keyboardNavigable && widget->m_autoSetNextWidget[i] )
+				if( widget->isKeyboardNavigable() && widget->m_autoSetNextWidget[i] )
 					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
 			}
 			++itor;
@@ -739,7 +739,7 @@ namespace Crystal
 		{
 			Widget *widget = *itor;
 
-			if( widget->m_keyboardNavigable )
+			if( widget->isKeyboardNavigable() )
 			{
 				Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
 				float closestSiblingDistances[Borders::NumBorders] =
@@ -755,7 +755,7 @@ namespace Crystal
 				{
 					Widget *widget2 = *it2;
 
-					if( widget2->m_keyboardNavigable )
+					if( widget2->isKeyboardNavigable() )
 					{
 						const Ogre::Vector2 cornerToCorner[4] =
 						{
@@ -953,6 +953,20 @@ namespace Crystal
 	{
 		autosetNavigation();
 
+		if( m_keyboardFocusedPair.widget && !m_keyboardFocusedPair.widget->isKeyboardNavigable() )
+			m_keyboardFocusedPair.widget = 0;
+		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget->isHidden() )
+			m_cursorFocusedPair = m_keyboardFocusedPair;
+
+		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
+		{
+			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
+			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
+			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+
+			scrollToWidget( m_keyboardFocusedPair.widget );
+		}
+
 		if( m_keyDirDown != Borders::NumBorders )
 		{
 			while( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
@@ -962,15 +976,6 @@ namespace Crystal
 			}
 
 			m_keyRepeatWaitTimer += timeSinceLast;
-		}
-
-		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
-		{
-			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
-			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
-
-			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
 
 		bool cursorFocusDirty = false;
