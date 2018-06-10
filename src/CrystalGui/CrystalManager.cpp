@@ -955,13 +955,13 @@ namespace Crystal
 
 		if( m_keyDirDown != Borders::NumBorders )
 		{
-			if( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
+			while( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
 			{
 				updateKeyDirection( m_keyDirDown );
 				m_keyRepeatWaitTimer -= m_timeDelayPerKeyStroke;
 			}
-			else
-				m_keyRepeatWaitTimer += timeSinceLast;
+
+			m_keyRepeatWaitTimer += timeSinceLast;
 		}
 
 		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
