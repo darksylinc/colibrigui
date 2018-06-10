@@ -661,11 +661,12 @@ namespace Crystal
 		return m_size - (m_clipBorderTL + m_clipBorderBR);
 	}
 	//-------------------------------------------------------------------------
-	void Widget::updateDerivedTransformFromParent()
+	void Widget::updateDerivedTransformFromParent( bool updateParent )
 	{
 		if( m_parent )
 		{
-			m_parent->updateDerivedTransformFromParent();
+			if( updateParent )
+				m_parent->updateDerivedTransformFromParent();
 
 			Ogre::Vector2 currentScroll = m_parent->getCurrentScroll();
 			const Ogre::Vector2 &invCanvasSize2x = m_manager->getInvCanvasSize2x();

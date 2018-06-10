@@ -986,6 +986,7 @@ namespace Crystal
 
 		if( cursorFocusDirty )
 		{
+			//Scroll changed, cursor may now be highlighting a different widget
 			updateAllDerivedTransforms();
 			updateWidgetsFocusedByCursor();
 		}

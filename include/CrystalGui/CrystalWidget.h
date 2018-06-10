@@ -364,7 +364,7 @@ namespace Crystal
 
 		/// Call this function before calling getDerivedTopLeft & co and it was asserting.
 		/// Do not do it too often as it is not the most efficient solution.
-		void updateDerivedTransformFromParent();
+		void updateDerivedTransformFromParent( bool updateParent=true );
 
 		/**
 		@remarks

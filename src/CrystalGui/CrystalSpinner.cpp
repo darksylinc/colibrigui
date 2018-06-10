@@ -10,7 +10,6 @@
 #define TODO_enable_decrement
 #define TODO_disable_increment
 #define TODO_enable_increment
-#define TODO_notify_were_dirty
 
 namespace Crystal
 {
@@ -144,7 +143,9 @@ namespace Crystal
 		m_increment->setTopLeft( m_optionLabel->getLocalBottomRight() );
 		m_increment->setCenter( Ogre::Vector2( m_increment->getCenter().x, m_optionLabel->getCenter().y ) );
 
-		TODO_notify_were_dirty;
+		m_optionLabel->updateDerivedTransformFromParent( false );
+		m_decrement->updateDerivedTransformFromParent( false );
+		m_increment->updateDerivedTransformFromParent( false );
 	}
 	//-------------------------------------------------------------------------
 	Label* Spinner::getLabel()
