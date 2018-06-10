@@ -30,6 +30,9 @@ namespace Crystal
 		m_keyboardNavigable = true;
 		m_pressable = false;
 		m_childrenClickable = true;
+
+		m_autoSetNextWidget[Borders::Left] = false;
+		m_autoSetNextWidget[Borders::Right] = false;
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::_initialize()

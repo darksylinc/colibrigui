@@ -393,7 +393,7 @@ namespace Crystal
 				if( nextWidget )
 				{
 					nextWidget->addListener( this );
-					if( reciprocate )
+					if( reciprocate && nextWidget->m_autoSetNextWidget[c_reciprocateBorders[i]] )
 						nextWidget->setNextWidget( this, c_reciprocateBorders[i], false );
 				}
 			}
@@ -406,7 +406,7 @@ namespace Crystal
 			if( nextWidget )
 			{
 				nextWidget->addListener( this );
-				if( reciprocate )
+				if( reciprocate && nextWidget->m_autoSetNextWidget[c_reciprocateBorders[direction]] )
 					nextWidget->setNextWidget( this, c_reciprocateBorders[direction], false );
 			}
 		}
