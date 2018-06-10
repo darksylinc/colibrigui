@@ -44,6 +44,10 @@ namespace Crystal
 		m_mouseCursorButtonDown( false ),
 		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
 		m_primaryButtonDown( false ),
+		m_keyDirDown( Borders::NumBorders ),
+		m_keyRepeatWaitTimer( 0.0f ),
+		m_keyRepeatDelay( 0.5f ),
+		m_timeDelayPerKeyStroke( 0.1f ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 )
 	{
@@ -420,7 +424,7 @@ namespace Crystal
 			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
 	}
 	//-------------------------------------------------------------------------
-	void CrystalManager::setKeyDirection( Borders::Borders direction )
+	void CrystalManager::updateKeyDirection( Borders::Borders direction )
 	{
 		if( m_keyboardFocusedPair.widget )
 		{
@@ -445,9 +449,25 @@ namespace Crystal
 				m_keyboardFocusedPair.widget = nextWidget;
 				overrideCursorFocusWith( m_keyboardFocusedPair );
 			}
+			else if( !m_keyboardFocusedPair.widget->m_autoSetNextWidget[direction] )
+			{
+				m_keyboardFocusedPair.widget->_notifyActionKeyMovement( direction );
+			}
 
 			scrollToWidget( m_keyboardFocusedPair.widget );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setKeyDirectionPressed( Borders::Borders direction )
+	{
+		updateKeyDirection( direction );
+		m_keyDirDown = direction;
+		m_keyRepeatWaitTimer = 0;
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setKeyDirectionReleased( Borders::Borders direction )
+	{
+		m_keyDirDown = Borders::NumBorders;
 	}
 	//-------------------------------------------------------------------------
 	void CrystalManager::updateAllDerivedTransforms()
@@ -932,6 +952,17 @@ namespace Crystal
 	void CrystalManager::update( float timeSinceLast )
 	{
 		autosetNavigation();
+
+		if( m_keyDirDown != Borders::NumBorders )
+		{
+			if( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
+			{
+				updateKeyDirection( m_keyDirDown );
+				m_keyRepeatWaitTimer -= m_timeDelayPerKeyStroke;
+			}
+			else
+				m_keyRepeatWaitTimer += timeSinceLast;
+		}
 
 		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
 		{

@@ -10,6 +10,7 @@
 #define TODO_enable_decrement
 #define TODO_disable_increment
 #define TODO_enable_increment
+#define TODO_notify_were_dirty
 
 namespace Crystal
 {
@@ -142,6 +143,8 @@ namespace Crystal
 
 		m_increment->setTopLeft( m_optionLabel->getLocalBottomRight() );
 		m_increment->setCenter( Ogre::Vector2( m_increment->getCenter().x, m_optionLabel->getCenter().y ) );
+
+		TODO_notify_were_dirty;
 	}
 	//-------------------------------------------------------------------------
 	Label* Spinner::getLabel()
@@ -190,6 +193,28 @@ namespace Crystal
 					++m_currentValue;
 				updateOptionLabel();
 			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::_notifyActionKeyMovement( Borders::Borders direction )
+	{
+		if( (direction == Borders::Left && m_horizontal) ||
+			(direction == Borders::Bottom && !m_horizontal) )
+		{
+			if( m_horizontal && m_manager->swapRTLControls() )
+				++m_currentValue;
+			else
+				--m_currentValue;
+			updateOptionLabel();
+		}
+		else if( (direction == Borders::Right && m_horizontal) ||
+				 (direction == Borders::Top && !m_horizontal) )
+		{
+			if( m_horizontal && m_manager->swapRTLControls() )
+				--m_currentValue;
+			else
+				++m_currentValue;
+			updateOptionLabel();
 		}
 	}
 }

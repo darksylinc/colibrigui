@@ -72,6 +72,13 @@ namespace Crystal
 		bool			m_mouseCursorButtonDown;
 		Ogre::Vector2	m_mouseCursorPosNdc; ///NDC = Normalized Device Coordinates
 		bool			m_primaryButtonDown;
+		Borders::Borders m_keyDirDown;
+		float			m_keyRepeatWaitTimer;
+
+		/// Controls how much to wait before we start repeating
+		float			m_keyRepeatDelay;
+		/// Controls how fast we repeat
+		float			m_timeDelayPerKeyStroke;
 
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
@@ -185,7 +192,11 @@ namespace Crystal
 		void setKeyboardPrimaryPressed();
 		void setKeyboardPrimaryReleased();
 		void setCancel();
-		void setKeyDirection( Borders::Borders direction );
+	protected:
+		void updateKeyDirection( Borders::Borders direction );
+	public:
+		void setKeyDirectionPressed( Borders::Borders direction );
+		void setKeyDirectionReleased( Borders::Borders direction );
 		void setScroll( const Ogre::Vector2 &scrollAmount );
 
 		void setLogListener( LogListener *logListener );

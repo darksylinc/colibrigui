@@ -60,6 +60,7 @@ namespace Crystal
 		virtual void setTransformDirty();
 
 		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
+		virtual void _notifyActionKeyMovement( Borders::Borders direction );
 	};
 }
 

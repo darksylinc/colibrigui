@@ -84,11 +84,14 @@ namespace Demo
 		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 		button0->getLabel()->setText( "Button 0" );
 
-		button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );
-		button1->setSkinPack( "ButtonSkin" );
-		button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 ) );
-		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
-		button1->getLabel()->setText( "Button 1" );
+		for( int i=0 ;i<1; ++i )
+		{
+			button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );
+			button1->setSkinPack( "ButtonSkin" );
+			button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 + i * 0.25 ) );
+			button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+			button1->getLabel()->setText( "Button 1" );
+		}
 
 		button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );
 		button1->setSkinPack( "ButtonSkin" );
@@ -157,7 +160,7 @@ namespace Demo
 		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
 
 #endif
-		//mainWindow->sizeScrollToFit();
+		mainWindow->sizeScrollToFit();
 
         TutorialGameState::createScene01();
     }
@@ -231,7 +234,15 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void CrystalGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
 	{
-		if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
+		if( arg.keysym.sym == SDLK_w || arg.keysym.sym == SDLK_UP )
+			crystalManager->setKeyDirectionPressed( Crystal::Borders::Top );
+		else if( arg.keysym.sym == SDLK_s || arg.keysym.sym == SDLK_DOWN )
+			crystalManager->setKeyDirectionPressed( Crystal::Borders::Bottom );
+		else if( arg.keysym.sym == SDLK_a || arg.keysym.sym == SDLK_LEFT )
+			crystalManager->setKeyDirectionPressed( Crystal::Borders::Left );
+		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
+			crystalManager->setKeyDirectionPressed( Crystal::Borders::Right );
+		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
 			arg.keysym.sym == SDLK_SPACE )
 		{
 			crystalManager->setKeyboardPrimaryPressed();
@@ -247,13 +258,13 @@ namespace Demo
         }
 
 		if( arg.keysym.sym == SDLK_w || arg.keysym.sym == SDLK_UP )
-			crystalManager->setKeyDirection( Crystal::Borders::Top );
+			crystalManager->setKeyDirectionReleased( Crystal::Borders::Top );
 		else if( arg.keysym.sym == SDLK_s || arg.keysym.sym == SDLK_DOWN )
-			crystalManager->setKeyDirection( Crystal::Borders::Bottom );
+			crystalManager->setKeyDirectionReleased( Crystal::Borders::Bottom );
 		else if( arg.keysym.sym == SDLK_a || arg.keysym.sym == SDLK_LEFT )
-			crystalManager->setKeyDirection( Crystal::Borders::Left );
+			crystalManager->setKeyDirectionReleased( Crystal::Borders::Left );
 		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
-			crystalManager->setKeyDirection( Crystal::Borders::Right );
+			crystalManager->setKeyDirectionReleased( Crystal::Borders::Right );
 		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
 				 arg.keysym.sym == SDLK_SPACE )
 		{

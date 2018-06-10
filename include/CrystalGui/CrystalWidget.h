@@ -204,6 +204,12 @@ namespace Crystal
 
 		void callActionListeners( Action::Action action );
 
+		/** Gets called when user hits a direction with the keyboard, and there's no next widget
+			to go to (thus we capture that and may be interpreted as an action. eg. Spinners use this)
+		@param direction
+		*/
+		virtual void _notifyActionKeyMovement( Borders::Borders direction );
+
 		/** Call this to indicate the widget has been moved or created; thus we'll broadcast
 			the message until reaching our most immediate parent window.
 			This window is now aware we've changed, and will later recalculate all

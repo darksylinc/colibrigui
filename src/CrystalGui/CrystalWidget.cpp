@@ -356,6 +356,10 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_notifyActionKeyMovement( Borders::Borders direction )
+	{
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setWidgetNavigationDirty()
 	{
 		m_parent->setWidgetNavigationDirty();
