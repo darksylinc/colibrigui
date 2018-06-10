@@ -82,24 +82,10 @@ namespace Crystal
 			m_minValue = 0;
 			m_maxValue = static_cast<int32_t>( m_options.size() - 1u );
 			m_denominator = 1;
-			m_currentValue = Ogre::Math::Clamp( m_currentValue, m_minValue, m_maxValue );
-
-			m_optionLabel->setText( m_options[m_currentValue] );
 		}
-		else
-		{
-			char tmpBuffer[64];
-			Ogre::LwString numberStr( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
 
-			m_currentValue = Ogre::Math::Clamp( m_currentValue, m_minValue, m_maxValue );
-
-			if( m_denominator == 1 )
-				numberStr.a( m_currentValue );
-			else
-				numberStr.a( m_currentValue / (float)m_denominator );
-
-			m_optionLabel->setText( numberStr.c_str() );
-		}
+		m_currentValue = Ogre::Math::Clamp( m_currentValue, m_minValue, m_maxValue );
+		m_optionLabel->setText( this->getCurrentValueStr() );
 
 		if( m_currentValue == m_minValue )
 			TODO_disable_decrement;
@@ -161,6 +147,88 @@ namespace Crystal
 		return m_label;
 	}
 	//-------------------------------------------------------------------------
+	void Spinner::setCurrentValue( int32_t currentValue )
+	{
+		if( m_currentValue != currentValue )
+		{
+			m_currentValue = currentValue;
+			updateOptionLabel();
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setDenominator( int32_t denominator )
+	{
+		if( m_denominator != denominator && !m_options.empty() )
+		{
+			m_denominator = denominator;
+			updateOptionLabel();
+		}
+	}
+	//-------------------------------------------------------------------------
+	float Spinner::getCurrentValueProcessed() const
+	{
+		return m_currentValue / static_cast<float>( m_denominator );
+	}
+	//-------------------------------------------------------------------------
+	std::string Spinner::getCurrentValueStr() const
+	{
+		if( !m_options.empty() )
+		{
+			return m_options[m_currentValue];
+		}
+		else
+		{
+			char tmpBuffer[64];
+			Ogre::LwString numberStr( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+			if( m_denominator == 1 )
+				numberStr.a( m_currentValue );
+			else
+				numberStr.a( m_currentValue / (float)m_denominator );
+			return numberStr.c_str();
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setRange( int32_t minValue, int32_t maxValue )
+	{
+		LogListener *logListener = m_manager->getLogListener();
+
+		if( m_options.empty() )
+		{
+			if( minValue <= maxValue )
+			{
+				m_minValue = minValue;
+				m_maxValue = maxValue;
+			}
+			else
+			{
+				char tmpBuffer[128];
+				Ogre::LwString msg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+				msg.a( "Invalid range for Spinner::setRange min = ", minValue, " max = ", maxValue  );
+				logListener->log( msg.c_str(), LogSeverity::Warning );
+				CRYSTAL_ASSERT_LOW( minValue <= maxValue );
+			}
+		}
+		else
+		{
+			logListener->log( "Invalid call Spinner::setRange. Cannot call this function while "
+							  "in list-mode (setOption was not empty)", LogSeverity::Warning );
+			CRYSTAL_ASSERT_LOW( false );
+		}
+
+		updateOptionLabel();
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setOptions( const std::vector<std::string> &options )
+	{
+		m_options = options;
+		updateOptionLabel();
+	}
+	//-------------------------------------------------------------------------
+	const std::vector<std::string>& Spinner::getOptions() const
+	{
+		return m_options;
+	}
+	//-------------------------------------------------------------------------
 	void Spinner::setTransformDirty()
 	{
 		if( m_label )
@@ -185,6 +253,7 @@ namespace Crystal
 				else
 					--m_currentValue;
 				updateOptionLabel();
+				callActionListeners( Action::ValueChanged );
 			}
 			else if( widget == m_increment )
 			{
@@ -193,6 +262,7 @@ namespace Crystal
 				else
 					++m_currentValue;
 				updateOptionLabel();
+				callActionListeners( Action::ValueChanged );
 			}
 		}
 	}
@@ -207,6 +277,7 @@ namespace Crystal
 			else
 				--m_currentValue;
 			updateOptionLabel();
+			callActionListeners( Action::ValueChanged );
 		}
 		else if( (direction == Borders::Right && m_horizontal) ||
 				 (direction == Borders::Top && !m_horizontal) )
@@ -216,6 +287,7 @@ namespace Crystal
 			else
 				++m_currentValue;
 			updateOptionLabel();
+			callActionListeners( Action::ValueChanged );
 		}
 	}
 }

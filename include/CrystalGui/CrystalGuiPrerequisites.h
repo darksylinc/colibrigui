@@ -56,7 +56,9 @@ namespace Crystal
 			/// User released the main button and the main action should be performed
 			PrimaryActionPerform,
 			/// User released the secondary button and that action should be performed
-			SecondaryActionPerform
+			SecondaryActionPerform,
+			/// The value the Widget was holding has changed. For example, Spinners
+			ValueChanged
 		};
 	}
 	namespace ActionMask
@@ -67,7 +69,8 @@ namespace Crystal
 			Highlighted				= 1u << Action::Highlighted,
 			Hold					= 1u << Action::Hold,
 			PrimaryActionPerform	= 1u << Action::PrimaryActionPerform,
-			SecondaryActionPerform	= 1u << Action::SecondaryActionPerform
+			SecondaryActionPerform	= 1u << Action::SecondaryActionPerform,
+			ValueChanged			= 1u << Action::ValueChanged
 		};
 	}
 
