@@ -24,7 +24,8 @@ namespace Crystal
 		m_maxValue( 10 ),
 		m_denominator( 1 ),
 		m_valueLocationFraction( 0.8f, 0.5f ),
-		m_arrowButtonSize( -1 )
+		m_arrowButtonSize( -1 ),
+		m_horizontal( true )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -110,10 +111,21 @@ namespace Crystal
 		else //if( m_increment->getHidden() )
 			TODO_enable_increment;
 
-		Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
-		m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * (1.0f - m_valueLocationFraction.x) );
-		Ogre::Vector2 newCenter( sizeAfterClipping * m_valueLocationFraction );
-		m_optionLabel->setCenter( newCenter );
+		if( m_manager->swapRTLControls() )
+		{
+			Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
+			m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * m_valueLocationFraction.x );
+			Ogre::Vector2 newCenter( sizeAfterClipping * Ogre::Vector2( 1.0f - m_valueLocationFraction.x,
+																		m_valueLocationFraction.y ) );
+			m_optionLabel->setCenter( newCenter );
+		}
+		else
+		{
+			Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
+			m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * (1.0f - m_valueLocationFraction.x) );
+			Ogre::Vector2 newCenter( sizeAfterClipping * m_valueLocationFraction );
+			m_optionLabel->setCenter( newCenter );
+		}
 
 		Ogre::Vector2 arrowButtonSize = m_arrowButtonSize;
 		if( arrowButtonSize.y < 0.0f )
@@ -164,12 +176,18 @@ namespace Crystal
 		{
 			if( widget == m_decrement )
 			{
-				--m_currentValue;
+				if( m_horizontal && m_manager->swapRTLControls() )
+					++m_currentValue;
+				else
+					--m_currentValue;
 				updateOptionLabel();
 			}
 			else if( widget == m_increment )
 			{
-				++m_currentValue;
+				if( m_horizontal && m_manager->swapRTLControls() )
+					--m_currentValue;
+				else
+					++m_currentValue;
 				updateOptionLabel();
 			}
 		}

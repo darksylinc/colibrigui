@@ -43,6 +43,8 @@ namespace Crystal
 		Ogre::Vector2	m_valueLocationFraction;
 		Ogre::Vector2	m_arrowButtonSize;
 
+		bool			m_horizontal;
+
 		std::vector<std::string>	m_options;
 
 		void updateOptionLabel();

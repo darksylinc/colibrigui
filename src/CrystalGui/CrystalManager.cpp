@@ -29,6 +29,7 @@ namespace Crystal
 		m_numLabels( 0 ),
 		m_numTextGlyphs( 0u ),
 		m_logListener( &DefaultLogListener ),
+		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
@@ -147,6 +148,20 @@ namespace Crystal
 																Ogre::HlmsParamVec() );
 			}
 			m_shaperManager->setOgre( hlmsCrystal, vaoManager );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::setSwapRTLControls( bool swapRtl )
+	{
+		m_swapRTLControls = swapRtl;
+
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+			(*itor)->setTransformDirty();
+			++itor;
 		}
 	}
 	//-------------------------------------------------------------------------

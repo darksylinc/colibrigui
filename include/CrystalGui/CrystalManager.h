@@ -44,6 +44,7 @@ namespace Crystal
 
 		LogListener	*m_logListener;
 
+		bool m_swapRTLControls;
 		bool m_windowNavigationDirty;
 
 		Ogre::Root					* crystalgui_nullable m_root;
@@ -113,6 +114,11 @@ namespace Crystal
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
 		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
+
+		/// When true, swaps the controls for RTL languages such as arabic. That means spinners
+		/// increment when clicking left button, for example
+		void setSwapRTLControls( bool swapRtl );
+		bool swapRTLControls() const								{ return m_swapRTLControls; }
 
 		/**	Sets the default skins to be used when creating a new widget.
 			Usage:
