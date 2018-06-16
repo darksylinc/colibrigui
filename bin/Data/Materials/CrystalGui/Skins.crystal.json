@@ -15,6 +15,20 @@
                 "all" : [10, 10]
             }
         },
+        "ButtonSkinDisabled" :
+        {
+            "material" : "ButtonSkinDisabled",
+            "tex_resolution" : [64, 96],
+            "grid_uv" :
+            {
+                "center2" : [0, 0, 64, 32],
+                "enclosing" : [[0, 0, 64, 32], [4, 4]]
+            },
+            "borders" :
+            {
+                "all" : [10, 10]
+            }
+        },
         "ButtonSkinHighlightedCursor" :
         {
             "material" : "ButtonSkinBrighter",
@@ -74,7 +88,7 @@
         "ButtonSkin" :
         {
             "all" : "ButtonSkin",
-            "disabled" : "ButtonSkin",
+            "disabled" : "ButtonSkinDisabled",
             "idle" : "ButtonSkin",
             "highlighted_cursor" : "ButtonSkinHighlightedCursor",
             "highlighted_button" : "ButtonSkinHighlightedButton",

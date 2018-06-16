@@ -90,12 +90,18 @@ namespace Crystal
 		if( m_currentValue == m_minValue )
 			m_decrement->setHidden( true );
 		else
+		{
 			m_decrement->setHidden( false );
+			m_decrement->setState( m_currentState );
+		}
 
 		if( m_currentValue == m_maxValue )
 			m_increment->setHidden( true );
 		else
+		{
 			m_increment->setHidden( false );
+			m_increment->setState( m_currentState );
+		}
 
 		if( m_manager->swapRTLControls() )
 		{

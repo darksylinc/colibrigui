@@ -430,6 +430,7 @@ namespace Crystal
 		{
 			Widget * crystalgui_nullable nextWidget =
 					m_keyboardFocusedPair.widget->m_nextWidget[direction];
+
 			if( nextWidget )
 			{
 				m_keyboardFocusedPair.widget->setState( States::Idle );
@@ -955,8 +956,11 @@ namespace Crystal
 
 		if( m_keyboardFocusedPair.widget && !m_keyboardFocusedPair.widget->isKeyboardNavigable() )
 			m_keyboardFocusedPair.widget = 0;
-		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget->isHidden() )
+		if( m_cursorFocusedPair.widget &&
+			(m_cursorFocusedPair.widget->isHidden() || m_cursorFocusedPair.widget->isDisabled()) )
+		{
 			m_cursorFocusedPair = m_keyboardFocusedPair;
+		}
 
 		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
 		{

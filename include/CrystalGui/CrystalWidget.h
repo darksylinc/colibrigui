@@ -151,6 +151,8 @@ namespace Crystal
 		void setHidden( bool hidden );
 		bool isHidden() const				{ return m_hidden; }
 
+		bool isDisabled() const				{ return m_currentState == States::Disabled; }
+
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
 		Window * crystalgui_nullable getAsWindow();
 
@@ -240,7 +242,7 @@ namespace Crystal
 		/// Returns m_keyboardNavigable. See isKeyboardNavigable
 		bool getKeyboardNavigable() const				{ return m_keyboardNavigable; }
 		/// Returns whether the widget is actually navigable
-		bool isKeyboardNavigable() const				{ return m_keyboardNavigable && !m_hidden; }
+		bool isKeyboardNavigable() const;
 
 		/// @copydoc m_childrenClickable
 		bool hasClickableChildren() const;
@@ -312,8 +314,12 @@ namespace Crystal
 			highlighted by cursor (or viceversa), sets the new state to
 			States::HighlightedButtonAndCursor
 			If false, we just set exactly what was requested.
+		@param broadcastEnable
+			When false, if a child widget is States::Disabled; then we won't take it out of that state
+			When true, we always extend this new state to our children.
 		*/
-		virtual void setState( States::States state, bool smartHighlight=true );
+		virtual void setState( States::States state, bool smartHighlight=true,
+							   bool broadcastEnable=false );
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
 		/// Note it may be < getChildren().size(), as this value only returns pure widgets.

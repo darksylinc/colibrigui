@@ -91,6 +91,8 @@ namespace Demo
 			button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 + i * 0.25 ) );
 			button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 			button1->getLabel()->setText( "Button 1" );
+
+			button1->setState( Crystal::States::Disabled );
 		}
 
 		button1 = crystalManager->createWidget<Crystal::Button>( mainWindow );

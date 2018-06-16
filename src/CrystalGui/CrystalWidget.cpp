@@ -391,6 +391,11 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
+	bool Widget::isKeyboardNavigable() const
+	{
+		return m_keyboardNavigable && (!m_hidden || m_currentState == States::Disabled);
+	}
+	//-------------------------------------------------------------------------
 	bool Widget::hasClickableChildren() const
 	{
 		return m_childrenClickable;
@@ -488,6 +493,7 @@ namespace Crystal
 		{
 			Widget *widget = *itor;
 			if( (widget->m_clickable || widget->m_childrenClickable) &&
+				!widget->isDisabled() &&
 				this->intersectsChild( widget, currentScroll ) &&
 				widget->intersects( newPosNdc ) )
 			{
@@ -551,7 +557,7 @@ namespace Crystal
 		updateDerivedTransform( parentPos, parentRot );
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setState( States::States state, bool smartHighlight )
+	void Widget::setState( States::States state, bool smartHighlight, bool broadcastEnable )
 	{
 		if( isWindow() )
 			return;
@@ -565,6 +571,8 @@ namespace Crystal
 			state = States::HighlightedButtonAndCursor;
 		}
 
+		const States::States oldValue = m_currentState;
+
 		m_currentState = state;
 
 		WidgetVec::const_iterator itor = m_children.begin();
@@ -572,8 +580,16 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->setState( state, false );
+			if( !(*itor)->isDisabled() || broadcastEnable )
+				(*itor)->setState( state, false );
 			++itor;
+		}
+
+		if( m_keyboardNavigable &&
+			((state == States::Disabled && oldValue != States::Disabled) ||
+			 (state != States::Disabled && oldValue == States::Disabled)) )
+		{
+			setWidgetNavigationDirty();
 		}
 	}
 	//-------------------------------------------------------------------------

@@ -112,7 +112,8 @@ namespace Crystal
 		*/
 		void _setSkinPack( SkinInfo const * crystalgui_nonnull const * crystalgui_nullable skinInfos );
 
-		virtual void setState( States::States state, bool smartHighlight=true );
+		virtual void setState( States::States state, bool smartHighlight=true,
+							   bool broadcastEnable=false );
 
 		/** Calls setClipBorders and makes the clipping region to match that of the current skin
 

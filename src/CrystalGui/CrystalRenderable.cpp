@@ -102,9 +102,9 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::setState( States::States state, bool smartHighlight )
+	void Renderable::setState( States::States state, bool smartHighlight, bool broadcastEnable )
 	{
-		Widget::setState( state, smartHighlight );
+		Widget::setState( state, smartHighlight, broadcastEnable );
 
 		if( mHlmsDatablock->getName() != m_stateInformation[m_currentState].materialName )
 			setDatablock( m_stateInformation[m_currentState].materialName );

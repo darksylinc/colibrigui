@@ -2,6 +2,12 @@ hlms ButtonSkin unlit
 {
     diffuse_map ButtonSkin.png
 }
+hlms ButtonSkinDisabled unlit
+{
+    diffuse 1 1 1 0.2
+    scene_blend alpha_blend
+    diffuse_map ButtonSkin.png
+}
 hlms ButtonSkinBrighter unlit
 {
     diffuse 2 2 2 1
