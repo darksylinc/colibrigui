@@ -149,6 +149,9 @@ namespace Crystal
 		SkinInfo const * crystalgui_nonnull const * crystalgui_nullable
 				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
+		/// This pointers can be casted to HlmsCrystalDatablock
+		Ogre::HlmsDatablock * crystalgui_nullable getDefaultTextDatablock( States::States state ) const;
+
 		const Ogre::Vector2& getMouseCursorPosNdc() const			{ return m_mouseCursorPosNdc; }
 
 		/** Sets the size of the virtual canvas. All widgets are relative to this canvas

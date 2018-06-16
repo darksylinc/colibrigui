@@ -224,6 +224,12 @@ namespace Crystal
 		return m_defaultSkins[widgetType];
 	}
 	//-------------------------------------------------------------------------
+	Ogre::HlmsDatablock * crystalgui_nullable
+	CrystalManager::getDefaultTextDatablock( States::States state ) const
+	{
+		return m_defaultTextDatablock[state];
+	}
+	//-------------------------------------------------------------------------
 	void CrystalManager::setCanvasSize( const Ogre::Vector2 &canvasSize,
 										const Ogre::Vector2 &pixelSize,
 										const Ogre::Vector2 &windowResolution )
