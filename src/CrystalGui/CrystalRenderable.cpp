@@ -163,7 +163,8 @@ namespace Crystal
 			apiObject.lastVaoName = 0;
 		}
 
-		const size_t widgetType = isLabel() ? 1u : 0u;
+		const bool bIsLabel = isLabel();
+		const size_t widgetType = bIsLabel ? 1u : 0u;
 
 		uint32 baseInstance = apiObject.hlms->fillBuffersForCrystal(
 								  hlmsCache, queuedRenderable, false,
@@ -190,6 +191,23 @@ namespace Crystal
 			drawCall->numDraws = 1u;
 			apiObject.drawCmd = drawCall;
 			apiObject.primCount = 0;
+			apiObject.lastDatablock = mHlmsDatablock;
+
+			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
+			apiObject.drawCountPtr->primCount		= 0;
+			apiObject.drawCountPtr->instanceCount	= 1u;
+			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
+			apiObject.drawCountPtr->baseInstance	= baseInstance;
+			apiObject.indirectDraw += sizeof( CbDrawStrip );
+		}
+		else if( bIsLabel && apiObject.lastDatablock != mHlmsDatablock )
+		{
+			//Text  has arbitrary number of of vertices, thus we can't properly calculate the drawId
+			//and therefore the material ID unless we issue a start a new draw.
+			CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
+			++drawCall->numDraws;
+			apiObject.primCount = 0;
+			apiObject.lastDatablock = mHlmsDatablock;
 
 			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 			apiObject.drawCountPtr->primCount		= 0;

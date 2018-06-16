@@ -15,11 +15,10 @@
 @piece( custom_vs_preExecution )
 	@property( !crystal_text )
 		uint crystalDrawId = input.drawId + (uint(gl_VertexID) / 54u);
-	@end @property( crystal_text )
-		uint crystalDrawId = input.drawId + (uint(gl_VertexID) / 6u);
+		#undef finalDrawId
+		#define finalDrawId crystalDrawId
 	@end
-	#undef finalDrawId
-	#define finalDrawId crystalDrawId
+
 	#define worldViewProj 1.0f
 
 	outVs.gl_ClipDistance0[0] = input.normal.x;

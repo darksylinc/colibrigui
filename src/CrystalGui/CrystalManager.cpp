@@ -9,6 +9,7 @@
 
 #include "CrystalGui/Ogre/CrystalOgreRenderable.h"
 #include "CrystalGui/Ogre/OgreHlmsCrystal.h"
+#include "CrystalGui/Ogre/OgreHlmsCrystalDatablock.h"
 #include "Vao/OgreVaoManager.h"
 #include "Vao/OgreVertexArrayObject.h"
 #include "Vao/OgreIndirectBufferPacked.h"
@@ -24,6 +25,16 @@ namespace Crystal
 	static LogListener DefaultLogListener;
 	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX, Ogre::HlmsPso() );
 
+	const std::string CrystalManager::c_defaultTextDatablockNames[States::NumStates] =
+	{
+		"# Crystal Disabled Text #",
+		"# Crystal Idle Text #",
+		"# Crystal HighlightedCursor Text #",
+		"# Crystal HighlightedButton Text #",
+		"# Crystal HighlightedButtonAndCursor Text #",
+		"# Crystal Pressed Text #"
+	};
+
 	CrystalManager::CrystalManager( LogListener *logListener ) :
 		m_numWidgets( 0 ),
 		m_numLabels( 0 ),
@@ -38,7 +49,6 @@ namespace Crystal
 		m_vao( 0 ),
 		m_indirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
-		m_defaultTextDatablock( 0 ),
 		m_allowingScrollAlways( false ),
 		m_allowingScrollGestureWhileButtonDown( false ),
 		m_mouseCursorButtonDown( false ),
@@ -51,6 +61,7 @@ namespace Crystal
 		m_skinManager( 0 ),
 		m_shaperManager( 0 )
 	{
+		memset( m_defaultTextDatablock, 0, sizeof(m_defaultTextDatablock) );
 		memset( m_defaultSkins, 0, sizeof(m_defaultSkins) );
 
 		setLogListener( logListener );
@@ -146,10 +157,20 @@ namespace Crystal
 				macroblock.mDepthWrite = false;
 				blendblock.setBlendType( Ogre::SBT_TRANSPARENT_ALPHA );
 
-				m_defaultTextDatablock = hlms->createDatablock( "## Crystal Default Text ##",
-																"## Crystal Default Text ##",
-																macroblock, blendblock,
-																Ogre::HlmsParamVec() );
+				for( size_t i=0; i<States::NumStates; ++i )
+				{
+					m_defaultTextDatablock[i] = hlms->createDatablock( c_defaultTextDatablockNames[i],
+																	   c_defaultTextDatablockNames[i],
+																	   macroblock, blendblock,
+																	   Ogre::HlmsParamVec() );
+				}
+
+				CRYSTAL_ASSERT_HIGH( dynamic_cast<Ogre::HlmsCrystalDatablock*>(
+										 m_defaultTextDatablock[States::Disabled] ) );
+				Ogre::HlmsCrystalDatablock *datablock = static_cast<Ogre::HlmsCrystalDatablock*>(
+															m_defaultTextDatablock[States::Disabled] );
+				datablock->setUseColour( true );
+				datablock->setColour( Ogre::ColourValue( 0.8f, 0.8f, 0.8f, 0.2f ) );
 			}
 			m_shaperManager->setOgre( hlmsCrystal, vaoManager );
 		}
@@ -1065,6 +1086,7 @@ namespace Crystal
 			apiObjects.indirectDraw = reinterpret_cast<uint8_t*>( m_indirectBuffer->getSwBufferPtr() );
 		}
 		apiObjects.startIndirectDraw = apiObjects.indirectDraw;
+		apiObjects.lastDatablock = 0;
 		apiObjects.baseInstanceAndIndirectBuffers = 0;
 		if( m_vaoManager->supportsIndirectBuffers() )
 			apiObjects.baseInstanceAndIndirectBuffers = 2;

@@ -34,6 +34,10 @@ namespace Crystal
 
 	class CrystalManager
 	{
+	public:
+		static const std::string c_defaultTextDatablockNames[States::NumStates];
+
+	protected:
 		WindowVec m_windows;
 		LabelVec m_labels;
 		/// Tracks total number of live widgets
@@ -55,7 +59,7 @@ namespace Crystal
 		Ogre::VertexArrayObject		* crystalgui_nullable m_textVao;
 		Ogre::IndirectBufferPacked	* crystalgui_nullable m_indirectBuffer;
 		Ogre::CommandBuffer			* crystalgui_nullable m_commandBuffer;
-		Ogre::HlmsDatablock			* crystalgui_nullable m_defaultTextDatablock;
+		Ogre::HlmsDatablock			* crystalgui_nullable m_defaultTextDatablock[States::NumStates];
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
@@ -120,7 +124,8 @@ namespace Crystal
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
-		Ogre::HlmsDatablock* getDefaultTextDatablock()				{ return m_defaultTextDatablock; }
+		Ogre::HlmsDatablock * crystalgui_nonnull * crystalgui_nullable getDefaultTextDatablock()
+																	{ return m_defaultTextDatablock; }
 
 		/// When true, swaps the controls for RTL languages such as arabic. That means spinners
 		/// increment when clicking left button, for example

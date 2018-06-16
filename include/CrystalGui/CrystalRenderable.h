@@ -58,6 +58,10 @@ namespace Crystal
 		Ogre::IndirectBufferPacked	*indirectBuffer;
 		uint8_t						*indirectDraw;
 		uint8_t						*startIndirectDraw;
+		//Used to see if we need to switch to a new draw when rendering text (since text rendering
+		//has arbitrary number of of vertices, thus we can't properly calculate the drawId and
+		//therefore the material ID)
+		Ogre::HlmsDatablock			*lastDatablock;
 		int							baseInstanceAndIndirectBuffers;
 		Ogre::CbDrawCallStrip		* crystalgui_nullable drawCmd;
 		Ogre::CbDrawStrip			* crystalgui_nullable drawCountPtr;

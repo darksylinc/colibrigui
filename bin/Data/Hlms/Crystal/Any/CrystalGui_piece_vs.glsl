@@ -12,11 +12,10 @@
 @piece( custom_vs_preExecution )
 	@property( !crystal_text )
 		uint crystalDrawId = drawId + ((uint(gl_VertexID) - instance.worldMaterialIdx[drawId].w) / 54u);
-	@end @property( crystal_text )
-		uint crystalDrawId = drawId + ((uint(gl_VertexID) - instance.worldMaterialIdx[drawId].w) / 6u);
+		#undef finalDrawId
+		#define finalDrawId crystalDrawId
 	@end
-	#undef finalDrawId
-	#define finalDrawId crystalDrawId
+
 	#define worldViewProj 1.0f
 
 	gl_ClipDistance[0] = normal.x;
