@@ -131,6 +131,12 @@ namespace Crystal
 		/// increment when clicking left button, for example
 		void setSwapRTLControls( bool swapRtl );
 		bool swapRTLControls() const								{ return m_swapRTLControls; }
+		bool shouldSwapRTL( HorizWidgetDir::HorizWidgetDir horizDir ) const
+		{
+			return horizDir == HorizWidgetDir::RTL ||
+					(horizDir == HorizWidgetDir::AutoRTL && !m_swapRTLControls) ||
+					(horizDir == HorizWidgetDir::AutoLTR && m_swapRTLControls);
+		}
 
 		/**	Sets the default skins to be used when creating a new widget.
 			Usage:

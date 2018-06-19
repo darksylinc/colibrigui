@@ -12,6 +12,7 @@ namespace Crystal
 {
 	struct UiVertex;
 	struct GlyphVertex;
+	struct ApiEncapsulatedObjects;
 	typedef std::vector<Widget*> WidgetVec;
 	typedef std::vector<Window*> WindowVec;
 
@@ -85,6 +86,8 @@ namespace Crystal
 		/// Whether this widget can go into States::Pressed state via keyboard or mouse cursor.
 		/// (assuming it is either clickable or keyboard navigable, otherwise it would be impossible)
 		bool					m_pressable;
+
+		bool m_culled;
 
 		States::States			m_currentState;
 
@@ -304,6 +307,8 @@ namespace Crystal
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
 											  const Ogre::Matrix3 &parentRot );
+
+		void addNonRenderableCommands( ApiEncapsulatedObjects &apiObject );
 
 		/** Sets the new state, which affects skins.
 			The state is is broadcasted to our children.

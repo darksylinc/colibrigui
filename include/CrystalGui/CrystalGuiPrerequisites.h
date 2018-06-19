@@ -31,6 +31,7 @@ namespace Crystal
 {
 	class Button;
 	struct CachedGlyph;
+	class Checkbox;
 	class CrystalManager;
 	class Label;
 	class LogListener;
@@ -238,6 +239,21 @@ namespace Crystal
 		};
 	}
 
+	namespace HorizWidgetDir
+	{
+		enum HorizWidgetDir
+		{
+			/// Use LTR unless CrystalManager::swapRTLControls returns true
+			AutoLTR,
+			/// Use RTL unless CrystalManager::swapRTLControls returns true
+			AutoRTL,
+			/// Always use LTR
+			LTR,
+			/// Always use RTL
+			RTL
+		};
+	}
+
 	struct RichText
 	{
 		uint32_t ptSize;
@@ -281,6 +297,10 @@ namespace Crystal
 			Spinner,
 			SpinnerBtnDecrement,
 			SpinnerBtnIncrement,
+			Checkbox,
+			CheckboxTickmarkUnchecked,
+			CheckboxTickmarkChecked,
+			CheckboxTickmarkThirdState,
 			NumSkinWidgetTypes
 		};
 	}

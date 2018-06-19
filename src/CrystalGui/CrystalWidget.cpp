@@ -27,6 +27,7 @@ namespace Crystal
 		m_keyboardNavigable( false ),
 		m_childrenClickable( false ),
 		m_pressable( true ),
+		m_culled( false ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( manager->getCanvasSize() ),
@@ -486,7 +487,7 @@ namespace Crystal
 
 		Ogre::Vector2 currentScroll = getCurrentScroll();
 
-		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
+		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
 
 		while( itor != end )
@@ -555,6 +556,68 @@ namespace Crystal
 										  const Ogre::Matrix3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
+
+		m_culled = true;
+
+		if( !m_parent->intersectsChild( this, parentCurrentScrollPos ) || m_hidden )
+			return;
+
+		m_culled = false;
+
+		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+
+		Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft +
+										m_parent->m_clipBorderTL * invCanvasSize2x;
+		Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight -
+										m_parent->m_clipBorderBR * invCanvasSize2x;
+
+		parentDerivedTL.makeCeil( m_parent->m_accumMinClipTL );
+		parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );
+		m_accumMinClipTL = parentDerivedTL;
+		m_accumMaxClipBR = parentDerivedBR;
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		const Ogre::Vector2 currentScrollPos = Ogre::Vector2::ZERO /*getCurrentScroll()*/;
+		const Ogre::Vector2 outerTopLeft = this->m_derivedTopLeft;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
+													   (m_clipBorderTL - currentScrollPos) *
+													   invCanvasSize2x;
+
+		while( itor != end )
+		{
+			(*itor)->_fillBuffersAndCommands( vertexBuffer, textVertBuffer,
+											  outerTopLeftWithClipping, currentScrollPos,
+											  m_derivedOrientation );
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Widget::addNonRenderableCommands( ApiEncapsulatedObjects &apiObject )
+	{
+		if( m_culled )
+			return;
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
+
+		while( itor != end )
+		{
+			(*itor)->addNonRenderableCommands( apiObject );
+			++itor;
+		}
+
+		itor = m_children.begin() + m_numNonRenderables;
+		end  = m_children.end();
+
+		while( itor != end )
+		{
+			CRYSTAL_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
+			Renderable *asRenderable = static_cast<Renderable*>( *itor );
+			asRenderable->_addCommands( apiObject );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setState( States::States state, bool smartHighlight, bool broadcastEnable )

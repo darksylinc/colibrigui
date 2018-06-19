@@ -29,6 +29,7 @@
 #include "CrystalGui/CrystalManager.h"
 #include "CrystalGui/CrystalWindow.h"
 #include "CrystalGui/CrystalButton.h"
+#include "CrystalGui/CrystalCheckbox.h"
 #include "CrystalGui/CrystalLabel.h"
 #include "CrystalGui/CrystalSpinner.h"
 
@@ -42,6 +43,7 @@ namespace Demo
 	Crystal::Button *button0 = 0;
 	Crystal::Button *button1 = 0;
 	Crystal::Spinner *spinner0 = 0;
+	Crystal::Checkbox *checkbox0 = 0;
 
     CrystalGuiGameState::CrystalGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -80,7 +82,7 @@ namespace Demo
 
 		button0 = crystalManager->createWidget<Crystal::Button>( mainWindow );
 		button0->setSkinPack( "ButtonSkin" );
-		button0->setTopLeft( Ogre::Vector2( 0.1, 0.1 ) );
+		button0->setTopLeft( Ogre::Vector2( 0.1, 0.21 ) );
 		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 		button0->getLabel()->setText( "Button 0" );
 
@@ -100,10 +102,14 @@ namespace Demo
 		button1->setTopLeft( Ogre::Vector2( 0.1 + 0.25, 0.1 + 0.1 + 0.25 + 0.1 ) );
 		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
-		spinner0 = crystalManager->createWidget<Crystal::Spinner>( mainWindow );
+		/*spinner0 = crystalManager->createWidget<Crystal::Spinner>( mainWindow );
 		spinner0->setSkinPack( "ButtonSkin" );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
+		checkbox0 = crystalManager->createWidget<Crystal::Checkbox>( mainWindow );
+		checkbox0->setSkinPack( "ButtonSkin" );
+		checkbox0->setTopLeft( Ogre::Vector2::ZERO );
+		checkbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 #if 0
 		Crystal::Label *label = crystalManager->createWidget<Crystal::Label>( mainWindow );
@@ -160,7 +166,6 @@ namespace Demo
 //		label->sizeToFit( Crystal::States::Idle, 0.5f,
 //						  Crystal::TextHorizAlignment::Center, Crystal::TextVertAlignment::Center );
 		label->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 1.0f ) );
-
 #endif
 		mainWindow->sizeScrollToFit();
 

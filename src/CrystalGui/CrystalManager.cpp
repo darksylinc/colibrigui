@@ -1109,7 +1109,7 @@ namespace Crystal
 
 		while( itor != end )
 		{
-			(*itor)->addCommands( apiObjects );
+			(*itor)->_addCommands( apiObjects );
 			++itor;
 		}
 

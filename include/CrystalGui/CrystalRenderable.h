@@ -78,8 +78,6 @@ namespace Crystal
 	protected:
 		StateInformation m_stateInformation[States::NumStates];
 
-		bool m_culled;
-
 		Ogre::ColourValue	m_colour;
 
 		/// WARNING: Most of the code assumes m_numVertices is hardcoded to 6*9;
@@ -88,8 +86,10 @@ namespace Crystal
 		/// also acknowledges that!
 		uint32_t			m_numVertices;
 
-		void addCommands( ApiEncapsulatedObjects &apiObject );
+	public:
+		void _addCommands( ApiEncapsulatedObjects &apiObject );
 
+	protected:
 		inline void addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,
 							 Ogre::Vector2 bottomRight,

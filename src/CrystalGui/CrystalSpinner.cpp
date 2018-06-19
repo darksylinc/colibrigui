@@ -6,11 +6,6 @@
 
 #include "OgreLwString.h"
 
-#define TODO_disable_decrement
-#define TODO_enable_decrement
-#define TODO_disable_increment
-#define TODO_enable_increment
-
 namespace Crystal
 {
 	Spinner::Spinner( CrystalManager *manager ) :
@@ -25,7 +20,8 @@ namespace Crystal
 		m_denominator( 1 ),
 		m_valueLocationFraction( 0.8f, 0.5f ),
 		m_arrowButtonSize( -1 ),
-		m_horizontal( true )
+		m_horizontal( true ),
+		m_horizDir( HorizWidgetDir::AutoRTL )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -103,7 +99,9 @@ namespace Crystal
 			m_increment->setState( m_currentState );
 		}
 
-		if( m_manager->swapRTLControls() )
+		const bool rightToLeft = m_manager->shouldSwapRTL( m_horizDir );
+
+		if( rightToLeft )
 		{
 			Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
 			m_optionLabel->sizeToFit( States::Idle, sizeAfterClipping.x * m_valueLocationFraction.x );
@@ -233,6 +231,12 @@ namespace Crystal
 	const std::vector<std::string>& Spinner::getOptions() const
 	{
 		return m_options;
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir )
+	{
+		m_horizDir = horizWidgetDir;
+		updateOptionLabel();
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::setTransformDirty()

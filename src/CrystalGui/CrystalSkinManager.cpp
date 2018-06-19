@@ -355,13 +355,17 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void SkinManager::loadDefaultSkinPacks( const rapidjson::Value &packsValue, const char *filename )
 	{
-		const char *c_strSkinWidgetTypes[SkinWidgetTypes::NumSkinWidgetTypes] =
+		const char *c_strSkinWidgetTypes[] =
 		{
 			"Window",
 			"Button",
 			"Spinner",
 			"SpinnerBtnDecrement",
-			"SpinnerBtnIncrement"
+			"SpinnerBtnIncrement",
+			"Checkbox",
+			"CheckboxTickmarkUnchecked",
+			"CheckboxTickmarkChecked",
+			"CheckboxTickmarkThirdState",
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];

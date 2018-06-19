@@ -29,7 +29,6 @@ namespace Crystal
 		CrystalOgreRenderable( Ogre::Id::generateNewId<Ogre::CrystalOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u, manager ),
-		m_culled( false ),
 		m_colour( Ogre::ColourValue::White ),
 		m_numVertices( 6u * 9u )
 	{
@@ -135,7 +134,7 @@ namespace Crystal
 		Widget::broadcastNewVao( vao, textVao );
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::addCommands( ApiEncapsulatedObjects &apiObject )
+	void Renderable::_addCommands( ApiEncapsulatedObjects &apiObject )
 	{
 		if( m_culled )
 			return;
@@ -221,14 +220,23 @@ namespace Crystal
 		apiObject.accumPrimCount[widgetType] += m_numVertices;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
-		WidgetVec::const_iterator itor = m_children.begin() + m_numNonRenderables;
-		WidgetVec::const_iterator end  = m_children.end();
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
+
+		while( itor != end )
+		{
+			(*itor)->addNonRenderableCommands( apiObject );
+			++itor;
+		}
+
+		itor = m_children.begin() + m_numNonRenderables;
+		end  = m_children.end();
 
 		while( itor != end )
 		{
 			CRYSTAL_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
 			Renderable *asRenderable = static_cast<Renderable*>( *itor );
-			asRenderable->addCommands( apiObject );
+			asRenderable->_addCommands( apiObject );
 			++itor;
 		}
 	}

@@ -44,6 +44,7 @@ namespace Crystal
 		Ogre::Vector2	m_arrowButtonSize;
 
 		bool			m_horizontal;
+		HorizWidgetDir::HorizWidgetDir	m_horizDir;
 
 		std::vector<std::string>	m_options;
 
@@ -116,6 +117,19 @@ namespace Crystal
 		*/
 		void setOptions( const std::vector<std::string> &options );
 		const std::vector<std::string>& getOptions() const;
+
+		/** Sets the horizontal direction. Only useful when the spinner is horizontal.
+			See HorizWidgetDir::HorizWidgetDir
+		@remarks
+			This controls the location of the UI: whether the options and the increase/decrease
+			buttons are to the left or the right of the text.
+			However it does not control other localization details. For example,
+			if CrystalManager::swapRTLControls() returns true, then pushing left will increase
+			instead of decrease, regardless of the value of horizWidgetDir.
+		@param horizWidgetDir
+		*/
+		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
+		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }
 
 		virtual void setTransformDirty();
 
