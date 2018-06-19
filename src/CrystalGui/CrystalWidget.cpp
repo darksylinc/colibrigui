@@ -394,7 +394,7 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	bool Widget::isKeyboardNavigable() const
 	{
-		return m_keyboardNavigable && (!m_hidden || m_currentState == States::Disabled);
+		return m_keyboardNavigable && (!m_hidden && m_currentState != States::Disabled);
 	}
 	//-------------------------------------------------------------------------
 	bool Widget::hasClickableChildren() const
