@@ -3,11 +3,11 @@ Crystal Gui library
  * https://bitbucket.org/dark_sylinc/crystalgui/ (mercurial)
  * https://github.com/darksylinc/crystalgui/ (git)
 
-We use [https://github.com/schacon/hg-git](hg-git plugin) to
+We use [hg-git plugin](https://github.com/schacon/hg-git) to
 interoperate between Mercurial & Git.
 
 It's simple: I prefer Mercurial over Git
-[http://www.yosoygames.com.ar/wp/2016/08/git-the-linux-kernel-and-other-projects/](a lot),
+[a lot](http://www.yosoygames.com.ar/wp/2016/08/git-the-linux-kernel-and-other-projects/),
 but I recognize Github's tools are superior (community, ticket system, pull requests)-
 
 Any Pull Request or Ticket must be submitted to Github repo and must not break hg-git
