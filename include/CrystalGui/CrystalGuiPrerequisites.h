@@ -1,3 +1,4 @@
+/// @file CrystalGuiPrerequisites.h
 
 #pragma once
 
@@ -27,12 +28,15 @@
 
 CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
+/// @defgroup Controls
+/// @defgroup Api_Backend
 namespace Crystal
 {
 	class Button;
 	struct CachedGlyph;
 	class Checkbox;
 	class CrystalManager;
+	class Editbox;
 	class Label;
 	class LogListener;
 	class Renderable;
@@ -276,14 +280,17 @@ namespace Crystal
 		enum LinebreakMode
 		{
 			/// Words will be broken into the next newline.
+			/// Our word-wrap algorithm is quite simple: spaces, tabs, commas and
+			/// similar characters are used to identify separation of words. This works
+			/// well for popular languages such as western ones (English, Spanish, German, etc)
+			/// and some eastern scripts.
+			/// However it does not properly perform word breaking for complex languages
+			/// such as Thai, Chinese or Japanese; as these would require us to include very
+			/// big unicode dictionaries, which goes against CrystalGui's philosophy of
+			/// being small.
 			WordWrap,
 			/// Text outside bounds will disapear
 			Clip
-			/// Unsupported: WordWrap would need us to include very big unicode datafiles
-			/// for word recognition (which bloats binary size and memory consumption) or
-			/// depend on system files to do it. Both solutions go against CrystalGui's
-			/// philosophy
-			/// WordWrap
 		};
 	}
 
@@ -301,6 +308,7 @@ namespace Crystal
 			CheckboxTickmarkUnchecked,
 			CheckboxTickmarkChecked,
 			CheckboxTickmarkThirdState,
+			Editbox,
 			NumSkinWidgetTypes
 		};
 	}

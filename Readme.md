@@ -34,3 +34,14 @@ Known issues
 
 1. Mixing multiple font sizes into the same Label, the correct height for the newline
 will not always be correctly calculated and thus be overestimated.
+
+
+How to build docs
+=================
+
+You'll need:
+
+1. CMake 3.9 or higher
+1. Doxygen. `sudo apt install doxygen`
+
+Create the CMake script and type: `ninja doxygen`

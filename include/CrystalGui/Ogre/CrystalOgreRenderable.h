@@ -9,10 +9,15 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Ogre
 {
-	/** CrystalOgreRenderables receive the shared Vao from their parents
+	/** @ingroup Api_Backend
+	@class CrystalOgreRenderables
+		CrystalOgreRenderables receive the shared Vao from their parents
 		(when 'this' is not a window).
+
 		Only Windows have their own Vao, which they share with their
 		children (except child windows).
+
+		This is an Ogre3D specifc class needed to render the widgets on screen.
 	*/
 	class CrystalOgreRenderable : public MovableObject, public Renderable
 	{

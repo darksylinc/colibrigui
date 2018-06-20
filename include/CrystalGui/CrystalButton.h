@@ -7,6 +7,9 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
+	/** @ingroup Controls
+	@class Button
+	*/
 	class Button : public Renderable
 	{
 		Label	*m_label;

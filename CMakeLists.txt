@@ -10,8 +10,16 @@
 
 #set( CMAKE_TOOLCHAIN_FILE CMake/iOS.cmake )
 
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.3 )
 project( CrystalGui )
+
+if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
+	# We need to do this first, as OGRE.cmake will add another FindDoxygen.cmake file
+	# which is older than the system-provided one.
+	find_package(	Doxygen
+					REQUIRED dot
+					OPTIONAL_COMPONENTS mscgen dia )
+endif()
 
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
 
@@ -58,4 +66,15 @@ if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/Info.plist )
 	#set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE SampleBrowser_OSX.icns)
 	set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework QuartzCore -framework UIKit -framework Metal -framework MetalKit -framework ModelIO" )
+endif()
+
+if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
+	if( DOXYGEN_FOUND )
+		set( DOXYGEN_EXTRACT_ALL NO )
+		set( DOXYGEN_EXTRACT_PRIVATE YES )
+		set( DOXYGEN_EXTRACT_PACKAGE YES )
+		set( DOXYGEN_EXTRACT_STATIC YES )
+		set( DOXYGEN_EXTRACT_LOCAL_METHODS YES )
+		doxygen_add_docs( doxygen ${SOURCES} ${HEADERS} )
+	endif()
 endif()

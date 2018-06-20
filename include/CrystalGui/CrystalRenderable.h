@@ -47,6 +47,16 @@ namespace Crystal
 		float clipDistance[Borders::NumBorders];
 	};
 
+	/** @ingroup Api_Backend
+	@class ApiEncapsulatedObjects
+		This structure encapsulates API-specific pointers required for rendering.
+		Most or all of the classes inside this structure are forward declared to
+		isolate CrystalGui's code from knowing about the 3D API backend as much as
+		possible
+
+		It's an argument to Renderable::_addCommands. Whatever happens inside
+		Renderable::_addCommands will obviously be very API-specific.
+	*/
 	struct ApiEncapsulatedObjects
 	{
 		//Ogre::HlmsCrystalGui		*hlms;
@@ -70,6 +80,7 @@ namespace Crystal
 	};
 
 	/**
+	@class Renderable
 		Renderable must derive from Ogre::CrystalOgreRenderable (or encapsulated class)
 		We can only share Vaos & Vertex Buffers, which will be owned by Window.
 	*/

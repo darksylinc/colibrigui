@@ -9,7 +9,8 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
-	/** Checkbox
+	/** @ingroup Controls
+	@class Checkbox
 	*/
 	class Checkbox : public Widget, public WidgetActionListener
 	{

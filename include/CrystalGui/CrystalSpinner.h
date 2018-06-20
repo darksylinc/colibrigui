@@ -7,18 +7,20 @@ CRYSTALGUI_ASSUME_NONNULL_BEGIN
 
 namespace Crystal
 {
-	/** Spinner – value input control which has small up and down buttons
+	/** @ingroup Controls
+	@class Spinner
+		Value input control which has small up and down buttons
 		to step through a range of values'
 
 		This implementation has two modes of operation:
-
+	@par
 		Via list:
 			The choices are in m_option, and the current one is in m_option[m_currentValue]
 			If m_currentValue for some reason is out of range, it gets clamped to become in range.
 			m_minValue must be 0.
 			m_maxValue must be m_options.size() - 1u
 			m_denominator must be 1
-
+	@par
 		List-less (numbers only):
 			m_options is empty, and m_currentValue is in range [m_minValue; m_maxValue]. The actual
 			value displayed is m_currentValue / m_denominator; thus supporting fractional numbers
@@ -59,7 +61,7 @@ namespace Crystal
 		Label* getLabel();
 
 		/** Sets the current value of the spinner. If the value is outside of range, it gets clamped
-			See setRange, setOptions
+			See Spinner::setRange, Spinner::setOptions
 		@remarks
 			Calling this function won't trigger the listeners, even if the value gets clamped.
 			You can do that yourself by doing callActionListeners( Action::ValueChanged )
@@ -73,9 +75,9 @@ namespace Crystal
 				spinner->setDenominator( 2 );
 			@endcode
 			Will display the value "2.5" since 5 / 2 = 2.5
-			This call is ignored if operating in list mode. See setOptions.
+			This call is ignored if operating in list mode. See Spinner::setOptions.
 		@remarks
-			See setCurrentValue remarks
+			See Spinner::setCurrentValue remarks
 		*/
 		void setDenominator( int32_t denominator );
 
@@ -97,7 +99,7 @@ namespace Crystal
 			If the Spinner is currently in list mode (you called setOptions with a non-empty list)
 			then this call is ignored and an assert and a warning are triggered.
 		@remarks
-			See setCurrentValue remarks
+			See Spinner::setCurrentValue remarks
 		@param minValue
 			Must be minValue <= maxValue
 		@param maxValue
@@ -112,7 +114,7 @@ namespace Crystal
 			get altered to match that of the list (min = 0, max = options.size() - 1)
 			and current value gets clamped to valid range
 		@remarks
-			See setCurrentValue remarks
+			See Spinner::setCurrentValue remarks
 		@param options
 		*/
 		void setOptions( const std::vector<std::string> &options );

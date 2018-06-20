@@ -10,6 +10,9 @@ namespace Crystal
 {
 	typedef std::vector<RichText> RichTextVec;
 
+	/** @ingroup Controls
+	@class Label
+	*/
 	class Label : public Renderable
 	{
 		struct Word
