@@ -1,0 +1,16 @@
+build/
+bin/Debug/
+bin/MinSizeRel/
+bin/Release/
+bin/RelWithDebInfo/
+bin/Data/Hlms/Common/
+bin/Data/Hlms/Pbs/
+bin/Data/Hlms/Unlit/
+bin/Data/Materials/Common
+bin/Data/DebugPack.zip
+bin/Data/resources2.cfg
+include/OgreCommon/
+src/OgreCommon/
+
+Dependencies/Ogre
+Dependencies/build_result/
