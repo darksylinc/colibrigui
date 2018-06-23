@@ -11,7 +11,7 @@
 #set( CMAKE_TOOLCHAIN_FILE CMake/iOS.cmake )
 
 cmake_minimum_required( VERSION 3.3 )
-project( CrystalGui )
+project( ColibriGui )
 
 if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
 	# We need to do this first, as OGRE.cmake will add another FindDoxygen.cmake file
