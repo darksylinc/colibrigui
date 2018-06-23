@@ -30,6 +30,7 @@
 #include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriCheckbox.h"
+#include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriSpinner.h"
 
@@ -44,6 +45,7 @@ namespace Demo
 	Colibri::Button *button1 = 0;
 	Colibri::Spinner *spinner0 = 0;
 	Colibri::Checkbox *checkbox0 = 0;
+	Colibri::Editbox *editbox0 = 0;
 
     ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -106,10 +108,14 @@ namespace Demo
 		spinner0->setSkinPack( "ButtonSkin" );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
 		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
-		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		/*checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->setSkinPack( "ButtonSkin" );
 		checkbox0->setTopLeft( Ogre::Vector2::ZERO );
-		checkbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		checkbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
+		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
+		editbox0->setSkinPack( "ButtonSkin" );
+		editbox0->setTopLeft( Ogre::Vector2::ZERO );
+		editbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 
 #if 0
 		Colibri::Label *label = colibriManager->createWidget<Colibri::Label>( mainWindow );
@@ -190,6 +196,7 @@ namespace Demo
 		}
 
 		colibriManager->update( timeSinceLast );
+		editbox0->update();
 
 		/*static float angle = 0;
 		Ogre::Matrix3 rotMat;

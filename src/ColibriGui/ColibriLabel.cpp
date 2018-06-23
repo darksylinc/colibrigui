@@ -1190,6 +1190,9 @@ namespace Colibri
 
 		Ogre::Vector2 localTopLeft = m_position;
 
+		const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();
+		const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
+
 		glyphIdx = std::min( glyphIdx, m_shapes[m_currentState].size() );
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + glyphIdx;
 
@@ -1197,13 +1200,23 @@ namespace Colibri
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();
-			const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
-
 			Ogre::Vector2 topLeft;
 			topLeft = shapedGlyph.caretPos;
+			topLeft.x += shapedGlyph.glyph->bearingX;
 			topLeft.y -= shapedGlyph.glyph->newlineSize;
 			localTopLeft += topLeft * invWindowRes * canvasSize;
+
+			ptSize = shapedGlyph.glyph->ptSize;
+		}
+		else if( !m_shapes[m_currentState].empty() )
+		{
+			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState].back();
+
+			Ogre::Vector2 topRight;
+			topRight = shapedGlyph.caretPos;
+			topRight.x += shapedGlyph.advance.x + 1.0f;
+			topRight.y -= shapedGlyph.glyph->newlineSize;
+			localTopLeft += topRight * invWindowRes * canvasSize;
 
 			ptSize = shapedGlyph.glyph->ptSize;
 		}

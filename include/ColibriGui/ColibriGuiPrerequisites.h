@@ -37,6 +37,7 @@ namespace Colibri
 	struct CachedGlyph;
 	class Checkbox;
 	class ColibriManager;
+	class Editbox;
 	class Label;
 	class LogListener;
 	class Renderable;
@@ -340,6 +341,7 @@ namespace Colibri
 			CheckboxTickmarkUnchecked,
 			CheckboxTickmarkChecked,
 			CheckboxTickmarkThirdState,
+			Editbox,
 			NumSkinWidgetTypes
 		};
 	}

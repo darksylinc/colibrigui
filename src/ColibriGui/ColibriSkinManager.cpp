@@ -366,6 +366,7 @@ namespace Colibri
 			"CheckboxTickmarkUnchecked",
 			"CheckboxTickmarkChecked",
 			"CheckboxTickmarkThirdState",
+			"Editbox"
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];

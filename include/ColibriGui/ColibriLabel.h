@@ -188,8 +188,11 @@ namespace Colibri
 
 		/** Retrieve the position of the caret (e.g. where to place a blinking cursor) based
 			on the index to its glyph
+		@remarks
+			If glyphIdx is past the end of the last glyphs, the returned position will be to the
+			right of the last glyph, rather than at the left.
 		@param glyphIdx
-			Index to the glyph.
+			Index to the glyph. Out of bounds values get clamped.
 		@param ptSize [out]
 			Font size at that glyph
 		@return
