@@ -391,6 +391,9 @@ namespace Colibri
 		/// See ColibriManager::setTextEdit
 		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
 
+		/// See ColibriManager::setTextSpecialKey
+		virtual void _setTextSpecialKey( uint32_t keyCode );
+
 		/// See ColibriManager::setTextInput
 		virtual void _setTextInput( const char *text );
 

@@ -11,6 +11,7 @@ namespace Colibri
 	{
 		Label		*m_label;
 		Label		*m_caret;
+		/// It's in code points (i.e. UTF32)
 		uint32_t	m_cursorPos;
 
 	public:
@@ -24,6 +25,7 @@ namespace Colibri
 		void update();
 
 		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
+		virtual void _setTextSpecialKey( uint32_t keyCode );
 		virtual void _setTextInput( const char *text );
 		virtual bool wantsTextInput() const;
 

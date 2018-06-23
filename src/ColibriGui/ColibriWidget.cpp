@@ -781,6 +781,10 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_setTextSpecialKey( uint32_t keyCode )
+	{
+	}
+	//-------------------------------------------------------------------------
 	void Widget::_setTextInput( const char *text )
 	{
 	}

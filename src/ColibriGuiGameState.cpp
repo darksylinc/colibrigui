@@ -263,18 +263,24 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
 	{
-		if( arg.keysym.sym == SDLK_w || arg.keysym.sym == SDLK_UP )
+		const bool isTextInputActive = SDL_IsTextInputActive();
+
+		if( (arg.keysym.sym == SDLK_w && !isTextInputActive) || arg.keysym.sym == SDLK_UP )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Top );
-		else if( arg.keysym.sym == SDLK_s || arg.keysym.sym == SDLK_DOWN )
+		else if( (arg.keysym.sym == SDLK_s && !isTextInputActive) || arg.keysym.sym == SDLK_DOWN )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Bottom );
-		else if( arg.keysym.sym == SDLK_a || arg.keysym.sym == SDLK_LEFT )
+		else if( (arg.keysym.sym == SDLK_a && !isTextInputActive) || arg.keysym.sym == SDLK_LEFT )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Left );
-		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
+		else if( (arg.keysym.sym == SDLK_d && !isTextInputActive) || arg.keysym.sym == SDLK_RIGHT )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Right );
 		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
-			arg.keysym.sym == SDLK_SPACE )
+				 (arg.keysym.sym == SDLK_SPACE && !isTextInputActive) )
 		{
 			colibriManager->setKeyboardPrimaryPressed();
+		}
+		else if( isTextInputActive )
+		{
+			colibriManager->setTextSpecialKeyPressed( arg.keysym.sym );
 		}
 	}
     //-----------------------------------------------------------------------------------
@@ -286,18 +292,24 @@ namespace Demo
             return;
         }
 
-		if( arg.keysym.sym == SDLK_w || arg.keysym.sym == SDLK_UP )
+		const bool isTextInputActive = SDL_IsTextInputActive();
+
+		if( (arg.keysym.sym == SDLK_w && !isTextInputActive) || arg.keysym.sym == SDLK_UP )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Top );
-		else if( arg.keysym.sym == SDLK_s || arg.keysym.sym == SDLK_DOWN )
+		else if( (arg.keysym.sym == SDLK_s && !isTextInputActive) || arg.keysym.sym == SDLK_DOWN )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Bottom );
-		else if( arg.keysym.sym == SDLK_a || arg.keysym.sym == SDLK_LEFT )
+		else if( (arg.keysym.sym == SDLK_a && !isTextInputActive) || arg.keysym.sym == SDLK_LEFT )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Left );
-		else if( arg.keysym.sym == SDLK_d || arg.keysym.sym == SDLK_RIGHT )
+		else if( (arg.keysym.sym == SDLK_d && !isTextInputActive) || arg.keysym.sym == SDLK_RIGHT )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Right );
 		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
-				 arg.keysym.sym == SDLK_SPACE )
+				 (arg.keysym.sym == SDLK_SPACE && !isTextInputActive) )
 		{
 			colibriManager->setKeyboardPrimaryReleased();
+		}
+		else if( isTextInputActive )
+		{
+			colibriManager->setTextSpecialKeyReleased( arg.keysym.sym );
 		}
 
 		TutorialGameState::keyReleased( arg );

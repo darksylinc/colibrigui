@@ -3,6 +3,10 @@
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriLabel.h"
 
+#include "unicode/unistr.h"
+
+#define TODO_text_edit
+
 namespace Colibri
 {
 	Editbox::Editbox( ColibriManager *manager ) :
@@ -63,16 +67,69 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Editbox::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
 	{
+		TODO_text_edit;
+	}
+	//-------------------------------------------------------------------------
+	namespace KeyCode
+	{
+		enum KeyCode
+		{
+			Backspace = '\b',
+			Delete = '\177'
+		};
+	}
+	void Editbox::_setTextSpecialKey( uint32_t keyCode )
+	{
+		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
+		{
+			const std::string &oldText = m_label->getText();
+			UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
+
+			//Convert m_cursorPos from code points to code units
+			int32_t offsetStart, offsetEnd;
+
+			if( keyCode == KeyCode::Backspace )
+			{
+				offsetEnd	= uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
+				offsetStart	= uStr.moveIndex32( offsetEnd, -1 );
+
+				//Set the new cursor position
+				if( m_cursorPos )
+					--m_cursorPos;
+			}
+			else
+			{
+				offsetStart	= uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
+				offsetEnd	= uStr.moveIndex32( offsetStart, 1 );
+			}
+
+			uStr.remove( offsetStart, offsetEnd - offsetStart );
+
+			//Convert back to UTF8
+			std::string result;
+			uStr.toUTF8String( result );
+			m_label->setText( result );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_setTextInput( const char *text )
 	{
-		std::string newText = m_label->getText();
-		const size_t oldSize = newText.size();
-		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)oldSize );
-		newText.insert( m_cursorPos, text );
-		m_label->setText( newText );
-		m_cursorPos += newText.size() - oldSize;
+		const std::string &oldText = m_label->getText();
+		UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
+		UnicodeString appendText( UnicodeString::fromUTF8( text ) );
+
+		//Convert m_cursorPos from code points to code units
+		const int32_t offset = uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
+		//Append the text
+		uStr.insert( offset, appendText );
+
+		//Convert back to UTF8
+		std::string result;
+		uStr.toUTF8String( result );
+		m_label->setText( result );
+
+		//Advance the cursor
+		m_cursorPos += appendText.countChar32();
 	}
 	//-------------------------------------------------------------------------
 	bool Editbox::wantsTextInput() const

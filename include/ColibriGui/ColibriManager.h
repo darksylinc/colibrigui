@@ -80,6 +80,8 @@ namespace Colibri
 		Borders::Borders m_keyDirDown;
 		float			m_keyRepeatWaitTimer;
 
+		uint32_t		m_keyTextInputDown;
+
 		/// Controls how much to wait before we start repeating
 		float			m_keyRepeatDelay;
 		/// Controls how fast we repeat
@@ -220,6 +222,8 @@ namespace Colibri
 
 		/// For understanding these params, see SDL_TextEditingEvent
 		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
+		void setTextSpecialKeyPressed( uint32_t keyCode );
+		void setTextSpecialKeyReleased( uint32_t keyCode );
 		void setTextInput( const char *text );
 		/// Returns true if the widget the keyboard is currently focused on accepts text input
 		bool focusedWantsTextInput() const;

@@ -56,6 +56,7 @@ namespace Colibri
 		m_primaryButtonDown( false ),
 		m_keyDirDown( Borders::NumBorders ),
 		m_keyRepeatWaitTimer( 0.0f ),
+		m_keyTextInputDown( 0 ),
 		m_keyRepeatDelay( 0.5f ),
 		m_timeDelayPerKeyStroke( 0.1f ),
 		m_defaultFontSize( 16u << 6u ),
@@ -491,6 +492,7 @@ namespace Colibri
 	{
 		updateKeyDirection( direction );
 		m_keyDirDown = direction;
+		m_keyTextInputDown = 0;
 		m_keyRepeatWaitTimer = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -529,6 +531,21 @@ namespace Colibri
 	{
 		if( m_keyboardFocusedPair.widget )
 			m_keyboardFocusedPair.widget->_setTextEdit( text, selectStart, selectLength );
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::setTextSpecialKeyPressed( uint32_t keyCode )
+	{
+		if( m_keyboardFocusedPair.widget )
+			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode );
+		if( m_keyDirDown != Borders::NumBorders )
+			setKeyDirectionReleased( m_keyDirDown );
+		m_keyTextInputDown = keyCode;
+		m_keyRepeatWaitTimer = 0;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::setTextSpecialKeyReleased( uint32_t keyCode )
+	{
+		m_keyTextInputDown = 0;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setTextInput( const char *text )
@@ -1002,6 +1019,21 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::update( float timeSinceLast )
 	{
+		//_setTextSpecialKey must be called before autosetNavigation
+		if( !m_keyboardFocusedPair.widget || !m_keyboardFocusedPair.widget->wantsTextInput() )
+			m_keyTextInputDown = 0;
+
+		if( m_keyTextInputDown )
+		{
+			while( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
+			{
+				m_keyboardFocusedPair.widget->_setTextSpecialKey( m_keyTextInputDown );
+				m_keyRepeatWaitTimer -= m_timeDelayPerKeyStroke;
+			}
+
+			m_keyRepeatWaitTimer += timeSinceLast;
+		}
+
 		autosetNavigation();
 
 		if( m_keyboardFocusedPair.widget && !m_keyboardFocusedPair.widget->isKeyboardNavigable() )
