@@ -1,7 +1,7 @@
-Crystal Gui library
+Colibri Gui library
 ===================
- * https://bitbucket.org/dark_sylinc/crystalgui/ (mercurial)
- * https://github.com/darksylinc/crystalgui/ (git)
+ * https://bitbucket.org/dark_sylinc/colibrigui/ (mercurial)
+ * https://github.com/darksylinc/colibrigui/ (git)
 
 We use [hg-git plugin](https://github.com/schacon/hg-git) to
 interoperate between Mercurial & Git.
@@ -13,6 +13,11 @@ but I recognize Github's tools are superior (community, ticket system, pull requ
 Any Pull Request or Ticket must be submitted to Github repo and must not break hg-git
 interoperability (you have to do very weird git branch stuff to break it).
 
+Originally this project was called "Crystal Gui", however googling around revealed this
+name was already taken by something completely unrelated. To prevent clashing, it
+was thus renamed to Colibri Gui, which doesn't seem to clash with anything at the
+time of the rebrand.
+
 
 Goals
 =====
@@ -22,7 +27,7 @@ Goals
 We perform text rendering using Freetype2 & HarfBuzz. Additionally these two depend on
 ZLib. These libraries are being included and have been tuned with defaults to use our own
 compiled versions, rather than system ones. The libraries are not using CoreText, Direct2D
-nor any other OS-specific rendering implementation. This allows CrystalGui's text engine
+nor any other OS-specific rendering implementation. This allows Colibri's text engine
 to be used on virtually any platform (e.g. Linux, Windows, Mac, iOS, Android) in a
 consistent manner, and without having to worry about ABI breakage.
 1. Freetype2 depends on HarfBuzz (optional) to enhance auto hinting. But for that to work,
