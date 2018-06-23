@@ -1,0 +1,11 @@
+@property( colibri_gui )
+
+@property( colibri_text )
+	@piece( custom_VStoPS )
+		float2 uvText @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
+		NO_INTERPOLATION_PREFIX uint glyphOffsetStart	NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
+		NO_INTERPOLATION_PREFIX uint pixelsPerRow		NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
+	@end
+@end
+
+@end

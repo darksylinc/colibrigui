@@ -21,13 +21,13 @@ compositor_node RenderingNode
             overlays	on
         }
 
-        pass custom crystal_gui
+        pass custom colibri_gui
         {
         }
     }
 }
 
-workspace CrystalGuiWorkspace
+workspace ColibriGuiWorkspace
 {
     connect_output					RenderingNode 0
 }
