@@ -525,6 +525,23 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
+	{
+		if( m_keyboardFocusedPair.widget )
+			m_keyboardFocusedPair.widget->_setTextEdit( text, selectStart, selectLength );
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::setTextInput( const char *text )
+	{
+		if( m_keyboardFocusedPair.widget )
+			m_keyboardFocusedPair.widget->_setTextInput( text );
+	}
+	//-------------------------------------------------------------------------
+	bool ColibriManager::focusedWantsTextInput() const
+	{
+		return m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->wantsTextInput();
+	}
+	//-------------------------------------------------------------------------
 	Window* ColibriManager::createWindow( Window * colibrigui_nullable parent )
 	{
 		COLIBRI_ASSERT( (!parent || parent->isWindow()) &&

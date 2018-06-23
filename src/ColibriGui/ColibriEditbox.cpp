@@ -61,6 +61,25 @@ namespace Colibri
 		m_caret->setDefaultFontSize( ptSize );
 	}
 	//-------------------------------------------------------------------------
+	void Editbox::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
+	{
+	}
+	//-------------------------------------------------------------------------
+	void Editbox::_setTextInput( const char *text )
+	{
+		std::string newText = m_label->getText();
+		const size_t oldSize = newText.size();
+		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)oldSize );
+		newText.insert( m_cursorPos, text );
+		m_label->setText( newText );
+		m_cursorPos += newText.size() - oldSize;
+	}
+	//-------------------------------------------------------------------------
+	bool Editbox::wantsTextInput() const
+	{
+		return true;
+	}
+	//-------------------------------------------------------------------------
 	Label* Editbox::getLabel()
 	{
 		return m_label;

@@ -1176,6 +1176,13 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	const std::string& Label::getText( States::States state )
+	{
+		if( state == States::NumStates )
+			state = m_currentState;
+		return m_text[state];
+	}
+	//-------------------------------------------------------------------------
 	size_t Label::getGlyphCount( States::States state ) const
 	{
 		if( state == States::NumStates )

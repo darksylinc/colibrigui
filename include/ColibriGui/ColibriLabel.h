@@ -177,6 +177,10 @@ namespace Colibri
 		*/
 		void setText( const std::string &text, States::States forState=States::NumStates );
 
+		/// Returns the text for the given state. When state == States::NumStates, it
+		/// returns the text from the current state
+		const std::string& getText( States::States state=States::NumStates );
+
 		/** Returns the number of shapes/glyphs used by the current text from the selected state.
 			Not to be confused with Label::getMaxNumGlyphs, which is used for rendering.
 		@param state

@@ -198,6 +198,11 @@ namespace Demo
 		colibriManager->update( timeSinceLast );
 		editbox0->update();
 
+		if( colibriManager->focusedWantsTextInput() && !SDL_IsTextInputActive() )
+			SDL_StartTextInput();
+		else if( !colibriManager->focusedWantsTextInput() && SDL_IsTextInputActive() )
+			SDL_StopTextInput();
+
 		/*static float angle = 0;
 		Ogre::Matrix3 rotMat;
 		rotMat.FromEulerAnglesXYZ( Ogre::Degree( 0 ), Ogre::Radian( 0 ), Ogre::Radian( angle ) );
@@ -244,6 +249,16 @@ namespace Demo
 	void ColibriGuiGameState::mouseReleased( const SDL_MouseButtonEvent &arg, Ogre::uint8 id )
 	{
 		colibriManager->setMouseCursorReleased();
+	}
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::textEditing( const SDL_TextEditingEvent &arg )
+	{
+		colibriManager->setTextEdit( arg.text, arg.start, arg.length );
+	}
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::textInput( const SDL_TextInputEvent &arg )
+	{
+		colibriManager->setTextInput( arg.text );
 	}
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )

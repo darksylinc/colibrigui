@@ -23,6 +23,10 @@ namespace Colibri
 
 		void update();
 
+		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
+		virtual void _setTextInput( const char *text );
+		virtual bool wantsTextInput() const;
+
 		virtual void setTransformDirty();
 
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );

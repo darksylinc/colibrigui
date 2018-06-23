@@ -777,6 +777,19 @@ namespace Colibri
 			updateDerivedTransform( Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
+	{
+	}
+	//-------------------------------------------------------------------------
+	void Widget::_setTextInput( const char *text )
+	{
+	}
+	//-------------------------------------------------------------------------
+	bool Widget::wantsTextInput() const
+	{
+		return false;
+	}
+	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedTopLeft() const
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_transformOutOfDate );

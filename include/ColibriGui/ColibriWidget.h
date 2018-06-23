@@ -388,6 +388,15 @@ namespace Colibri
 		/// Do not do it too often as it is not the most efficient solution.
 		void updateDerivedTransformFromParent( bool updateParent=true );
 
+		/// See ColibriManager::setTextEdit
+		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
+
+		/// See ColibriManager::setTextInput
+		virtual void _setTextInput( const char *text );
+
+		/// See ColibriManager::focusedWantsTextInput
+		virtual bool wantsTextInput() const;
+
 		/**
 		@remarks
 			Do not assume derived top left <= derived bottom right.

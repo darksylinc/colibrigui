@@ -218,6 +218,12 @@ namespace Colibri
 		void setKeyDirectionReleased( Borders::Borders direction );
 		void setScroll( const Ogre::Vector2 &scrollAmount );
 
+		/// For understanding these params, see SDL_TextEditingEvent
+		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
+		void setTextInput( const char *text );
+		/// Returns true if the widget the keyboard is currently focused on accepts text input
+		bool focusedWantsTextInput() const;
+
 		void setLogListener( LogListener *logListener );
 		LogListener* getLogListener() const		{ return m_logListener; }
 
