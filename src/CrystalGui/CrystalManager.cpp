@@ -58,6 +58,7 @@ namespace Crystal
 		m_keyRepeatWaitTimer( 0.0f ),
 		m_keyRepeatDelay( 0.5f ),
 		m_timeDelayPerKeyStroke( 0.1f ),
+		m_defaultFontSize( 16u << 6u ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 )
 	{
@@ -632,6 +633,11 @@ namespace Crystal
 			m_windows.push_back( window );
 		}
 	}
+	//-------------------------------------------------------------------------
+	void CrystalManager::_scheduleSetTransformDirty( Widget *widget )
+	{
+		m_dirtyWidgets.push_back( widget );
+	}
 	//-----------------------------------------------------------------------------------
 	void CrystalManager::overrideKeyboardFocusWith( const FocusPair &_focusedPair )
 	{
@@ -1018,6 +1024,19 @@ namespace Crystal
 		{
 			cursorFocusDirty |= (*itor)->update( timeSinceLast );
 			++itor;
+		}
+
+		{
+			WidgetVec::const_iterator itor = m_dirtyWidgets.begin();
+			WidgetVec::const_iterator end  = m_dirtyWidgets.end();
+
+			while( itor != end )
+			{
+				(*itor)->setTransformDirty();
+				++itor;
+			}
+
+			m_dirtyWidgets.clear();
 		}
 
 		if( cursorFocusDirty )

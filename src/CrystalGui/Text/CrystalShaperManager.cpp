@@ -493,7 +493,7 @@ namespace Crystal
 #else
 			const uint16_t *utf16Str = temp.getBuffer();
 #endif
-			shaper->setFontSize26d6( richText.ptSize );
+			shaper->setFontSize( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx, outShapes );
 		}
 

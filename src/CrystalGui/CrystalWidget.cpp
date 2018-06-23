@@ -670,8 +670,7 @@ namespace Crystal
 	{
 #if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = true;
-
-	#if CRYSTALGUI_DEBUG >= CRYSTALGUI_DEBUG_HIGH
+#endif
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
@@ -680,8 +679,11 @@ namespace Crystal
 			(*itor)->setTransformDirty();
 			++itor;
 		}
-	#endif
-#endif
+	}
+	//-------------------------------------------------------------------------
+	void Widget::scheduleSetTransformDirty()
+	{
+		m_manager->_scheduleSetTransformDirty( this );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
@@ -730,11 +732,17 @@ namespace Crystal
 	//-------------------------------------------------------------------------
 	void Widget::setClipBorders( float clipBorders[Borders::NumBorders] )
 	{
-		m_clipBorderTL.x = clipBorders[Borders::Left];
-		m_clipBorderTL.y = clipBorders[Borders::Top];
-		m_clipBorderBR.x = clipBorders[Borders::Right];
-		m_clipBorderBR.y = clipBorders[Borders::Bottom];
-		setTransformDirty();
+		if( m_clipBorderTL.x != clipBorders[Borders::Left]	||
+			m_clipBorderTL.y != clipBorders[Borders::Top]	||
+			m_clipBorderBR.x != clipBorders[Borders::Right]	||
+			m_clipBorderBR.y != clipBorders[Borders::Bottom] )
+		{
+			m_clipBorderTL.x = clipBorders[Borders::Left];
+			m_clipBorderTL.y = clipBorders[Borders::Top];
+			m_clipBorderBR.x = clipBorders[Borders::Right];
+			m_clipBorderBR.y = clipBorders[Borders::Bottom];
+			scheduleSetTransformDirty();
+		}
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::getTopLeftAfterClipping() const

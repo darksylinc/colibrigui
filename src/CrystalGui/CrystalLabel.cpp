@@ -26,6 +26,7 @@ namespace Crystal
 		m_shadowDisplace( 1.0f ),
 		m_backgroundSize( Ogre::Vector2::ZERO ),
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
+		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
@@ -122,13 +123,28 @@ namespace Crystal
 		m_shadowDisplace = shadowDisplace;
 	}
 	//-------------------------------------------------------------------------
+	void Label::setDefaultFontSize( FontSize defaultFontSize )
+	{
+		if( m_defaultFontSize != defaultFontSize )
+		{
+			for( size_t i=0; i<States::NumStates; ++i )
+			{
+				if( m_richText[i].size() == 1u )
+				{
+					m_richText[i].clear();
+					flagDirty( static_cast<States::States>( i ) );
+				}
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )
 	{
 		const size_t textSize = m_text[state].size();
 		if( m_richText[state].empty() )
 		{
 			RichText rt;
-			rt.ptSize = 16u << 6u;
+			rt.ptSize = m_defaultFontSize;
 			rt.rgba32 = m_colour.getAsABGR();
 			rt.noBackground = true;
 			rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
@@ -1158,6 +1174,41 @@ namespace Crystal
 				flagDirty( forState );
 			}
 		}
+	}
+	//-------------------------------------------------------------------------
+	size_t Label::getGlyphCount( States::States state ) const
+	{
+		if( state == States::NumStates )
+			state = m_currentState;
+
+		return m_shapes[m_currentState].size();
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Label::getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const
+	{
+		CRYSTAL_ASSERT_MEDIUM( !isAnyStateDirty() );
+
+		Ogre::Vector2 localTopLeft = m_position;
+
+		glyphIdx = std::min( glyphIdx, m_shapes[m_currentState].size() );
+		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + glyphIdx;
+
+		if( itor != m_shapes[m_currentState].end() )
+		{
+			const ShapedGlyph &shapedGlyph = *itor;
+
+			const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();
+			const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
+
+			Ogre::Vector2 topLeft;
+			topLeft = shapedGlyph.caretPos;
+			topLeft.y -= shapedGlyph.glyph->newlineSize;
+			localTopLeft += topLeft * invWindowRes * canvasSize;
+
+			ptSize = shapedGlyph.glyph->ptSize;
+		}
+
+		return localTopLeft;
 	}
 	//-------------------------------------------------------------------------
 	void Label::sizeToFit( States::States baseState, float maxAllowedWidth,

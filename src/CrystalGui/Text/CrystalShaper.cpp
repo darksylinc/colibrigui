@@ -60,7 +60,7 @@ namespace Crystal
 		m_buffer( 0 ),
 		m_library( shaperManager->getFreeTypeLibrary() ),
 		m_shaperManager( shaperManager ),
-		m_ptSize( 0 )
+		m_ptSize( 0u )
 	{
 		FT_Error errorCode = FT_New_Face( m_library, fontLocation, 0, &m_ftFont );
 		if( errorCode )
@@ -75,7 +75,7 @@ namespace Crystal
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
 
-		setFontSizeFloat( 24.0f );
+		setFontSize( FontSize( 24.0f ) );
 		force_ucs2_charmap( m_ftFont );
 
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );
@@ -114,21 +114,16 @@ namespace Crystal
 		m_features.push_back( feature );
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::setFontSizeFloat( float ptSize )
+	void Shaper::setFontSize( FontSize ptSize )
 	{
-		setFontSize26d6( static_cast<uint32_t>( round( ptSize * 64.0f ) ) );
-	}
-	//-------------------------------------------------------------------------
-	void Shaper::setFontSize26d6( uint32_t ptSize )
-	{
-		const uint32_t oldSize = m_ptSize;
+		const FontSize oldSize = m_ptSize;
 		m_ptSize = ptSize;
 
 		if( oldSize != m_ptSize )
 		{
 			const FT_UInt deviceHdpi = 96u;
 			const FT_UInt deviceVdpi = 96u;
-			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize,
+			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize.value26d6,
 												   deviceHdpi, deviceVdpi );
 			if( crystalgui_unlikely( errorCode ) )
 			{
@@ -139,7 +134,7 @@ namespace Crystal
 
 				errorMsg.clear();
 				errorMsg.a( "[Freetype2 error] Could set font size to ",
-							Ogre::LwString::Float( getFontSizeFloat(), 2 ),
+							Ogre::LwString::Float( ptSize.asFloat(), 2 ),
 							". errorCode: ", errorCode, " Desc: ",
 							ShaperManager::getErrorMessage( errorCode ) );
 				log->log( errorMsg.c_str(), LogSeverity::Error );
@@ -149,12 +144,7 @@ namespace Crystal
 		}
 	}
 	//-------------------------------------------------------------------------
-	float Shaper::getFontSizeFloat() const
-	{
-		return m_ptSize / 64.0f;
-	}
-	//-------------------------------------------------------------------------
-	uint32_t Shaper::getFontSize26d6() const
+	FontSize Shaper::getFontSize() const
 	{
 		return m_ptSize;
 	}
@@ -183,7 +173,7 @@ namespace Crystal
 		{
 			const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
 																	  glyphInfo[i].codepoint,
-																	  m_ptSize );
+																	  m_ptSize.value26d6 );
 
 			size_t cluster = glyphInfo[i].cluster;
 

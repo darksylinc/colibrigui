@@ -61,6 +61,8 @@ namespace Crystal
 					setDatablock( m_stateInformation[forState].materialName );
 			}
 		}
+
+		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setSkinPack( Ogre::IdString skinName )
@@ -85,6 +87,8 @@ namespace Crystal
 				}
 			}
 		}
+
+		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::_setSkinPack( SkinInfo const * crystalgui_nonnull
@@ -99,6 +103,8 @@ namespace Crystal
 					setDatablock( m_stateInformation[i].materialName );
 			}
 		}
+
+		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setState( States::States state, bool smartHighlight, bool broadcastEnable )
@@ -107,6 +113,8 @@ namespace Crystal
 
 		if( mHlmsDatablock->getName() != m_stateInformation[m_currentState].materialName )
 			setDatablock( m_stateInformation[m_currentState].materialName );
+
+		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setClipBordersMatchSkin()

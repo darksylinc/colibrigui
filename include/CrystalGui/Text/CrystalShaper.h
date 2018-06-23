@@ -46,7 +46,7 @@ namespace Crystal
 		FT_Library		m_library;
 		ShaperManager	*m_shaperManager;
 
-		uint32_t	m_ptSize; //Font size in points
+		FontSize	m_ptSize; //Font size in points
 
 	public:
 		Shaper( hb_script_t script, const char *fontLocation,
@@ -57,12 +57,8 @@ namespace Crystal
 		void setFeatures( const std::vector<hb_feature_t> &features );
 		void addFeatures( const hb_feature_t &feature );
 
-		/// Set the font size in points. Note the returned value by getFontSize
-		/// can differ as the float is internally converted to 26.6 fixed point
-		void setFontSizeFloat( float ptSize );
-		void setFontSize26d6( uint32_t ptSize );
-		float getFontSizeFloat() const;
-		uint32_t getFontSize26d6() const;
+		void setFontSize( FontSize ptSize );
+		FontSize getFontSize() const;
 
 		void renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
 						   uint32_t richTextIdx, ShapedGlyphVec &outShapes );

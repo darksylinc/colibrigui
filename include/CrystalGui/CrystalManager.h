@@ -45,6 +45,7 @@ namespace Crystal
 		size_t m_numLabels;
 		size_t m_numTextGlyphs; /// It's an upper bound. Current max number of glyphs may be lower
 		LabelVec m_dirtyLabels;
+		WidgetVec m_dirtyWidgets;
 
 		LogListener	*m_logListener;
 
@@ -83,6 +84,8 @@ namespace Crystal
 		float			m_keyRepeatDelay;
 		/// Controls how fast we repeat
 		float			m_timeDelayPerKeyStroke;
+
+		uint32_t		m_defaultFontSize;
 
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
@@ -137,6 +140,8 @@ namespace Crystal
 					(horizDir == HorizWidgetDir::AutoRTL && !m_swapRTLControls) ||
 					(horizDir == HorizWidgetDir::AutoLTR && m_swapRTLControls);
 		}
+
+		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
 
 		/**	Sets the default skins to be used when creating a new widget.
 			Usage:
@@ -226,6 +231,9 @@ namespace Crystal
 		void _setAsParentlessWindow( Window *window );
 		/// You can call this one directly
 		void setAsParentlessWindow( Window *window );
+
+		/// For internal use. Do NOT call directly
+		void _scheduleSetTransformDirty( Widget *widget );
 
 		/// Iterates through all windows and widgets, and calls setNextWidget to
 		/// set which widgets is connected to each other (via an heuristic)

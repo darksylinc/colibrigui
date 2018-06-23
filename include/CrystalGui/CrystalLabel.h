@@ -43,6 +43,7 @@ namespace Crystal
 
 		Ogre::Vector2 m_backgroundSize;
 		Ogre::ColourValue m_defaultBackgroundColour;
+		FontSize m_defaultFontSize;
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
@@ -126,6 +127,15 @@ namespace Crystal
 		void setVertReadingDir( VertReadingDir::VertReadingDir vertReadingDir );
 		VertReadingDir::VertReadingDir getVertReadingDir() const;
 
+		/** Sets the default font size
+		@remarks
+			If the new default font size is different, and there are states (See States::States)
+			that only have one rich edit entries (likely the one created by default, but not
+			necessarily), they will be cleared
+		*/
+		void setDefaultFontSize( FontSize defaultFontSize );
+		FontSize getDefaultFontSize() const							{ return m_defaultFontSize; }
+
 		/** Enables a shadow of the text behind each character, for highlighting or
 			making the text easier to read, specially against backgrounds of the same
 			colour as the text.
@@ -166,6 +176,26 @@ namespace Crystal
 			Use NumStates to affect all states
 		*/
 		void setText( const std::string &text, States::States forState=States::NumStates );
+
+		/** Returns the number of shapes/glyphs used by the current text from the selected state.
+			Not to be confused with Label::getMaxNumGlyphs, which is used for rendering.
+		@param state
+			When value == States::NumStates, retrieves the current state
+		@return
+			The value in m_shapes[m_currentState].size()
+		*/
+		size_t getGlyphCount( States::States state=States::NumStates ) const;
+
+		/** Retrieve the position of the caret (e.g. where to place a blinking cursor) based
+			on the index to its glyph
+		@param glyphIdx
+			Index to the glyph.
+		@param ptSize [out]
+			Font size at that glyph
+		@return
+			Top left to position the caret, in virtual canvas units.
+		*/
+		Ogre::Vector2 getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const;
 
 		/** Recalculates the size of the widget based on the text contents to fit tightly.
 			It may also reposition the Widget depending on newHorizPos & newVertPos

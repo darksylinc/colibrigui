@@ -132,6 +132,7 @@ namespace Crystal
 		virtual void stateChanged( States::States newState ) {}
 
 		virtual void setTransformDirty();
+		void scheduleSetTransformDirty();
 
 	public:
 		Widget( CrystalManager *manager );
@@ -365,6 +366,10 @@ namespace Crystal
 			Results are undefined if:
 				clipBorders[Borders::Left] + clipBorders[Borders::Right] > m_size.x
 				clipBorders[Borders::Top] + clipBorders[Borders::Bottom] > m_size.y
+		@remarks
+			These parameters call are likely going to be overwritten by
+			Renderable::setClipBordersMatchSkin every time the virtual function Widget::setState
+			is called
 		@param clipBorders
 		*/
 		void setClipBorders( float clipBorders[crystalgui_nonnull Borders::NumBorders] );

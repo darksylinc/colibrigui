@@ -24,6 +24,7 @@
 #endif
 
 #include <stdint.h>
+#include <math.h>
 #include "math_round.h"
 
 CRYSTALGUI_ASSUME_NONNULL_BEGIN
@@ -258,9 +259,41 @@ namespace Crystal
 		};
 	}
 
+	/**
+	@class FontSize
+		Font sizes are in points, represented by 26.6 fixed point.
+		This class allows converting to/from floats for easier handling
+	*/
+	struct FontSize
+	{
+		/// Fixed point 26.6
+		uint32_t value26d6;
+
+		FontSize() : value26d6( 0u ) {}
+		FontSize( uint32_t val ) : value26d6( val ) {}
+		FontSize( float val ) : value26d6( 0u )
+		{
+			fromFloat( val );
+		}
+
+		bool operator == ( const FontSize &other ) const
+		{ return this->value26d6 == other.value26d6; }
+		bool operator != ( const FontSize &other ) const
+		{ return this->value26d6 != other.value26d6; }
+
+		void fromFloat( float ptSize )
+		{
+			value26d6 = static_cast<uint32_t>( round( ptSize * 64.0f ) );
+		}
+		float asFloat() const
+		{
+			return value26d6 / 64.0f;
+		}
+	};
+
 	struct RichText
 	{
-		uint32_t ptSize;
+		FontSize ptSize;
 		uint32_t offset;
 		uint32_t length;
 		HorizReadingDir::HorizReadingDir readingDir;
