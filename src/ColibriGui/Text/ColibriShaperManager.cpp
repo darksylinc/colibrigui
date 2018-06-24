@@ -108,7 +108,7 @@ namespace Colibri
 	{
 		COLIBRI_ASSERT_LOW( font < m_shapers.size() );
 
-		m_shapers[font] = m_shapers[font];
+		m_shapers[0] = m_shapers[font];
 		switch( horizReadingDir )
 		{
 		case HorizReadingDir::Default:	m_defaultDirection = UBIDI_DEFAULT_LTR;	break;
@@ -253,14 +253,17 @@ namespace Colibri
 		std::pair<CachedGlyphMap::iterator, bool> pair =
 				m_glyphCache.insert( std::pair<uint64_t, CachedGlyph>( glyphKey, newGlyph ) );
 
-		//Copy the rasterized results to our atlas
-		memcpy( m_glyphAtlas + newGlyph.offsetStart, ftBitmap.buffer, newGlyph.getSizeBytes() );
+		if( newGlyph.getSizeBytes() > 0 )
 		{
-			//Schedule a transfer to the GPU.
-			Range dirtyRange;
-			dirtyRange.offset	= newGlyph.offsetStart;
-			dirtyRange.size		= newGlyph.getSizeBytes();
-			m_dirtyRanges.push_back( dirtyRange );
+			//Copy the rasterized results to our atlas
+			memcpy( m_glyphAtlas + newGlyph.offsetStart, ftBitmap.buffer, newGlyph.getSizeBytes() );
+			{
+				//Schedule a transfer to the GPU.
+				Range dirtyRange;
+				dirtyRange.offset	= newGlyph.offsetStart;
+				dirtyRange.size		= newGlyph.getSizeBytes();
+				m_dirtyRanges.push_back( dirtyRange );
+			}
 		}
 
 		return &pair.first->second;
