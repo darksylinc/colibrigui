@@ -789,6 +789,11 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
+	bool Widget::isTextMultiline() const
+	{
+		return false;
+	}
+	//-------------------------------------------------------------------------
 	bool Widget::wantsTextInput() const
 	{
 		return false;

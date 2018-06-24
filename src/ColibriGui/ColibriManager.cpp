@@ -554,6 +554,11 @@ namespace Colibri
 			m_keyboardFocusedPair.widget->_setTextInput( text );
 	}
 	//-------------------------------------------------------------------------
+	bool ColibriManager::isTextMultiline() const
+	{
+		return m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->isTextMultiline();
+	}
+	//-------------------------------------------------------------------------
 	bool ColibriManager::focusedWantsTextInput() const
 	{
 		return m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->wantsTextInput();

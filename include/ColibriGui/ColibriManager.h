@@ -225,6 +225,11 @@ namespace Colibri
 		void setTextSpecialKeyPressed( uint32_t keyCode );
 		void setTextSpecialKeyReleased( uint32_t keyCode );
 		void setTextInput( const char *text );
+		/// Returns true if the widget the keyboard is currently focused on supports multiple
+		/// lines. This means the app should not forward Enter presses as calls to
+		/// setKeyboardPrimaryPressed/setKeyboardPrimaryReleased but rather as
+		/// setTextSpecialKeyPressed/Released( '\\r' );
+		bool isTextMultiline() const;
 		/// Returns true if the widget the keyboard is currently focused on accepts text input
 		bool focusedWantsTextInput() const;
 

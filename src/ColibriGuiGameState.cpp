@@ -264,6 +264,7 @@ namespace Demo
 	void ColibriGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
 	{
 		const bool isTextInputActive = SDL_IsTextInputActive();
+		const bool isTextMultiline = colibriManager->isTextMultiline();
 
 		if( (arg.keysym.sym == SDLK_w && !isTextInputActive) || arg.keysym.sym == SDLK_UP )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Top );
@@ -273,14 +274,18 @@ namespace Demo
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Left );
 		else if( (arg.keysym.sym == SDLK_d && !isTextInputActive) || arg.keysym.sym == SDLK_RIGHT )
 			colibriManager->setKeyDirectionPressed( Colibri::Borders::Right );
-		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
+		else if( ((arg.keysym.sym == SDLK_RETURN ||
+				   arg.keysym.sym == SDLK_KP_ENTER) && !isTextMultiline) ||
 				 (arg.keysym.sym == SDLK_SPACE && !isTextInputActive) )
 		{
 			colibriManager->setKeyboardPrimaryPressed();
 		}
 		else if( isTextInputActive )
 		{
-			colibriManager->setTextSpecialKeyPressed( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
+			if( (arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER) && isTextMultiline )
+				colibriManager->setTextSpecialKeyPressed( SDLK_RETURN );
+			else
+				colibriManager->setTextSpecialKeyPressed( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
 		}
 	}
     //-----------------------------------------------------------------------------------
@@ -293,6 +298,7 @@ namespace Demo
         }
 
 		const bool isTextInputActive = SDL_IsTextInputActive();
+		const bool isTextMultiline = colibriManager->isTextMultiline();
 
 		if( (arg.keysym.sym == SDLK_w && !isTextInputActive) || arg.keysym.sym == SDLK_UP )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Top );
@@ -302,14 +308,18 @@ namespace Demo
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Left );
 		else if( (arg.keysym.sym == SDLK_d && !isTextInputActive) || arg.keysym.sym == SDLK_RIGHT )
 			colibriManager->setKeyDirectionReleased( Colibri::Borders::Right );
-		else if( arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER ||
+		else if( ((arg.keysym.sym == SDLK_RETURN ||
+				   arg.keysym.sym == SDLK_KP_ENTER) && !isTextMultiline) ||
 				 (arg.keysym.sym == SDLK_SPACE && !isTextInputActive) )
 		{
 			colibriManager->setKeyboardPrimaryReleased();
 		}
 		else if( isTextInputActive )
 		{
-			colibriManager->setTextSpecialKeyReleased( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
+			if( (arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER) && isTextMultiline )
+				colibriManager->setTextSpecialKeyReleased( SDLK_RETURN );
+			else
+				colibriManager->setTextSpecialKeyReleased( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
 		}
 
 		TutorialGameState::keyReleased( arg );

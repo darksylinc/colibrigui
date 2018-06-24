@@ -13,7 +13,8 @@ namespace Colibri
 		Renderable( manager ),
 		m_label( 0 ),
 		m_caret( 0 ),
-		m_cursorPos( 0 )
+		m_cursorPos( 0 ),
+		m_multiline( false )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -74,6 +75,7 @@ namespace Colibri
 	{
 		enum KeyCode
 		{
+			Enter = '\r',
 			Tab = '\t',
 			Backspace = '\b',
 			Delete = '\177',
@@ -121,9 +123,13 @@ namespace Colibri
 		{
 			m_cursorPos = static_cast<uint32_t>( m_label->getGlyphCount() );
 		}
-		else if( keyCode == KeyCode::Tab)
+		else if( keyCode == KeyCode::Tab )
 		{
 			_setTextInput( "\t" );
+		}
+		else if( keyCode == KeyCode::Enter )
+		{
+			_setTextInput( "\n" );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -145,6 +151,11 @@ namespace Colibri
 
 		//Advance the cursor
 		m_cursorPos += appendText.countChar32();
+	}
+	//-------------------------------------------------------------------------
+	bool Editbox::isTextMultiline() const
+	{
+		return m_multiline;
 	}
 	//-------------------------------------------------------------------------
 	bool Editbox::wantsTextInput() const

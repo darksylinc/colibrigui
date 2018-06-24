@@ -397,6 +397,9 @@ namespace Colibri
 		/// See ColibriManager::setTextInput
 		virtual void _setTextInput( const char *text );
 
+		/// See ColibriManager::isTextMultiline
+		virtual bool isTextMultiline() const;
+
 		/// See ColibriManager::focusedWantsTextInput
 		virtual bool wantsTextInput() const;
 
