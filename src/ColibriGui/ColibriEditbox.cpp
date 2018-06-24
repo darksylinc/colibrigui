@@ -33,10 +33,10 @@ namespace Colibri
 		m_label->setTextVertAlignment( TextVertAlignment::Top );
 
 		m_caret = m_manager->createWidget<Label>( this );
-		m_caret->setSize( m_manager->getCanvasSize() );
 		m_caret->setTextHorizAlignment( TextHorizAlignment::Left );
 		m_caret->setTextVertAlignment( TextVertAlignment::Top );
 		m_caret->setText( "|" );
+		m_caret->sizeToFit( States::Idle );
 
 		m_label->setText( "Hel lo" );
 
@@ -63,7 +63,12 @@ namespace Colibri
 
 		Ogre::Vector2 pos = m_label->getCaretTopLeft( m_cursorPos, ptSize );
 		m_caret->setTopLeft( pos - caretBearing * 2.0f );
-		m_caret->setDefaultFontSize( ptSize );
+
+		if( m_caret->getDefaultFontSize() != ptSize )
+		{
+			m_caret->setDefaultFontSize( ptSize );
+			m_caret->sizeToFit( States::Idle );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
@@ -151,6 +156,12 @@ namespace Colibri
 
 		//Advance the cursor
 		m_cursorPos += appendText.countChar32();
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Editbox::_getImeLocation()
+	{
+		m_caret->updateDerivedTransformFromParent();
+		return m_caret->getDerivedBottomRight();
 	}
 	//-------------------------------------------------------------------------
 	bool Editbox::isTextMultiline() const

@@ -397,6 +397,9 @@ namespace Colibri
 		/// See ColibriManager::setTextInput
 		virtual void _setTextInput( const char *text );
 
+		/// See ColibriManager::getImeLocation
+		virtual Ogre::Vector2 _getImeLocation();
+
 		/// See ColibriManager::isTextMultiline
 		virtual bool isTextMultiline() const;
 

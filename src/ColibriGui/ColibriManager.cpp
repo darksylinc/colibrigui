@@ -564,6 +564,18 @@ namespace Colibri
 		return m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->wantsTextInput();
 	}
 	//-------------------------------------------------------------------------
+	Ogre::Vector2 ColibriManager::getImeLocation()
+	{
+		Ogre::Vector2 retVal( Ogre::Vector2::ZERO );
+		if( m_keyboardFocusedPair.widget )
+		{
+			retVal = m_keyboardFocusedPair.widget->_getImeLocation();
+			retVal = (retVal + 1.0f) * m_halfWindowResolution;
+		}
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
 	Window* ColibriManager::createWindow( Window * colibrigui_nullable parent )
 	{
 		COLIBRI_ASSERT( (!parent || parent->isWindow()) &&

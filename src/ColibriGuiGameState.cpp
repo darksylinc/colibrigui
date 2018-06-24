@@ -198,10 +198,27 @@ namespace Demo
 		colibriManager->update( timeSinceLast );
 		editbox0->update();
 
-		if( colibriManager->focusedWantsTextInput() && !SDL_IsTextInputActive() )
+		const bool isTextInputActive = SDL_IsTextInputActive();
+
+		if( colibriManager->focusedWantsTextInput() && !isTextInputActive )
 			SDL_StartTextInput();
-		else if( !colibriManager->focusedWantsTextInput() && SDL_IsTextInputActive() )
+		else if( !colibriManager->focusedWantsTextInput() && isTextInputActive )
 			SDL_StopTextInput();
+
+		if( isTextInputActive )
+		{
+			static SDL_Rect oldRect = { 0, 0, 0, 0 };
+			//We tried to update this only inside ColibriGuiGameState::keyPressed
+			//but it didn't work well in Linux with fcitx
+			Ogre::Vector2 imeOffset = colibriManager->getImeLocation();
+			SDL_Rect rect;
+			rect.x = imeOffset.x;
+			rect.y = imeOffset.y;
+			rect.w = 0;
+			rect.h = 0;
+			if( oldRect.x != rect.x || oldRect.y != rect.y )
+				SDL_SetTextInputRect( &rect );
+		}
 
 		/*static float angle = 0;
 		Ogre::Matrix3 rotMat;

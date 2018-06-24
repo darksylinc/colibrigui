@@ -789,6 +789,11 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::_getImeLocation()
+	{
+		return Ogre::Vector2::ZERO;
+	}
+	//-------------------------------------------------------------------------
 	bool Widget::isTextMultiline() const
 	{
 		return false;

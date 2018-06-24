@@ -233,6 +233,10 @@ namespace Colibri
 		/// Returns true if the widget the keyboard is currently focused on accepts text input
 		bool focusedWantsTextInput() const;
 
+		/// Returns the position where to locate the virtual keyboard / IME (for CJK languages)
+		/// The value is in screen pixels
+		Ogre::Vector2 getImeLocation();
+
 		void setLogListener( LogListener *logListener );
 		LogListener* getLogListener() const		{ return m_logListener; }
 
