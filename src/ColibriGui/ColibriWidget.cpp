@@ -774,7 +774,7 @@ namespace Colibri
 									m_parent->m_derivedOrientation );
 		}
 		else
-			updateDerivedTransform( Ogre::Vector2::ZERO, Ogre::Matrix3::IDENTITY );
+			updateDerivedTransform( -Ogre::Vector2::UNIT_SCALE, Ogre::Matrix3::IDENTITY );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
