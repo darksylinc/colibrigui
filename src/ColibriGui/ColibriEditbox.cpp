@@ -74,8 +74,11 @@ namespace Colibri
 	{
 		enum KeyCode
 		{
+			Tab = '\t',
 			Backspace = '\b',
-			Delete = '\177'
+			Delete = '\177',
+			Home = 74,
+			End = 77
 		};
 	}
 	void Editbox::_setTextSpecialKey( uint32_t keyCode )
@@ -109,6 +112,18 @@ namespace Colibri
 			std::string result;
 			uStr.toUTF8String( result );
 			m_label->setText( result );
+		}
+		else if( keyCode == KeyCode::Home )
+		{
+			m_cursorPos = 0;
+		}
+		else if( keyCode == KeyCode::End )
+		{
+			m_cursorPos = static_cast<uint32_t>( m_label->getGlyphCount() );
+		}
+		else if( keyCode == KeyCode::Tab)
+		{
+			_setTextInput( "\t" );
 		}
 	}
 	//-------------------------------------------------------------------------

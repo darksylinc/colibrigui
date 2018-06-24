@@ -280,7 +280,7 @@ namespace Demo
 		}
 		else if( isTextInputActive )
 		{
-			colibriManager->setTextSpecialKeyPressed( arg.keysym.sym );
+			colibriManager->setTextSpecialKeyPressed( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
 		}
 	}
     //-----------------------------------------------------------------------------------
@@ -309,7 +309,7 @@ namespace Demo
 		}
 		else if( isTextInputActive )
 		{
-			colibriManager->setTextSpecialKeyReleased( arg.keysym.sym );
+			colibriManager->setTextSpecialKeyReleased( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
 		}
 
 		TutorialGameState::keyReleased( arg );
