@@ -950,15 +950,14 @@ namespace Colibri
 						topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
 						bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
+						const Ogre::Vector2 glyphSize = bottomRight - topLeft;
+
 						//Snap to pixels
 						topLeft = (topLeft + 1.0f) * halfWindowRes;
 						topLeft.x = roundf( topLeft.x );
 						topLeft.y = roundf( topLeft.y );
-						bottomRight = (bottomRight + 1.0f) * halfWindowRes;
-						bottomRight.x = roundf( bottomRight.x );
-						bottomRight.y = roundf( bottomRight.y );
 						topLeft = topLeft * invWindowRes - 1.0f;
-						bottomRight = bottomRight * invWindowRes - 1.0f;
+						bottomRight = topLeft + glyphSize;
 
 						addQuad( textVertBuffer,
 								 topLeft - backgroundDisplacement,
@@ -1054,15 +1053,14 @@ namespace Colibri
 				topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
 				bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
+				const Ogre::Vector2 glyphSize = bottomRight - topLeft;
+
 				//Snap to pixels
 				topLeft = (topLeft + 1.0f) * halfWindowRes;
 				topLeft.x = roundf( topLeft.x );
 				topLeft.y = roundf( topLeft.y );
-				bottomRight = (bottomRight + 1.0f) * halfWindowRes;
-				bottomRight.x = roundf( bottomRight.x );
-				bottomRight.y = roundf( bottomRight.y );
 				topLeft = topLeft * invWindowRes - 1.0f;
-				bottomRight = bottomRight * invWindowRes - 1.0f;
+				bottomRight = topLeft + glyphSize;
 
 				if( m_shadowOutline )
 				{
