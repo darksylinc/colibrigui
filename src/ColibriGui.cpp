@@ -59,7 +59,21 @@ namespace Demo
 			Ogre::LogManager::getSingleton().logMessage( text );
 		}
 	};
+	class ColibriListener : public Colibri::ColibriListener
+	{
+		void setClipboardText( const char *text )
+		{
+			SDL_SetClipboardText( text );
+		}
+
+		virtual bool getClipboardText( char * colibrigui_nonnull * const colibrigui_nullable outText )
+		{
+			*outText = SDL_GetClipboardText();
+			return *outText != 0;
+		}
+	};
 	static ColibriLogListener g_colibriLogListener;
+	static ColibriListener g_colibriListener;
 
     class ColibriGuiGraphicsSystem : public GraphicsSystem
 	{
@@ -202,7 +216,8 @@ namespace Demo
 				Colibri::HorizReadingDir::LTR, true )
 			};
 
-			colibriManager = new Colibri::ColibriManager( &g_colibriLogListener );
+			colibriManager = new Colibri::ColibriManager( &g_colibriLogListener,
+														  &g_colibriListener );
 			Colibri::ShaperManager *shaperManager = colibriManager->getShaperManager();
 
 			for( size_t i=0; i<sizeof( shaperSettings ) / sizeof( shaperSettings[0] ); ++i )

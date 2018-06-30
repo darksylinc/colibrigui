@@ -26,10 +26,41 @@ namespace Colibri
 			Info
 		};
 	}
+
+	/**
+	@class LogListener
+	*/
 	class LogListener
 	{
 	public:
 		virtual void log( const char *text, Colibri::LogSeverity::LogSeverity severity ) {}
+	};
+
+	/**
+	@class ColibriListener
+	*/
+	class ColibriListener
+	{
+	public:
+		/** See SDL_SetClipboardText. We just send a null-terminated UTF8 string
+		@param text
+		*/
+		virtual void setClipboardText( const char *text )		{}
+
+		/** See SDL_GetClipboardText and SDL_HasClipboardText
+		@param outText
+			Pointer to text.
+			outText [in] cannot be nullptr
+			*outText [out] may be nullptr or valid ptr (if nullptr, then we return false)
+		@return
+			False if failed to grab the text or there was no text in the clipboard,
+			true otherwise
+		*/
+		virtual bool getClipboardText( char * colibrigui_nonnull * const colibrigui_nullable outText )
+		{
+			*outText = 0;
+			return false;
+		}
 	};
 
 	class ColibriManager
@@ -48,6 +79,7 @@ namespace Colibri
 		WidgetVec m_dirtyWidgets;
 
 		LogListener	*m_logListener;
+		ColibriListener	*m_colibriListener;
 
 		bool m_swapRTLControls;
 		bool m_windowNavigationDirty;
@@ -81,6 +113,7 @@ namespace Colibri
 		float			m_keyRepeatWaitTimer;
 
 		uint32_t		m_keyTextInputDown;
+		uint16_t		m_keyModInputDown;
 
 		/// Controls how much to wait before we start repeating
 		float			m_keyRepeatDelay;
@@ -114,7 +147,7 @@ namespace Colibri
 		void scrollToWidget( Widget *widget );
 
 	public:
-		ColibriManager( LogListener *logListener );
+		ColibriManager( LogListener *logListener, ColibriListener *colibriListener );
 		~ColibriManager();
 
 		void loadSkins( const char *fullPath );
@@ -222,8 +255,17 @@ namespace Colibri
 
 		/// For understanding these params, see SDL_TextEditingEvent
 		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
-		void setTextSpecialKeyPressed( uint32_t keyCode );
-		void setTextSpecialKeyReleased( uint32_t keyCode );
+		/**
+		@see KeyCode::KeyCode
+		@see KeyMod::KeyMod
+		@param keyCode
+		@param keyMod
+			Bitmask from KeyMod::KeyMod
+		*/
+		void setTextSpecialKeyPressed( uint32_t keyCode, uint16_t keyMod );
+		/// @see ColibriManager::setTextSpecialKeyPressed
+		void setTextSpecialKeyReleased( uint32_t keyCode, uint16_t keyMod );
+
 		void setTextInput( const char *text );
 		/// Returns true if the widget the keyboard is currently focused on supports multiple
 		/// lines. This means the app should not forward Enter presses as calls to
@@ -239,6 +281,9 @@ namespace Colibri
 
 		void setLogListener( LogListener *logListener );
 		LogListener* getLogListener() const		{ return m_logListener; }
+
+		void setColibriListener( ColibriListener *colibriListener );
+		ColibriListener* getColibriListener() const		{ return m_colibriListener; }
 
 		Window* createWindow( Window * colibrigui_nullable parent );
 

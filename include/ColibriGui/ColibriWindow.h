@@ -7,7 +7,9 @@ COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
-	/** Windows are special Widgets:
+	/**
+	@class Window
+		Windows are special Widgets:
 			1. They can only be children of other Windows
 			2. m_parent can be nullptr
 			3. Regular widgets can be navigated via left, up, down, etc.

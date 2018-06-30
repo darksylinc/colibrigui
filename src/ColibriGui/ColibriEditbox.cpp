@@ -75,20 +75,8 @@ namespace Colibri
 	{
 		TODO_text_edit;
 	}
-	//-------------------------------------------------------------------------
-	namespace KeyCode
-	{
-		enum KeyCode
-		{
-			Enter = '\r',
-			Tab = '\t',
-			Backspace = '\b',
-			Delete = '\177',
-			Home = 74,
-			End = 77
-		};
-	}
-	void Editbox::_setTextSpecialKey( uint32_t keyCode )
+	//------------------------------------------------------------------------
+	void Editbox::_setTextSpecialKey( uint32_t keyCode, uint16_t keyMod )
 	{
 		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
 		{
@@ -135,6 +123,18 @@ namespace Colibri
 		else if( keyCode == KeyCode::Enter )
 		{
 			_setTextInput( "\n" );
+		}
+		else if( keyCode == 'c' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
+		{
+			ColibriListener *colibriListener = m_manager->getColibriListener();
+			colibriListener->setClipboardText( m_label->getText().c_str() );
+		}
+		else if( keyCode == 'v' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
+		{
+			ColibriListener *colibriListener = m_manager->getColibriListener();
+			char *clipboardText = 0;
+			if( colibriListener->getClipboardText( &clipboardText ) )
+				_setTextInput( clipboardText );
 		}
 	}
 	//-------------------------------------------------------------------------

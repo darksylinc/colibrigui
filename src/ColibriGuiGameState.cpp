@@ -300,9 +300,12 @@ namespace Demo
 		else if( isTextInputActive )
 		{
 			if( (arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER) && isTextMultiline )
-				colibriManager->setTextSpecialKeyPressed( SDLK_RETURN );
+				colibriManager->setTextSpecialKeyPressed( SDLK_RETURN, arg.keysym.mod );
 			else
-				colibriManager->setTextSpecialKeyPressed( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
+			{
+				colibriManager->setTextSpecialKeyPressed( arg.keysym.sym & ~SDLK_SCANCODE_MASK,
+														  arg.keysym.mod );
+			}
 		}
 	}
     //-----------------------------------------------------------------------------------
@@ -334,9 +337,12 @@ namespace Demo
 		else if( isTextInputActive )
 		{
 			if( (arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER) && isTextMultiline )
-				colibriManager->setTextSpecialKeyReleased( SDLK_RETURN );
+				colibriManager->setTextSpecialKeyReleased( SDLK_RETURN, arg.keysym.mod );
 			else
-				colibriManager->setTextSpecialKeyReleased( arg.keysym.sym & ~SDLK_SCANCODE_MASK );
+			{
+				colibriManager->setTextSpecialKeyReleased( arg.keysym.sym & ~SDLK_SCANCODE_MASK,
+														   arg.keysym.mod );
+			}
 		}
 
 		TutorialGameState::keyReleased( arg );

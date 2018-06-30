@@ -345,6 +345,43 @@ namespace Colibri
 			NumSkinWidgetTypes
 		};
 	}
+
+	namespace KeyCode
+	{
+		/// Enumerates relevant KeyCodes used by Colibri. They tend to match
+		/// SDL's (sym keys & ~SDLK_SCANCODE_MASK) for convenience.
+		/// For regular letters, we assume they're lowercase
+		/// (i.e. send 'a' instead of 'A')
+		enum KeyCode
+		{
+			Enter = '\r',
+			Tab = '\t',
+			Backspace = '\b',
+			Delete = '\177',
+			Home = 74,
+			End = 77
+		};
+	}
+	namespace KeyMod
+	{
+		/// These purposely mirror SDL_Keymod
+		enum KeyMod
+		{
+			None = 0x0000,
+			LShift = 0x0001,
+			RShift = 0x0002,
+			LCtrl = 0x0040,
+			RCtrl = 0x0080,
+			LAlt = 0x0100,
+			RAlt = 0x0200,
+			LGui = 0x0400,
+			RGui = 0x0800,
+			Num = 0x1000,
+			Caps = 0x2000,
+			Mode = 0x4000,
+			Reserved = 0x8000
+		};
+	}
 }
 
 namespace Ogre

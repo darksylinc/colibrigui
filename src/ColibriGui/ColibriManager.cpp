@@ -23,6 +23,7 @@
 namespace Colibri
 {
 	static LogListener DefaultLogListener;
+	static ColibriListener DefaultColibriListener;
 	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX, Ogre::HlmsPso() );
 
 	const std::string ColibriManager::c_defaultTextDatablockNames[States::NumStates] =
@@ -35,11 +36,12 @@ namespace Colibri
 		"# Colibri Pressed Text #"
 	};
 
-	ColibriManager::ColibriManager( LogListener *logListener ) :
+	ColibriManager::ColibriManager( LogListener *logListener, ColibriListener *colibriListener ) :
 		m_numWidgets( 0 ),
 		m_numLabels( 0 ),
 		m_numTextGlyphs( 0u ),
 		m_logListener( &DefaultLogListener ),
+		m_colibriListener( &DefaultColibriListener ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_root( 0 ),
@@ -67,6 +69,7 @@ namespace Colibri
 		memset( m_defaultSkins, 0, sizeof(m_defaultSkins) );
 
 		setLogListener( logListener );
+		setColibriListener( colibriListener );
 
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ),
 					   Ogre::Vector2( 1600.0f, 900.0f ) );
@@ -91,6 +94,13 @@ namespace Colibri
 		m_logListener = logListener;
 		if( !m_logListener )
 			m_logListener = &DefaultLogListener;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::setColibriListener( ColibriListener *colibriListener )
+	{
+		m_colibriListener = colibriListener;
+		if( !m_colibriListener )
+			m_colibriListener = &DefaultColibriListener;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::loadSkins( const char *fullPath )
@@ -492,7 +502,8 @@ namespace Colibri
 	{
 		updateKeyDirection( direction );
 		m_keyDirDown = direction;
-		m_keyTextInputDown = 0;
+		m_keyTextInputDown	= 0;
+		m_keyModInputDown	= 0;
 		m_keyRepeatWaitTimer = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -533,19 +544,21 @@ namespace Colibri
 			m_keyboardFocusedPair.widget->_setTextEdit( text, selectStart, selectLength );
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setTextSpecialKeyPressed( uint32_t keyCode )
+	void ColibriManager::setTextSpecialKeyPressed( uint32_t keyCode, uint16_t keyMod )
 	{
 		if( m_keyboardFocusedPair.widget )
-			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode );
+			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode, keyMod );
 		if( m_keyDirDown != Borders::NumBorders )
 			setKeyDirectionReleased( m_keyDirDown );
-		m_keyTextInputDown = keyCode;
+		m_keyTextInputDown	= keyCode;
+		m_keyModInputDown	= keyMod;
 		m_keyRepeatWaitTimer = 0;
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setTextSpecialKeyReleased( uint32_t keyCode )
+	void ColibriManager::setTextSpecialKeyReleased( uint32_t keyCode, uint16_t keyMod )
 	{
 		m_keyTextInputDown = 0;
+		m_keyModInputDown = 0;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setTextInput( const char *text )
@@ -1038,13 +1051,17 @@ namespace Colibri
 	{
 		//_setTextSpecialKey must be called before autosetNavigation
 		if( !m_keyboardFocusedPair.widget || !m_keyboardFocusedPair.widget->wantsTextInput() )
+		{
 			m_keyTextInputDown = 0;
+			m_keyModInputDown = 0;
+		}
 
 		if( m_keyTextInputDown )
 		{
 			while( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
 			{
-				m_keyboardFocusedPair.widget->_setTextSpecialKey( m_keyTextInputDown );
+				m_keyboardFocusedPair.widget->_setTextSpecialKey( m_keyTextInputDown,
+																  m_keyModInputDown );
 				m_keyRepeatWaitTimer -= m_timeDelayPerKeyStroke;
 			}
 
