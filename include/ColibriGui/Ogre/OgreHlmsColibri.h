@@ -32,15 +32,27 @@ THE SOFTWARE.
 
 namespace Ogre
 {
-    /** \addtogroup Component
-    *  @{
-    */
-    /** \addtogroup Material
-    *  @{
-    */
-
 	class HlmsColibriDatablock;
+	/** @ingroup Api_Backend
+	@class HlmsColibri
+		Overrides HlmsUnlit
+		That way wecan create shaders specifically tailored for our UI widgets, while also
+		using vanilla Unlit for everything else. But text rendering requires special shaders,
+		that is different from UI widgets and from regular entities. To identify them, we overloaded
+		calculateHashForPreCreate (which gets called when a Renderable is assigned a new
+		datablock/material) and use the magic numbers "6372" to identify the Renderable as an
+		UI widget, and "6373" for text widgets. We only look for the presence of the key, and we
+		don't care about the value.
 
+		This works because basically all UI widgets follow a different path from regular Unlit,
+		and all text widgets follow a different path from the other two (so there's a total of 3 paths).
+
+		UI widgets are only meant to be rendered from a custom compositor pass we provide, which
+		is why we use fillBuffersForColibri that handles our special needs, instead of
+		overloading the regular fillBuffersForV2.
+
+		@see	CompositorPassColibriGuiProvider
+	*/
 	class HlmsColibri : public HlmsUnlit
     {
 	protected:
@@ -74,12 +86,6 @@ namespace Ogre
         /// @copydoc HlmsPbs::getDefaultPaths
         static void getDefaultPaths( String& outDataFolderPath, StringVector& outLibraryFoldersPaths );
 	};
-
- 
-
-    /** @} */
-    /** @} */
-
 }
 
 #include "OgreHeaderSuffix.h"

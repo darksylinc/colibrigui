@@ -7,6 +7,17 @@
 
 namespace Ogre
 {
+	/** @ingroup Api_Backend
+	@class CompositorPassColibriGuiProvider
+		Generates the CompositorPassColibriGui pass needed to render Colibri UI
+		Also ensures the compositor scripts recognize the pass type "colibri_gui"
+		i.e.
+		@code
+			pass custom colibri_gui
+			{
+			}
+		@endcode
+	*/
 	class CompositorPassColibriGuiProvider : public CompositorPassProvider
 	{
 		Colibri::ColibriManager	*m_colibriManager;

@@ -7,6 +7,9 @@
 
 namespace Ogre
 {
+	/** @ingroup Api_Backend
+	@class CompositorPassColibriGuiDef
+	*/
 	class CompositorPassColibriGuiDef : public CompositorPassDef
 	{
 	public:

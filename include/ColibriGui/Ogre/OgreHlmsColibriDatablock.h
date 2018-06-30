@@ -32,13 +32,9 @@ THE SOFTWARE.
 
 namespace Ogre
 {
-    /** \addtogroup Component
-    *  @{
-    */
-    /** \addtogroup Material
-    *  @{
-    */
-
+	/** @ingroup Api_Backend
+	@class HlmsColibriDatablock
+	*/
 	class HlmsColibriDatablock : public HlmsUnlitDatablock
     {
 		friend class HlmsColibri;
@@ -52,10 +48,6 @@ namespace Ogre
 		{
 		}
 	};
-
-    /** @} */
-    /** @} */
-
 }
 
 #include "OgreHeaderSuffix.h"

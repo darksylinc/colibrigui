@@ -12,7 +12,9 @@ namespace Ogre
 {
 	class CompositorPassColibriGuiDef;
 
-	/** Implementation of CompositorPass
+	/** @ingroup Api_Backend
+	@class CompositorPassColibriGui
+		Implementation of CompositorPass
 	@author
 		Matias N. Goldberg
 	@version
