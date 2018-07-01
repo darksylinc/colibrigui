@@ -1006,11 +1006,15 @@ namespace Colibri
 	{
 		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
 
+		updateDerivedTransform( parentPos, parentRot );
+
+		m_culled = true;
+
 		m_numVertices = 0;
-		if( !m_parent->intersectsChild( this, parentCurrentScrollPos ) )
+		if( !m_parent->intersectsChild( this, parentCurrentScrollPos ) || m_hidden )
 			return;
 
-		updateDerivedTransform( parentPos, parentRot );
+		m_culled = false;
 
 		const uint32_t shadowColour = m_shadowColour.getAsABGR();
 

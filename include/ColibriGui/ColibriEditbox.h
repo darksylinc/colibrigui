@@ -26,8 +26,11 @@ namespace Colibri
 		/// @see	ColibriManager::isTextMultiline
 		bool		m_multiline;
 
+		float		m_blinkTimer;
+
 	protected:
 
+		void showCaret();
 		bool requiresActiveUpdate() const;
 
 	public:

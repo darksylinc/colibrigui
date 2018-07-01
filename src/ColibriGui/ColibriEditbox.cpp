@@ -14,7 +14,8 @@ namespace Colibri
 		m_label( 0 ),
 		m_caret( 0 ),
 		m_cursorPos( 0 ),
-		m_multiline( false )
+		m_multiline( false ),
+		m_blinkTimer( 0 )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -37,6 +38,7 @@ namespace Colibri
 		m_caret->setTextVertAlignment( TextVertAlignment::Top );
 		m_caret->setText( "|" );
 		m_caret->sizeToFit( States::Idle );
+		m_caret->setHidden( true );
 
 		m_label->setText( "Hel lo" );
 
@@ -52,6 +54,12 @@ namespace Colibri
 
 		//m_label is a child of us, so it will be destroyed by our super class
 		m_label = 0;
+	}
+	//-------------------------------------------------------------------------
+	void Editbox::showCaret()
+	{
+		m_caret->setHidden( false );
+		m_blinkTimer = 0;
 	}
 	//-------------------------------------------------------------------------
 	bool Editbox::requiresActiveUpdate() const
@@ -73,14 +81,29 @@ namespace Colibri
 		if( wasActive != isActive )
 		{
 			if( isActive )
+			{
 				m_manager->_addUpdateWidget( this );
+				showCaret();
+			}
 			else
+			{
 				m_manager->_removeUpdateWidget( this );
+				m_caret->setHidden( true );
+				m_blinkTimer = 0;
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_update( float timeSinceLast )
 	{
+		m_blinkTimer += timeSinceLast;
+
+		if( m_blinkTimer >= 0.5f )
+		{
+			m_caret->setHidden( !m_caret->isHidden() );
+			m_blinkTimer = 0.0f;
+		}
+
 		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)m_label->getGlyphCount() );
 
 		FontSize ptSize;
@@ -135,14 +158,18 @@ namespace Colibri
 			std::string result;
 			uStr.toUTF8String( result );
 			m_label->setText( result );
+
+			showCaret();
 		}
 		else if( keyCode == KeyCode::Home )
 		{
 			m_cursorPos = 0;
+			showCaret();
 		}
 		else if( keyCode == KeyCode::End )
 		{
 			m_cursorPos = static_cast<uint32_t>( m_label->getGlyphCount() );
+			showCaret();
 		}
 		else if( keyCode == KeyCode::Tab )
 		{
@@ -184,6 +211,8 @@ namespace Colibri
 
 		//Advance the cursor
 		m_cursorPos += appendText.countChar32();
+
+		showCaret();
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Editbox::_getImeLocation()
@@ -225,6 +254,7 @@ namespace Colibri
 				if( m_cursorPos )
 					--m_cursorPos;
 			}
+			showCaret();
 			callActionListeners( Action::ValueChanged );
 		}
 		else if( direction == Borders::Right )
@@ -236,6 +266,7 @@ namespace Colibri
 			}
 			else
 				++m_cursorPos;
+			showCaret();
 			callActionListeners( Action::ValueChanged );
 		}
 	}
