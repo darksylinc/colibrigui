@@ -252,6 +252,15 @@ namespace Colibri
 		m_pixelSize2x = (2.0f * pixelSize) / canvasSize;
 		m_halfWindowResolution	= windowResolution / 2.0f;
 		m_invWindowResolution2x = 2.0f / windowResolution;
+
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator end  = m_windows.end();
+
+		while( itor != end )
+		{
+			(*itor)->_notifyCanvasChanged();
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateWidgetsFocusedByCursor()

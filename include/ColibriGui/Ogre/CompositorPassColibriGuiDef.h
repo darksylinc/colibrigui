@@ -13,9 +13,14 @@ namespace Ogre
 	class CompositorPassColibriGuiDef : public CompositorPassDef
 	{
 	public:
+		bool mSetsResolution;
+
+	public:
 		CompositorPassColibriGuiDef( CompositorTargetDef *parentTargetDef ) :
-			CompositorPassDef( PASS_CUSTOM, parentTargetDef )
+			CompositorPassDef( PASS_CUSTOM, parentTargetDef ),
+			mSetsResolution( true )
 		{
+			mProfilingId = "Colibri Gui";
 		}
 	};
 }

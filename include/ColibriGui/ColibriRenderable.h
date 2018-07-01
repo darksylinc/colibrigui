@@ -111,6 +111,8 @@ namespace Colibri
 							 Ogre::Vector2 parentDerivedBR,
 							 Ogre::Vector2 invSize );
 
+		virtual void _notifyCanvasChanged();
+
 		virtual void stateChanged( States::States newState );
 
 	public:

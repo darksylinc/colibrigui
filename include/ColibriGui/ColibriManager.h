@@ -221,6 +221,11 @@ namespace Colibri
 
 			This is irrespective of screen resolution. If the actual screen is 1024x768,
 			the canvas will be stretched to fit the aspect ratio.
+
+		@remarks
+			This function can be slow as it must recalculate a lot of resolution-dependant
+			variables for all widgets. Don't call this function unless something has changed.
+
 		@param canvasSize
 			The size of the canvas. A value of (1.0f, 1.0f) is screen independent with
 			an aspect ratio of 1:1

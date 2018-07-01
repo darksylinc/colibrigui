@@ -1322,6 +1322,15 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Label::_notifyCanvasChanged()
+	{
+		for( size_t i=0; i<States::NumStates; ++i )
+			flagDirty( static_cast<States::States>( i ) );
+//		_updateDirtyGlyphs();
+
+		Renderable::_notifyCanvasChanged();
+	}
+	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 	bool RichText::operator == ( const RichText &other ) const

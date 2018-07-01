@@ -475,6 +475,8 @@ namespace Colibri
 		/// @see	ColibriManager::_addUpdateWidget
 		virtual void _update( float timeSinceLast );
 
+		virtual void _notifyCanvasChanged();
+
 		/**
 		@remarks
 			Do not assume derived top left <= derived bottom right.

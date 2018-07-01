@@ -56,6 +56,13 @@ namespace Demo
     {
         mCameraController = new CameraController( mGraphicsSystem, false );
 
+		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
+
+		colibriManager->setCanvasSize( Ogre::Vector2( 1.0f ),
+									   Ogre::Vector2( 1.0f / window->getWidth(),
+													  1.0f / window->getHeight() ),
+									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
+
 		//colibriManager = new Colibri::ColibriManager();
 		colibriManager->setOgre( mGraphicsSystem->getRoot(),
 								 mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager(),

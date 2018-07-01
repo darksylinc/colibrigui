@@ -35,6 +35,12 @@ namespace Colibri
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::_notifyCanvasChanged()
+	{
+		setClipBordersMatchSkin();
+		Widget::_notifyCanvasChanged();
+	}
+	//-------------------------------------------------------------------------
 	void Renderable::stateChanged( States::States newState )
 	{
 		setDatablock( m_stateInformation[newState].materialName );

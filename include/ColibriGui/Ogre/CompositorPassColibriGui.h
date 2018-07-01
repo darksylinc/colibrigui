@@ -26,6 +26,8 @@ namespace Ogre
 		SceneManager    *mSceneManager;
 		Colibri::ColibriManager *m_colibriManager;
 
+		void setResolutionToColibri( uint32 width, uint32 height );
+
 	public:
 		CompositorPassColibriGui( const CompositorPassColibriGuiDef *definition,
 								  SceneManager *sceneManager,
@@ -33,6 +35,8 @@ namespace Ogre
 								  Colibri::ColibriManager *colibriManager );
 
 		virtual void execute( const Camera *lodCamera );
+
+		virtual bool notifyRecreated( const TextureGpu *channel );
 
 	private:
 		CompositorPassColibriGuiDef const *mDefinition;

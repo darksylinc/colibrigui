@@ -844,7 +844,10 @@ namespace Colibri
 									m_parent->m_derivedOrientation );
 		}
 		else
+		{
+			//If we have no parent, then we're definitely a window
 			updateDerivedTransform( -Ogre::Vector2::UNIT_SCALE, Ogre::Matrix3::IDENTITY );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
@@ -876,6 +879,20 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Widget::_update( float timeSinceLast )
 	{
+	}
+	//-------------------------------------------------------------------------
+	void Widget::_notifyCanvasChanged()
+	{
+		updateDerivedTransformFromParent( false );
+
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			(*itor)->_notifyCanvasChanged();
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedTopLeft() const

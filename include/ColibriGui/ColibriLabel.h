@@ -241,6 +241,8 @@ namespace Colibri
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
 											  const Ogre::Matrix3 &parentRot );
+
+		virtual void _notifyCanvasChanged();
 	};
 }
 

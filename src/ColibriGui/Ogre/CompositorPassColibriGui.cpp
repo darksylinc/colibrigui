@@ -7,6 +7,8 @@
 #include "Compositor/OgreCompositorWorkspace.h"
 #include "Compositor/OgreCompositorWorkspaceListener.h"
 
+#include "OgrePixelFormatGpuUtils.h"
+
 namespace Ogre
 {
 	CompositorPassColibriGui::CompositorPassColibriGui( const CompositorPassColibriGuiDef *definition,
@@ -20,6 +22,8 @@ namespace Ogre
 		mDefinition( definition )
 	{
 		initialize( rtv );
+
+		setResolutionToColibri( mAnyTargetTexture->getWidth(), mAnyTargetTexture->getHeight() );
 	}
 	//-----------------------------------------------------------------------------------
 	void CompositorPassColibriGui::execute( const Camera *lodCamera )
@@ -51,5 +55,36 @@ namespace Ogre
 			listener->passPosExecute( this );
 
 		profilingEnd();
+	}
+	//-----------------------------------------------------------------------------------
+	void CompositorPassColibriGui::setResolutionToColibri( uint32 width, uint32 height )
+	{
+		if( !mDefinition->mSetsResolution )
+			return;
+
+		const Vector2 resolution( width, height );
+		const Vector2 halfResolution( resolution / 2.0f );
+
+		if( fabsf( halfResolution.x - m_colibriManager->getHalfWindowResolution().x ) > 1e-6f ||
+			fabsf( halfResolution.y - m_colibriManager->getHalfWindowResolution().y ) > 1e-6f )
+		{
+			m_colibriManager->setCanvasSize( m_colibriManager->getCanvasSize(),
+											 1.0f / resolution,
+											 resolution );
+		}
+	}
+	//-----------------------------------------------------------------------------------
+	bool CompositorPassColibriGui::notifyRecreated( const TextureGpu *channel )
+	{
+		bool usedByUs = CompositorPass::notifyRecreated( channel );
+
+		if( usedByUs &&
+			!PixelFormatGpuUtils::isDepth( channel->getPixelFormat() ) &&
+			!PixelFormatGpuUtils::isStencil( channel->getPixelFormat() ) )
+		{
+			setResolutionToColibri( channel->getWidth(), channel->getHeight() );
+		}
+
+		return usedByUs;
 	}
 }
