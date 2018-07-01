@@ -257,7 +257,7 @@ namespace Demo
 		}
 		else if( arg.type == SDL_MOUSEWHEEL )
 		{
-			Ogre::Vector2 mouseScroll( 0.0f, -arg.wheel.y );
+			Ogre::Vector2 mouseScroll( arg.wheel.x, -arg.wheel.y );
 			colibriManager->setScroll( mouseScroll * 50.0f * colibriManager->getPixelSize() );
 		}
 
