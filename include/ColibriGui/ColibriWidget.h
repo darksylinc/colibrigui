@@ -406,6 +406,11 @@ namespace Colibri
 		/// See ColibriManager::focusedWantsTextInput
 		virtual bool wantsTextInput() const;
 
+		/// This function gets called every frame if the Widget
+		/// registered itself for that.
+		/// @see	ColibriManager::_addUpdateWidget
+		virtual void _update( float timeSinceLast );
+
 		/**
 		@remarks
 			Do not assume derived top left <= derived bottom right.

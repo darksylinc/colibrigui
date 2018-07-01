@@ -804,6 +804,10 @@ namespace Colibri
 		return false;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_update( float timeSinceLast )
+	{
+	}
+	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedTopLeft() const
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_transformOutOfDate );

@@ -41,17 +41,47 @@ namespace Colibri
 		m_label->setText( "Hel lo" );
 
 		Renderable::_initialize();
+
+		m_manager->_addUpdateWidget( this );
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_destroy()
 	{
+		if( requiresActiveUpdate() )
+			m_manager->_removeUpdateWidget( this );
+
 		Renderable::_destroy();
 
 		//m_label is a child of us, so it will be destroyed by our super class
 		m_label = 0;
 	}
 	//-------------------------------------------------------------------------
-	void Editbox::update()
+	bool Editbox::requiresActiveUpdate() const
+	{
+		return	m_currentState == States::HighlightedButton ||
+				m_currentState == States::HighlightedButtonAndCursor ||
+				m_currentState == States::Pressed;
+	}
+	//-------------------------------------------------------------------------
+	void Editbox::setState( States::States state, bool smartHighlight,
+							bool broadcastEnable )
+	{
+		const bool wasActive = requiresActiveUpdate();
+
+		Renderable::setState( state, smartHighlight, broadcastEnable );
+
+		const bool isActive = requiresActiveUpdate();
+
+		if( wasActive != isActive )
+		{
+			if( isActive )
+				m_manager->_addUpdateWidget( this );
+			else
+				m_manager->_removeUpdateWidget( this );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Editbox::_update( float timeSinceLast )
 	{
 		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)m_label->getGlyphCount() );
 

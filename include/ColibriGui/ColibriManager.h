@@ -77,6 +77,9 @@ namespace Colibri
 		size_t m_numTextGlyphs; /// It's an upper bound. Current max number of glyphs may be lower
 		LabelVec m_dirtyLabels;
 		WidgetVec m_dirtyWidgets;
+		/// Some widgets require getting called every frame for updates.
+		/// Those widgets are listed here
+		WidgetVec m_updateWidgets;
 
 		LogListener	*m_logListener;
 		ColibriListener	*m_colibriListener;
@@ -296,8 +299,19 @@ namespace Colibri
 		/// You can call this one directly
 		void setAsParentlessWindow( Window *window );
 
+		/// Sometimes, Widgets cannot immediately call setTransformDirty, usually
+		/// because they'll trigger asserts that either can be safely ignored,
+		/// or they create side effects that cannot happen at that time.
+		/// This function queues the widget so we call setTransformDirty
+		/// for them later, inside ColibriManager::update
 		/// For internal use. Do NOT call directly
 		void _scheduleSetTransformDirty( Widget *widget );
+
+		/// Some widgets require getting called every frame for updates.
+		/// They register themselves via this interface.
+		/// For internal use.
+		void _addUpdateWidget( Widget *widget );
+		void _removeUpdateWidget( Widget *widget );
 
 		/// Iterates through all windows and widgets, and calls setNextWidget to
 		/// set which widgets is connected to each other (via an heuristic)

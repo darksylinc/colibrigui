@@ -28,6 +28,8 @@ namespace Colibri
 
 	protected:
 
+		bool requiresActiveUpdate() const;
+
 	public:
 		Editbox( ColibriManager *manager );
 
@@ -36,7 +38,10 @@ namespace Colibri
 
 		Label* getLabel();
 
-		void update();
+		virtual void setState( States::States state, bool smartHighlight=true,
+							   bool broadcastEnable=false );
+
+		void _update( float timeSinceLast );
 
 		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
 		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod );

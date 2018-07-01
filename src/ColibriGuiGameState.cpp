@@ -196,7 +196,6 @@ namespace Demo
 		}
 
 		colibriManager->update( timeSinceLast );
-		editbox0->update();
 
 		const bool isTextInputActive = SDL_IsTextInputActive();
 

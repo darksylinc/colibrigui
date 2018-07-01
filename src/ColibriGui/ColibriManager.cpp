@@ -703,6 +703,19 @@ namespace Colibri
 		m_dirtyWidgets.push_back( widget );
 	}
 	//-----------------------------------------------------------------------------------
+	void ColibriManager::_addUpdateWidget( Widget *widget )
+	{
+		m_updateWidgets.push_back( widget );
+	}
+	//-----------------------------------------------------------------------------------
+	void ColibriManager::_removeUpdateWidget( Widget *widget )
+	{
+		WidgetVec::iterator itor = std::find( m_updateWidgets.begin(), m_updateWidgets.end(), widget );
+
+		if( itor != m_updateWidgets.end() )
+			m_updateWidgets.erase( itor );
+	}
+	//-----------------------------------------------------------------------------------
 	void ColibriManager::overrideKeyboardFocusWith( const FocusPair &_focusedPair )
 	{
 		const Widget *cursorWidget = _focusedPair.widget;
@@ -1130,6 +1143,17 @@ namespace Colibri
 		}
 
 		m_shaperManager->updateGpuBuffers();
+
+		{
+			WidgetVec::const_iterator itor = m_updateWidgets.begin();
+			WidgetVec::const_iterator end  = m_updateWidgets.end();
+
+			while( itor != end )
+			{
+				(*itor)->_update( timeSinceLast );
+				++itor;
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::prepareRenderCommands()
