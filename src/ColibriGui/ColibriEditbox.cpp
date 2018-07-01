@@ -41,8 +41,6 @@ namespace Colibri
 		m_label->setText( "Hel lo" );
 
 		Renderable::_initialize();
-
-		m_manager->_addUpdateWidget( this );
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_destroy()
