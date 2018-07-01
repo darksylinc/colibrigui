@@ -78,6 +78,11 @@ namespace Demo
 		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
 		mainWindow->setClipBordersMatchSkin();
 
+		//When m_breadthFirst is set to true, it can cause significant performance
+		//increases for UI-heavy applications. But be sure you understand it i.e.
+		//it may not render correctly if your widgets have children and they overlap.
+		mainWindow->m_breadthFirst = false;
+
 		/*button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );
 		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
