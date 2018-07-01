@@ -142,7 +142,7 @@ namespace Colibri
 		Widget::broadcastNewVao( vao, textVao );
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::_addCommands( ApiEncapsulatedObjects &apiObject )
+	void Renderable::_addCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst )
 	{
 		if( m_culled )
 			return;
@@ -228,25 +228,7 @@ namespace Colibri
 		apiObject.accumPrimCount[widgetType] += m_numVertices;
 		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
-		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
-
-		while( itor != end )
-		{
-			(*itor)->addNonRenderableCommands( apiObject );
-			++itor;
-		}
-
-		itor = m_children.begin() + m_numNonRenderables;
-		end  = m_children.end();
-
-		while( itor != end )
-		{
-			COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
-			Renderable *asRenderable = static_cast<Renderable*>( *itor );
-			asRenderable->_addCommands( apiObject );
-			++itor;
-		}
+		addChildrenCommands( apiObject, collectingBreadthFirst );
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::_fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull

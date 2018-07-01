@@ -88,7 +88,44 @@ namespace Colibri
 		bool					m_pressable;
 
 		bool m_culled;
+	public:
+		/// When true, this widgets and its children will be rendered in breadth first
+		/// order, instead of depth first.
+		/// Breadth first can result in incorrect rendering if two sibling or children
+		/// widgets overlap, but can result in a significant performance boost in most
+		/// common scenarios
+		///
+		/// This performance boost comes from the fact that sibling widgets commonly
+		/// use the same skin / materials, but their children break it.
+		///
+		/// For example almost all Buttons are the same, but if Buttons have text in
+		/// it, with depth-first the text must be rendered between each button.
+		/// This breaks batching and causes the number_buttons*2 draw calls and
+		/// shader switching.
+		///
+		/// By using breadth first instead, all buttons are rendered together, and then
+		/// their text. This causes just 2 draw calls to be issued, regardless of the
+		/// number of buttons, thus it can cause a tremendous performance boost.
+		///
+		/// Because breadth first rendering can cause rendering artifacts if the widgets
+		/// overlaps (because child Widgets may be drawn on top of a sibling Widget,
+		/// instead of behind), you can control the rendering mode per widget.
+		///
+		/// Note that it is the parent who must be set m_breadthFirst to true.
+		/// In the example above, it is pointless to set the Buttons or the text's
+		/// m_breadthFirst. You must set the parent window's m_breadthFirst of
+		/// all those buttons in order to work.
+		///
+		/// @remark	PUBLIC MEMEBER: CAN BE EDITED DIRECTLY
+		/// @remark	This value affects children. If this->m_breadthFirst is set to
+		///			false, it may still be drawn as breadth first if any of our
+		///			parents has this value set to true
+		///
+		/// @see	Widget::addChildrenCommands
+		/// @see	Widget::isUltimatelyBreadthFirst
+		bool m_breadthFirst;
 
+	protected:
 		States::States			m_currentState;
 
 		WidgetListenerPairVec			m_listeners;
@@ -308,8 +345,35 @@ namespace Colibri
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
 											  const Ogre::Matrix3 &parentRot );
+	protected:
+		void addNonRenderableCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
 
-		void addNonRenderableCommands( ApiEncapsulatedObjects &apiObject );
+		/** There are 3 rendering modes we can idenfity:
+			1. Depth First. This guarantees Widgets are rendered in correct order.
+			2. Executor Breadth First. When this->m_breadthFirst is set, this widget
+			   and ALL of its children will render in breadth first mode (even if our
+			   children have m_breadthFirst unset).
+			   This widget will also perform rendering commands.
+			3. Collecter breadth first. When our parent (or our parent's parent parent...)
+			   has m_breadthFirst set, our value of m_breadthFirst does not matter anymore
+			   and we're "collecters", that means we just inform our parents what Widgets
+			   are our children, so the Executor can render them
+
+			@see	Widget::m_breadthFirst
+			@see	Widget::isUltimatelyBreadthFirst
+		@param apiObject
+		@param collectingBreadthFirst
+			When true, this is a collecter and our parent (or parent's parent...) is the executor.
+			When false, this is either depth first or executor, depending on the value of m_breadthFirst
+		*/
+		void addChildrenCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
+
+	public:
+
+		/// Returns true if this widget or any parent has m_breadthFirst set to true
+		/// @see	Widget::m_breadthFirst
+		/// @see	Widget::addChildrenCommands
+		bool isUltimatelyBreadthFirst() const;
 
 		/** Sets the new state, which affects skins.
 			The state is is broadcasted to our children.

@@ -98,7 +98,8 @@ namespace Colibri
 		uint32_t			m_numVertices;
 
 	public:
-		void _addCommands( ApiEncapsulatedObjects &apiObject );
+		/// @copydoc Widget::addChildrenCommands
+		void _addCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
 
 	protected:
 		inline void addQuad( UiVertex * RESTRICT_ALIAS vertexBuffer,

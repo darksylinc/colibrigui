@@ -1230,12 +1230,17 @@ namespace Colibri
 		apiObjects.accumPrimCount[0] = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
 		apiObjects.accumPrimCount[1] = m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
 
+		m_breadthFirst[0].clear();
+		m_breadthFirst[1].clear();
+		m_breadthFirst[2].clear();
+		m_breadthFirst[3].clear();
+
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
 
 		while( itor != end )
 		{
-			(*itor)->_addCommands( apiObjects );
+			(*itor)->_addCommands( apiObjects, false );
 			++itor;
 		}
 

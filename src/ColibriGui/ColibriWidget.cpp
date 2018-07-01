@@ -28,6 +28,7 @@ namespace Colibri
 		m_childrenClickable( false ),
 		m_pressable( true ),
 		m_culled( false ),
+		m_breadthFirst( false ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( manager->getCanvasSize() ),
@@ -594,30 +595,99 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Widget::addNonRenderableCommands( ApiEncapsulatedObjects &apiObject )
+	void Widget::addNonRenderableCommands( ApiEncapsulatedObjects &apiObject,
+										   bool collectingBreadthFirst )
 	{
 		if( m_culled )
 			return;
 
-		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
-
-		while( itor != end )
+		addChildrenCommands( apiObject, collectingBreadthFirst );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::addChildrenCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst )
+	{
+		if( !m_breadthFirst && !collectingBreadthFirst )
 		{
-			(*itor)->addNonRenderableCommands( apiObject );
-			++itor;
+			WidgetVec::const_iterator itor = m_children.begin();
+			WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
+
+			while( itor != end )
+			{
+				(*itor)->addNonRenderableCommands( apiObject, false );
+				++itor;
+			}
+
+			itor = m_children.begin() + m_numNonRenderables;
+			end  = m_children.end();
+
+			while( itor != end )
+			{
+				COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
+				Renderable *asRenderable = static_cast<Renderable*>( *itor );
+				asRenderable->_addCommands( apiObject, false );
+				++itor;
+			}
+		}
+		else
+		{
+			WidgetVec *breadthFirst = m_manager->m_breadthFirst;
+
+			breadthFirst[2].insert( breadthFirst[2].end(), m_children.begin(),
+									m_children.begin() + m_numNonRenderables );
+			breadthFirst[3].insert( breadthFirst[3].end(), m_children.begin() + m_numNonRenderables,
+									m_children.end() );
+
+			if( !collectingBreadthFirst )
+			{
+				//If we're here, this widget is the first in the hierarchy we found to be
+				//using breadth first. So it's the one executing it and all children will
+				//collect, and thus all children will use breadth first.
+				//Siblings to this widget may be using depth first instead,
+				//or may also become executers.
+				while( !breadthFirst[2].empty() || !breadthFirst[3].empty() )
+				{
+					breadthFirst[0].swap( breadthFirst[2] );
+					breadthFirst[1].swap( breadthFirst[3] );
+
+					WidgetVec::const_iterator itor = breadthFirst[0].begin();
+					WidgetVec::const_iterator end  = breadthFirst[0].end();
+
+					while( itor != end )
+					{
+						(*itor)->addNonRenderableCommands( apiObject, true );
+						++itor;
+					}
+
+					itor = breadthFirst[1].begin();
+					end  = breadthFirst[1].end();
+
+					while( itor != end )
+					{
+						COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
+						Renderable *asRenderable = static_cast<Renderable*>( *itor );
+						asRenderable->_addCommands( apiObject, true );
+						++itor;
+					}
+
+					breadthFirst[0].clear();
+					breadthFirst[1].clear();
+				}
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	bool Widget::isUltimatelyBreadthFirst() const
+	{
+		bool isBreadthFirst = m_breadthFirst;
+		Widget const *nextParent = m_parent;
+
+		while( !isBreadthFirst && nextParent )
+		{
+			isBreadthFirst = m_breadthFirst;
+			nextParent = nextParent->m_parent;
 		}
 
-		itor = m_children.begin() + m_numNonRenderables;
-		end  = m_children.end();
-
-		while( itor != end )
-		{
-			COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
-			Renderable *asRenderable = static_cast<Renderable*>( *itor );
-			asRenderable->_addCommands( apiObject );
-			++itor;
-		}
+		return isBreadthFirst;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setState( States::States state, bool smartHighlight, bool broadcastEnable )

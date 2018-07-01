@@ -80,7 +80,19 @@ namespace Colibri
 		/// Some widgets require getting called every frame for updates.
 		/// Those widgets are listed here
 		WidgetVec m_updateWidgets;
+	public:
+		/// When iterating in breadth first mode,
+		///		m_breadthFirst[0] contains non Renderables in this iteration
+		///		m_breadthFirst[1] contains Renderables in this iteration
+		///		m_breadthFirst[2] contains non Renderables for the next iteration
+		///		m_breadthFirst[3] contains Renderables for the next iteration
+		/// After m_breadthFirst[0] and [1] are empty, we swap them with [2] and [3]
+		///
+		/// @remark	For internal use.
+		/// @see	Widget::m_breadthFirst
+		WidgetVec m_breadthFirst[4];
 
+	protected:
 		LogListener	*m_logListener;
 		ColibriListener	*m_colibriListener;
 
