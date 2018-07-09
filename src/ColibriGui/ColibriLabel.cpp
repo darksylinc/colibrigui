@@ -875,6 +875,13 @@ namespace Colibri
 	{
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
+		//Snap position to pixels
+		Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
+		derivedTopLeft = (derivedTopLeft + 1.0f) * halfWindowRes;
+		derivedTopLeft.x = roundf( derivedTopLeft.x );
+		derivedTopLeft.y = roundf( derivedTopLeft.y );
+		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
+
 		RichTextVec::const_iterator itRichText = m_richText[m_currentState].begin();
 		RichTextVec::const_iterator enRichText = m_richText[m_currentState].end();
 
@@ -947,17 +954,16 @@ namespace Colibri
 								Ogre::Vector2( mostLeft, mostTop - lineHeight * regionUp );
 						Ogre::Vector2 bottomRight =
 								Ogre::Vector2( mostRight, mostBottom + lineHeight * (1.0f - regionUp) );
-						topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
-						bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
 
 						const Ogre::Vector2 glyphSize = bottomRight - topLeft;
 
-						//Snap to pixels
-						topLeft = (topLeft + 1.0f) * halfWindowRes;
+						//Snap each glyph to pixels too
 						topLeft.x = roundf( topLeft.x );
 						topLeft.y = roundf( topLeft.y );
-						topLeft = topLeft * invWindowRes - 1.0f;
 						bottomRight = topLeft + glyphSize;
+
+						topLeft		= derivedTopLeft + topLeft * invWindowRes;
+						bottomRight	= derivedTopLeft + bottomRight * invWindowRes;
 
 						addQuad( textVertBuffer,
 								 topLeft - backgroundDisplacement,
@@ -1042,6 +1048,13 @@ namespace Colibri
 											 parentDerivedTL, parentDerivedBR, isHoriz );
 		}
 
+		//Snap position to pixels
+		Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
+		derivedTopLeft = (derivedTopLeft + 1.0f) * halfWindowRes;
+		derivedTopLeft.x = roundf( derivedTopLeft.x );
+		derivedTopLeft.y = roundf( derivedTopLeft.y );
+		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
+
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
 
@@ -1054,17 +1067,15 @@ namespace Colibri
 				Ogre::Vector2 topLeft, bottomRight;
 				getCorners( shapedGlyph, topLeft, bottomRight );
 
-				topLeft		= m_derivedTopLeft + topLeft * invWindowRes;
-				bottomRight	= m_derivedTopLeft + bottomRight * invWindowRes;
-
 				const Ogre::Vector2 glyphSize = bottomRight - topLeft;
 
-				//Snap to pixels
-				topLeft = (topLeft + 1.0f) * halfWindowRes;
+				//Snap each glyph to pixels too
 				topLeft.x = roundf( topLeft.x );
 				topLeft.y = roundf( topLeft.y );
-				topLeft = topLeft * invWindowRes - 1.0f;
 				bottomRight = topLeft + glyphSize;
+
+				topLeft		= derivedTopLeft + topLeft * invWindowRes;
+				bottomRight	= derivedTopLeft + bottomRight * invWindowRes;
 
 				if( m_shadowOutline )
 				{
