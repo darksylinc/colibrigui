@@ -109,4 +109,5 @@ codeunit) in a string in ShapedGlyph::clusterStart
  * [Arabic Localization of a Game – Our Experience](https://forum.unity.com/threads/arabic-localization-our-experience.355100/)
  * [Precomposed Character - Wikipedia](https://en.wikipedia.org/wiki/Precomposed_character)
  * [Complex text layout - Wikipedia](https://en.wikipedia.org/wiki/Complex_text_layout)
- * [Using a Japanese IME](file:///media/matias/Datos/Downloads/Whitepapers/Using%20a%20Japanese%20IME.mhtml)
+ * [Using a Japanese IME](http://blog.gatunka.com/2009/09/12/using-a-japanese-ime/)
+ * [IME Basics for Developers](http://blog.gatunka.com/2009/09/20/ime-basics-for-developers/)
