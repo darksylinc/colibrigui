@@ -65,3 +65,48 @@ You'll need:
 1. Doxygen. `sudo apt install doxygen`
 
 Create the CMake script and type: `ninja doxygen`
+
+
+Unicode mini-intro for contributors
+===================================
+
+Unicode is hard. But it's harder than it should be because there's a lot of misconceptions
+and misinformation. To make it even harder, the technical reports from unicode.org are
+far from user friendly.
+
+This mini-intro is aimed at preventing you from making the common mistakes.
+
+Asuming we're dealing with UTF-8, Unicode has several things you need to take in mind:
+
+1. Code unit: A unicode codeunit in UTF-8 correspond with a byte.
+1. Code unit: A codeunit is formed from one or more codeunits. For example the letter
+'A' is represented by the codeunit '0x41' in UTF-8, while the kanji codeunit '漢' is
+represented by the three-byte sequence 'E6 BC A2'.<br/>
+It is a common misconception to think that a code unit is a character. In UTF-32,
+codeunits are the same as codeunits.
+1. 'Glyph' / 'Grapheme cluster': A grapheme cluster is made from one or multiple code
+units.
+Grapheme clusters can be caused by multiple reasons:
+	1. Precomposed characters vs decomposed: For example the character ö can be
+  	written in two ways: its precomposed form ö or its decomposed form o + ¨
+		* Precomposed ö codeunit U+00F6; codeunits C3 B6
+		* Decomposed ö codeunits U+006F and U+0308; codeunits 6F CC 88<br/>
+	Note that there can be more than two codeunits. For example the glyph ṓ is made up
+	from 3 codeunits, but should be rendered as a single character
+	1. Complex text layout: For example in arabic scripts, the same letter can be
+	represented in three different ways, depending on whether the letter is at the
+	start, in the middle or at the beginning of a word. This is only one such example.
+	We rely on HarfBuzz library to perform Complex Text Layout for us. 
+
+So what really counts as a "character" or "letter" is more accurately a grapheme cluster
+or glyph, not a code unit. We store the beginning of the cluster (i.e. the first
+codeunit) in a string in ShapedGlyph::clusterStart
+
+*More information:*
+
+ * [Let’s Stop Ascribing Meaning to Code Points](https://manishearth.github.io/blog/2017/01/14/stop-ascribing-meaning-to-unicode-code-points/)
+ * [Breaking Our Latin-1 Assumptions](https://manishearth.github.io/blog/2017/01/15/breaking-our-latin-1-assumptions/)
+ * [Arabic Localization of a Game – Our Experience](https://forum.unity.com/threads/arabic-localization-our-experience.355100/)
+ * [Precomposed Character - Wikipedia](https://en.wikipedia.org/wiki/Precomposed_character)
+ * [Complex text layout - Wikipedia](https://en.wikipedia.org/wiki/Complex_text_layout)
+ * [Using a Japanese IME](file:///media/matias/Datos/Downloads/Whitepapers/Using%20a%20Japanese%20IME.mhtml)

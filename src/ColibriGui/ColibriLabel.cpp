@@ -6,6 +6,8 @@
 
 #include "OgreLwString.h"
 
+#include "unicode/unistr.h"
+
 namespace Colibri
 {
 	inline void getCorners( const ShapedGlyph &shapedGlyph,
@@ -1242,6 +1244,29 @@ namespace Colibri
 		}
 
 		return localTopLeft;
+	}
+	//-------------------------------------------------------------------------
+	void Label::getGlyphStartUtf16( size_t glyphIdx, size_t &glyphStart, size_t &outLength )
+	{
+		COLIBRI_ASSERT_MEDIUM( !isAnyStateDirty() );
+
+		if( glyphIdx < m_shapes[m_currentState].size() )
+		{
+			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][glyphIdx];
+			glyphStart = shapedGlyph.clusterStart;
+			if( glyphIdx + 1u < m_shapes[m_currentState].size() )
+				outLength = m_shapes[m_currentState][glyphIdx+1u].clusterStart - glyphStart;
+			else
+			{
+				UnicodeString uStr( UnicodeString::fromUTF8( m_text[m_currentState] ) );
+				outLength = uStr.length() - glyphStart;
+			}
+		}
+		else
+		{
+			glyphStart = m_text[m_currentState].size();
+			outLength = 0;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::sizeToFit( States::States baseState, float maxAllowedWidth,

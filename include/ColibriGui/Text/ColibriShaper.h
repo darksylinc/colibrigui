@@ -28,6 +28,7 @@ namespace Colibri
 		bool isRtl;
 		bool isTab;
 		uint32_t richTextIdx;
+		uint32_t clusterStart;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;

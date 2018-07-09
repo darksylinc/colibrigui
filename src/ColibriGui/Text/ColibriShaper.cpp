@@ -183,6 +183,7 @@ namespace Colibri
 			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
 												-glyphPos[i].y_offset ) / 64.0f;
 			shapedGlyph.caretPos = Ogre::Vector2::ZERO;
+			shapedGlyph.clusterStart = glyphInfo[i].cluster;
 			shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 			shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
 										utf16Str[cluster] == L'\t'	||

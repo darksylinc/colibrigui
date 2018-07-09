@@ -134,25 +134,21 @@ namespace Colibri
 			const std::string &oldText = m_label->getText();
 			UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 
-			//Convert m_cursorPos from code points to code units
-			int32_t offsetStart, offsetEnd;
-
 			if( keyCode == KeyCode::Backspace )
 			{
-				offsetEnd	= uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
-				offsetStart	= uStr.moveIndex32( offsetEnd, -1 );
-
 				//Set the new cursor position
 				if( m_cursorPos )
 					--m_cursorPos;
 			}
-			else
-			{
-				offsetStart	= uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
-				offsetEnd	= uStr.moveIndex32( offsetStart, 1 );
-			}
 
-			uStr.remove( offsetStart, offsetEnd - offsetStart );
+			size_t glyphStart;
+			size_t glyphLength;
+			m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
+			if( glyphLength > 0 )
+			{
+				uStr.remove( static_cast<int32_t>( glyphStart ),
+							 static_cast<int32_t>( glyphLength ) );
+			}
 
 			//Convert back to UTF8
 			std::string result;
@@ -199,17 +195,23 @@ namespace Colibri
 		UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 		UnicodeString appendText( UnicodeString::fromUTF8( text ) );
 
-		//Convert m_cursorPos from code points to code units
-		const int32_t offset = uStr.moveIndex32( 0, static_cast<int32_t>( m_cursorPos ) );
+		//Convert m_cursorPos from glyph to code units
+		size_t glyphStart;
+		size_t glyphLength;
+		m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
+
 		//Append the text
-		uStr.insert( offset, appendText );
+		uStr.insert( glyphStart, appendText );
 
 		//Convert back to UTF8
 		std::string result;
 		uStr.toUTF8String( result );
 		m_label->setText( result );
 
-		//Advance the cursor
+		//Advance the cursor - We advance it by code units instead of glyphs
+		//This is wrong but we don't have enough information here. Worst
+		//case scenario the cursor pos advances too much and gets clamped
+		//if it goes out of bounds. It should be rare.
 		m_cursorPos += appendText.countChar32();
 
 		showCaret();

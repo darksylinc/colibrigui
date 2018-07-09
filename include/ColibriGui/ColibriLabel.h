@@ -204,6 +204,18 @@ namespace Colibri
 		*/
 		Ogre::Vector2 getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const;
 
+		/** Returns the start location in codeunits of a given glyph index
+		@remarks
+			If glyphIdx is out of bounds, then we return outLength = 0 and
+			glyphStart = m_text[m_currentState].size()
+		@param glyphIdx
+		@param glyphStart [out]
+			The start of the glyph in the string, in codeunits UTF16
+		@param outLength [out]
+			The length of glyph, in codeunits UTF16
+		 */
+		void getGlyphStartUtf16( size_t glyphIdx, size_t &glyphStart, size_t &outLength );
+
 		/** Recalculates the size of the widget based on the text contents to fit tightly.
 			It may also reposition the Widget depending on newHorizPos & newVertPos
 		@remarks
