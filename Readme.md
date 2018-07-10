@@ -66,6 +66,109 @@ You'll need:
 
 Create the CMake script and type: `ninja doxygen`
 
+FAQ
+===
+
+### Why did you write this library?
+
+I've always wanted a GUI meant for video games that would fit the following criteria:
+
+  * Is reasonably fast (i.e. doesn't make a huge impact when complex UIs are on screen).
+    We don't aim to be the fastest one, but at least we shouldn't be a drag like most UIs
+    are.
+  * Has internationalization support
+  * Open Source
+  * Lightweight (in terms of memory consumption, lines of code, file sizes, build times)
+  * Has builtin support for basic typing editboxes
+  * Supports keyboard and mouse pointer navigation
+  * Supports gamepad and similar devices (e.g. AppleTV's remote control)
+  * Supports touch
+
+None of the libraries I knew or tried met all of the criteria, so I decided to write one
+
+### Is this library just for video games?
+
+While that is intended use, you don't have to. Any multimedia equipment that requires
+basic navigation with a remote control could be suited for this. For example my old TV
+has a built-in file explorer for opening movies and pictures in an USB drive.
+
+This interface could use Colibri, as it was developed to be very fast and lightweight
+displaying lots of big buttons with thumbnails on it and a text description.
+
+### Why not use [Pango](https://www.pango.org/)?
+
+Pango is LGPL-licensed software, which means it cannot be used in closed platforms such as
+consoles or the App Store (iOS)
+
+While we'd love to see these platforms opening up, the reality is that is very likely not
+gonna happen and our core target market uses these platforms.
+
+### What programming language is Colibri written?
+
+Colibri is written in C++98. This ensures maximum compatibility with even old compilers,
+and also very fast build times, since building with C++11 and afterwards often increases
+build times.
+
+### What's your memory consumption? Can you customize allocators?
+
+No. Some C and hardcore C++ programmers may be in shock that we use the STL.
+We try to minimize STL usage to the basics:
+
+  * std::vector for most of our needs (which is basically a linear contiguous array)
+  * std::string for text
+  * Rarely use std::set and std::map when O(log N) is needed
+
+GUI libraries are difficult to write, hence we use the STL for common operations to speed
+up development.
+
+We do not do dumb stuff like creating a temporary std::vector on the stack on functions
+that are called every frame, as this would lead to allocs and deallocs every frame.
+If such container is needed, we keep it persistently so that its memory can be reused.
+
+If a container or snippet of code is allocating and deallocating memory every frame this
+is a bug and feel free to report it.
+
+I'm afraid we do not provide custom allocators.
+
+I'm also afraid that each Widget/Control created is done via new, i.e.
+
+```
+Colibri::Button *retVal = new Colibri::Button( m_colibriManager );
+```
+
+This means each widget may not be contiguous. We may fix this in the future and provide
+custom allocators for handling widgets, because after all, all widgets are created either
+via:
+
+  1. ColibriManager::_createWidget (creation)
+  1. ColibriManager::destroyWidget (destruction)
+  1. ColibriManager::createWindow (creation)
+  1. ColibriManager::destroyWindow (destruction)
+  1. ShaperManager::addShaper calls new
+  1. ShaperManager::growAtlas calls realloc
+
+So adding a custom allocator to handle the widgets & glyph rendering should be rather
+easy.
+
+Note however the widgets inside may allocate further memory e.g. via std::vector living
+inside of them.
+
+Text management is probably the biggest offender in terms of memory usage. In extreme
+cases we need to convert the std::string (UTF8) into an icu::UnicodeString (UTF16).
+
+The more widgets with text (or worst, editable text) the worst it gets. If this text
+changes every frame, then it's possible you end up with memory allocations every frame.
+
+### Do you use C++ Exceptions?
+
+Colibri Gui not rely on C++ exceptions. However our Ogre3D backend does, and currently
+that's the only backend.
+
+### Do you use templates?
+
+Aside from stl library, we only rely on templates when it makes sense to do so, and that
+means almost never.
+
 
 Unicode mini-intro for contributors
 ===================================
