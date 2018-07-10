@@ -169,6 +169,86 @@ that's the only backend.
 Aside from stl library, we only rely on templates when it makes sense to do so, and that
 means almost never.
 
+### How does Colibri render text?
+
+There are several known ways to render text:
+
+  1. Render via the font rasterization library i.e. FreeType directly into the screen.
+     Consumes little memory. Best quality. It's CPU-only. It's terribly slow.
+  1. Render the fonts with the GPU using clever GPU algorithms like the Loop-Blinn method
+     or the Dobbie Method. [Slug](http://sluglibrary.com/) deserves a special mention as
+     it renders everything via pixel shaders with exceptional high quality at high speed.
+  1. Fixed font atlases. This is fine if you stick to latin characters, but quality
+     suffers when the font size doesn't match the one in the atlas, and RAM consuption can
+     go out of proportion for other languages.
+  1. Signed Distance Fields. An significant improvement over fixed font atlases, but still
+     has ultimately the same problems. These are popular among videogames because of its
+     speed and reasonable quality, but it doesn't work as well for non-lating characters.
+  1. Dynamic atlas. Generate the atlas on the demand based on characters and font sizes
+     needed on screen, and cache them for reuse, and start throwing away what hasn't been
+     used when we're running out of space.
+
+For more information see Lengyel's [GPU Font Rendering Current State of the Art](http://terathon.com/font_rendering_sota_lengyel.pdf)
+
+Colibri uses the last one i.e. a dynamic atlas. The difference with most implementations
+is that they often use a 2D texture. This is troublesome because unless all glyphs have
+the same width and height (spoiler alert: they don't) you run into the "sprite packing"
+problem of packing all glyphs as tightly as possible.
+
+This is a hard problem i.e. we either spend considerable time analyzing the optimal way
+to place all the glyphs in the 2D atlas, or we use simple algorithms that will waste
+a lot of RAM.
+
+Colibri does not do that. We use a 1D buffer and store all glyphs contiguously. This turns
+a 2D fragmentation problem into a 1D problem, which is **much** easier to handle and
+resembles regular memory fragmentation which is well understood.
+
+The glyph is then fetch from the pixel shader using the following code:
+```
+//GLSL
+#define OGRE_BufferFetch1( buffer, intLocation ) texelFetch( buffer, intLocation ).x
+//HLSL
+#define OGRE_BufferFetch1( buffer, intLocation ) buffer.Load( intLocation ).x
+//Metal
+#define OGRE_BufferFetch1( buffer, intLocation ) buffer[(intLocation)]
+
+glyphCol = OGRE_BufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
+						uint(floor(inPs.uvText.y) *
+						float(inPs.pixelsPerRow) +
+						floor(inPs.uvText.x)) ) );
+```
+
+This prevents HW bilinear filtering, but we do not care because **we render sharp
+pixel-perfect fonts for the given font size / DPI selected**, that means for example our
+dynamic atlas may contain the letter 'e' twice, one with font size 16 another with font
+size 20.
+
+### Why don't you use Slug?
+
+Slug is not free.
+
+### Why do you use FreeType instead of stb_truetype?
+
+I was tempted by the extreme simplicity of stb_truetype over FreeType (largely on disk
+size of both code and compiled library) but I was very limited in time and did not want to
+spend time analyzing too much.
+
+A quick google around showed that:
+
+  * stb is mostly aimed at producing fixed font atlases (i.e. SDF atlas).
+  * Apparently FreeType is faster at rasterizing than std_truetype. Although this may be
+    old benchmarks, it would make sense since fixed font atlases are only built once. But
+    this is not the case for dynamic atlas approaches like Colibri's, so rasterization
+    time is very important.
+  * Due to our internalization support goal, we need to support very weird / obscure
+    formats. stb only supports the most popular ones.
+  * FreeType is older and thus more tested against edge cases (i.e. non-latin fonts)
+
+Admitedly these are all preconceptions rather than hard evidence (except the performance
+benchmark, however it may be outdated), but I did not want to spend considerable time
+comparing the two, and chosing stb_truetype was too risky if it ended up not suitable
+for my needs.
+
 
 Unicode mini-intro for contributors
 ===================================
