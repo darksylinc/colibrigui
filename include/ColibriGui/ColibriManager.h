@@ -143,6 +143,11 @@ namespace Colibri
 		SkinInfo const * colibrigui_nullable
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
 
+#if COLIBRIGUI_DEBUG_MEDIUM
+		bool m_fillBuffersStarted;
+		bool m_renderingStarted;
+#endif
+
 		void updateWidgetsFocusedByCursor();
 		void updateAllDerivedTransforms();
 
@@ -150,7 +155,9 @@ namespace Colibri
 		void overrideKeyboardFocusWith( const FocusPair &focusedPair );
 		void overrideCursorFocusWith( const FocusPair &focusedPair );
 
-		void updateDirtyLabels();
+	public:
+		void _updateDirtyLabels();
+	protected:
 		void checkVertexBufferCapacity();
 
 		template <typename T>

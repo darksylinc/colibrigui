@@ -64,6 +64,10 @@ namespace Colibri
 		m_defaultFontSize( 16u << 6u ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 )
+	#if COLIBRIGUI_DEBUG_MEDIUM
+	,	m_fillBuffersStarted( false )
+	,	m_renderingStarted( false )
+	#endif
 	{
 		memset( m_defaultTextDatablock, 0, sizeof(m_defaultTextDatablock) );
 		memset( m_defaultSkins, 0, sizeof(m_defaultSkins) );
@@ -982,8 +986,11 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::updateDirtyLabels()
+	void ColibriManager::_updateDirtyLabels()
 	{
+		COLIBRI_ASSERT_MEDIUM( !m_fillBuffersStarted );
+		COLIBRI_ASSERT_MEDIUM( !m_renderingStarted );
+
 		bool recalculateNumGlyphs = false;
 		LabelVec::const_iterator itor = m_dirtyLabels.begin();
 		LabelVec::const_iterator end  = m_dirtyLabels.end();
@@ -1012,7 +1019,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::autosetNavigation()
 	{
-		updateDirtyLabels();
+		_updateDirtyLabels();
 		checkVertexBufferCapacity();
 
 		if( m_windowNavigationDirty )
@@ -1167,6 +1174,10 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::prepareRenderCommands()
 	{
+#if COLIBRIGUI_DEBUG_MEDIUM
+		m_fillBuffersStarted = true;
+#endif
+
 		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
 		Ogre::VertexBufferPacked *vertexBufferText = m_textVao->getBaseVertexBuffer();
 
@@ -1196,10 +1207,17 @@ namespace Colibri
 		COLIBRI_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
 		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
+
+#if COLIBRIGUI_DEBUG_MEDIUM
+		m_fillBuffersStarted = false;
+#endif
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::render()
 	{
+#if COLIBRIGUI_DEBUG_MEDIUM
+		m_renderingStarted = true;
+#endif
 		ApiEncapsulatedObjects apiObjects;
 
 		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
@@ -1259,5 +1277,9 @@ namespace Colibri
 		hlms->preCommandBufferExecution( m_commandBuffer );
 		m_commandBuffer->execute();
 		hlms->postCommandBufferExecution( m_commandBuffer );
+
+#if COLIBRIGUI_DEBUG_MEDIUM
+		m_renderingStarted = false;
+#endif
 	}
 }

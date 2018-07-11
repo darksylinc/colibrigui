@@ -208,6 +208,9 @@ namespace Colibri
 		uStr.toUTF8String( result );
 		m_label->setText( result );
 
+		//We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
+		m_manager->_updateDirtyLabels();
+
 		//Advance the cursor - We advance it by code units instead of glyphs
 		//This is wrong but we don't have enough information here. Worst
 		//case scenario the cursor pos advances too much and gets clamped
