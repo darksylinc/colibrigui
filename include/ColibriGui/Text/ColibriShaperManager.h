@@ -49,6 +49,10 @@ namespace Colibri
 
 	class ShaperManager
 	{
+	public:
+		typedef std::vector<Shaper*> ShaperVec;
+
+	protected:
 		struct Range
 		{
 			size_t	offset;
@@ -75,7 +79,6 @@ namespace Colibri
 		UBiDiLevel	m_defaultDirection;
 		bool		m_useVerticalLayoutWhenAvailable;
 
-		typedef std::vector<Shaper*> ShaperVec;
 		/// m_shapers[0] is the default and not a strong reference
 		ShaperVec	m_shapers;
 
@@ -100,6 +103,10 @@ namespace Colibri
 						   const std::string &language );
 		void setDefaultShaper( uint16_t font, HorizReadingDir::HorizReadingDir horizReadingDir,
 							   bool useVerticalLayoutWhenAvailable );
+
+		/// @remark m_shapers[0] contains the default font, which
+		///			means it will appear twice in the array
+		const ShaperVec& getShapers() const			{ return m_shapers; }
 
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
 		LogListener* getLogListener() const;

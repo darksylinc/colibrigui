@@ -149,9 +149,46 @@ namespace Colibri
 		return m_ptSize;
 	}
 	//-------------------------------------------------------------------------
+	bool Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
+										   hb_direction_t dir, uint32_t richTextIdx,
+										   ShapedGlyphVec &outShapes, uint32_t clusterStart )
+	{
+		size_t currentSize = outShapes.size();
+
+		const ShaperManager::ShaperVec &shapers = m_shaperManager->getShapers();
+
+		ShaperManager::ShaperVec::const_iterator itor = shapers.begin() + 1u;
+		ShaperManager::ShaperVec::const_iterator end  = shapers.end();
+
+		while( itor != end && outShapes.size() == currentSize )
+		{
+			if( *itor != this )
+			{
+				Shaper *otherShaper = *itor;
+				otherShaper->setFontSize( m_ptSize );
+				otherShaper->renderString( utf16Str, stringLength, dir, richTextIdx, outShapes, false );
+			}
+
+			++itor;
+		}
+
+		const bool success = outShapes.size() != currentSize;
+
+		ShapedGlyphVec::iterator itShapedGlyph = outShapes.begin() + currentSize;
+		ShapedGlyphVec::iterator enShapedGlyph = outShapes.end();
+
+		while( itShapedGlyph != enShapedGlyph )
+		{
+			itShapedGlyph->clusterStart += clusterStart;
+			++itShapedGlyph;
+		}
+
+		return success;
+	}
+	//-------------------------------------------------------------------------
 	void Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
 							   hb_direction_t dir, uint32_t richTextIdx,
-							   ShapedGlyphVec &outShapes )
+							   ShapedGlyphVec &outShapes, bool substituteIfNotFound )
 	{
 		ShapedGlyphVec shapesVec;
 		shapesVec.swap( outShapes );
@@ -171,46 +208,64 @@ namespace Colibri
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
-			const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
-																	  glyphInfo[i].codepoint,
-																	  m_ptSize.value26d6 );
+			bool foundSubstituteGlyph = false;
 
-			size_t cluster = glyphInfo[i].cluster;
-
-			ShapedGlyph shapedGlyph;
-			shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
-												 -glyphPos[i].y_advance ) / 64.0f;
-			shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
-												-glyphPos[i].y_offset ) / 64.0f;
-			shapedGlyph.caretPos = Ogre::Vector2::ZERO;
-			shapedGlyph.clusterStart = glyphInfo[i].cluster;
-			shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
-			shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
-										utf16Str[cluster] == L'\t'	||
-										utf16Str[cluster] == L'.'	||
-										utf16Str[cluster] == L';'	||
-										utf16Str[cluster] == L',';
-
-			//Ensure whitespace has zero offset, otherwise it messes up Right & Bottom alignment
-			if( utf16Str[cluster] == L' ' || utf16Str[cluster] == L'\t' )
-				shapedGlyph.offset = Ogre::Vector2::ZERO;
-
+			if( glyphInfo[i].codepoint == 0 && substituteIfNotFound )
 			{
-				//Ask ICU if this character correspond to a language we can
-				//break by single letters (e.g. CJK characters, Thai)
-				//Word breaking is actually very complex, so we just assume
-				//these languages can be broken at any character
-				uint32_t utf32Char;
-				U16_GET_UNSAFE( utf16Str, cluster, utf32Char );
-				UErrorCode ignoredError = U_ZERO_ERROR;
-				UScriptCode scriptCode = uscript_getScript( utf32Char, &ignoredError );
-				shapedGlyph.isWordBreaker |= uscript_breaksBetweenLetters( scriptCode ) != 0;
+				size_t clusterLength;
+				if( i + 1u < glyphCount)
+					clusterLength = glyphInfo[i+1u].cluster - glyphInfo[i].cluster;
+				else
+					clusterLength = stringLength - glyphInfo[i].cluster;
+
+				foundSubstituteGlyph = renderWithSubstituteFont( &utf16Str[glyphInfo[i].cluster],
+																 clusterLength, dir, richTextIdx,
+																 shapesVec, glyphInfo[i].cluster );
 			}
-			shapedGlyph.isTab = utf16Str[cluster] == L'\t';
-			shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
-			shapedGlyph.richTextIdx = richTextIdx;
-			shapedGlyph.glyph = glyph;
-			shapesVec.push_back( shapedGlyph );
+
+			if( glyphInfo[i].codepoint != 0 || (!foundSubstituteGlyph && substituteIfNotFound) )
+			{
+				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
+																		  glyphInfo[i].codepoint,
+																		  m_ptSize.value26d6 );
+
+				size_t cluster = glyphInfo[i].cluster;
+
+				ShapedGlyph shapedGlyph;
+				shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
+													 -glyphPos[i].y_advance ) / 64.0f;
+				shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
+													-glyphPos[i].y_offset ) / 64.0f;
+				shapedGlyph.caretPos = Ogre::Vector2::ZERO;
+				shapedGlyph.clusterStart = glyphInfo[i].cluster;
+				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
+				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
+											utf16Str[cluster] == L'\t'	||
+											utf16Str[cluster] == L'.'	||
+											utf16Str[cluster] == L';'	||
+											utf16Str[cluster] == L',';
+
+				//Ensure whitespace has zero offset, otherwise it messes up Right & Bottom alignment
+				if( utf16Str[cluster] == L' ' || utf16Str[cluster] == L'\t' )
+					shapedGlyph.offset = Ogre::Vector2::ZERO;
+
+				{
+					//Ask ICU if this character correspond to a language we can
+					//break by single letters (e.g. CJK characters, Thai)
+					//Word breaking is actually very complex, so we just assume
+					//these languages can be broken at any character
+					uint32_t utf32Char;
+					U16_GET_UNSAFE( utf16Str, cluster, utf32Char );
+					UErrorCode ignoredError = U_ZERO_ERROR;
+					UScriptCode scriptCode = uscript_getScript( utf32Char, &ignoredError );
+					shapedGlyph.isWordBreaker |= uscript_breaksBetweenLetters( scriptCode ) != 0;
+				}
+				shapedGlyph.isTab = utf16Str[cluster] == L'\t';
+				shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
+				shapedGlyph.richTextIdx = richTextIdx;
+				shapedGlyph.glyph = glyph;
+				shapesVec.push_back( shapedGlyph );
+			}
 		}
 
 		shapesVec.swap( outShapes );

@@ -234,6 +234,9 @@ namespace Demo
 											 shaperSettings[defaultFont].horizReadingDir,
 											 shaperSettings[defaultFont].allowsVerticalLayout );
 
+			if( defaultFont == 1 )
+				colibriManager->setSwapRTLControls( true );
+
 			Ogre::CompositorPassColibriGuiProvider *compoProvider =
 					OGRE_NEW Ogre::CompositorPassColibriGuiProvider( colibriManager );
 			Ogre::CompositorManager2 *compositorManager = mRoot->getCompositorManager2();

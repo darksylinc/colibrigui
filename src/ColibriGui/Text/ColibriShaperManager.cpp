@@ -497,7 +497,7 @@ namespace Colibri
 			const uint16_t *utf16Str = temp.getBuffer();
 #endif
 			shaper->setFontSize( richText.ptSize );
-			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx, outShapes );
+			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx, outShapes, true );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;
