@@ -262,28 +262,38 @@ This mini-intro is aimed at preventing you from making the common mistakes.
 Asuming we're dealing with UTF-8, Unicode has several things you need to take in mind:
 
 1. Code unit: A unicode codeunit in UTF-8 correspond with a byte.
-1. Code unit: A codeunit is formed from one or more codeunits. For example the letter
-'A' is represented by the codeunit '0x41' in UTF-8, while the kanji codeunit '漢' is
-represented by the three-byte sequence 'E6 BC A2'.<br/>
-It is a common misconception to think that a code unit is a character. In UTF-32,
-codeunits are the same as codeunits.
-1. 'Glyph' / 'Grapheme cluster': A grapheme cluster is made from one or multiple code
-units.
+1. Code point: A codepoint is formed from one or more codeunits. For example the letter
+'A' is represented by the codeunit '0x41' in UTF-8, while the kanji '漢' is represented
+by the three-byte sequence 'E6 BC A2'.<br/>
+**It is a common misconception to think that a code point is a character**. In UTF-32,
+codepoint are the same as codeunits.
+1. 'Grapheme cluster': A grapheme cluster is made from one or multiple code
+points.
 Grapheme clusters can be caused by multiple reasons:
 	1. Precomposed characters vs decomposed: For example the character ö can be
   	written in two ways: its precomposed form ö or its decomposed form o + ¨
-		* Precomposed ö codeunit U+00F6; codeunits C3 B6
-		* Decomposed ö codeunits U+006F and U+0308; codeunits 6F CC 88<br/>
-	Note that there can be more than two codeunits. For example the glyph ṓ is made up
-	from 3 codeunits, but should be rendered as a single character
+		* Precomposed ö codepoint U+00F6; codeunits C3 B6
+		* Decomposed ö codepoints U+006F and U+0308; codeunits 6F CC 88<br/>
+	Note that there can be more than two codepoints. For example the glyph ṓ is made
+	up from 3 codepoints, but should be rendered as a single character
 	1. Complex text layout: For example in arabic scripts, the same letter can be
 	represented in three different ways, depending on whether the letter is at the
 	start, in the middle or at the beginning of a word. This is only one such example.
 	We rely on HarfBuzz library to perform Complex Text Layout for us. 
 
-So what really counts as a "character" or "letter" is more accurately a grapheme cluster
-or glyph, not a code unit. We store the beginning of the cluster (i.e. the first
-codeunit) in a string in ShapedGlyph::clusterStart
+So what really counts as a "character" or "letter" is more accurately a grapheme cluster,
+not a codepoint. We store the beginning of the cluster (i.e. the first codepoint) in a
+string in ShapedGlyph::clusterStart
+
+Please note that:
+  1. A glyph may be made from multiple code points. This happens when the string is stored
+     in its decomposed form and the font has a precomposed version i.e. ö U+006F U+0308
+     is stored as o + ¨ but is often rendered as a single glyph.<br/>
+     One glyph, one cluster, two codepoints.
+  1. A single cluster may result in multiple glyphs! For example the letter पा is one
+     cluster made up from codepoints U+092A U+093E is stored decomposed, and several
+     devangari fonts render also render it as two glyphs: प + ा
+     One cluster, two glyphs, two codepoints.
 
 *More information:*
 
