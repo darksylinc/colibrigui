@@ -1253,18 +1253,15 @@ namespace Colibri
 		if( glyphIdx < m_shapes[m_currentState].size() )
 		{
 			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][glyphIdx];
-			glyphStart = shapedGlyph.clusterStart;
-			if( glyphIdx + 1u < m_shapes[m_currentState].size() )
-				outLength = m_shapes[m_currentState][glyphIdx+1u].clusterStart - glyphStart;
-			else
-			{
-				UnicodeString uStr( UnicodeString::fromUTF8( m_text[m_currentState] ) );
-				outLength = uStr.length() - glyphStart;
-			}
+			glyphStart	= shapedGlyph.clusterStart;
+			outLength	= shapedGlyph.clusterLength;
 		}
 		else
 		{
-			glyphStart = m_text[m_currentState].size();
+			if( !m_manager->swapRTLControls() )
+				glyphStart = m_text[m_currentState].size();
+			else
+				glyphStart = 0;
 			outLength = 0;
 		}
 	}

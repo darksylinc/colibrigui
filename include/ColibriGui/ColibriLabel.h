@@ -207,7 +207,8 @@ namespace Colibri
 		/** Returns the start location in codeunits of a given glyph index
 		@remarks
 			If glyphIdx is out of bounds, then we return outLength = 0 and
-			glyphStart = m_text[m_currentState].size()
+			glyphStart = m_text[m_currentState].size() or 0 depending on whether
+			RTL is swapped
 		@param glyphIdx
 		@param glyphStart [out]
 			The start of the glyph in the string, in codeunits UTF16

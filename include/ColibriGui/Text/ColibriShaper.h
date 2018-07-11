@@ -29,6 +29,7 @@ namespace Colibri
 		bool isTab;
 		uint32_t richTextIdx;
 		uint32_t clusterStart;
+		uint32_t clusterLength;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;
@@ -49,9 +50,9 @@ namespace Colibri
 
 		FontSize	m_ptSize; //Font size in points
 
-		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
-										 uint32_t richTextIdx, ShapedGlyphVec &outShapes,
-										 uint32_t clusterStart );
+		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
+										 hb_direction_t dir, uint32_t richTextIdx,
+										 uint32_t clusterOffset, ShapedGlyphVec &outShapes );
 
 	public:
 		Shaper( hb_script_t script, const char *fontLocation,
@@ -66,7 +67,7 @@ namespace Colibri
 		FontSize getFontSize() const;
 
 		size_t renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
-							 uint32_t richTextIdx, ShapedGlyphVec &outShapes,
+							 uint32_t richTextIdx, uint32_t clusterOffset, ShapedGlyphVec &outShapes,
 							 bool substituteIfNotFound );
 
 		bool operator < ( const Shaper &other ) const;

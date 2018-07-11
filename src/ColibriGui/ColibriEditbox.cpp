@@ -131,29 +131,35 @@ namespace Colibri
 	{
 		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
 		{
-			const std::string &oldText = m_label->getText();
-			UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
+			bool isAtLimit = (keyCode == KeyCode::Backspace && m_cursorPos == 0) ||
+							 (keyCode == KeyCode::Delete && m_cursorPos >= m_label->getGlyphCount());
 
-			if( keyCode == KeyCode::Backspace )
+			if( !isAtLimit )
 			{
-				//Set the new cursor position
-				if( m_cursorPos )
-					--m_cursorPos;
-			}
+				const std::string &oldText = m_label->getText();
+				UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 
-			size_t glyphStart;
-			size_t glyphLength;
-			m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
-			if( glyphLength > 0 )
-			{
-				uStr.remove( static_cast<int32_t>( glyphStart ),
-							 static_cast<int32_t>( glyphLength ) );
-			}
+				if( keyCode == KeyCode::Backspace )
+				{
+					//Set the new cursor position
+					if( m_cursorPos )
+						--m_cursorPos;
+				}
 
-			//Convert back to UTF8
-			std::string result;
-			uStr.toUTF8String( result );
-			m_label->setText( result );
+				size_t glyphStart;
+				size_t glyphLength;
+				m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
+				if( glyphLength > 0 )
+				{
+					uStr.remove( static_cast<int32_t>( glyphStart ),
+								 static_cast<int32_t>( glyphLength ) );
+				}
+
+				//Convert back to UTF8
+				std::string result;
+				uStr.toUTF8String( result );
+				m_label->setText( result );
+			}
 
 			showCaret();
 		}

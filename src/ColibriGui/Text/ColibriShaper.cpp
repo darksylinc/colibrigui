@@ -151,7 +151,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	size_t Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 											 hb_direction_t dir, uint32_t richTextIdx,
-											 ShapedGlyphVec &outShapes, uint32_t clusterStart )
+											 uint32_t clusterOffset, ShapedGlyphVec &outShapes )
 	{
 		size_t currentSize = outShapes.size();
 		size_t numWrittenCodepoints = 0;
@@ -168,26 +168,18 @@ namespace Colibri
 				Shaper *otherShaper = *itor;
 				otherShaper->setFontSize( m_ptSize );
 				numWrittenCodepoints = otherShaper->renderString( utf16Str, stringLength, dir,
-																  richTextIdx, outShapes, false );
+																  richTextIdx, clusterOffset,
+																  outShapes, false );
 			}
 
 			++itor;
-		}
-
-		ShapedGlyphVec::iterator itShapedGlyph = outShapes.begin() + currentSize;
-		ShapedGlyphVec::iterator enShapedGlyph = outShapes.end();
-
-		while( itShapedGlyph != enShapedGlyph )
-		{
-			itShapedGlyph->clusterStart += clusterStart;
-			++itShapedGlyph;
 		}
 
 		return numWrittenCodepoints;
 	}
 	//-------------------------------------------------------------------------
 	size_t Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
-								 hb_direction_t dir, uint32_t richTextIdx,
+								 hb_direction_t dir, uint32_t richTextIdx, uint32_t clusterOffset,
 								 ShapedGlyphVec &outShapes, bool substituteIfNotFound )
 	{
 		size_t numWrittenCodepoints = stringLength;
@@ -254,7 +246,8 @@ namespace Colibri
 
 				size_t replacedCodepoints = renderWithSubstituteFont( &utf16Str[firstCluster],
 																	  clusterLength, dir, richTextIdx,
-																	  shapesVec, firstCluster );
+																	  clusterOffset + firstCluster,
+																	  shapesVec );
 
 				if( replacedCodepoints == clusterLength )
 					i += numUnknownGlyphs;
@@ -304,7 +297,21 @@ namespace Colibri
 				shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
 													-glyphPos[i].y_offset ) / 64.0f;
 				shapedGlyph.caretPos = Ogre::Vector2::ZERO;
-				shapedGlyph.clusterStart = glyphInfo[i].cluster;
+				shapedGlyph.clusterStart = glyphInfo[i].cluster + clusterOffset;
+				if( dir != HB_DIRECTION_RTL )
+				{
+					if( i+1u < glyphCount )
+						shapedGlyph.clusterLength = glyphInfo[i+1u].cluster - glyphInfo[i].cluster;
+					else
+						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
+				}
+				else
+				{
+					if( i > 0 )
+						shapedGlyph.clusterLength = glyphInfo[i-1u].cluster - glyphInfo[i].cluster;
+					else
+						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
+				}
 				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
 											utf16Str[cluster] == L'\t'	||
