@@ -286,17 +286,17 @@ So what really counts as a "character" or "letter" is more accurately a grapheme
 not a codepoint. We store the beginning of the cluster (i.e. the first codepoint) in a
 string in ShapedGlyph::clusterStart
 
-Please note that:
+**Please note that:**
   1. A glyph may be made from multiple codepoints. This happens when the string is stored
      in its decomposed form and the font has a precomposed version i.e. ö U+006F U+0308
      is stored as o + ¨ but is often rendered as a single glyph.<br/>
      One glyph, one cluster, two codepoints.
   1. A single cluster may result in multiple glyphs! For example the letter पा is one
-     cluster made up from codepoints U+092A U+093E is stored decomposed, and several
-     devangari fonts render also render it as two glyphs: प + ा<br/>
+     cluster made up from codepoints U+092A and U+093E is stored decomposed, and several
+     devangari fonts also render it as two glyphs: प + ा<br/>
      One cluster, two glyphs, two codepoints.
 
-*More information:*
+**More information:**
 
  * [Let’s Stop Ascribing Meaning to Code Points](https://manishearth.github.io/blog/2017/01/14/stop-ascribing-meaning-to-unicode-code-points/)
  * [Breaking Our Latin-1 Assumptions](https://manishearth.github.io/blog/2017/01/15/breaking-our-latin-1-assumptions/)
