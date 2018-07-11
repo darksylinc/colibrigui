@@ -298,17 +298,31 @@ namespace Colibri
 													-glyphPos[i].y_offset ) / 64.0f;
 				shapedGlyph.caretPos = Ogre::Vector2::ZERO;
 				shapedGlyph.clusterStart = glyphInfo[i].cluster + clusterOffset;
+
+				//Multiple glyphs may be used to render the same cluster.
+				//We need to find the next glyph that renders the next cluster
 				if( dir != HB_DIRECTION_RTL )
 				{
-					if( i+1u < glyphCount )
-						shapedGlyph.clusterLength = glyphInfo[i+1u].cluster - glyphInfo[i].cluster;
+					size_t nextIdx = i+1u;
+					while( nextIdx < glyphCount && glyphInfo[nextIdx].cluster == glyphInfo[i].cluster )
+						++nextIdx;
+
+					if( nextIdx < glyphCount )
+						shapedGlyph.clusterLength = glyphInfo[nextIdx].cluster - glyphInfo[i].cluster;
 					else
 						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
 				}
 				else
 				{
-					if( i > 0 )
-						shapedGlyph.clusterLength = glyphInfo[i-1u].cluster - glyphInfo[i].cluster;
+					//We're counting on the fact that if i == 0 or
+					//glyphInfo[0].cluster == glyphInfo[i].cluster then prevIdx will underflow
+					//and thus prevIdx < glyphCount won't be true.
+					size_t prevIdx = i-1u;
+					while( prevIdx < glyphCount && glyphInfo[prevIdx].cluster == glyphInfo[i].cluster )
+						--prevIdx;
+
+					if( prevIdx < glyphCount )
+						shapedGlyph.clusterLength = glyphInfo[prevIdx].cluster - glyphInfo[i].cluster;
 					else
 						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
 				}

@@ -142,8 +142,7 @@ namespace Colibri
 				if( keyCode == KeyCode::Backspace )
 				{
 					//Set the new cursor position
-					if( m_cursorPos )
-						--m_cursorPos;
+					m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
 				}
 
 				size_t glyphStart;
@@ -201,6 +200,8 @@ namespace Colibri
 		UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 		UnicodeString appendText( UnicodeString::fromUTF8( text ) );
 
+		const size_t oldGlyphCount = m_label->getGlyphCount();
+
 		//Convert m_cursorPos from glyph to code units
 		size_t glyphStart;
 		size_t glyphLength;
@@ -217,11 +218,10 @@ namespace Colibri
 		//We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
 		m_manager->_updateDirtyLabels();
 
-		//Advance the cursor - We advance it by code units instead of glyphs
-		//This is wrong but we don't have enough information here. Worst
-		//case scenario the cursor pos advances too much and gets clamped
-		//if it goes out of bounds. It should be rare.
-		m_cursorPos += appendText.countChar32();
+		const size_t newGlyphCount = m_label->getGlyphCount();
+
+		//Advance the cursor
+		m_cursorPos += newGlyphCount - oldGlyphCount;
 
 		showCaret();
 	}
@@ -259,24 +259,19 @@ namespace Colibri
 		if( direction == Borders::Left )
 		{
 			if( m_manager->swapRTLControls() )
-				++m_cursorPos;
+				m_cursorPos = m_label->advanceGlyphToNextCluster( m_cursorPos );
 			else
-			{
-				if( m_cursorPos )
-					--m_cursorPos;
-			}
+				m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
 			showCaret();
 			callActionListeners( Action::ValueChanged );
 		}
 		else if( direction == Borders::Right )
 		{
 			if( m_manager->swapRTLControls() )
-			{
-				if( m_cursorPos )
-					--m_cursorPos;
-			}
+				m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
 			else
-				++m_cursorPos;
+				m_cursorPos = m_label->advanceGlyphToNextCluster( m_cursorPos );
+
 			showCaret();
 			callActionListeners( Action::ValueChanged );
 		}

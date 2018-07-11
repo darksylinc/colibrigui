@@ -204,6 +204,16 @@ namespace Colibri
 		*/
 		Ogre::Vector2 getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const;
 
+		/// Multiple glyphs may be used to render the same cluster. Usually 1 glyph = 1 cluster,
+		/// but if that's not the case, this function will tell you the index to the next glyph
+		/// If input is out of bounds or output would go out of bounds,
+		/// it returns m_shapes[m_currentState].size()
+		size_t advanceGlyphToNextCluster( size_t glyphIdx ) const;
+
+		/// @see	advanceGlyphToNextCluster
+		/// If input is 0 it returns 0
+		size_t regressGlyphToPreviousCluster( size_t glyphIdx ) const;
+
 		/** Returns the start location in codeunits of a given glyph index
 		@remarks
 			If glyphIdx is out of bounds, then we return outLength = 0 and

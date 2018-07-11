@@ -14,7 +14,7 @@ namespace Colibri
 	{
 		Label		*m_label;
 		Label		*m_caret;
-		/// It's in glyph / grapheme clusters
+		/// It's in glyphs
 		uint32_t	m_cursorPos;
 
 	public:

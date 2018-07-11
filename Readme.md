@@ -261,11 +261,12 @@ This mini-intro is aimed at preventing you from making the common mistakes.
 
 Asuming we're dealing with UTF-8, Unicode has several things you need to take in mind:
 
+1. Glyph: graphical representation of a codepoint or a grapheme cluster.
 1. Code unit: A unicode codeunit in UTF-8 correspond with a byte.
 1. Code point: A codepoint is formed from one or more codeunits. For example the letter
-'A' is represented by the codeunit '0x41' in UTF-8, while the kanji '漢' is represented
-by the three-byte sequence 'E6 BC A2'.<br/>
-**It is a common misconception to think that a code point is a character**. In UTF-32,
+'A' is represented by the codeunit '0x41' in UTF-8, while the kanji '漢' U+6F22 is
+represented by the three-byte codeunit sequence 'E6 BC A2' in UTF-8.<br/>
+**It is a common misconception to think that a codepoint is a character**. In UTF-32,
 codepoint are the same as codeunits.
 1. 'Grapheme cluster': A grapheme cluster is made from one or multiple code
 points.
@@ -286,13 +287,13 @@ not a codepoint. We store the beginning of the cluster (i.e. the first codepoint
 string in ShapedGlyph::clusterStart
 
 Please note that:
-  1. A glyph may be made from multiple code points. This happens when the string is stored
+  1. A glyph may be made from multiple codepoints. This happens when the string is stored
      in its decomposed form and the font has a precomposed version i.e. ö U+006F U+0308
      is stored as o + ¨ but is often rendered as a single glyph.<br/>
      One glyph, one cluster, two codepoints.
   1. A single cluster may result in multiple glyphs! For example the letter पा is one
      cluster made up from codepoints U+092A U+093E is stored decomposed, and several
-     devangari fonts render also render it as two glyphs: प + ा
+     devangari fonts render also render it as two glyphs: प + ा<br/>
      One cluster, two glyphs, two codepoints.
 
 *More information:*

@@ -1246,6 +1246,61 @@ namespace Colibri
 		return localTopLeft;
 	}
 	//-------------------------------------------------------------------------
+	size_t Label::advanceGlyphToNextCluster( size_t glyphIdx ) const
+	{
+		const size_t glyphCount = m_shapes[m_currentState].size();
+
+		if( glyphIdx >= glyphCount )
+			return glyphCount;
+
+		const size_t currCluster = m_shapes[m_currentState][glyphIdx].clusterStart;
+
+		size_t nextGlyph = glyphIdx + 1u;
+
+		while( nextGlyph < glyphCount &&
+			   currCluster == m_shapes[m_currentState][nextGlyph].clusterStart )
+		{
+			++nextGlyph;
+		}
+
+		return nextGlyph;
+	}
+	//-------------------------------------------------------------------------
+	size_t Label::regressGlyphToPreviousCluster( size_t glyphIdx ) const
+	{
+		const size_t glyphCount = m_shapes[m_currentState].size();
+
+		if( glyphCount == 0 )
+			return glyphCount;
+
+		bool wasOutOfBounds = glyphIdx >= glyphCount;
+		if( wasOutOfBounds )
+			glyphIdx = glyphCount - 1u;
+
+		//We're counting on the fact that when prevIdx == 0 or glyphIdx == 0;
+		//decrementing it will underflow and thus prevIdx < glyphCount is not true.
+		const size_t currCluster = m_shapes[m_currentState][glyphIdx].clusterStart;
+
+		size_t prevIdx = glyphIdx - 1u;
+
+		while( prevIdx < glyphCount &&
+			   currCluster == m_shapes[m_currentState][prevIdx].clusterStart )
+		{
+			--prevIdx;
+		}
+
+		if( wasOutOfBounds )
+		{
+			//We need to position behind the last letter, not behind the second to last letter
+			++prevIdx;
+		}
+
+		if( prevIdx >= glyphCount )
+			prevIdx = 0;
+
+		return prevIdx;
+	}
+	//-------------------------------------------------------------------------
 	void Label::getGlyphStartUtf16( size_t glyphIdx, size_t &glyphStart, size_t &outLength )
 	{
 		COLIBRI_ASSERT_MEDIUM( !isAnyStateDirty() );
