@@ -97,6 +97,7 @@ namespace Colibri
 		Shaper *shaper = new Shaper( static_cast<hb_script_t>( script ), fontPath, language, this );
 		if( m_shapers.empty() )
 			m_shapers.push_back( shaper );
+
 		m_shapers.push_back( shaper );
 
 		return shaper;
@@ -213,7 +214,8 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize )
+	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint,
+											 uint32_t ptSize, uint16_t fontIdx )
 	{
 		FT_Error errorCode = FT_Load_Glyph( font, codepoint, FT_LOAD_DEFAULT );
 		if( colibrigui_unlikely( errorCode ) )
@@ -247,11 +249,12 @@ namespace Colibri
 		newGlyph.newlineSize= font->size->metrics.height / 64.0f;
 		newGlyph.regionUp = (float)font->size->metrics.ascender / (font->size->metrics.ascender -
 																   font->size->metrics.descender);
+		newGlyph.font		= fontIdx;
 		newGlyph.refCount	= 0;
 
-		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
 		std::pair<CachedGlyphMap::iterator, bool> pair =
-				m_glyphCache.insert( std::pair<uint64_t, CachedGlyph>( glyphKey, newGlyph ) );
+				m_glyphCache.insert( std::pair<GlyphKey, CachedGlyph>( glyphKey, newGlyph ) );
 
 		if( newGlyph.getSizeBytes() > 0 )
 		{
@@ -337,17 +340,18 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	const CachedGlyph* ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize )
+	const CachedGlyph* ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint,
+													uint32_t ptSize, uint16_t fontIdx )
 	{
 		CachedGlyph *retVal = 0;
 
-		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
 		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
 
 		if( itor != m_glyphCache.end() )
 			retVal = &itor->second;
 		else
-			retVal = createGlyph( font, codepoint, ptSize );
+			retVal = createGlyph( font, codepoint, ptSize, fontIdx );
 
 		++retVal->refCount;
 
@@ -356,8 +360,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ShaperManager::addRefCount( const CachedGlyph *cachedGlyph )
 	{
-		const uint64_t glyphKey = ((uint64_t)cachedGlyph->codepoint << 32ul) |
-								  ((uint64_t)cachedGlyph->ptSize);
+		const GlyphKey glyphKey( cachedGlyph->codepoint, cachedGlyph->ptSize, cachedGlyph->font );
 
 		COLIBRI_ASSERT_MEDIUM( m_glyphCache.find( glyphKey ) != m_glyphCache.end() &&
 							   "Invalid glyph cache entry. Use-after-free perhaps?" );
@@ -366,9 +369,9 @@ namespace Colibri
 		++nonConstCachedGlyph->refCount;
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::releaseGlyph( uint32_t codepoint, uint32_t ptSize )
+	void ShaperManager::releaseGlyph( uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx )
 	{
-		const uint64_t glyphKey = ((uint64_t)codepoint << 32ul) | ((uint64_t)ptSize);
+		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
 
 		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
 
@@ -382,8 +385,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ShaperManager::releaseGlyph( const CachedGlyph *cachedGlyph )
 	{
-		const uint64_t glyphKey = ((uint64_t)cachedGlyph->codepoint << 32ul) |
-								  ((uint64_t)cachedGlyph->ptSize);
+		const GlyphKey glyphKey( cachedGlyph->codepoint, cachedGlyph->ptSize, cachedGlyph->font );
 
 		COLIBRI_ASSERT_MEDIUM( m_glyphCache.find( glyphKey ) != m_glyphCache.end() &&
 							   "Invalid glyph cache entry. Use-after-free perhaps?" );

@@ -60,7 +60,8 @@ namespace Colibri
 		m_buffer( 0 ),
 		m_library( shaperManager->getFreeTypeLibrary() ),
 		m_shaperManager( shaperManager ),
-		m_ptSize( 0u )
+		m_ptSize( 0u ),
+		m_fontIdx( std::max<uint16_t>( shaperManager->getShapers().size(), 1u ) )
 	{
 		FT_Error errorCode = FT_New_Face( m_library, fontLocation, 0, &m_ftFont );
 		if( errorCode )
@@ -287,7 +288,8 @@ namespace Colibri
 			{
 				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
 																		  glyphInfo[i].codepoint,
-																		  m_ptSize.value26d6 );
+																		  m_ptSize.value26d6,
+																		  m_fontIdx );
 
 				size_t cluster = glyphInfo[i].cluster;
 

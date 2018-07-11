@@ -36,6 +36,7 @@ namespace Colibri
 		uint16_t height;
 		float newlineSize;
 		float regionUp;
+		uint16_t font;
 		uint32_t refCount;
 
 		size_t getSizeBytes() const;
@@ -58,11 +59,36 @@ namespace Colibri
 			size_t	offset;
 			size_t	size;
 		};
+		struct GlyphKey
+		{
+			uint32_t codepoint;
+			uint32_t ptSize;
+			uint32_t fontIdx;
+			GlyphKey( uint32_t _codepoint, uint32_t _ptSize, uint32_t _fontIdx ) :
+				codepoint( _codepoint ), ptSize( _ptSize ), fontIdx( _fontIdx )
+			{
+				COLIBRI_ASSERT_MEDIUM( fontIdx != 0 );
+			}
+
+			bool operator < ( const GlyphKey &other ) const
+			{
+				if( this->codepoint != other.codepoint )
+					return this->codepoint < other.codepoint;
+
+				if( this->ptSize != other.ptSize )
+					return this->ptSize < other.ptSize;
+
+				if( this->fontIdx != other.fontIdx )
+					return this->fontIdx < other.fontIdx;
+
+				return false;
+			}
+		};
 
 		FT_Library	m_ftLibrary;
 		ColibriManager	*m_colibriManager;
 
-		typedef std::map<uint64_t, CachedGlyph> CachedGlyphMap;
+		typedef std::map<GlyphKey, CachedGlyph> CachedGlyphMap;
 		CachedGlyphMap	m_glyphCache;
 
 		typedef std::vector<Range> RangeVec;
@@ -88,7 +114,7 @@ namespace Colibri
 
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );
-		CachedGlyph* createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize );
+		CachedGlyph* createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx );
 		void destroyGlyph( CachedGlyphMap::iterator glyphIt );
 		void mergeContiguousBlocks( RangeVec::iterator blockToMerge, RangeVec &blocks );
 
@@ -127,7 +153,8 @@ namespace Colibri
 		@return
 			Cached glyph
 		*/
-		const CachedGlyph* acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize );
+		const CachedGlyph* acquireGlyph( FT_Face font, uint32_t codepoint,
+										 uint32_t ptSize, uint16_t fontIdx );
 		/// WARNING: const_casts cachedGlyph, which means it's not thread safe
 		void addRefCount( const CachedGlyph *cachedGlyph );
 		/** Decreases the reference count of a glyph, for when it's not needed anymore
@@ -138,7 +165,7 @@ namespace Colibri
 		@param codepoint
 		@param ptSize
 		*/
-		void releaseGlyph( uint32_t codepoint, uint32_t ptSize );
+		void releaseGlyph( uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx );
 		/// This version is faster
 		/// WARNING: const_casts cachedGlyph, which means it's not thread safe
 		void releaseGlyph( const CachedGlyph *cachedGlyph );

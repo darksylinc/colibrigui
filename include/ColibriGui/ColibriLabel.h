@@ -44,6 +44,7 @@ namespace Colibri
 		Ogre::Vector2 m_backgroundSize;
 		Ogre::ColourValue m_defaultBackgroundColour;
 		FontSize m_defaultFontSize;
+		uint16_t m_defaultFont;
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
@@ -90,7 +91,9 @@ namespace Colibri
 		void alignGlyphsHorizReadingDir( States::States state );
 		void alignGlyphsVertReadingDir( States::States state );
 
+	public:
 		bool isAnyStateDirty() const;
+	protected:
 		void flagDirty( States::States state );
 
 		/// Returns false when there are no more words (and output is now empty)
@@ -135,6 +138,15 @@ namespace Colibri
 		*/
 		void setDefaultFontSize( FontSize defaultFontSize );
 		FontSize getDefaultFontSize() const							{ return m_defaultFontSize; }
+
+		/** Sets the default font
+		@remarks
+			If the new default font is different, and there are states (See States::States)
+			that only have one rich edit entries (likely the one created by default, but not
+			necessarily), they will be cleared
+		*/
+		void setDefaultFont( uint16_t defaultFont );
+		uint16_t getDefaultFont() const								{ return m_defaultFont; }
 
 		/** Enables a shadow of the text behind each character, for highlighting or
 			making the text easier to read, specially against backgrounds of the same
@@ -199,10 +211,12 @@ namespace Colibri
 			Index to the glyph. Out of bounds values get clamped.
 		@param ptSize [out]
 			Font size at that glyph
+		@param outFontIdx [out]
+			Font used for that glyph
 		@return
 			Top left to position the caret, in virtual canvas units.
 		*/
-		Ogre::Vector2 getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const;
+		Ogre::Vector2 getCaretTopLeft( size_t glyphIdx, FontSize &ptSize, uint16_t &outFontIdx ) const;
 
 		/// Multiple glyphs may be used to render the same cluster. Usually 1 glyph = 1 cluster,
 		/// but if that's not the case, this function will tell you the index to the next glyph

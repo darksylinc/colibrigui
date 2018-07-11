@@ -29,6 +29,7 @@ namespace Colibri
 		m_backgroundSize( Ogre::Vector2::ZERO ),
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
+		m_defaultFont( 0 ),
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
@@ -129,6 +130,24 @@ namespace Colibri
 	{
 		if( m_defaultFontSize != defaultFontSize )
 		{
+			m_defaultFontSize = defaultFontSize;
+
+			for( size_t i=0; i<States::NumStates; ++i )
+			{
+				if( m_richText[i].size() == 1u )
+				{
+					m_richText[i].clear();
+					flagDirty( static_cast<States::States>( i ) );
+				}
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Label::setDefaultFont( uint16_t defaultFont )
+	{
+		if( m_defaultFont != defaultFont )
+		{
+			m_defaultFont = defaultFont;
 			for( size_t i=0; i<States::NumStates; ++i )
 			{
 				if( m_richText[i].size() == 1u )
@@ -150,7 +169,7 @@ namespace Colibri
 			rt.rgba32 = m_colour.getAsABGR();
 			rt.noBackground = true;
 			rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
-			rt.font = 0;
+			rt.font = m_defaultFont;
 			rt.offset = 0;
 			rt.length = textSize;
 			rt.readingDir = HorizReadingDir::Default;
@@ -1206,7 +1225,7 @@ namespace Colibri
 		return m_shapes[m_currentState].size();
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Label::getCaretTopLeft( size_t glyphIdx, FontSize &ptSize ) const
+	Ogre::Vector2 Label::getCaretTopLeft( size_t glyphIdx, FontSize &ptSize, uint16_t &outFontIdx ) const
 	{
 		COLIBRI_ASSERT_MEDIUM( !isAnyStateDirty() );
 
@@ -1229,6 +1248,7 @@ namespace Colibri
 			localTopLeft += topLeft * invWindowRes * canvasSize;
 
 			ptSize = shapedGlyph.glyph->ptSize;
+			outFontIdx = shapedGlyph.glyph->font;
 		}
 		else if( !m_shapes[m_currentState].empty() )
 		{
@@ -1241,6 +1261,7 @@ namespace Colibri
 			localTopLeft += topRight * invWindowRes * canvasSize;
 
 			ptSize = shapedGlyph.glyph->ptSize;
+			outFontIdx = shapedGlyph.glyph->font;
 		}
 
 		return localTopLeft;

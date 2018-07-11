@@ -107,12 +107,17 @@ namespace Colibri
 		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)m_label->getGlyphCount() );
 
 		FontSize ptSize;
+		uint16_t font;
+		Ogre::Vector2 pos = m_label->getCaretTopLeft( m_cursorPos, ptSize, font );
 
 		//Subtract the caret's bearing so it appears at the beginning
+		m_caret->setDefaultFontSize( ptSize );
+		m_caret->setDefaultFont( font );
+		if( m_caret->isAnyStateDirty() )
+			m_manager->_updateDirtyLabels();
 		m_caret->setTopLeft( Ogre::Vector2::ZERO );
-		const Ogre::Vector2 caretBearing = m_caret->getCaretTopLeft( 0u, ptSize );
+		const Ogre::Vector2 caretBearing = m_caret->getCaretTopLeft( 0u, ptSize, font );
 
-		Ogre::Vector2 pos = m_label->getCaretTopLeft( m_cursorPos, ptSize );
 		m_caret->setTopLeft( pos - caretBearing * 2.0f );
 
 		if( m_caret->getDefaultFontSize() != ptSize )

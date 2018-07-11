@@ -49,6 +49,7 @@ namespace Colibri
 		ShaperManager	*m_shaperManager;
 
 		FontSize	m_ptSize; //Font size in points
+		uint16_t	m_fontIdx;
 
 		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 										 hb_direction_t dir, uint32_t richTextIdx,
