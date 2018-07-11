@@ -285,6 +285,7 @@ not a codepoint. We store the beginning of the cluster (i.e. the first codepoint
 string in ShapedGlyph::clusterStart
 
 **Please note that:**
+
   1. A glyph may be made from multiple codepoints. This happens when the string is stored
      in its decomposed form and the font has a precomposed version i.e. ö U+006F U+0308
      is stored as o + ¨ but is often rendered as a single glyph.<br/>
