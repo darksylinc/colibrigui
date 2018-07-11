@@ -49,9 +49,9 @@ namespace Colibri
 
 		FontSize	m_ptSize; //Font size in points
 
-		bool renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
-									   uint32_t richTextIdx, ShapedGlyphVec &outShapes,
-									   uint32_t clusterStart );
+		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
+										 uint32_t richTextIdx, ShapedGlyphVec &outShapes,
+										 uint32_t clusterStart );
 
 	public:
 		Shaper( hb_script_t script, const char *fontLocation,
@@ -65,8 +65,9 @@ namespace Colibri
 		void setFontSize( FontSize ptSize );
 		FontSize getFontSize() const;
 
-		void renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
-						   uint32_t richTextIdx, ShapedGlyphVec &outShapes, bool substituteIfNotFound );
+		size_t renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
+							 uint32_t richTextIdx, ShapedGlyphVec &outShapes,
+							 bool substituteIfNotFound );
 
 		bool operator < ( const Shaper &other ) const;
 

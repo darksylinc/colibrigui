@@ -149,11 +149,12 @@ namespace Colibri
 		return m_ptSize;
 	}
 	//-------------------------------------------------------------------------
-	bool Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
-										   hb_direction_t dir, uint32_t richTextIdx,
-										   ShapedGlyphVec &outShapes, uint32_t clusterStart )
+	size_t Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
+											 hb_direction_t dir, uint32_t richTextIdx,
+											 ShapedGlyphVec &outShapes, uint32_t clusterStart )
 	{
 		size_t currentSize = outShapes.size();
+		size_t numWrittenCodepoints = 0;
 
 		const ShaperManager::ShaperVec &shapers = m_shaperManager->getShapers();
 
@@ -166,13 +167,12 @@ namespace Colibri
 			{
 				Shaper *otherShaper = *itor;
 				otherShaper->setFontSize( m_ptSize );
-				otherShaper->renderString( utf16Str, stringLength, dir, richTextIdx, outShapes, false );
+				numWrittenCodepoints = otherShaper->renderString( utf16Str, stringLength, dir,
+																  richTextIdx, outShapes, false );
 			}
 
 			++itor;
 		}
-
-		const bool success = outShapes.size() != currentSize;
 
 		ShapedGlyphVec::iterator itShapedGlyph = outShapes.begin() + currentSize;
 		ShapedGlyphVec::iterator enShapedGlyph = outShapes.end();
@@ -183,13 +183,15 @@ namespace Colibri
 			++itShapedGlyph;
 		}
 
-		return success;
+		return numWrittenCodepoints;
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
-							   hb_direction_t dir, uint32_t richTextIdx,
-							   ShapedGlyphVec &outShapes, bool substituteIfNotFound )
+	size_t Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
+								 hb_direction_t dir, uint32_t richTextIdx,
+								 ShapedGlyphVec &outShapes, bool substituteIfNotFound )
 	{
+		size_t numWrittenCodepoints = stringLength;
+
 		ShapedGlyphVec shapesVec;
 		shapesVec.swap( outShapes );
 
@@ -208,22 +210,87 @@ namespace Colibri
 
 		for( size_t i=0; i<glyphCount; ++i )
 		{
-			bool foundSubstituteGlyph = false;
-
-			if( glyphInfo[i].codepoint == 0 && substituteIfNotFound )
+			if( glyphInfo[i].codepoint == 0 )
 			{
-				size_t clusterLength;
-				if( i + 1u < glyphCount)
-					clusterLength = glyphInfo[i+1u].cluster - glyphInfo[i].cluster;
-				else
-					clusterLength = stringLength - glyphInfo[i].cluster;
+				if( !substituteIfNotFound )
+				{
+					//Abort rendering this sequence if we're a substitute font
+					//and don't know what this character is.
+					if( dir != HB_DIRECTION_RTL )
+						numWrittenCodepoints = glyphInfo[i].cluster - glyphInfo[0].cluster;
+					else
+						numWrittenCodepoints = stringLength - glyphInfo[i].cluster;
 
-				foundSubstituteGlyph = renderWithSubstituteFont( &utf16Str[glyphInfo[i].cluster],
-																 clusterLength, dir, richTextIdx,
-																 shapesVec, glyphInfo[i].cluster );
+					break;
+				}
+
+				size_t clusterLength;
+
+				size_t firstCluster;
+				size_t numUnknownGlyphs = 1u;
+
+				while( i + numUnknownGlyphs < glyphCount &&
+					   glyphInfo[i + numUnknownGlyphs].codepoint == 0 )
+				{
+					++numUnknownGlyphs;
+				}
+
+				if( dir != HB_DIRECTION_RTL )
+				{
+					firstCluster = glyphInfo[i].cluster;
+					if( i + numUnknownGlyphs < glyphCount )
+						clusterLength = glyphInfo[i+numUnknownGlyphs].cluster - glyphInfo[i].cluster;
+					else
+						clusterLength = stringLength - glyphInfo[i].cluster;
+				}
+				else
+				{
+					firstCluster = glyphInfo[i+numUnknownGlyphs-1u].cluster;
+					if( i > 0 )
+						clusterLength = glyphInfo[i-1u].cluster - glyphInfo[i+numUnknownGlyphs-1u].cluster;
+					else
+						clusterLength = stringLength - glyphInfo[i+numUnknownGlyphs-1u].cluster;
+				}
+
+				size_t replacedCodepoints = renderWithSubstituteFont( &utf16Str[firstCluster],
+																	  clusterLength, dir, richTextIdx,
+																	  shapesVec, firstCluster );
+
+				if( replacedCodepoints == clusterLength )
+					i += numUnknownGlyphs;
+				else
+				{
+					if( dir != HB_DIRECTION_RTL )
+					{
+						const size_t nextUnknownCluster = firstCluster + replacedCodepoints;
+						for( size_t j=i + numUnknownGlyphs; --j>i; )
+						{
+							if( nextUnknownCluster >= glyphInfo[j].cluster )
+							{
+								//j can never be 0 because --j is executed first,
+								//and if i == 0, then 0 > 0 will exit the loop
+								i = j - 1u;
+								break;
+							}
+						}
+					}
+					else
+					{
+						const size_t nextUnknownCluster = firstCluster + clusterLength - 1u -
+														  replacedCodepoints;
+						for( size_t j=i; j<i + numUnknownGlyphs; ++j )
+						{
+							if( nextUnknownCluster <= glyphInfo[j].cluster )
+							{
+								i = j + 1u;
+								break;
+							}
+						}
+					}
+				}
 			}
 
-			if( glyphInfo[i].codepoint != 0 || (!foundSubstituteGlyph && substituteIfNotFound) )
+			if( i < glyphCount && glyphInfo[i].codepoint != 0 )
 			{
 				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
 																		  glyphInfo[i].codepoint,
@@ -269,6 +336,8 @@ namespace Colibri
 		}
 
 		shapesVec.swap( outShapes );
+
+		return numWrittenCodepoints;
 	}
 	//-------------------------------------------------------------------------
 	bool Shaper::operator < ( const Shaper &other ) const
