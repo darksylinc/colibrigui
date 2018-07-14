@@ -26,12 +26,13 @@ namespace Colibri
 		/** Maximum size to distribute the size proportionally. If the all the cells combined
 			are bigger than this size, then this maximum size is enlarged until all objects fit.
 
-			If there are proportional cells, these cells will be enlarged to fit softMaxSize.
+			If there are proportional cells, these cells will be enlarged until softMaxSize is full.
 
 			This option is meant for scrolling windows:
-				* If the window is big enough to fit, then all objects are distributed proportionally
-				  to fit the entire window
-				* If the window is too small, then scrolling is used
+				* m_softMaxSize should be set to the size of the window
+				* If the window is big enough to fit, then all objects are distributed
+				  proportionally to fit the entire window
+				* If the window is too small, then scrolling can be used
 
 			Only the x component is used if bVertical = false, only the y component is used
 			otherwise.
@@ -45,9 +46,9 @@ namespace Colibri
 			If all objects combined exceed this size, then cells that are below their min
 			size start stealing from other cells who have empty space.
 
-			If the cells are still too big after all empty space has been stolen, then they won't
-			be rendered correctly and minimum cell sizes won't be respected.
-			The cells simply do not fit.
+			If the cells are still too big after all empty space has been stolen, then the
+			widgets can't be rendered correctly and minimum cell sizes won't be respected.
+			The cells simply do not fit the restricted space.
 
 			@see	LayoutBase::m_softMaxSize
 			@see	LayoutCell::m_priority
