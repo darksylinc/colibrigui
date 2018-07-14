@@ -2,8 +2,6 @@
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/ColibriManager.h"
 
-#define TODO_missing
-
 namespace Colibri
 {
 	LayoutLine::LayoutLine( ColibriManager *colibriManager ) :
@@ -146,6 +144,9 @@ namespace Colibri
 	};
 	void LayoutLine::layout()
 	{
+		if( m_cells.empty() )
+			return;
+
 		const bool bVertical = m_vertical;
 
 		std::vector<float> cellSizes;
@@ -157,13 +158,6 @@ namespace Colibri
 
 		const Ogre::Vector2 softMaxSize = m_softMaxSize;
 		const Ogre::Vector2 hardMaxSize = m_hardMaxSize;
-
-		TODO_missing;
-		/*
-		 * Border size
-		 * Table grids so everyone gets the same rows
-		 * Table grids so everyone gets same distance
-		*/
 
 		//Sum all proportions
 		size_t maxProportion = 0;
@@ -188,11 +182,18 @@ namespace Colibri
 				accumMarginSize += cell->m_margin[bVertical];
 				++itor;
 			}
+
+			if( m_evenMarginSpaceAtEdges )
+			{
+				accumMarginSize += m_cells.front()->m_margin[bVertical] * 0.5f;
+				accumMarginSize += m_cells.back()->m_margin[bVertical] * 0.5f;
+			}
 		}
 
 		//Calculate all cell sizes as if there were no size restrictions
 		const size_t numCells = m_cells.size();
-		const float maxLineSize = std::min( std::max( softMaxSize[bVertical], minMaxSize ),
+		const float maxLineSize = std::min( std::max( softMaxSize[bVertical] - accumMarginSize,
+													  minMaxSize ),
 											hardMaxSize[bVertical] );
 		const float sizeToDistribute = maxLineSize - nonProportionalSize;
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
@@ -203,7 +204,7 @@ namespace Colibri
 		//marginFactor will be in range [0; 1] because
 		//spaceLeftForMargins is in range [0; accumMarginSize]
 		const float marginFactor =
-				accumMarginSize > 1e-6f ? spaceLeftForMargins / accumMarginSize : 1.0f;
+				accumMarginSize > 1e-6f ? (spaceLeftForMargins / accumMarginSize) : 1.0f;
 
 //		m_size[bVertical] = maxLineSize;
 //		m_size[!bVertical] = maxOtherSize;
@@ -319,6 +320,9 @@ namespace Colibri
 
 		float accumOffset = 0;
 
+		if( m_evenMarginSpaceAtEdges )
+			accumOffset += m_cells.front()->m_margin[bVertical] * (0.5f * marginFactor);
+
 		//Now apply sizes and offsets
 		for( size_t i=0; i<numCells; ++i )
 		{
@@ -351,7 +355,7 @@ namespace Colibri
 			cell->setCellSize( finalCellSize );
 
 			accumOffset += cellSizes[i];
-			accumOffset += halfMargin[bVertical];
+			accumOffset += cell->m_margin[bVertical] * marginFactor;
 		}
 	}
 	//-------------------------------------------------------------------------

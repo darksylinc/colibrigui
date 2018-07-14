@@ -57,6 +57,25 @@ namespace Colibri
 		*/
 		Ogre::Vector2	m_hardMaxSize;
 
+		/** Specifies whether cells at the edges (i.e. left & right or top & bottom)
+			are evenly spaced or not.
+
+			There are two ways to lay out cells with their margins:
+		@code
+			//m_evenMarginSpaceAtEdges = false
+				- A -- B -- C -- D -
+			//m_evenMarginSpaceAtEdges = true
+				-- A -- B -- C -- D --
+		@endcode
+			Note that when m_evenMarginSpaceAtEdges = false, the distance between A and B is
+			(A->m_margin.x + B->m_margin.x) / 2; yet however the distance between A and the
+			left edge is only A->m_margin.x / 2
+
+			When m_evenMarginSpaceAtEdges = true, the distance between the left edge and A
+			is A->m_margin.x; while the distance between the right edge and D is D->m_margin.x
+		*/
+		bool m_evenMarginSpaceAtEdges;
+
 	public:
 		LayoutBase( ColibriManager *colibriManager );
 
