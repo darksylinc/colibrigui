@@ -416,6 +416,7 @@ namespace Colibri
 
 		/** Establishes the clipping area to apply to our children widgets. Childrens
 			will be clipped against:
+		@code
 			Legend:
 			m_pos = m_position
 			clipB = clipBorder
@@ -428,6 +429,7 @@ namespace Colibri
 			|					--------------------------------							  |
 			|						m_pos.y+m_size.y-clipBBottom							  |
 			--------------------------------------------------------------------m_pos + m_size
+		@endcode
 
 			Results are undefined if:
 				clipBorders[Borders::Left] + clipBorders[Borders::Right] > m_size.x

@@ -66,6 +66,9 @@ namespace Colibri
 		/// Note this setting only makes sense if LayoutCell::m_expand is false
 		GridLocations::GridLocations	m_gridLocation;
 
+		/// Empty space between each cell. In virtual canvas units.
+		Ogre::Vector2	m_margin;
+
 		virtual void notifyLayoutUpdated() {}
 
 		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) = 0;

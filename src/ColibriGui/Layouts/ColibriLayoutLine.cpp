@@ -17,6 +17,103 @@ namespace Colibri
 		m_cells.push_back( cell );
 	}
 	//-------------------------------------------------------------------------
+	inline Ogre::Vector2 LayoutLine::getTopLeft( bool bVertical,
+												 GridLocations::GridLocations gridLoc,
+												 float accumOffset, float cellSize,
+												 float maxOtherSize,
+												 const Ogre::Vector2 &finalCellSize,
+												 const Ogre::Vector2 &halfMargin )
+	{
+		Ogre::Vector2 topLeft;
+
+		if( !bVertical )
+		{
+			switch( gridLoc )
+			{
+			case GridLocations::TopLeft:
+			case GridLocations::CenterLeft:
+			case GridLocations::BottomLeft:
+			case GridLocations::NumGridLocations:
+				topLeft.x = accumOffset + halfMargin.x;
+				break;
+			case GridLocations::Top:
+			case GridLocations::Center:
+			case GridLocations::Bottom:
+				topLeft.x = accumOffset + (cellSize - finalCellSize.x) * 0.5f + halfMargin.x;
+				break;
+			case GridLocations::TopRight:
+			case GridLocations::CenterRight:
+			case GridLocations::BottomRight:
+				topLeft.x = accumOffset + (cellSize - finalCellSize.x) - halfMargin.x;
+				break;
+			}
+
+			switch( gridLoc )
+			{
+			case GridLocations::TopLeft:
+			case GridLocations::Top:
+			case GridLocations::TopRight:
+			case GridLocations::NumGridLocations:
+				topLeft.y = halfMargin.y;
+				break;
+			case GridLocations::CenterLeft:
+			case GridLocations::Center:
+			case GridLocations::CenterRight:
+				topLeft.y = (maxOtherSize - finalCellSize.y) * 0.5f + halfMargin.y;
+				break;
+			case GridLocations::BottomLeft:
+			case GridLocations::Bottom:
+			case GridLocations::BottomRight:
+				topLeft.y = maxOtherSize - finalCellSize.y - halfMargin.y;
+				break;
+			}
+		}
+		else
+		{
+			switch( gridLoc )
+			{
+			case GridLocations::TopLeft:
+			case GridLocations::Top:
+			case GridLocations::TopRight:
+			case GridLocations::NumGridLocations:
+				topLeft.y = accumOffset + halfMargin.y;
+				break;
+			case GridLocations::CenterLeft:
+			case GridLocations::Center:
+			case GridLocations::CenterRight:
+				topLeft.y = accumOffset + (cellSize - finalCellSize.y) * 0.5f + halfMargin.y;
+				break;
+			case GridLocations::BottomLeft:
+			case GridLocations::Bottom:
+			case GridLocations::BottomRight:
+				topLeft.y = accumOffset + (cellSize - finalCellSize.y) - halfMargin.y;
+				break;
+			}
+
+			switch( gridLoc )
+			{
+			case GridLocations::TopLeft:
+			case GridLocations::CenterLeft:
+			case GridLocations::BottomLeft:
+			case GridLocations::NumGridLocations:
+				topLeft.x = halfMargin.x;
+				break;
+			case GridLocations::Top:
+			case GridLocations::Center:
+			case GridLocations::Bottom:
+				topLeft.x = (maxOtherSize - finalCellSize.x) * 0.5f + halfMargin.x;
+				break;
+			case GridLocations::TopRight:
+			case GridLocations::CenterRight:
+			case GridLocations::BottomRight:
+				topLeft.x = maxOtherSize - finalCellSize.x - halfMargin.x;
+				break;
+			}
+		}
+
+		return topLeft;
+	}
+	//-------------------------------------------------------------------------
 	struct SortByPriorityLowToHigh
 	{
 		const LayoutCellVec &cells;
@@ -73,6 +170,7 @@ namespace Colibri
 		float minMaxSize = 0;		//Vertical / Horizontal size
 		float maxOtherSize = 0;		//Horizontal / Vertical size (opposite axis of minMaxSize)
 		float nonProportionalSize = 0;
+		float accumMarginSize = 0;
 
 		{
 			LayoutCellVec::const_iterator itor = m_cells.begin();
@@ -87,6 +185,7 @@ namespace Colibri
 				maxOtherSize = std::max( maxOtherSize, cellSize[!bVertical] );
 				if( !cell->m_proportion[bVertical] )
 					nonProportionalSize += cellSize[bVertical];
+				accumMarginSize += cell->m_margin[bVertical];
 				++itor;
 			}
 		}
@@ -97,6 +196,14 @@ namespace Colibri
 											hardMaxSize[bVertical] );
 		const float sizeToDistribute = maxLineSize - nonProportionalSize;
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
+
+		const float spaceLeftForMargins =
+				fabsf( maxLineSize - std::min( hardMaxSize[bVertical],
+											   (maxLineSize + accumMarginSize) ) );
+		//marginFactor will be in range [0; 1] because
+		//spaceLeftForMargins is in range [0; accumMarginSize]
+		const float marginFactor =
+				accumMarginSize > 1e-6f ? spaceLeftForMargins / accumMarginSize : 1.0f;
 
 //		m_size[bVertical] = maxLineSize;
 //		m_size[!bVertical] = maxOtherSize;
@@ -232,54 +339,19 @@ namespace Colibri
 			if( cell->m_expand[!bVertical] )
 				finalCellSize[!bVertical] = maxOtherSize;
 
-			Ogre::Vector2 topLeft;
+			const Ogre::Vector2 halfMargin = cell->m_margin * (0.5f * marginFactor);
+
 			GridLocations::GridLocations gridLoc =
 					m_manager->getSwappedGridLocation( m_gridLocation );
-			switch( gridLoc )
-			{
-			case GridLocations::TopLeft:
-			case GridLocations::NumGridLocations:
-				topLeft[!bVertical]	= 0;
-				topLeft[bVertical]	= accumOffset;
-				break;
-			case GridLocations::Top:
-				topLeft[!bVertical]	= 0;
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]) * 0.5f;
-				break;
-			case GridLocations::TopRight:
-				topLeft[!bVertical]	= 0;
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]);
-				break;
-			case GridLocations::CenterLeft:
-				topLeft[!bVertical]	= (maxOtherSize - finalCellSize[!bVertical]) * 0.5f;
-				topLeft[bVertical]	= accumOffset;
-				break;
-			case GridLocations::Center:
-				topLeft[!bVertical]	= (maxOtherSize - finalCellSize[!bVertical]) * 0.5f;
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]) * 0.5f;
-				break;
-			case GridLocations::CenterRight:
-				topLeft[!bVertical]	= (maxOtherSize - finalCellSize[!bVertical]) * 0.5f;
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]);
-				break;
-			case GridLocations::BottomLeft:
-				topLeft[!bVertical]	= maxOtherSize - finalCellSize[!bVertical];
-				topLeft[bVertical]	= accumOffset;
-				break;
-			case GridLocations::Bottom:
-				topLeft[!bVertical]	= maxOtherSize - finalCellSize[!bVertical];
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]) * 0.5f;
-				break;
-			case GridLocations::BottomRight:
-				topLeft[!bVertical]	= maxOtherSize - finalCellSize[!bVertical];
-				topLeft[bVertical]	= accumOffset + (cellSizes[i] - finalCellSize[bVertical]);
-				break;
-			}
+
+			const Ogre::Vector2 topLeft = getTopLeft( bVertical, gridLoc, accumOffset, cellSizes[i],
+													  maxOtherSize, finalCellSize, halfMargin );
 
 			cell->setCellOffset( m_topLeft + topLeft );
 			cell->setCellSize( finalCellSize );
 
 			accumOffset += cellSizes[i];
+			accumOffset += halfMargin[bVertical];
 		}
 	}
 	//-------------------------------------------------------------------------

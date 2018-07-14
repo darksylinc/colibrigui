@@ -38,7 +38,7 @@ namespace Colibri
 
 		For the sake of documentation, we'll refer to examples as if m_vertical = false; thus
 		we'll speak as row and columns, where row = the line.
-		If m_vertical where to be true, replace swap the words row and column:
+		If m_vertical were to be true, replace swap the words row and column:
 
 		Multiple LayoutLine can be used to implement a table. However this does not guarantee
 		all the columns will have equal width unless all the LayoutCell::m_proportion values in
@@ -60,6 +60,35 @@ namespace Colibri
 		/// True to layout all cells as a column
 		/// False to layout all cells as a row
 		bool m_vertical;
+
+		/** Returns the top left location for the widget that is inside the cell
+		@remarks
+			This doc assumes m_vertical = false for explaining variables.
+			Else swap the words row and column, and the words width and height.
+		@param bVertical
+			See LayoutLine::m_vertical
+		@param gridLoc
+			Alignment in the grid
+		@param accumOffset
+			Accumulated .x offset so far in the row
+		@param cellSize
+			The calculated width for the cell
+		@param maxOtherSize
+			The calculated height for the cell
+		@param finalCellSize
+			The actual width & height for the cell. Must be:<br/>
+				<= Vector2( cellSize, maxOtherSize ) for bVertical == false and<br/>
+				<= Vector2( maxOtherSize, cellSize ) for bVertical == true
+		@param halfMargin
+			Half of LayoutCell::m_margin
+		@return
+		*/
+		inline static Ogre::Vector2 getTopLeft( bool bVertical,
+												GridLocations::GridLocations gridLoc,
+												float accumOffset, float cellSize,
+												float maxOtherSize,
+												const Ogre::Vector2 &finalCellSize,
+												const Ogre::Vector2 &halfMargin );
 
 	public:
 		LayoutLine( ColibriManager *colibriManager );

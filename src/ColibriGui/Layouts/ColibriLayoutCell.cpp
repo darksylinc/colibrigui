@@ -5,7 +5,8 @@ namespace Colibri
 {
 	LayoutCell::LayoutCell() :
 		m_priority( 0 ),
-		m_gridLocation( GridLocations::TopLeft )
+		m_gridLocation( GridLocations::TopLeft ),
+		m_margin( Ogre::Vector2::ZERO )
 	{
 		m_proportion[0] = 0;
 		m_proportion[1] = 0;
