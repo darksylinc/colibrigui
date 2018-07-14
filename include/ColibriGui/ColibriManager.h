@@ -197,6 +197,8 @@ namespace Colibri
 					(horizDir == HorizWidgetDir::AutoRTL && !m_swapRTLControls) ||
 					(horizDir == HorizWidgetDir::AutoLTR && m_swapRTLControls);
 		}
+		GridLocations::GridLocations getSwappedGridLocation(
+					GridLocations::GridLocations gridLoc ) const;
 
 		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
 

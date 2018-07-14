@@ -23,6 +23,14 @@
 	#endif
 #endif
 
+#if __cplusplus >= 201103L
+	#define colibri_override	override
+	#define colibri_final		final
+#else
+	#define colibri_override
+	#define colibri_final
+#endif
+
 #include <stdint.h>
 #include <math.h>
 #include "math_round.h"
@@ -30,6 +38,7 @@
 COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
 /// @defgroup Controls
+/// @defgroup Layout
 /// @defgroup Api_Backend
 namespace Colibri
 {
@@ -39,6 +48,7 @@ namespace Colibri
 	class ColibriManager;
 	class Editbox;
 	class Label;
+	class LayoutCell;
 	class LogListener;
 	class Renderable;
 	struct ShapedGlyph;

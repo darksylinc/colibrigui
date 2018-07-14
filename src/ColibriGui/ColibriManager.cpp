@@ -206,6 +206,29 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	GridLocations::GridLocations ColibriManager::getSwappedGridLocation(
+			GridLocations::GridLocations gridLoc ) const
+	{
+		if( !m_swapRTLControls )
+			return gridLoc;
+
+		switch( gridLoc )
+		{
+		case GridLocations::TopLeft:			return GridLocations::TopRight;
+		case GridLocations::Top:				return GridLocations::Top;
+		case GridLocations::TopRight:			return GridLocations::TopLeft;
+		case GridLocations::CenterLeft:			return GridLocations::CenterRight;
+		case GridLocations::Center:				return GridLocations::Center;
+		case GridLocations::CenterRight:		return GridLocations::CenterLeft;
+		case GridLocations::BottomLeft:			return GridLocations::BottomRight;
+		case GridLocations::Bottom:				return GridLocations::Bottom;
+		case GridLocations::BottomRight:		return GridLocations::BottomLeft;
+		case GridLocations::NumGridLocations:	return GridLocations::NumGridLocations;
+		}
+
+		return gridLoc;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::setDefaultSkins(
 			std::string defaultSkinPacks[SkinWidgetTypes::NumSkinWidgetTypes] )
 	{

@@ -918,4 +918,24 @@ namespace Colibri
 		COLIBRI_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return (m_derivedTopLeft + m_derivedBottomRight) * 0.5f;
 	}
+	//-------------------------------------------------------------------------
+	void Widget::setCellOffset( const Ogre::Vector2 &topLeft )
+	{
+		setTopLeft( topLeft );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setCellSize( const Ogre::Vector2 &size )
+	{
+		setSize( size );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getCellSize() const
+	{
+		return m_size;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getCellMinSize() const
+	{
+		return m_size;
+	}
 }

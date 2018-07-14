@@ -34,6 +34,8 @@
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriSpinner.h"
 
+#include "ColibriGui/Layouts/ColibriLayoutLine.h"
+
 using namespace Demo;
 
 namespace Demo
@@ -100,7 +102,9 @@ namespace Demo
 		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
 		button0->getLabel()->setText( "Button 0" );
 
-		for( int i=0 ;i<1; ++i )
+		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
+
+		for( int i=0 ;i<10; ++i )
 		{
 			button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 			button1->setSkinPack( "ButtonSkin" );
@@ -109,7 +113,13 @@ namespace Demo
 			button1->getLabel()->setText( "Button 1" );
 
 			button1->setState( Colibri::States::Disabled );
+
+			//layout->addCell( new Colibri::LayoutSpacer() );
+			layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+			layout->addCell( button1 );
 		}
+
+		layout->layout();
 
 		button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button1->setSkinPack( "ButtonSkin" );
@@ -124,10 +134,10 @@ namespace Demo
 		checkbox0->setSkinPack( "ButtonSkin" );
 		checkbox0->setTopLeft( Ogre::Vector2::ZERO );
 		checkbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
-		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
+		/*editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
 		editbox0->setSkinPack( "ButtonSkin" );
 		editbox0->setTopLeft( Ogre::Vector2::ZERO );
-		editbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		editbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
 
 #if 0
 		Colibri::Label *label = colibriManager->createWidget<Colibri::Label>( mainWindow );

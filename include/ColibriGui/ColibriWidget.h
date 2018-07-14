@@ -3,6 +3,8 @@
 
 #include "ColibriGui/ColibriGuiPrerequisites.h"
 
+#include "ColibriGui/Layouts/ColibriLayoutCell.h"
+
 #include "OgreVector2.h"
 #include "OgreMatrix3.h"
 
@@ -39,7 +41,7 @@ namespace Colibri
 
 	typedef std::vector<WidgetListenerPair> WidgetListenerPairVec;
 
-	class Widget : public WidgetListener
+	class Widget : public WidgetListener, public LayoutCell
 	{
 	protected:
 		friend class ColibriManager;
@@ -488,6 +490,12 @@ namespace Colibri
 		const Ogre::Vector2& getDerivedBottomRight() const;
 		const Ogre::Matrix3& getDerivedOrientation() const;
 		Ogre::Vector2 getDerivedCenter() const;
+
+		// LayoutCell overrides
+		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_override;
+		virtual void setCellSize( const Ogre::Vector2 &size ) colibri_override;
+		virtual Ogre::Vector2 getCellSize() const colibri_override;
+		virtual Ogre::Vector2 getCellMinSize() const colibri_override;
 	};
 }
 
