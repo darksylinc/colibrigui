@@ -6,7 +6,8 @@ namespace Colibri
 {
 	LayoutLine::LayoutLine( ColibriManager *colibriManager ) :
 		LayoutBase( colibriManager ),
-		m_vertical( true )
+		m_vertical( true ),
+		m_evenMarginSpaceAtEdges( true )
 	{
 	}
 	//-------------------------------------------------------------------------
