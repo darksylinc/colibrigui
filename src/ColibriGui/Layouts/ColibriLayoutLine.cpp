@@ -57,7 +57,7 @@ namespace Colibri
 			case GridLocations::CenterLeft:
 			case GridLocations::Center:
 			case GridLocations::CenterRight:
-				topLeft.y = (maxOtherSize - finalCellSize.y) * 0.5f + halfMargin.y;
+				topLeft.y = (maxOtherSize - finalCellSize.y) * 0.5f;
 				break;
 			case GridLocations::BottomLeft:
 			case GridLocations::Bottom:
@@ -99,7 +99,7 @@ namespace Colibri
 			case GridLocations::Top:
 			case GridLocations::Center:
 			case GridLocations::Bottom:
-				topLeft.x = (maxOtherSize - finalCellSize.x) * 0.5f + halfMargin.x;
+				topLeft.x = (maxOtherSize - finalCellSize.x) * 0.5f;
 				break;
 			case GridLocations::TopRight:
 			case GridLocations::CenterRight:
@@ -176,7 +176,8 @@ namespace Colibri
 				maxProportion += cell->m_proportion[bVertical];
 				minMaxSize += cell->getCellMinSize()[bVertical];
 				const Ogre::Vector2 cellSize = cell->getCellSize();
-				maxOtherSize = std::max( maxOtherSize, cellSize[!bVertical] );
+				maxOtherSize = Ogre::max( maxOtherSize,
+										  cellSize[!bVertical] + cell->m_margin[!bVertical] );
 				if( !cell->m_proportion[bVertical] )
 					nonProportionalSize += cellSize[bVertical];
 				accumMarginSize += cell->m_margin[bVertical];
@@ -197,6 +198,8 @@ namespace Colibri
 											hardMaxSize[bVertical] );
 		const float sizeToDistribute = maxLineSize - nonProportionalSize;
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
+		maxOtherSize = Ogre::min( Ogre::max( maxOtherSize, softMaxSize[!bVertical] ),
+								  hardMaxSize[!bVertical] );
 
 		const float spaceLeftForMargins =
 				fabsf( maxLineSize - std::min( hardMaxSize[bVertical],
@@ -222,7 +225,7 @@ namespace Colibri
 			{
 				Ogre::Vector2 cellSize = cell->getCellSize();
 				cellSize.makeCeil( cell->getCellMinSize() );
-				cellLineSize = bVertical ? cellSize.x : cellSize.y;
+				cellLineSize = cellSize[bVertical];
 			}
 
 			float minCellSize = cell->getCellMinSize()[bVertical];
@@ -341,12 +344,19 @@ namespace Colibri
 			}
 
 			if( cell->m_expand[!bVertical] )
-				finalCellSize[!bVertical] = maxOtherSize;
+			{
+				const Ogre::Vector2 cellMinSize = cell->getCellMinSize();
+				float otherAvailableSize = maxOtherSize - cellMinSize[!bVertical];
+				otherAvailableSize = Ogre::max( otherAvailableSize, 0.0f );
+
+				finalCellSize[!bVertical] = maxOtherSize - Ogre::min( otherAvailableSize,
+																	  cell->m_margin[!bVertical] );
+			}
 
 			const Ogre::Vector2 halfMargin = cell->m_margin * (0.5f * marginFactor);
 
 			GridLocations::GridLocations gridLoc =
-					m_manager->getSwappedGridLocation( m_gridLocation );
+					m_manager->getSwappedGridLocation( cell->m_gridLocation );
 
 			const Ogre::Vector2 topLeft = getTopLeft( bVertical, gridLoc, accumOffset, cellSizes[i],
 													  maxOtherSize, finalCellSize, halfMargin );
@@ -374,8 +384,8 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize();
-			Ogre::Vector2 cellSize = (*itor)->getCellSize();
+			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize() + (*itor)->m_margin;
+			Ogre::Vector2 cellSize = (*itor)->getCellSize() + (*itor)->m_margin;
 			maxedVal.makeCeil( cellSize );
 			accumVal += minCellSize;
 			++itor;
