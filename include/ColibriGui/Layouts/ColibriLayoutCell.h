@@ -63,7 +63,24 @@ namespace Colibri
 		/// Otherwise, it will be equal to the cell size or smaller
 		bool		m_expand[2];
 
-		/// Note this setting only makes sense if LayoutCell::m_expand is false
+		/** When these conditions are met:
+				1. m_proportion = false; m_expand = false and LayoutLine::m_vertical = true
+				2. m_proportion = true; m_expand = true and LayoutLine::m_vertical = false
+
+			then the following work:
+				1. *Left
+				2. *Center
+				3. *Right
+
+			When these conditions are met:
+				1. m_proportion = false; m_expand = false and LayoutLine::m_vertical = false
+				2. m_proportion = true; m_expand = true and LayoutLine::m_vertical = true
+
+			then the following work:
+				1. Top*
+				2. Center*
+				3. Bottom*
+		*/
 		GridLocations::GridLocations	m_gridLocation;
 
 		/// Empty space between each cell. In virtual canvas units.

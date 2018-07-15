@@ -73,6 +73,8 @@ namespace Colibri
 
 			When m_evenMarginSpaceAtEdges = true, the distance between the left edge and A
 			is A->m_margin.x; while the distance between the right edge and D is D->m_margin.x
+
+			LineLayout: This option only works when the first and/or last cell have m_proportion = false
 		*/
 		bool m_evenMarginSpaceAtEdges;
 

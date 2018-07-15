@@ -103,21 +103,38 @@ namespace Demo
 		button0->getLabel()->setText( "Button 0" );
 
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
+		//Colibri::LayoutTableSameSize *layout = new Colibri::LayoutTableSameSize( colibriManager );
 
-		for( int i=0 ;i<10; ++i )
+		//layout->m_numColumns = 3;
+		layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
+		//layout->m_evenMarginSpaceAtEdges = false;
+
+		//layout->m_vertical = false;
+
+		for( int i=0 ;i<4; ++i )
 		{
 			button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 			button1->setSkinPack( "ButtonSkin" );
 			button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 + i * 0.25 ) );
-			button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+			button1->setSize( Ogre::Vector2( 0.05, 0.05 ) );
 			button1->getLabel()->setText( "Button 1" );
 
-			button1->setState( Colibri::States::Disabled );
+			//button1->setState( Colibri::States::Disabled );
 
+			button1->m_proportion[1] = 1;
+			//button1->m_expand[1] = true;
+
+			//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 			//layout->addCell( new Colibri::LayoutSpacer() );
-			layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+			button1->m_margin = Ogre::Vector2( 0.02f );
+			//button1->m_gridLocation = Colibri::GridLocations::BottomLeft;
+			//button1->m_gridLocation = Colibri::GridLocations::TopRight;
+			//button1->m_gridLocation = Colibri::GridLocations::Top;
+			//button1->m_gridLocation = Colibri::GridLocations::TopLeft;
 			layout->addCell( button1 );
 		}
+
+		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		layout->layout();
 

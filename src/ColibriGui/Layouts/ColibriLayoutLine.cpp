@@ -186,8 +186,11 @@ namespace Colibri
 
 			if( m_evenMarginSpaceAtEdges )
 			{
-				accumMarginSize += m_cells.front()->m_margin[bVertical] * 0.5f;
-				accumMarginSize += m_cells.back()->m_margin[bVertical] * 0.5f;
+				if( !m_cells.front()->m_expand[bVertical] )
+					accumMarginSize += m_cells.front()->m_margin[bVertical] * 0.5f;
+
+				if( !m_cells.back()->m_expand[bVertical] )
+					accumMarginSize += m_cells.back()->m_margin[bVertical] * 0.5f;
 			}
 		}
 
@@ -196,7 +199,7 @@ namespace Colibri
 		const float maxLineSize = std::min( std::max( softMaxSize[bVertical] - accumMarginSize,
 													  minMaxSize ),
 											hardMaxSize[bVertical] );
-		const float sizeToDistribute = maxLineSize - nonProportionalSize;
+		const float sizeToDistribute = Ogre::max( maxLineSize - nonProportionalSize, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
 		maxOtherSize = Ogre::min( Ogre::max( maxOtherSize, softMaxSize[!bVertical] ),
 								  hardMaxSize[!bVertical] );
@@ -323,7 +326,7 @@ namespace Colibri
 
 		float accumOffset = 0;
 
-		if( m_evenMarginSpaceAtEdges )
+		if( m_evenMarginSpaceAtEdges && !m_cells.front()->m_expand[bVertical] )
 			accumOffset += m_cells.front()->m_margin[bVertical] * (0.5f * marginFactor);
 
 		//Now apply sizes and offsets
@@ -358,8 +361,8 @@ namespace Colibri
 			GridLocations::GridLocations gridLoc =
 					m_manager->getSwappedGridLocation( cell->m_gridLocation );
 
-			const Ogre::Vector2 topLeft = getTopLeft( bVertical, gridLoc, accumOffset, cellSizes[i],
-													  maxOtherSize, finalCellSize, halfMargin );
+			Ogre::Vector2 topLeft = getTopLeft( bVertical, gridLoc, accumOffset, cellSizes[i],
+												maxOtherSize, finalCellSize, halfMargin );
 
 			cell->setCellOffset( m_topLeft + topLeft );
 			cell->setCellSize( finalCellSize );

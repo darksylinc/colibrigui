@@ -52,6 +52,8 @@ namespace Colibri
 		Many of the variables are public, because once you're done modifying them all you should
 		call LayoutLine::layout()<br/>
 		Thus there are few or no setter / getters.
+
+		@see	LayoutCell
 	*/
 	class LayoutLine : public LayoutBase
 	{
