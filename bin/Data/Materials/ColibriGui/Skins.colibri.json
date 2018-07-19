@@ -17,68 +17,34 @@
         },
         "ButtonSkinDisabled" :
         {
-            "material" : "ButtonSkinDisabled",
-            "tex_resolution" : [64, 96],
-            "grid_uv" :
-            {
-                "center2" : [0, 0, 64, 32],
-                "enclosing" : [[0, 0, 64, 32], [4, 4]]
-            },
-            "borders" :
-            {
-                "all" : [10, 10]
-            }
+            "copy_from" : "ButtonSkin",
+            "material" : "ButtonSkinDisabled"
         },
         "ButtonSkinHighlightedCursor" :
         {
-            "material" : "ButtonSkinBrighter",
-            "tex_resolution" : [64, 96],
-            "grid_uv" :
-            {
-                "enclosing" : [[0, 0, 64, 32], [4, 4]]
-            },
-            "borders" :
-            {
-                "all" : [10, 10]
-            }
+            "copy_from" : "ButtonSkin",
+            "material" : "ButtonSkinBrighter"
         },
         "ButtonSkinHighlightedButton" :
         {
-            "material" : "ButtonSkin",
-            "tex_resolution" : [64, 96],
+            "copy_from" : "ButtonSkin",
             "grid_uv" :
             {
                 "enclosing" : [[0, 32, 64, 32], [4, 4]]
-            },
-            "borders" :
-            {
-                "all" : [10, 10]
             }
         },
         "ButtonSkinHighlightedButtonAndCursor" :
         {
-            "material" : "ButtonSkinBrighter",
-            "tex_resolution" : [64, 96],
-            "grid_uv" :
-            {
-                "enclosing" : [[0, 32, 64, 32], [4, 4]]
-            },
-            "borders" :
-            {
-                "all" : [10, 10]
-            }
+            "copy_from" : "ButtonSkinHighlightedButton",
+            "material" : "ButtonSkinBrighter"
         },
         "ButtonSkinPressed" :
         {
+            "copy_from" : "ButtonSkin",
             "material" : "ButtonSkin",
-            "tex_resolution" : [64, 96],
             "grid_uv" :
             {
                 "enclosing" : [[0, 64, 64, 32], [4, 4]]
-            },
-            "borders" :
-            {
-                "all" : [10, 10]
             }
         }
     },

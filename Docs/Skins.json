@@ -20,7 +20,9 @@
                 "right" : ["size", "repeat_size"],
                 "top" : ["size", "repeat_size"],
                 "bottom" : ["size", "repeat_size"]
-            }
+            },
+
+            "copy_from" : "other skin name that must've been defined first (i.e. before this skin)!"
         }
     },
 

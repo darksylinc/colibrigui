@@ -157,10 +157,48 @@ namespace Colibri
 				skinInfo.stateInfo.uvTopLeftBottomRight[GridLocations::Center] =
 						Ogre::Vector4( 0, 0, 1, 1 );
 
-				skinInfo.name = itor->name.GetString();
 				const rapidjson::Value &skinValue = itor->value;
 
 				rapidjson::Value::ConstMemberIterator itTmp;
+
+				itTmp = skinValue.FindMember( "copy_from" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+				{
+					const char *baseSkinName = itTmp->value.GetString();
+					SkinInfoMap::const_iterator itSkin = m_skins.find( baseSkinName );
+					if( itSkin != m_skins.end() )
+					{
+						skinInfo = itSkin->second;
+
+						//itBaseSkin should be guaranteed to find a match if we're here
+						rapidjson::Value::ConstMemberIterator itBaseSkin =
+								skinsValue.FindMember( baseSkinName );
+
+						COLIBRI_ASSERT_LOW( itBaseSkin != skinsValue.MemberEnd() );
+
+						itTmp = itBaseSkin->value.FindMember( "tex_resolution" );
+						if( itTmp != itBaseSkin->value.MemberEnd() &&
+							itTmp->value.IsArray() &&
+							itTmp->value.Size() == 2u &&
+							itTmp->value[0].IsUint() && itTmp->value[1].IsUint() )
+						{
+							texResolution.x = itTmp->value[0].GetUint();
+							texResolution.y = itTmp->value[1].GetUint();
+						}
+					}
+					else
+					{
+						errorMsg.clear();
+						errorMsg.a( "[SkinManager::loadSkins]: Skin ", baseSkinName,
+									" needed by skin ", itor->name.GetString(),
+									" via copy_from not found! Note skins to be copied "
+									"from must be defined first. in ", filename );
+						log->log( errorMsg.c_str(), LogSeverity::Error );
+					}
+				}
+
+				//Now that we've copied the base parameters, set the actual name
+				skinInfo.name = itor->name.GetString();
 
 				itTmp = skinValue.FindMember( "tex_resolution" );
 				if( itTmp != skinValue.MemberEnd() &&
