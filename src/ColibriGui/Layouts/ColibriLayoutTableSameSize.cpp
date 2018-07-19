@@ -163,6 +163,8 @@ namespace Colibri
 			accumOffset.x = 0.0f;
 			accumOffset.y += biggestSize.y;
 		}
+
+		tellChildrenToUpdateLayout( m_cells );
 	}
 	//-------------------------------------------------------------------------
 	void LayoutTableSameSize::notifyLayoutUpdated()

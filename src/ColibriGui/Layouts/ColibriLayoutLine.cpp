@@ -371,6 +371,8 @@ namespace Colibri
 			accumOffset += cellSizes[i];
 			accumOffset += cell->m_margin[bVertical] * marginFactor;
 		}
+
+		tellChildrenToUpdateLayout( m_cells );
 	}
 	//-------------------------------------------------------------------------
 	void LayoutLine::notifyLayoutUpdated()

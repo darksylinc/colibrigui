@@ -18,6 +18,9 @@ namespace Colibri
 	{
 	protected:
 		ColibriManager	*m_manager;
+
+		void tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells );
+
 	public:
 		/// True to layout all cells as a column
 		/// False to layout all cells as a row

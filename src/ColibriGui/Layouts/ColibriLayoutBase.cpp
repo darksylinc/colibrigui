@@ -11,6 +11,18 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
+	void LayoutBase::tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells )
+	{
+		LayoutCellVec::const_iterator itor = childrenCells.begin();
+		LayoutCellVec::const_iterator end  = childrenCells.end();
+
+		while( itor != end )
+		{
+			(*itor)->notifyLayoutUpdated();
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
 	void LayoutBase::setCellOffset( const Ogre::Vector2 &topLeft )
 	{
 		m_topLeft = topLeft;
