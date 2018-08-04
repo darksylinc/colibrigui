@@ -188,6 +188,9 @@ namespace Colibri
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 
+		/// @see	Renderable::setVisualsEnabled
+		virtual bool isVisualsEnabled() const	{ return false; }
+
 		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
 

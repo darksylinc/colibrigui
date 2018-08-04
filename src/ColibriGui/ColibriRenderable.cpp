@@ -30,7 +30,8 @@ namespace Colibri
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u, manager ),
 		m_colour( Ogre::ColourValue::White ),
-		m_numVertices( 6u * 9u )
+		m_numVertices( 6u * 9u ),
+		m_visualsEnabled( true )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
 	}
@@ -44,6 +45,16 @@ namespace Colibri
 	void Renderable::stateChanged( States::States newState )
 	{
 		setDatablock( m_stateInformation[newState].materialName );
+	}
+	//-------------------------------------------------------------------------
+	void Renderable::setVisualsEnabled( bool bEnabled )
+	{
+		m_visualsEnabled = bEnabled;
+	}
+	//-------------------------------------------------------------------------
+	bool Renderable::isVisualsEnabled() const
+	{
+		return m_visualsEnabled;
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setSkin( Ogre::IdString skinName, States::States forState )
@@ -153,86 +164,89 @@ namespace Colibri
 		if( m_culled )
 			return;
 
-		using namespace Ogre;
-
-		CommandBuffer *commandBuffer = apiObject.commandBuffer;
-
-		QueuedRenderable queuedRenderable( 0u, this, this );
-
-		uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
-		VertexArrayObject *vao = mVaoPerLod[0].back();
-		const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
-																  *apiObject.passCache,
-																  queuedRenderable,
-																  vao->getInputLayoutId(),
-																  false );
-		if( lastHlmsCacheHash != hlmsCache->hash )
+		if( m_visualsEnabled )
 		{
-			CbPipelineStateObject *psoCmd = commandBuffer->addCommand<CbPipelineStateObject>();
-			*psoCmd = CbPipelineStateObject( &hlmsCache->pso );
-			apiObject.lastHlmsCache = hlmsCache;
+			using namespace Ogre;
 
-			//Flush the Vao when changing shaders. Needed by D3D11/12 & possibly Vulkan
-			apiObject.lastVaoName = 0;
-		}
+			CommandBuffer *commandBuffer = apiObject.commandBuffer;
 
-		const bool bIsLabel = isLabel();
-		const size_t widgetType = bIsLabel ? 1u : 0u;
+			QueuedRenderable queuedRenderable( 0u, this, this );
 
-		uint32 baseInstance = apiObject.hlms->fillBuffersForColibri(
-								  hlmsCache, queuedRenderable, false,
-								  apiObject.accumPrimCount[widgetType],
-								  lastHlmsCacheHash, apiObject.commandBuffer );
-
-		if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
-			apiObject.lastVaoName != vao->getVaoName() )
-		{
+			uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
+			VertexArrayObject *vao = mVaoPerLod[0].back();
+			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
+																	  *apiObject.passCache,
+																	  queuedRenderable,
+																	  vao->getInputLayoutId(),
+																	  false );
+			if( lastHlmsCacheHash != hlmsCache->hash )
 			{
-				*commandBuffer->addCommand<CbVao>() = CbVao( vao );
-				*commandBuffer->addCommand<CbIndirectBuffer>() =
-						CbIndirectBuffer( apiObject.indirectBuffer );
-				apiObject.lastVaoName = vao->getVaoName();
+				CbPipelineStateObject *psoCmd = commandBuffer->addCommand<CbPipelineStateObject>();
+				*psoCmd = CbPipelineStateObject( &hlmsCache->pso );
+				apiObject.lastHlmsCache = hlmsCache;
+
+				//Flush the Vao when changing shaders. Needed by D3D11/12 & possibly Vulkan
+				apiObject.lastVaoName = 0;
 			}
 
-			void *offset = reinterpret_cast<void*>( apiObject.indirectBuffer->_getFinalBufferStart() +
-													(apiObject.indirectDraw -
-													 apiObject.startIndirectDraw) );
+			const bool bIsLabel = isLabel();
+			const size_t widgetType = bIsLabel ? 1u : 0u;
 
-			CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
-			*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers,
-										 vao, offset );
-			drawCall->numDraws = 1u;
-			apiObject.drawCmd = drawCall;
-			apiObject.primCount = 0;
-			apiObject.lastDatablock = mHlmsDatablock;
+			uint32 baseInstance = apiObject.hlms->fillBuffersForColibri(
+									  hlmsCache, queuedRenderable, false,
+									  apiObject.accumPrimCount[widgetType],
+									  lastHlmsCacheHash, apiObject.commandBuffer );
 
-			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
-			apiObject.drawCountPtr->primCount		= 0;
-			apiObject.drawCountPtr->instanceCount	= 1u;
-			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
-			apiObject.drawCountPtr->baseInstance	= baseInstance;
-			apiObject.indirectDraw += sizeof( CbDrawStrip );
+			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
+				apiObject.lastVaoName != vao->getVaoName() )
+			{
+				{
+					*commandBuffer->addCommand<CbVao>() = CbVao( vao );
+					*commandBuffer->addCommand<CbIndirectBuffer>() =
+							CbIndirectBuffer( apiObject.indirectBuffer );
+					apiObject.lastVaoName = vao->getVaoName();
+				}
+
+				void *offset = reinterpret_cast<void*>(
+								   apiObject.indirectBuffer->_getFinalBufferStart() +
+								   (apiObject.indirectDraw - apiObject.startIndirectDraw) );
+
+				CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
+				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers,
+											 vao, offset );
+				drawCall->numDraws = 1u;
+				apiObject.drawCmd = drawCall;
+				apiObject.primCount = 0;
+				apiObject.lastDatablock = mHlmsDatablock;
+
+				apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
+				apiObject.drawCountPtr->primCount		= 0;
+				apiObject.drawCountPtr->instanceCount	= 1u;
+				apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
+				apiObject.drawCountPtr->baseInstance	= baseInstance;
+				apiObject.indirectDraw += sizeof( CbDrawStrip );
+			}
+			else if( bIsLabel && apiObject.lastDatablock != mHlmsDatablock )
+			{
+				//Text  has arbitrary number of of vertices, thus we can't properly calculate the drawId
+				//and therefore the material ID unless we issue a start a new draw.
+				CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
+				++drawCall->numDraws;
+				apiObject.primCount = 0;
+				apiObject.lastDatablock = mHlmsDatablock;
+
+				apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
+				apiObject.drawCountPtr->primCount		= 0;
+				apiObject.drawCountPtr->instanceCount	= 1u;
+				apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
+				apiObject.drawCountPtr->baseInstance	= baseInstance;
+				apiObject.indirectDraw += sizeof( CbDrawStrip );
+			}
+
+			apiObject.primCount += m_numVertices;
+			apiObject.accumPrimCount[widgetType] += m_numVertices;
+			apiObject.drawCountPtr->primCount = apiObject.primCount;
 		}
-		else if( bIsLabel && apiObject.lastDatablock != mHlmsDatablock )
-		{
-			//Text  has arbitrary number of of vertices, thus we can't properly calculate the drawId
-			//and therefore the material ID unless we issue a start a new draw.
-			CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
-			++drawCall->numDraws;
-			apiObject.primCount = 0;
-			apiObject.lastDatablock = mHlmsDatablock;
-
-			apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
-			apiObject.drawCountPtr->primCount		= 0;
-			apiObject.drawCountPtr->instanceCount	= 1u;
-			apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
-			apiObject.drawCountPtr->baseInstance	= baseInstance;
-			apiObject.indirectDraw += sizeof( CbDrawStrip );
-		}
-
-		apiObject.primCount += m_numVertices;
-		apiObject.accumPrimCount[widgetType] += m_numVertices;
-		apiObject.drawCountPtr->primCount = apiObject.primCount;
 
 		addChildrenCommands( apiObject, collectingBreadthFirst );
 	}
@@ -246,6 +260,6 @@ namespace Colibri
 											 const Ogre::Matrix3 &parentRot )
 	{
 		_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
-								parentCurrentScrollPos, parentRot, Ogre::Vector2::ZERO, false );
+								 parentCurrentScrollPos, parentRot, Ogre::Vector2::ZERO, false );
 	}
 }

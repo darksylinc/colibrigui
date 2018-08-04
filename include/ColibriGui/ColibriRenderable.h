@@ -97,6 +97,8 @@ namespace Colibri
 		/// also acknowledges that!
 		uint32_t			m_numVertices;
 
+		bool				m_visualsEnabled;
+
 	public:
 		/// @copydoc Widget::addChildrenCommands
 		void _addCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
@@ -117,6 +119,20 @@ namespace Colibri
 
 	public:
 		Renderable( ColibriManager *manager );
+
+		/** Disables drawing this widget, but it is still active. That means you can click on it,
+			highlight it, navigate to it via the keyboard, etc; as if everything were normal.
+
+			However the widget won't be drawn on screen. This is mostly useful for Windows,
+			as widgets must require at least a root window, and you may not this window to
+			have any visual representation (i.e. you just want to render a few widgets
+			on screen)
+		@param bEnabled
+			True to enable rendering this widget (Default).
+			False to disable rendering.
+		*/
+		void setVisualsEnabled( bool bEnabled );
+		virtual bool isVisualsEnabled() const colibri_final;
 
 		void setSkin( Ogre::IdString skinName, States::States forState );
 

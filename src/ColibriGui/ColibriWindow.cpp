@@ -345,6 +345,6 @@ namespace Colibri
 										 const Ogre::Matrix3 &parentRot )
 	{
 		Renderable::_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
-											parentCurrentScrollPos, parentRot, m_currentScroll, true );
+											 parentCurrentScrollPos, parentRot, m_currentScroll, true );
 	}
 }
