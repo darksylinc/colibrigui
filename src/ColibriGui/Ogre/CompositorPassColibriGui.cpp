@@ -68,8 +68,20 @@ namespace Ogre
 		if( fabsf( halfResolution.x - m_colibriManager->getHalfWindowResolution().x ) > 1e-6f ||
 			fabsf( halfResolution.y - m_colibriManager->getHalfWindowResolution().y ) > 1e-6f )
 		{
-			m_colibriManager->setCanvasSize( m_colibriManager->getCanvasSize(),
-											 1.0f / resolution,
+			Ogre::Vector2 canvasSize = m_colibriManager->getCanvasSize();
+
+			if( mDefinition->mAspectRatioMode == CompositorPassColibriGuiDef::ArKeepWidth )
+			{
+				const float newAr = resolution.y / resolution.x;
+				canvasSize.y = round( canvasSize.x * newAr );
+			}
+			else if( mDefinition->mAspectRatioMode == CompositorPassColibriGuiDef::ArKeepHeight )
+			{
+				const float newAr = resolution.x / resolution.y;
+				canvasSize.x = round( canvasSize.y * newAr );
+			}
+
+			m_colibriManager->setCanvasSize( canvasSize,
 											 resolution );
 		}
 	}

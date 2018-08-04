@@ -60,9 +60,7 @@ namespace Demo
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
-		colibriManager->setCanvasSize( Ogre::Vector2( 1.0f ),
-									   Ogre::Vector2( 1.0f / window->getWidth(),
-													  1.0f / window->getHeight() ),
+		colibriManager->setCanvasSize( Ogre::Vector2( 1.0f, 1.0f ),
 									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
 
 		//colibriManager = new Colibri::ColibriManager();

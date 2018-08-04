@@ -141,15 +141,15 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Renderable::setClipBordersMatchSkin( States::States state )
 	{
-		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
-
 		const StateInformation &stateInfo = m_stateInformation[state];
 
+		const Ogre::Vector2 &pixelToCanvas = m_manager->getCanvasSize() * m_manager->getPixelSize();
+
 		float clipBorders[Borders::NumBorders];
-		clipBorders[Borders::Left]	= stateInfo.borderSize[Borders::Left] * pixelSize.x;
-		clipBorders[Borders::Top]	= stateInfo.borderSize[Borders::Top] * pixelSize.y;
-		clipBorders[Borders::Right]	= stateInfo.borderSize[Borders::Right] * pixelSize.x;
-		clipBorders[Borders::Bottom]= stateInfo.borderSize[Borders::Bottom] * pixelSize.y;
+		clipBorders[Borders::Left]	= stateInfo.borderSize[Borders::Left] * pixelToCanvas.x;
+		clipBorders[Borders::Top]	= stateInfo.borderSize[Borders::Top] * pixelToCanvas.y;
+		clipBorders[Borders::Right]	= stateInfo.borderSize[Borders::Right] * pixelToCanvas.x;
+		clipBorders[Borders::Bottom]= stateInfo.borderSize[Borders::Bottom] * pixelToCanvas.y;
 		setClipBorders( clipBorders );
 	}
 	//-------------------------------------------------------------------------

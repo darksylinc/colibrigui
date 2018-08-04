@@ -21,6 +21,7 @@ namespace Colibri
 	{
 		//One set of UVs for each cell in the 3x3 grid.
 		Ogre::Vector4	uvTopLeftBottomRight[GridLocations::NumGridLocations];
+		//Values are in screen pixels, thus they're independent from canvas resolution
 		float			borderSize[Borders::NumBorders];
 		float			borderRepeatSize[Borders::NumBorders]; /// 0 or negative means disable repeat
 		Ogre::IdString	materialName;

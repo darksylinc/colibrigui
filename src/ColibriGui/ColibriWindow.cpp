@@ -106,7 +106,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Window::hasScroll() const
 	{
-		return m_maxScroll.x > 0 && m_maxScroll.y > 0;
+		return m_maxScroll.x > 0 || m_maxScroll.y > 0;
 	}
 	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()

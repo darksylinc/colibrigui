@@ -75,8 +75,7 @@ namespace Colibri
 		setLogListener( logListener );
 		setColibriListener( colibriListener );
 
-		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1.0f / 1600.0f, 1.0f / 900.0f ),
-					   Ogre::Vector2( 1600.0f, 900.0f ) );
+		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1600.0f, 900.0f ) );
 
 		m_skinManager = new SkinManager( this );
 
@@ -270,13 +269,12 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setCanvasSize( const Ogre::Vector2 &canvasSize,
-										const Ogre::Vector2 &pixelSize,
 										const Ogre::Vector2 &windowResolution )
 	{
 		m_canvasSize = canvasSize;
 		m_invCanvasSize2x = 2.0f / canvasSize;
-		m_pixelSize = pixelSize / canvasSize;
-		m_pixelSize2x = (2.0f * pixelSize) / canvasSize;
+		m_pixelSize = 1.0f / windowResolution;
+		m_pixelSize2x = 2.0f / windowResolution;
 		m_halfWindowResolution	= windowResolution / 2.0f;
 		m_invWindowResolution2x = 2.0f / windowResolution;
 
@@ -1101,6 +1099,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::update( float timeSinceLast )
 	{
+		updateAllDerivedTransforms();
+
 		//_setTextSpecialKey must be called before autosetNavigation
 		if( !m_keyboardFocusedPair.widget || !m_keyboardFocusedPair.widget->wantsTextInput() )
 		{

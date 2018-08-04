@@ -111,6 +111,7 @@ namespace Colibri
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
+		/// Size of a pixel on the screen in canvas units.
 		Ogre::Vector2				m_pixelSize;
 		Ogre::Vector2				m_pixelSize2x;
 		Ogre::Vector2				m_halfWindowResolution;
@@ -238,17 +239,11 @@ namespace Colibri
 		@param canvasSize
 			The size of the canvas. A value of (1.0f, 1.0f) is screen independent with
 			an aspect ratio of 1:1
-		@param pixelSize
-			How many units a pixel occupies. This value is used to determine the size of the
-			widget borders.
-			Usually this value should be 1 (e.g. canvas = 1920x1080, pixelSize = 1). However
-			if you insert a canvas of 1x1; then your pixel size could be (1 / 1920, 1 / 1080)
 		@param windowResolution
 			The actual size of the window. Does not necesarily have to match the virtual canvas
 			size. We use this value to display sharp text.
 		*/
-		void setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &pixelSize,
-							const Ogre::Vector2 &windowResolution );
+		void setCanvasSize( const Ogre::Vector2 &canvasSize, const Ogre::Vector2 &windowResolution );
 		const Ogre::Vector2& getCanvasSize() const					{ return m_canvasSize; }
 		const Ogre::Vector2& getInvCanvasSize2x() const				{ return m_invCanvasSize2x; }
 		const Ogre::Vector2& getPixelSize() const					{ return m_pixelSize; }
