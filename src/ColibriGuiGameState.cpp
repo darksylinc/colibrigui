@@ -35,6 +35,8 @@
 #include "ColibriGui/ColibriSpinner.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
+#include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
+#include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
 
 using namespace Demo;
 
@@ -60,7 +62,12 @@ namespace Demo
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
+#define USE_CANVAS 1
+#if USE_CANVAS
+		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ),
+#else
 		colibriManager->setCanvasSize( Ogre::Vector2( 1.0f, 1.0f ),
+#endif
 									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
 
 		//colibriManager = new Colibri::ColibriManager();
@@ -71,11 +78,16 @@ namespace Demo
 								   "Materials/ColibriGui/Skins.colibri.json").c_str() );
 
 		mainWindow = colibriManager->createWindow( 0 );
+		//mainWindow->setVisualsEnabled( false );
 
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
-		mainWindow->setTransform( Ogre::Vector2( 0.5, 0.0 ), Ogre::Vector2( 0.5, 0.5 ) );
+#if USE_CANVAS
+		mainWindow->setTransform( Ogre::Vector2( 960, 0 ), Ogre::Vector2( 960, 960 ) );
+#else
+		mainWindow->setTransform( Ogre::Vector2( 0.5f, 0.0f ), Ogre::Vector2( 0.5f, 0.5f ) );
+#endif
 		mainWindow->setClipBordersMatchSkin();
 
 		//When m_breadthFirst is set to true, it can cause significant performance
@@ -85,7 +97,7 @@ namespace Demo
 
 		/*button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );
-		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		button0->setSize( Ogre::Vector2( 480, 270 ) );
 
 		Colibri::Label *label = colibriManager->createWidget<Colibri::Label>( mainWindow );
 		label->setText( "||\n||" );
@@ -96,15 +108,22 @@ namespace Demo
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setSkinPack( "ButtonSkin" );
-		button0->setTopLeft( Ogre::Vector2( 0.1, 0.21 ) );
+		button0->setTopLeft( Ogre::Vector2( 192, 226 ) );
+#if USE_CANVAS
+		button0->setSize( Ogre::Vector2( 480, 270 ) );
+#else
 		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+#endif
 		button0->getLabel()->setText( "Button 0" );
-
-		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
+#if 0
+		//Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
+		Colibri::LayoutMultiline *layout = new Colibri::LayoutMultiline( colibriManager );
 		//Colibri::LayoutTableSameSize *layout = new Colibri::LayoutTableSameSize( colibriManager );
 
+		layout->m_numLines = 2;
 		//layout->m_numColumns = 3;
-		layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
+		//layout->m_transpose = false;
+		//layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
 		//layout->m_evenMarginSpaceAtEdges = false;
 
 		//layout->m_vertical = false;
@@ -113,46 +132,51 @@ namespace Demo
 		{
 			button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 			button1->setSkinPack( "ButtonSkin" );
-			button1->setTopLeft( Ogre::Vector2( 0.1, 0.1 + 0.1 + 0.25 + i * 0.25 ) );
-			button1->setSize( Ogre::Vector2( 0.05, 0.05 ) );
-			button1->getLabel()->setText( "Button 1" );
+			button1->setTopLeft( Ogre::Vector2( 192, 192 + 192 + 480 + i * 480 ) );
+			//button1->setSize( i == 1 ? Ogre::Vector2( 288, 180 ) : Ogre::Vector2( 96, 54 ) );
+			button1->setSize( Ogre::Vector2( 288, 180 ) );
+			button1->getLabel()->setText( "Button " + Ogre::StringConverter::toString( i ) );
 
 			//button1->setState( Colibri::States::Disabled );
 
-			button1->m_proportion[1] = 1;
-			//button1->m_expand[1] = true;
+			/*button1->m_proportion[0] = 1;
+			button1->m_proportion[1] = 1;*/
+			/*button1->m_expand[0] = true;
+			button1->m_expand[1] = true;*/
 
 			//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 			//layout->addCell( new Colibri::LayoutSpacer() );
-			button1->m_margin = Ogre::Vector2( 0.02f );
-			//button1->m_gridLocation = Colibri::GridLocations::BottomLeft;
+			button1->m_margin = Ogre::Vector2( 38 );
+			//button1->m_gridLocation = Colibri::GridLocations::BottomRight;
 			//button1->m_gridLocation = Colibri::GridLocations::TopRight;
 			//button1->m_gridLocation = Colibri::GridLocations::Top;
 			//button1->m_gridLocation = Colibri::GridLocations::TopLeft;
+			//button1->m_gridLocation = Colibri::GridLocations::Center;
 			layout->addCell( button1 );
 		}
 
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		layout->layout();
-
+#else
 		button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button1->setSkinPack( "ButtonSkin" );
-		button1->setTopLeft( Ogre::Vector2( 0.1 + 0.25, 0.1 + 0.1 + 0.25 + 0.1 ) );
-		button1->setSize( Ogre::Vector2( 0.25, 0.25 ) );
+		button1->setTopLeft( Ogre::Vector2( 192 + 288, 192 + 192 + 288 + 192 ) );
+		button1->setSize( Ogre::Vector2( 288, 180 ) );
 
-		/*spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
+		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
 		spinner0->setSkinPack( "ButtonSkin" );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
-		/*checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
-		checkbox0->setSkinPack( "ButtonSkin" );
-		checkbox0->setTopLeft( Ogre::Vector2::ZERO );
-		checkbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
+		spinner0->setSize( Ogre::Vector2( 288, 180 ) );
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		//checkbox0->setSkinPack( "ButtonSkin" );
+		checkbox0->setTopLeft( Ogre::Vector2( 0, 500 ) );
+		checkbox0->setSize( Ogre::Vector2( 288, 180 ) );
 		/*editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
 		editbox0->setSkinPack( "ButtonSkin" );
 		editbox0->setTopLeft( Ogre::Vector2::ZERO );
-		editbox0->setSize( Ogre::Vector2( 0.25, 0.25 ) );*/
+		editbox0->setSize( Ogre::Vector2( 288, 180 ) );*/
+#endif
 
 #if 0
 		Colibri::Label *label = colibriManager->createWidget<Colibri::Label>( mainWindow );
@@ -283,7 +307,9 @@ namespace Demo
 		else if( arg.type == SDL_MOUSEWHEEL )
 		{
 			Ogre::Vector2 mouseScroll( arg.wheel.x, -arg.wheel.y );
-			colibriManager->setScroll( mouseScroll * 50.0f * colibriManager->getPixelSize() );
+			colibriManager->setScroll( mouseScroll * 50.0f *
+									   colibriManager->getCanvasSize() *
+									   colibriManager->getPixelSize() );
 		}
 
 		TutorialGameState::mouseMoved( arg );

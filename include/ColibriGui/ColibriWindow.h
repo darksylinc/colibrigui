@@ -126,7 +126,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot );
+											  const Ogre::Matrix3 &parentRot ) colibri_final;
 	};
 }
 

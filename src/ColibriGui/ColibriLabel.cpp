@@ -1043,6 +1043,11 @@ namespace Colibri
 
 		m_culled = false;
 
+		if( !m_visualsEnabled )
+			return;
+
+		m_currVertexBufferOffset = textVertBuffer - m_manager->_getTextVertexBufferBase();
+
 		const uint32_t shadowColour = m_shadowColour.getAsABGR();
 
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
@@ -1123,7 +1128,23 @@ namespace Colibri
 
 			++itor;
 		}
+
 		*_textVertBuffer = textVertBuffer;
+
+		const Ogre::Vector2 outerTopLeft = this->m_derivedTopLeft;
+		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
+													   m_clipBorderTL * invCanvasSize2x;
+
+		WidgetVec::const_iterator itChild = m_children.begin();
+		WidgetVec::const_iterator enChild  = m_children.end();
+
+		while( itChild != enChild )
+		{
+			(*itChild)->_fillBuffersAndCommands( vertexBuffer, _textVertBuffer, outerTopLeftWithClipping,
+												 Ogre::Vector2::ZERO, finalRot );
+			++itChild;
+		}
 	}
 	//-------------------------------------------------------------------------
 	bool Label::_updateDirtyGlyphs()

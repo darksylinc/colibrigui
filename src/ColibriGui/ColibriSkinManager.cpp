@@ -57,12 +57,13 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void SkinManager::buildGridFromEnclosingUv( Ogre::Vector4 uvTopLeftWidthHeight,
 												const Ogre::Vector2 &texResolution,
-												Ogre::Vector2 borderSize,
+												Ogre::Vector2 borderSizeTL,
+												Ogre::Vector2 borderSizeBR,
 												StateInformation &stateInfo,
 												const char *skinName, const char *filename )
 	{
-		if( borderSize.x * 2.0f > uvTopLeftWidthHeight.z ||
-			borderSize.y * 2.0f > uvTopLeftWidthHeight.w )
+		if( borderSizeTL.x + borderSizeBR.x > uvTopLeftWidthHeight.z ||
+			borderSizeTL.y + borderSizeBR.y > uvTopLeftWidthHeight.w )
 		{
 			LogListener *log = m_colibriManager->getLogListener();
 			char tmpBuffer[512];
@@ -79,61 +80,62 @@ namespace Colibri
 		                             uvTopLeftWidthHeight.y / texResolution.y );
 		const Ogre::Vector2 widthHeight( uvTopLeftWidthHeight.z / texResolution.x,
 		                                 uvTopLeftWidthHeight.w / texResolution.y );
-		borderSize /= texResolution;
+		borderSizeTL /= texResolution;
+		borderSizeBR /= texResolution;
 
 		GridLocations::GridLocations idx;
 
 		idx = GridLocations::TopLeft;
 		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
 		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSizeTL.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSizeTL.y;
 
 		idx = GridLocations::Top;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSizeTL.x;
 		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSizeBR.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSizeTL.y;
 
 		idx = GridLocations::TopRight;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSizeBR.x;
 		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y;
 		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + borderSizeTL.y;
 
 		idx = GridLocations::CenterLeft;
 		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSizeTL.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSizeTL.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSizeBR.y;
 
 		idx = GridLocations::Center;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSizeTL.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSizeTL.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSizeBR.x;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSizeBR.y;
 
 		idx = GridLocations::CenterRight;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSizeBR.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + borderSizeTL.y;
 		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
-		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y - borderSizeBR.y;
 
 		idx = GridLocations::BottomLeft;
 		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSizeBR.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + borderSizeTL.x;
 		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
 
 		idx = GridLocations::Bottom;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
-		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSize.x;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + borderSizeTL.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSizeBR.y;
+		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x - borderSizeBR.x;
 		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
 
 		idx = GridLocations::BottomRight;
-		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSize.x;
-		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSize.y;
+		stateInfo.uvTopLeftBottomRight[idx].x = topLeft.x + widthHeight.x - borderSizeBR.x;
+		stateInfo.uvTopLeftBottomRight[idx].y = topLeft.y + widthHeight.y - borderSizeBR.y;
 		stateInfo.uvTopLeftBottomRight[idx].z = topLeft.x + widthHeight.x;
 		stateInfo.uvTopLeftBottomRight[idx].w = topLeft.y + widthHeight.y;
 	}
@@ -235,16 +237,27 @@ namespace Colibri
 					itTmp = gridValue.FindMember( "enclosing" );
 					if( itTmp != skinValue.MemberEnd() &&
 						itTmp->value.IsArray() &&
-						itTmp->value.Size() == 2u &&
-						itTmp->value[0].IsArray() &&
-						itTmp->value[1].IsArray() )
+						((itTmp->value.Size() == 2u &&
+						  itTmp->value[0].IsArray() &&
+						  itTmp->value[1].IsArray()) ||
+						 (itTmp->value.Size() == 3u &&
+						  itTmp->value[0].IsArray() &&
+						  itTmp->value[1].IsArray() &&
+						  itTmp->value[2].IsArray())) )
 					{
 						const Ogre::Vector4 uvTopLeftWidthHeight = getVector4Array( itTmp->value[0] );
-						const Ogre::Vector2 borderUvSize =
-								getVector2Array( itTmp->value[1] );
+						const Ogre::Vector2 borderUvSizeTL = getVector2Array( itTmp->value[1] );
 
-						buildGridFromEnclosingUv( uvTopLeftWidthHeight, texResolution, borderUvSize,
-												  skinInfo.stateInfo, skinInfo.name.c_str(), filename );
+						Ogre::Vector2 borderUvSizeBR;
+
+						if( itTmp->value.Size() == 2u )
+							borderUvSizeBR = borderUvSizeTL;
+						else
+							borderUvSizeBR = getVector2Array( itTmp->value[2] );
+
+						buildGridFromEnclosingUv( uvTopLeftWidthHeight, texResolution, borderUvSizeTL,
+												  borderUvSizeBR, skinInfo.stateInfo,
+												  skinInfo.name.c_str(), filename );
 					}
 
 					const char *gridLocations[GridLocations::NumGridLocations] =

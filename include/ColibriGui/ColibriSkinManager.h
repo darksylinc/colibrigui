@@ -50,7 +50,7 @@ namespace Colibri
 
 		void buildGridFromEnclosingUv( Ogre::Vector4 uvTopLeftWidthHeight,
 									   const Ogre::Vector2 &texResolution,
-									   Ogre::Vector2 borderSize,
+									   Ogre::Vector2 borderSizeTL, Ogre::Vector2 borderSizeBR,
 									   StateInformation &stateInfo,
 									   const char *skinName, const char *filename );
 

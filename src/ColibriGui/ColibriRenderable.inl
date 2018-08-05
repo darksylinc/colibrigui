@@ -87,14 +87,14 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	inline void Renderable::_fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
-													RESTRICT_ALIAS _vertexBuffer,
-													GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
-													RESTRICT_ALIAS _textVertBuffer,
-													const Ogre::Vector2 &parentPos,
-													const Ogre::Vector2 &parentScrollPos,
-													const Ogre::Matrix3 &parentRot,
-													const Ogre::Vector2 &currentScrollPos,
-													bool forWindows )
+													 RESTRICT_ALIAS _vertexBuffer,
+													 GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+													 RESTRICT_ALIAS _textVertBuffer,
+													 const Ogre::Vector2 &parentPos,
+													 const Ogre::Vector2 &parentScrollPos,
+													 const Ogre::Matrix3 &parentRot,
+													 const Ogre::Vector2 &currentScrollPos,
+													 bool forWindows )
 	{
 		UiVertex * RESTRICT_ALIAS vertexBuffer = *_vertexBuffer;
 
@@ -145,6 +145,8 @@ namespace Colibri
 
 		if( m_visualsEnabled )
 		{
+			m_currVertexBufferOffset = vertexBuffer - m_manager->_getVertexBufferBase();
+
 			uint8_t rgbaColour[4];
 			rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
 			rgbaColour[1] = static_cast<uint8_t>( m_colour.g * 255.0f + 0.5f );

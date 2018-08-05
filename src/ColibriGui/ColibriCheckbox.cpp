@@ -47,6 +47,8 @@ namespace Colibri
 		Widget::_initialize();
 
 		m_tickmark->addActionListener( this, ActionMask::PrimaryActionPerform );
+		//Add ourselves as well
+		this->addActionListener( this, ActionMask::PrimaryActionPerform );
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::_destroy()
@@ -157,11 +159,12 @@ namespace Colibri
 	{
 		if( action == Action::PrimaryActionPerform )
 		{
-			if( widget == m_tickmark )
+			if( widget == this || widget == m_tickmark )
 			{
-				m_currentValue = (m_currentValue + 1u) % getMaxValue();
+				m_currentValue = (m_currentValue + 1u) % (getMaxValue() + 1u);
 				updateTickmark();
-				callActionListeners( Action::PrimaryActionPerform );
+				if( widget != this )
+					callActionListeners( Action::PrimaryActionPerform );
 			}
 		}
 	}

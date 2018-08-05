@@ -31,6 +31,7 @@ namespace Colibri
 							   manager->getOgreSceneManager(), 0u, manager ),
 		m_colour( Ogre::ColourValue::White ),
 		m_numVertices( 6u * 9u ),
+		m_currVertexBufferOffset( 0 ),
 		m_visualsEnabled( true )
 	{
 		memset( m_stateInformation, 0, sizeof(m_stateInformation) );
@@ -192,13 +193,16 @@ namespace Colibri
 			const bool bIsLabel = isLabel();
 			const size_t widgetType = bIsLabel ? 1u : 0u;
 
+			const uint32 firstVertex = m_currVertexBufferOffset + apiObject.basePrimCount[widgetType];
+
 			uint32 baseInstance = apiObject.hlms->fillBuffersForColibri(
 									  hlmsCache, queuedRenderable, false,
-									  apiObject.accumPrimCount[widgetType],
+									  firstVertex,
 									  lastHlmsCacheHash, apiObject.commandBuffer );
 
 			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
-				apiObject.lastVaoName != vao->getVaoName() )
+				apiObject.lastVaoName != vao->getVaoName() ||
+				apiObject.nextFirstVertex != firstVertex )
 			{
 				{
 					*commandBuffer->addCommand<CbVao>() = CbVao( vao );
@@ -222,7 +226,7 @@ namespace Colibri
 				apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 				apiObject.drawCountPtr->primCount		= 0;
 				apiObject.drawCountPtr->instanceCount	= 1u;
-				apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
+				apiObject.drawCountPtr->firstVertexIndex= firstVertex;
 				apiObject.drawCountPtr->baseInstance	= baseInstance;
 				apiObject.indirectDraw += sizeof( CbDrawStrip );
 			}
@@ -238,14 +242,15 @@ namespace Colibri
 				apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
 				apiObject.drawCountPtr->primCount		= 0;
 				apiObject.drawCountPtr->instanceCount	= 1u;
-				apiObject.drawCountPtr->firstVertexIndex=apiObject.accumPrimCount[widgetType];
+				apiObject.drawCountPtr->firstVertexIndex= firstVertex;
 				apiObject.drawCountPtr->baseInstance	= baseInstance;
 				apiObject.indirectDraw += sizeof( CbDrawStrip );
 			}
 
 			apiObject.primCount += m_numVertices;
-			apiObject.accumPrimCount[widgetType] += m_numVertices;
 			apiObject.drawCountPtr->primCount = apiObject.primCount;
+
+			apiObject.nextFirstVertex = firstVertex + m_numVertices;
 		}
 
 		addChildrenCommands( apiObject, collectingBreadthFirst );

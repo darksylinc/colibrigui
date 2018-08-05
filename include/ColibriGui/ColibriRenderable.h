@@ -77,7 +77,8 @@ namespace Colibri
 		Ogre::CbDrawCallStrip		* colibrigui_nullable drawCmd;
 		Ogre::CbDrawStrip			* colibrigui_nullable drawCountPtr;
 		uint16_t primCount;
-		uint32_t accumPrimCount[2]; //[0] = regular widgets, [1] = text
+		uint32_t basePrimCount[2]; //[0] = regular widgets, [1] = text
+		uint32_t nextFirstVertex;
 	};
 
 	/**
@@ -97,6 +98,7 @@ namespace Colibri
 		/// have arbitrary number of vertices and the rest of the code
 		/// also acknowledges that!
 		uint32_t			m_numVertices;
+		uint32_t			m_currVertexBufferOffset;
 
 		bool				m_visualsEnabled;
 
@@ -178,7 +180,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot );
+											  const Ogre::Matrix3 &parentRot ) colibri_override;
 	};
 }
 

@@ -144,6 +144,9 @@ namespace Colibri
 		SkinInfo const * colibrigui_nullable
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
 
+		UiVertex		*m_vertexBufferBase;
+		GlyphVertex		*m_textVertexBufferBase;
+
 #if COLIBRIGUI_DEBUG_MEDIUM
 		bool m_fillBuffersStarted;
 		bool m_renderingStarted;
@@ -344,6 +347,18 @@ namespace Colibri
 		void update( float timeSinceLast );
 		void prepareRenderCommands();
 		void render();
+
+		const UiVertex* _getVertexBufferBase() const
+		{
+			COLIBRI_ASSERT_HIGH( m_fillBuffersStarted );
+			return m_vertexBufferBase;
+		}
+
+		const GlyphVertex* _getTextVertexBufferBase() const
+		{
+			COLIBRI_ASSERT_HIGH( m_fillBuffersStarted );
+			return m_textVertexBufferBase;
+		}
 
 #if __clang__
 	#pragma clang diagnostic push

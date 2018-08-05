@@ -63,7 +63,9 @@ namespace Colibri
 		m_timeDelayPerKeyStroke( 0.1f ),
 		m_defaultFontSize( 16u << 6u ),
 		m_skinManager( 0 ),
-		m_shaperManager( 0 )
+		m_shaperManager( 0 ),
+		m_vertexBufferBase( 0 ),
+		m_textVertexBufferBase( 0 )
 	#if COLIBRIGUI_DEBUG_MEDIUM
 	,	m_fillBuffersStarted( false )
 	,	m_renderingStarted( false )
@@ -1207,10 +1209,12 @@ namespace Colibri
 		UiVertex *vertex = reinterpret_cast<UiVertex*>(
 							   vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
 		UiVertex *startOffset = vertex;
+		m_vertexBufferBase = startOffset;
 
 		GlyphVertex *vertexText = reinterpret_cast<GlyphVertex*>(
 									  vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
 		GlyphVertex *startOffsetText = vertexText;
+		m_textVertexBufferBase = startOffsetText;
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
@@ -1230,6 +1234,9 @@ namespace Colibri
 		COLIBRI_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
 		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
+
+		m_vertexBufferBase = 0;
+		m_textVertexBufferBase = 0;
 
 #if COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = false;
@@ -1277,8 +1284,9 @@ namespace Colibri
 		apiObjects.drawCmd = 0;
 		apiObjects.drawCountPtr = 0;
 		apiObjects.primCount = 0;
-		apiObjects.accumPrimCount[0] = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
-		apiObjects.accumPrimCount[1] = m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.basePrimCount[0] = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.basePrimCount[1] = m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.nextFirstVertex = 0;
 
 		m_breadthFirst[0].clear();
 		m_breadthFirst[1].clear();

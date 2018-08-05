@@ -9,6 +9,7 @@
             {
                 "all" : ["top", "left", "width", "height"],
                 "enclosing" : [["top", "left", "width", "height"], ["border_x", "border_y"]],
+                "enclosing" : [["top", "left", "width", "height"], ["border_left_x", "border_top_y"], ["border_right_x", "border_bottom_y"] ],
                 "top" : ["top", "left", "width", "height"],
                 "top_right" : ["top", "left", "width", "height"]
             },
