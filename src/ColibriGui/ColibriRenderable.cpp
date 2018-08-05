@@ -201,8 +201,7 @@ namespace Colibri
 									  lastHlmsCacheHash, apiObject.commandBuffer );
 
 			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
-				apiObject.lastVaoName != vao->getVaoName() ||
-				apiObject.nextFirstVertex != firstVertex )
+				apiObject.lastVaoName != vao->getVaoName() )
 			{
 				{
 					*commandBuffer->addCommand<CbVao>() = CbVao( vao );
@@ -234,6 +233,23 @@ namespace Colibri
 			{
 				//Text has arbitrary number of of vertices, thus we can't properly calculate the drawId
 				//and therefore the material ID unless we issue a start a new draw.
+				CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
+				++drawCall->numDraws;
+				apiObject.primCount = 0;
+				apiObject.lastDatablock = mHlmsDatablock;
+
+				apiObject.drawCountPtr = reinterpret_cast<CbDrawStrip*>( apiObject.indirectDraw );
+				apiObject.drawCountPtr->primCount		= 0;
+				apiObject.drawCountPtr->instanceCount	= 1u;
+				apiObject.drawCountPtr->firstVertexIndex= firstVertex;
+				apiObject.drawCountPtr->baseInstance	= baseInstance;
+				apiObject.indirectDraw += sizeof( CbDrawStrip );
+			}
+			else if( apiObject.nextFirstVertex != firstVertex )
+			{
+				//If we're here, we're most likely rendering using breadth first.
+				//Unfortunately, breadth first breaks ordering, thus firstVertex jumped.
+				//Add a new draw without creating a new command
 				CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
 				++drawCall->numDraws;
 				apiObject.primCount = 0;
