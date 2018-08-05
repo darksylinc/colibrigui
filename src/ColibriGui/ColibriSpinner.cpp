@@ -68,6 +68,19 @@ namespace Colibri
 		m_label = 0;
 	}
 	//-------------------------------------------------------------------------
+	void Spinner::setArrowSize( Button *arrowWidget )
+	{
+		Ogre::Vector2 arrowButtonSize = m_arrowButtonSize;
+		if( arrowButtonSize.y < 0.0f )
+			arrowButtonSize.y = std::min( getSize().x, getSize().y ) * 0.15f;
+		if( arrowButtonSize.x < 0.0f )
+		{
+			const float uvAspecRatio = arrowWidget->getStateInformation().centerAspectRatio;
+			arrowButtonSize.x = arrowButtonSize.y * uvAspecRatio;
+		}
+		arrowWidget->setSize( arrowButtonSize );
+	}
+	//-------------------------------------------------------------------------
 	void Spinner::updateOptionLabel()
 	{
 		if( !m_optionLabel )
@@ -117,13 +130,8 @@ namespace Colibri
 			m_optionLabel->setCenter( newCenter );
 		}
 
-		Ogre::Vector2 arrowButtonSize = m_arrowButtonSize;
-		if( arrowButtonSize.y < 0.0f )
-			arrowButtonSize.y = std::min( getSize().x, getSize().y ) * 0.05f;
-		if( arrowButtonSize.x < 0.0f )
-			arrowButtonSize.x = arrowButtonSize.y;
-		m_decrement->setSize( arrowButtonSize );
-		m_increment->setSize( arrowButtonSize );
+		setArrowSize( m_decrement );
+		setArrowSize( m_increment );
 
 		m_decrement->setTopLeft( m_optionLabel->getLocalTopLeft() - m_decrement->getSize() );
 		m_decrement->setCenter( Ogre::Vector2( m_decrement->getCenter().x, m_optionLabel->getCenter().y ) );

@@ -55,7 +55,8 @@ namespace Colibri
 									   const char *skinName, const char *filename );
 
 		void loadSkins( const rapidjson::Value &skinsValue, const char *filename );
-		void loadSkinPacks( const rapidjson::Value &packsValue, const char *filename );
+		void loadSkinPacks( const rapidjson::Value &packsValue, const rapidjson::Value &skinsValue,
+							const char *filename );
 		void loadDefaultSkinPacks( const rapidjson::Value &packsValue, const char *filename );
 
 	public:

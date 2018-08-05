@@ -232,7 +232,7 @@ namespace Colibri
 			}
 			else if( bIsLabel && apiObject.lastDatablock != mHlmsDatablock )
 			{
-				//Text  has arbitrary number of of vertices, thus we can't properly calculate the drawId
+				//Text has arbitrary number of of vertices, thus we can't properly calculate the drawId
 				//and therefore the material ID unless we issue a start a new draw.
 				CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
 				++drawCall->numDraws;
@@ -254,6 +254,13 @@ namespace Colibri
 		}
 
 		addChildrenCommands( apiObject, collectingBreadthFirst );
+	}
+	//-------------------------------------------------------------------------
+	const StateInformation& Renderable::getStateInformation( States::States state ) const
+	{
+		if( state == States::NumStates )
+			state = m_currentState;
+		return m_stateInformation[state];
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::_fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull

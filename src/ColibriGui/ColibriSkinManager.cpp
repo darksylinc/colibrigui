@@ -76,6 +76,9 @@ namespace Colibri
 			log->log( errorMsg.c_str(), LogSeverity::Warning );
 		}
 
+		stateInfo.centerAspectRatio = (uvTopLeftWidthHeight.z - borderSizeTL.x - borderSizeBR.x) /
+									  (uvTopLeftWidthHeight.w - borderSizeTL.y - borderSizeBR.y);
+
 		const Ogre::Vector2 topLeft( uvTopLeftWidthHeight.x / texResolution.x,
 		                             uvTopLeftWidthHeight.y / texResolution.y );
 		const Ogre::Vector2 widthHeight( uvTopLeftWidthHeight.z / texResolution.x,
@@ -158,6 +161,7 @@ namespace Colibri
 				memset( &skinInfo.stateInfo, 0, sizeof(skinInfo.stateInfo) );
 				skinInfo.stateInfo.uvTopLeftBottomRight[GridLocations::Center] =
 						Ogre::Vector4( 0, 0, 1, 1 );
+				skinInfo.stateInfo.centerAspectRatio = 1.0f;
 
 				const rapidjson::Value &skinValue = itor->value;
 
@@ -232,6 +236,9 @@ namespace Colibri
 								widthHeightToBottomLeft( uvTopLeftWidthHeight, texResolution );
 						for( size_t i=0; i<GridLocations::NumGridLocations; ++i )
 							skinInfo.stateInfo.uvTopLeftBottomRight[i] = uvTopLeftBottomRight;
+
+						skinInfo.stateInfo.centerAspectRatio = uvTopLeftWidthHeight.z /
+															   uvTopLeftWidthHeight.w;
 					}
 
 					itTmp = gridValue.FindMember( "enclosing" );
@@ -282,6 +289,12 @@ namespace Colibri
 							const Ogre::Vector4 uvTopLeftBottomRight =
 									widthHeightToBottomLeft( uvTopLeftWidthHeight, texResolution );
 							skinInfo.stateInfo.uvTopLeftBottomRight[i] = uvTopLeftBottomRight;
+
+							if( i == GridLocations::Center )
+							{
+								skinInfo.stateInfo.centerAspectRatio = uvTopLeftWidthHeight.z /
+																	   uvTopLeftWidthHeight.w;
+							}
 						}
 					}
 
@@ -357,7 +370,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void SkinManager::loadSkinPacks( const rapidjson::Value &packsValue, const char *filename )
+	void SkinManager::loadSkinPacks( const rapidjson::Value &packsValue,
+									 const rapidjson::Value &skinsValue, const char *filename )
 	{
 		rapidjson::Value::ConstMemberIterator itor = packsValue.MemberBegin();
 		rapidjson::Value::ConstMemberIterator end  = packsValue.MemberEnd();
@@ -390,6 +404,33 @@ namespace Colibri
 					"highlighted_button_and_cursor",
 					"pressed"
 				};
+
+				itTmp = skinValue.FindMember( "auto" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+				{
+					char tmpBuffer[256];
+					Ogre::LwString skinName( Ogre::LwString::FromEmptyPointer( tmpBuffer,
+																			   sizeof( tmpBuffer ) ) );
+
+					skinName = itTmp->value.GetString();
+					const size_t prefixSize = skinName.size();
+
+					for( size_t i=0u; i<States::NumStates; ++i )
+					{
+						skinName.resize( prefixSize );
+						skinName.a( "_", states[i] );
+						if( skinsValue.FindMember( skinName.c_str() ) != skinsValue.MemberEnd() )
+							skinPack.skinInfo[i] = skinName.c_str();
+						else
+						{
+							//Assume _idle exists
+							skinName.resize( prefixSize );
+							skinName.a( "_", states[States::Idle] );
+							skinPack.skinInfo[i] = skinName.c_str();
+						}
+					}
+				}
+
 				for( size_t i=0u; i<States::NumStates; ++i )
 				{
 					itTmp = skinValue.FindMember( states[i] );
@@ -499,12 +540,14 @@ namespace Colibri
 		rapidjson::Value::ConstMemberIterator itTmp;
 
 		itTmp = d.FindMember( "skins" );
-		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
-			loadSkins( itTmp->value, filename );
+		{
+			if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
+				loadSkins( itTmp->value, filename );
 
-		itTmp = d.FindMember( "skin_packs" );
-		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )
-			loadSkinPacks( itTmp->value, filename );
+			rapidjson::Value::ConstMemberIterator itTmp2 = d.FindMember( "skin_packs" );
+			if( itTmp2 != d.MemberEnd() && itTmp2->value.IsObject() )
+				loadSkinPacks( itTmp2->value, itTmp->value, filename );
+		}
 
 		itTmp = d.FindMember( "default_skin_packs" );
 		if( itTmp != d.MemberEnd() && itTmp->value.IsObject() )

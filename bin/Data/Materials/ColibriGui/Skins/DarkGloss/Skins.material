@@ -1,0 +1,26 @@
+hlms Atlas unlit
+{
+	diffuse_map Atlas.png
+}
+hlms AtlasTransparent unlit
+{
+	scene_blend alpha_blend
+	diffuse_map Atlas.png
+}
+hlms AtlasDisabled unlit
+{
+	diffuse 1 1 1 0.2
+	scene_blend alpha_blend
+	diffuse_map Atlas.png
+}
+hlms AtlasBrighter unlit
+{
+	diffuse 2 2 2 1
+	diffuse_map Atlas.png
+}
+hlms AtlasBrighterTransparent unlit
+{
+	diffuse 2 2 2 1
+	scene_blend alpha_blend
+	diffuse_map Atlas.png
+}

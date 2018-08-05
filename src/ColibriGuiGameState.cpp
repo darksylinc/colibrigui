@@ -75,7 +75,7 @@ namespace Demo
 								 mGraphicsSystem->getRoot()->getRenderSystem()->getVaoManager(),
 								 mGraphicsSystem->getSceneManager() );
 		colibriManager->loadSkins( (mGraphicsSystem->getResourcePath() +
-								   "Materials/ColibriGui/Skins.colibri.json").c_str() );
+								   "Materials/ColibriGui/Skins/DarkGloss/Skins.colibri.json").c_str() );
 
 		mainWindow = colibriManager->createWindow( 0 );
 		//mainWindow->setVisualsEnabled( false );
@@ -93,7 +93,7 @@ namespace Demo
 		//When m_breadthFirst is set to true, it can cause significant performance
 		//increases for UI-heavy applications. But be sure you understand it i.e.
 		//it may not render correctly if your widgets have children and they overlap.
-		mainWindow->m_breadthFirst = false;
+		mainWindow->m_breadthFirst = true;
 
 		/*button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );

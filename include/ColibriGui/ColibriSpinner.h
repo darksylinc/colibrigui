@@ -50,6 +50,7 @@ namespace Colibri
 
 		std::vector<std::string>	m_options;
 
+		void setArrowSize( Button *arrowWidget );
 		void updateOptionLabel();
 
 	public:

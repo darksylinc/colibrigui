@@ -24,6 +24,7 @@ namespace Colibri
 		//Values are in screen pixels, thus they're independent from canvas resolution
 		float			borderSize[Borders::NumBorders];
 		float			borderRepeatSize[Borders::NumBorders]; /// 0 or negative means disable repeat
+		float			centerAspectRatio;
 		Ogre::IdString	materialName;
 	};
 
@@ -164,6 +165,8 @@ namespace Colibri
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
 		virtual bool isRenderable() const	{ return true; }
+
+		const StateInformation& getStateInformation( States::States state = States::NumStates ) const;
 
 		inline void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
 											 RESTRICT_ALIAS vertexBuffer,

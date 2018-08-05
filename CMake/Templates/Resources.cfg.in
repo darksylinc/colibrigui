@@ -7,7 +7,8 @@ FileSystem=@OGRE_MEDIA_DIR@Data/Materials/Common
 FileSystem=@OGRE_MEDIA_DIR@Data/Materials/Common/GLSL
 FileSystem=@OGRE_MEDIA_DIR@Data/Materials/Common/HLSL
 FileSystem=@OGRE_MEDIA_DIR@Data/Materials/Common/Metal
-FileSystem=@OGRE_MEDIA_DIR@Data/Materials/ColibriGui
+FileSystem=@OGRE_MEDIA_DIR@Data/Materials/ColibriGui/Skins/DarkGloss
+FileSystem=@OGRE_MEDIA_DIR@Data/Materials/ColibriGui/Skins/Debug
 
 # Do not load this as a resource. It's here merely to tell the code where
 # the Hlms templates are located

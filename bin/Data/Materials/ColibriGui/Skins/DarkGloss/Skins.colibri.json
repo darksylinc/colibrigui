@@ -1,0 +1,176 @@
+{
+    "skins" :
+    {
+        "Button_idle" :
+        {
+            "material" : "Atlas",
+            "tex_resolution" : [256, 512],
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 0, 256, 128], [4, 4]]
+            },
+            "borders" :
+            {
+                "all" : [4, 4]
+            }
+        },
+        "Button_disabled" :
+        {
+            "copy_from" : "Button_idle",
+            "material" : "AtlasDisabled"
+        },
+        "Button_highlighted_cursor" :
+        {
+            "copy_from" : "Button_idle",
+            "material" : "AtlasBrighter"
+        },
+        "Button_highlighted_button" :
+        {
+            "copy_from" : "Button_idle",
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 128, 256, 128], [4, 4]]
+            }
+        },
+        "Button_highlighted_button_and_cursor" :
+        {
+            "copy_from" : "Button_highlighted_button",
+            "material" : "AtlasBrighter"
+        },
+        "Button_pressed" :
+        {
+            "copy_from" : "Button_idle",
+            "material" : "Atlas",
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 256, 256, 128], [4, 4]]
+            }
+        },
+
+        "Background" :
+        {
+            "material" : "Atlas",
+            "tex_resolution" : [256, 512],
+            "grid_uv" :
+            {
+                "enclosing" : [[0, 384, 128, 128], [2, 20], [2, 2]]
+            },
+            "borders" :
+            {
+                "all" : [2, 2],
+                "top" : [20, 20]
+            }
+        },
+
+        "SpinnerBtnDecrement_idle" :
+        {
+            "material" : "AtlasTransparent",
+            "tex_resolution" : [256, 512],
+            "grid_uv" : { "center" : [160, 416, 64, 32] }
+        },
+        "SpinnerBtnDecrement_disabled" :
+        {
+            "copy_from" : "SpinnerBtnDecrement_idle",
+            "material" : "AtlasDisabled"
+        },
+        "SpinnerBtnDecrement_highlighted_cursor" :
+        {
+            "copy_from" : "SpinnerBtnDecrement_idle",
+            "material" : "AtlasBrighterTransparent"
+        },
+        "SpinnerBtnDecrement_highlighted_button_and_cursor" :
+        {
+            "copy_from" : "SpinnerBtnDecrement_highlighted_cursor",
+            "material" : "AtlasBrighterTransparent"
+        },
+
+        "SpinnerBtnIncrement_idle" :
+        {
+            "material" : "AtlasTransparent",
+            "tex_resolution" : [256, 512],
+            "grid_uv" : { "center" : [160, 384, 64, 32] }
+        },
+        "SpinnerBtnIncrement_disabled" :
+        {
+            "copy_from" : "SpinnerBtnIncrement_idle",
+            "material" : "AtlasDisabled"
+        },
+        "SpinnerBtnIncrement_highlighted_cursor" :
+        {
+            "copy_from" : "SpinnerBtnIncrement_idle",
+            "material" : "AtlasBrighterTransparent"
+        },
+        "SpinnerBtnIncrement_highlighted_button_and_cursor" :
+        {
+            "copy_from" : "SpinnerBtnIncrement_highlighted_cursor",
+            "material" : "AtlasBrighterTransparent"
+        },
+
+        "CheckboxTickmarkUnchecked" :
+        {
+            "material" : "Atlas",
+            "tex_resolution" : [256, 512],
+            "grid_uv" : { "center" : [128, 384, 32, 32] }
+        },
+        "CheckboxTickmarkChecked" :
+        {
+            "copy_from" : "CheckboxTickmarkUnchecked",
+            "grid_uv" : { "center" : [128, 416, 32, 32] }
+        },
+        "CheckboxTickmarkThirdState" :
+        {
+            "copy_from" : "CheckboxTickmarkUnchecked",
+            "grid_uv" : { "center" : [128, 448, 32, 32] }
+        }
+    },
+
+    "skin_packs" :
+    {
+        "Button" :
+        {
+            "auto" : "Button"
+        },
+        "Background" :
+        {
+            "all" : "Background"
+        },
+        "Spinner" :
+        {
+            "auto" : "Button",
+            "highlighted_button_and_cursor" : "Button_highlighted_button"
+        },
+        "SpinnerBtnDecrement" :
+        {
+            "auto" : "SpinnerBtnDecrement"
+        },
+        "SpinnerBtnIncrement" :
+        {
+            "auto" : "SpinnerBtnIncrement"
+        },
+        "CheckboxTickmarkChecked" :
+        {
+            "all" : "CheckboxTickmarkChecked"
+        },
+        "CheckboxTickmarkUnchecked" :
+        {
+            "all" : "CheckboxTickmarkUnchecked"
+        },
+        "CheckboxTickmarkThirdState" :
+        {
+            "all" : "CheckboxTickmarkThirdState"
+        }
+    },
+
+    "default_skin_packs" :
+    {
+        "Window"                : "Background",
+        "Button"                : "Button",
+        "Spinner"               : "Spinner",
+        "SpinnerBtnDecrement"   : "SpinnerBtnDecrement",
+        "SpinnerBtnIncrement"   : "SpinnerBtnIncrement",
+        "Checkbox"              : "Button",
+        "CheckboxTickmarkUnchecked"     : "CheckboxTickmarkUnchecked",
+        "CheckboxTickmarkChecked"       : "CheckboxTickmarkChecked",
+        "CheckboxTickmarkThirdState"    : "CheckboxTickmarkThirdState"
+    }
+}
