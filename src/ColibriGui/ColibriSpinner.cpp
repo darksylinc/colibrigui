@@ -21,7 +21,7 @@ namespace Colibri
 		m_valueLocationFraction( 0.8f, 0.5f ),
 		m_arrowButtonSize( -1 ),
 		m_horizontal( true ),
-		m_horizDir( HorizWidgetDir::AutoRTL )
+		m_horizDir( HorizWidgetDir::AutoLTR )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -72,7 +72,7 @@ namespace Colibri
 	{
 		Ogre::Vector2 arrowButtonSize = m_arrowButtonSize;
 		if( arrowButtonSize.y < 0.0f )
-			arrowButtonSize.y = std::min( getSize().x, getSize().y ) * 0.15f;
+			arrowButtonSize.y = std::min( getSize().x, getSize().y ) * 0.25f;
 		if( arrowButtonSize.x < 0.0f )
 		{
 			const float uvAspecRatio = arrowWidget->getStateInformation().centerAspectRatio;

@@ -41,6 +41,11 @@ namespace Colibri
 
 		Label* getLabel();
 
+		/// When changing the text programatically, prefer using this function over directly
+		/// modifying the Label (via getLabel) because this function will update the caret
+		/// cursor position the way the user would expect.
+		void setText( const char *text );
+
 		virtual void setState( States::States state, bool smartHighlight=true,
 							   bool broadcastEnable=false );
 

@@ -62,12 +62,7 @@ namespace Demo
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
-#define USE_CANVAS 1
-#if USE_CANVAS
 		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ),
-#else
-		colibriManager->setCanvasSize( Ogre::Vector2( 1.0f, 1.0f ),
-#endif
 									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
 
 		//colibriManager = new Colibri::ColibriManager();
@@ -83,17 +78,13 @@ namespace Demo
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
-#if USE_CANVAS
 		mainWindow->setTransform( Ogre::Vector2( 960, 0 ), Ogre::Vector2( 960, 960 ) );
-#else
-		mainWindow->setTransform( Ogre::Vector2( 0.5f, 0.0f ), Ogre::Vector2( 0.5f, 0.5f ) );
-#endif
 		mainWindow->setClipBordersMatchSkin();
 
 		//When m_breadthFirst is set to true, it can cause significant performance
 		//increases for UI-heavy applications. But be sure you understand it i.e.
 		//it may not render correctly if your widgets have children and they overlap.
-		mainWindow->m_breadthFirst = true;
+		mainWindow->m_breadthFirst = false;
 
 		/*button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );
@@ -106,15 +97,72 @@ namespace Demo
 		label->sizeToFit( Colibri::States::Idle );
 		button0->setSize( label->getSize() );*/
 
+		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
+		layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
-		button0->setSkinPack( "ButtonSkin" );
-		button0->setTopLeft( Ogre::Vector2( 192, 226 ) );
-#if USE_CANVAS
-		button0->setSize( Ogre::Vector2( 480, 270 ) );
-#else
-		button0->setSize( Ogre::Vector2( 0.25, 0.25 ) );
-#endif
-		button0->getLabel()->setText( "Button 0" );
+		button0->setSize( Ogre::Vector2( 350, 64 ) );
+		button0->getLabel()->setText( "This is a button" );
+		layout->addCell( button0 );
+
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->getButton()->getLabel()->setText( "This is a checkbox" );
+		layout->addCell( checkbox0 );
+
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->setTriState( true );
+		checkbox0->getButton()->getLabel()->setText( "This is a tri-state checkbox" );
+		layout->addCell( checkbox0 );
+
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->getButton()->getLabel()->setText( "This checkbox has the tickmark outside" );
+		checkbox0->setCheckboxMode( Colibri::Checkbox::TickButton );
+		layout->addCell( checkbox0 );
+
+		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
+		spinner0->setTopLeft( Ogre::Vector2::ZERO );
+		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->getLabel()->setText( "Options" );
+		{
+			std::vector<std::string> options;
+			options.push_back( "Test" );
+			options.push_back( "Low" );
+			options.push_back( "Medium" );
+			options.push_back( "High" );
+			spinner0->setOptions( options );
+		}
+		layout->addCell( spinner0 );
+
+		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
+		spinner0->setTopLeft( Ogre::Vector2::ZERO );
+		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->getLabel()->setText( "Numeric Spinner" );
+		layout->addCell( spinner0 );
+
+		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
+		editbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		editbox0->setText( "You can edit this text" );
+		editbox0->m_expand[0] = true;
+		layout->addCell( editbox0 );
+
+		{
+			const Colibri::LayoutCellVec &cells = layout->getCells();
+			Colibri::LayoutCellVec::const_iterator itor = cells.begin();
+			Colibri::LayoutCellVec::const_iterator end  = cells.end();
+
+			while( itor != end )
+			{
+				(*itor)->m_margin = 5.0f;
+
+				++itor;
+			}
+		}
+
+		layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
+		layout->layout();
 #if 0
 		//Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		Colibri::LayoutMultiline *layout = new Colibri::LayoutMultiline( colibriManager );
@@ -131,7 +179,6 @@ namespace Demo
 		for( int i=0 ;i<4; ++i )
 		{
 			button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
-			button1->setSkinPack( "ButtonSkin" );
 			button1->setTopLeft( Ogre::Vector2( 192, 192 + 192 + 480 + i * 480 ) );
 			//button1->setSize( i == 1 ? Ogre::Vector2( 288, 180 ) : Ogre::Vector2( 96, 54 ) );
 			button1->setSize( Ogre::Vector2( 288, 180 ) );
@@ -158,24 +205,6 @@ namespace Demo
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		layout->layout();
-#else
-		button1 = colibriManager->createWidget<Colibri::Button>( mainWindow );
-		button1->setSkinPack( "ButtonSkin" );
-		button1->setTopLeft( Ogre::Vector2( 192 + 288, 192 + 192 + 288 + 192 ) );
-		button1->setSize( Ogre::Vector2( 288, 180 ) );
-
-		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
-		spinner0->setSkinPack( "ButtonSkin" );
-		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 288, 180 ) );
-		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
-		//checkbox0->setSkinPack( "ButtonSkin" );
-		checkbox0->setTopLeft( Ogre::Vector2( 0, 500 ) );
-		checkbox0->setSize( Ogre::Vector2( 288, 180 ) );
-		/*editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
-		editbox0->setSkinPack( "ButtonSkin" );
-		editbox0->setTopLeft( Ogre::Vector2::ZERO );
-		editbox0->setSize( Ogre::Vector2( 288, 180 ) );*/
 #endif
 
 #if 0

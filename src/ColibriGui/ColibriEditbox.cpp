@@ -40,8 +40,6 @@ namespace Colibri
 		m_caret->sizeToFit( States::Idle );
 		m_caret->setHidden( true );
 
-		m_label->setText( "Hel lo" );
-
 		Renderable::_initialize();
 	}
 	//-------------------------------------------------------------------------
@@ -67,6 +65,13 @@ namespace Colibri
 		return	m_currentState == States::HighlightedButton ||
 				m_currentState == States::HighlightedButtonAndCursor ||
 				m_currentState == States::Pressed;
+	}
+	//-------------------------------------------------------------------------
+	void Editbox::setText( const char *text )
+	{
+		m_label->setText( text );
+		//Set the cursor at the end (will later be clamped correctly)
+		m_cursorPos = std::numeric_limits<uint32_t>::max();
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::setState( States::States state, bool smartHighlight,

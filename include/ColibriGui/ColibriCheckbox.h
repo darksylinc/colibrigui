@@ -14,6 +14,7 @@ namespace Colibri
 	*/
 	class Checkbox : public Widget, public WidgetActionListener
 	{
+	public:
 		enum Mode
 		{
 			/** Layout is as follows:
@@ -30,6 +31,7 @@ namespace Colibri
 			BigButton
 		};
 
+	protected:
 		Button *m_button;
 		Button *m_tickmark;
 
@@ -53,7 +55,12 @@ namespace Colibri
 		virtual void _initialize();
 		virtual void _destroy();
 
+		Button* getButton()								{ return m_button; }
+
 		void setSkinPack( Ogre::IdString skinPackName );
+
+		void setCheckboxMode( Mode mode );
+		Mode getCheckboxMode() const					{ return m_mode; }
 
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
 		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }

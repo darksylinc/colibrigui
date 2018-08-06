@@ -11,6 +11,11 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
+	const LayoutCellVec& LayoutLine::getCells() const
+	{
+		return m_cells;
+	}
+	//-------------------------------------------------------------------------
 	void LayoutLine::addCell( LayoutCell *cell )
 	{
 		m_cells.push_back( cell );

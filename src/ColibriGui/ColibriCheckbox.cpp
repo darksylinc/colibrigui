@@ -17,7 +17,7 @@ namespace Colibri
 		m_horizDir( HorizWidgetDir::AutoLTR ),
 		m_mode( BigButton ),
 		m_valueLocationFraction( 0.5f, 0.5f ),
-		m_tickmarkHeightFractionSize( 0.2f ),
+		m_tickmarkHeightFractionSize( 0.5f ),
 		m_marginHeightFractionSize( 0.02f )
 	{
 		m_clickable = true;
@@ -64,6 +64,12 @@ namespace Colibri
 	void Checkbox::setSkinPack( Ogre::IdString skinPackName )
 	{
 		m_button->setSkinPack( skinPackName );
+	}
+	//-------------------------------------------------------------------------
+	void Checkbox::setCheckboxMode( Checkbox::Mode mode )
+	{
+		m_mode = mode;
+		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir )

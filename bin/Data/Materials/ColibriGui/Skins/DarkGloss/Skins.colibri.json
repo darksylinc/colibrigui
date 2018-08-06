@@ -171,6 +171,7 @@
         "Checkbox"              : "Button",
         "CheckboxTickmarkUnchecked"     : "CheckboxTickmarkUnchecked",
         "CheckboxTickmarkChecked"       : "CheckboxTickmarkChecked",
-        "CheckboxTickmarkThirdState"    : "CheckboxTickmarkThirdState"
+        "CheckboxTickmarkThirdState"    : "CheckboxTickmarkThirdState",
+        "Editbox"               : "Button"
     }
 }
