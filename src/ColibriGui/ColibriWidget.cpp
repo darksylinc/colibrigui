@@ -825,6 +825,11 @@ namespace Colibri
 		return m_position + m_size - m_clipBorderBR;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setSizeAfterClipping( const Ogre::Vector2 &size )
+	{
+		setSize( size + (m_clipBorderTL + m_clipBorderBR) );
+	}
+	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::getSizeAfterClipping() const
 	{
 		return m_size - (m_clipBorderTL + m_clipBorderBR);

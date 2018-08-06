@@ -60,6 +60,11 @@ namespace Colibri
 		*/
 		Ogre::Vector2	m_hardMaxSize;
 
+		/** When not null, it will modify the window's client size to fit the objects,
+			and modify its scroll area if m_hardMaxSize was exceeded
+		*/
+		Window * colibrigui_nullable m_adjustableWindow;
+
 	public:
 		LayoutBase( ColibriManager *colibriManager );
 

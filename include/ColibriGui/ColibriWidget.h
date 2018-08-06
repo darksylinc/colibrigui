@@ -449,6 +449,9 @@ namespace Colibri
 		/// Returns m_position + m_size - clipBorderBottomRight;
 		/// aka where the working area for children ends
 		Ogre::Vector2 getBottomRightAfterClipping() const;
+		/// Sets the size of the working area.
+		/// This means that the actual size i.e. getSize() may be bigger.
+		void setSizeAfterClipping( const Ogre::Vector2 &size );
 		/// Returns the working area. clipBorderTopLeft + clipBorderBottomRight
 		Ogre::Vector2 getSizeAfterClipping() const;
 

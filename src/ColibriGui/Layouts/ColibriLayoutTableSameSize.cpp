@@ -1,6 +1,7 @@
 
 #include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/ColibriWindow.h"
 
 namespace Colibri
 {
@@ -165,6 +166,14 @@ namespace Colibri
 		}
 
 		tellChildrenToUpdateLayout( m_cells );
+
+		if( m_adjustableWindow )
+		{
+			Ogre::Vector2 windowSize = this->getCellSize();
+
+			m_adjustableWindow->setSizeAfterClipping( windowSize );
+			m_adjustableWindow->sizeScrollToFit();
+		}
 	}
 	//-------------------------------------------------------------------------
 	void LayoutTableSameSize::notifyLayoutUpdated()

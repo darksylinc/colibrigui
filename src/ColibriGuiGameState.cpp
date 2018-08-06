@@ -78,27 +78,15 @@ namespace Demo
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
-		mainWindow->setTransform( Ogre::Vector2( 960, 0 ), Ogre::Vector2( 960, 960 ) );
-		mainWindow->setClipBordersMatchSkin();
+		mainWindow->setTransform( Ogre::Vector2( 960, 0 ), Ogre::Vector2( 960, 0 ) );
 
 		//When m_breadthFirst is set to true, it can cause significant performance
 		//increases for UI-heavy applications. But be sure you understand it i.e.
 		//it may not render correctly if your widgets have children and they overlap.
-		mainWindow->m_breadthFirst = false;
-
-		/*button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
-		button0->setTopLeft( Ogre::Vector2( 0.0, 0.0 ) );
-		button0->setSize( Ogre::Vector2( 480, 270 ) );
-
-		Colibri::Label *label = colibriManager->createWidget<Colibri::Label>( mainWindow );
-		label->setText( "||\n||" );
-		label->setTextVertAlignment( Colibri::TextVertAlignment::Center );
-		label->setVertReadingDir( Colibri::VertReadingDir::ForceTTB );
-		label->sizeToFit( Colibri::States::Idle );
-		button0->setSize( label->getSize() );*/
+		mainWindow->m_breadthFirst = true;
 
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
-		layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->setSize( Ogre::Vector2( 350, 64 ) );
@@ -162,7 +150,14 @@ namespace Demo
 		}
 
 		layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
+		layout->m_adjustableWindow = mainWindow;
 		layout->layout();
+
+		Colibri::LayoutLine *layoutW = new Colibri::LayoutLine( colibriManager );
+		layoutW->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+		layoutW->addCell( mainWindow );
+		layoutW->m_softMaxSize = colibriManager->getCanvasSize();
+		layoutW->layout();
 #if 0
 		//Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		Colibri::LayoutMultiline *layout = new Colibri::LayoutMultiline( colibriManager );
