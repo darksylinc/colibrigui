@@ -40,9 +40,8 @@ namespace Colibri
 		HorizWidgetDir::HorizWidgetDir	m_horizDir;
 		Mode	m_mode;
 
-		Ogre::Vector2	m_valueLocationFraction;
-		float m_tickmarkHeightFractionSize;
-		float m_marginHeightFractionSize;
+		float			m_tickmarkMargin;
+		Ogre::Vector2	m_tickmarkSize;
 
 		/// Each skin pack per m_skinPacks[m_currentValue]
 		SkinInfo const * colibrigui_nullable m_skinPacks[3][States::NumStates];
@@ -62,6 +61,10 @@ namespace Colibri
 		void setCheckboxMode( Mode mode );
 		Mode getCheckboxMode() const					{ return m_mode; }
 
+		void setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size );
+		float getTickmarkMargin() const					{ return m_tickmarkMargin; }
+		Ogre::Vector2 getTickmarkSize() const			{ return m_tickmarkSize; }
+
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
 		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }
 
@@ -78,7 +81,7 @@ namespace Colibri
 
 		uint8_t getMaxValue() const						{ return m_triState ? 2u : 1u; }
 
-		virtual void setTransformDirty();
+		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
 	};

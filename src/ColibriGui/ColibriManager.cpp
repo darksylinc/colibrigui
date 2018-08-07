@@ -44,6 +44,7 @@ namespace Colibri
 		m_colibriListener( &DefaultColibriListener ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
+		m_numGlyphsDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -62,6 +63,10 @@ namespace Colibri
 		m_keyRepeatDelay( 0.5f ),
 		m_timeDelayPerKeyStroke( 0.1f ),
 		m_defaultFontSize( 16u << 6u ),
+		m_defaultTickmarkMargin( 7.0f ),
+		m_defaultTickmarkSize( 25.0f, 25.0f ),
+		m_defaultArrowMargin( 5.0f ),
+		m_defaultArrowSize( 15.0f, 15.0f ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 ),
 		m_vertexBufferBase( 0 ),
@@ -202,7 +207,7 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			(*itor)->setTransformDirty();
+			(*itor)->setTransformDirty( Widget::TransformDirtyAll );
 			++itor;
 		}
 	}
@@ -644,7 +649,7 @@ namespace Colibri
 		retVal->_initialize();
 
 		retVal->setWindowNavigationDirty();
-		retVal->setTransformDirty();
+		retVal->setTransformDirty( Widget::TransformDirtyAll );
 
 		++m_numWidgets;
 
@@ -1009,24 +1014,28 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::_notifyNumGlyphsIsDirty()
+	{
+		m_numGlyphsDirty = true;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::_updateDirtyLabels()
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_fillBuffersStarted );
 		COLIBRI_ASSERT_MEDIUM( !m_renderingStarted );
 
-		bool recalculateNumGlyphs = false;
 		LabelVec::const_iterator itor = m_dirtyLabels.begin();
 		LabelVec::const_iterator end  = m_dirtyLabels.end();
 
 		while( itor != end )
 		{
-			recalculateNumGlyphs |= (*itor)->_updateDirtyGlyphs();
+			(*itor)->_updateDirtyGlyphs();
 			++itor;
 		}
 
 		m_dirtyLabels.clear();
 
-		if( recalculateNumGlyphs )
+		if( m_numGlyphsDirty )
 		{
 			m_numTextGlyphs = 0;
 			itor = m_labels.begin();
@@ -1037,6 +1046,8 @@ namespace Colibri
 				m_numTextGlyphs += (*itor)->getMaxNumGlyphs();
 				++itor;
 			}
+
+			m_numGlyphsDirty = false;
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -1169,7 +1180,7 @@ namespace Colibri
 
 			while( itor != end )
 			{
-				(*itor)->setTransformDirty();
+				(*itor)->setTransformDirty( Widget::TransformDirtyAll );
 				++itor;
 			}
 

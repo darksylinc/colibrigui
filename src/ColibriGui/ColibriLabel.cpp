@@ -220,6 +220,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Label::updateGlyphs( States::States state, bool bPlaceGlyphs )
 	{
+		const size_t prevNumGlyphs = m_shapes[state].size();
+
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 
 		{
@@ -335,6 +337,10 @@ namespace Colibri
 
 		if( bPlaceGlyphs && !m_glyphsPlaced[state] )
 			placeGlyphs( state );
+
+		const size_t currNumGlyphs = m_shapes[state].size();
+		if( currNumGlyphs > prevNumGlyphs )
+			m_manager->_notifyNumGlyphsIsDirty();
 	}
 	//-------------------------------------------------------------------------
 	void Label::placeGlyphs( States::States state, bool performAlignment )
@@ -1147,26 +1153,16 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	bool Label::_updateDirtyGlyphs()
+	void Label::_updateDirtyGlyphs()
 	{
-		bool retVal = false;
 		for( size_t i=0; i<States::NumStates; ++i )
 		{
 			if( m_glyphsDirty[i] )
-			{
-				const size_t prevNumGlyphs = m_shapes[i].size();
 				updateGlyphs( static_cast<States::States>( i ) );
-				const size_t currNumGlyphs = m_shapes[i].size();
-
-				if( currNumGlyphs > prevNumGlyphs )
-					retVal = true;
-			}
 
 			if( !m_glyphsPlaced[i] )
 				placeGlyphs( static_cast<States::States>( i ) );
 		}
-
-		return retVal;
 	}
 	//-------------------------------------------------------------------------
 	bool Label::isAnyStateDirty() const
@@ -1363,11 +1359,13 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Label::sizeToFit( States::States baseState, float maxAllowedWidth,
+	void Label::sizeToFit( float maxAllowedWidth,
 						   TextHorizAlignment::TextHorizAlignment newHorizPos,
-						   TextVertAlignment::TextVertAlignment newVertPos )
+						   TextVertAlignment::TextVertAlignment newVertPos,
+						   States::States baseState )
 	{
-		COLIBRI_ASSERT_LOW( baseState < States::NumStates );
+		if( baseState == States::NumStates )
+			baseState = m_currentState;
 
 		if( m_glyphsDirty[baseState] )
 			updateGlyphs( baseState, false );
@@ -1450,6 +1448,19 @@ namespace Colibri
 			m_position.y = m_position.y + oldSize.y - m_size.y;
 			break;
 		}
+	}
+	//-------------------------------------------------------------------------
+	void Label::setTransformDirty( uint32_t dirtyReason )
+	{
+		if( (dirtyReason & (TransformDirtyParentCaller|TransformDirtyScale)) == TransformDirtyScale &&
+			!m_glyphsDirty[m_currentState] &&
+			m_glyphsPlaced[m_currentState] )
+		{
+			//Align the glyphs so horizontal & vertical alignment are respected
+			placeGlyphs( m_currentState );
+		}
+
+		Renderable::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
 	void Label::_notifyCanvasChanged()

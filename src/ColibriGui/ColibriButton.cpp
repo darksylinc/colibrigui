@@ -40,13 +40,14 @@ namespace Colibri
 		return m_label;
 	}
 	//-------------------------------------------------------------------------
-	void Button::setTransformDirty()
+	void Button::setTransformDirty( uint32_t dirtyReason )
 	{
 		if( m_label )
 		{
-			if( m_label->getSize() != m_size )
-				m_label->setSize( getSizeAfterClipping() );
+			const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
+			if( m_label->getSize() != sizeAfterClipping )
+				m_label->setSize( sizeAfterClipping );
 		}
-		Renderable::setTransformDirty();
+		Renderable::setTransformDirty( dirtyReason );
 	}
 }

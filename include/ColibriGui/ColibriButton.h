@@ -22,7 +22,7 @@ namespace Colibri
 
 		Label* getLabel();
 
-		virtual void setTransformDirty();
+		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 	};
 }
 

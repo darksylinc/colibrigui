@@ -170,7 +170,20 @@ namespace Colibri
 
 		virtual void stateChanged( States::States newState ) {}
 
-		virtual void setTransformDirty();
+		enum TransformDirtyReason
+		{
+			TransformDirtyPosition		= 1u << 0u,
+			TransformDirtyScale			= 1u << 1u,
+			TransformDirtyOrientation	= 1u << 2u,
+			TransformDirtyParentCaller	= 1u << 3u,
+			TransformDirtyAll			= 0xFFFFFFFF
+		};
+
+		/**
+		@param dirtyReason
+			@see	TransformDirtyReason
+		*/
+		virtual void setTransformDirty( uint32_t dirtyReason );
 		void scheduleSetTransformDirty();
 
 	public:

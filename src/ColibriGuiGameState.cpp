@@ -130,6 +130,14 @@ namespace Demo
 		spinner0->getLabel()->setText( "Numeric Spinner" );
 		layout->addCell( spinner0 );
 
+		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
+		spinner0->setTopLeft( Ogre::Vector2::ZERO );
+		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->setFixedWidth( true, 0 );
+		spinner0->setHorizWidgetDir( Colibri::HorizWidgetDir::AutoRTL );
+		spinner0->getLabel()->setText( "This spinner is on the other side" );
+		layout->addCell( spinner0 );
+
 		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
 		editbox0->setSize( Ogre::Vector2( 350, 64 ) );
 		editbox0->setText( "You can edit this text" );

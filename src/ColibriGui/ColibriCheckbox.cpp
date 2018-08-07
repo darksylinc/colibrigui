@@ -16,9 +16,8 @@ namespace Colibri
 		m_triState( false ),
 		m_horizDir( HorizWidgetDir::AutoLTR ),
 		m_mode( BigButton ),
-		m_valueLocationFraction( 0.5f, 0.5f ),
-		m_tickmarkHeightFractionSize( 0.5f ),
-		m_marginHeightFractionSize( 0.02f )
+		m_tickmarkMargin( manager->m_defaultTickmarkMargin ),
+		m_tickmarkSize( manager->m_defaultTickmarkSize )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;
@@ -57,7 +56,7 @@ namespace Colibri
 
 		//m_tickmark is a child of us, so it will be destroyed by our super class
 		m_tickmark = 0;
-		//m_label is a child of us, so it will be destroyed by our super class
+		//m_button is a child of us, so it will be destroyed by our super class
 		m_button = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -69,6 +68,13 @@ namespace Colibri
 	void Checkbox::setCheckboxMode( Checkbox::Mode mode )
 	{
 		m_mode = mode;
+		updateTickmark();
+	}
+	//-------------------------------------------------------------------------
+	void Checkbox::setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size )
+	{
+		m_tickmarkMargin = margin;
+		m_tickmarkSize = size;
 		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
@@ -84,8 +90,8 @@ namespace Colibri
 			return; //_initialize hasn't been called yet
 
 		const Ogre::Vector2 checkboxSize( getSizeAfterClipping() );
-		const float margin = checkboxSize.y * m_marginHeightFractionSize * 2.0f;
-		const Ogre::Vector2 tickmarkSize( checkboxSize.y * m_tickmarkHeightFractionSize );
+		const float margin = m_tickmarkMargin;
+		const Ogre::Vector2 tickmarkSize( m_tickmarkSize );
 
 		m_tickmark->setSize( tickmarkSize );
 
@@ -154,11 +160,13 @@ namespace Colibri
 		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
-	void Checkbox::setTransformDirty()
+	void Checkbox::setTransformDirty( uint32_t dirtyReason )
 	{
-		updateTickmark();
+		//Only update the tickmark if our size is directly being changed, not our parent's
+		if( (dirtyReason & (TransformDirtyParentCaller|TransformDirtyScale)) == TransformDirtyScale )
+			updateTickmark();
 
-		Widget::setTransformDirty();
+		Widget::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::notifyWidgetAction( Widget *widget, Action::Action action )

@@ -169,10 +169,8 @@ namespace Colibri
 
 		/** Called by ColibriManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.
-		@return
-			True if the max number of glyphs has increased from the last time.
 		*/
-		bool _updateDirtyGlyphs();
+		void _updateDirtyGlyphs();
 
 		/** Returns the max number of glyphs needed to render
 		@return
@@ -259,10 +257,10 @@ namespace Colibri
 			Specify the vertical pivot point. If the value is other than
 			TextHorizAlignment::Top, the widget will be repositioned.
 		*/
-		void sizeToFit( States::States baseState,
-						float maxAllowedWidth=std::numeric_limits<float>::max(),
+		void sizeToFit( float maxAllowedWidth=std::numeric_limits<float>::max(),
 						TextHorizAlignment::TextHorizAlignment newHorizPos=TextHorizAlignment::Left,
-						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top );
+						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
+						States::States baseState=States::NumStates );
 
 		GlyphVertex* fillBackground( GlyphVertex * RESTRICT_ALIAS textVertBuffer,
 									 const Ogre::Vector2 halfWindowRes,
@@ -278,6 +276,8 @@ namespace Colibri
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
 											  const Ogre::Matrix3 &parentRot ) colibri_final;
+
+		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void _notifyCanvasChanged();
 	};

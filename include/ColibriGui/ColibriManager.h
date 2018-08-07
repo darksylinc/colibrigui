@@ -98,6 +98,7 @@ namespace Colibri
 
 		bool m_swapRTLControls;
 		bool m_windowNavigationDirty;
+		bool m_numGlyphsDirty;
 
 		Ogre::Root					* colibrigui_nullable m_root;
 		Ogre::VaoManager			* colibrigui_nullable m_vaoManager;
@@ -137,7 +138,14 @@ namespace Colibri
 		float			m_timeDelayPerKeyStroke;
 
 		uint32_t		m_defaultFontSize;
+	public:
+		// These values are in virtual canvas units
+		float			m_defaultTickmarkMargin;
+		Ogre::Vector2	m_defaultTickmarkSize;
+		float			m_defaultArrowMargin;
+		Ogre::Vector2	m_defaultArrowSize;
 
+	protected:
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
 
@@ -160,7 +168,9 @@ namespace Colibri
 		void overrideCursorFocusWith( const FocusPair &focusedPair );
 
 	public:
+		void _notifyNumGlyphsIsDirty();
 		void _updateDirtyLabels();
+
 	protected:
 		void checkVertexBufferCapacity();
 

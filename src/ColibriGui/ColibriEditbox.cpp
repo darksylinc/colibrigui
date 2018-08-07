@@ -257,11 +257,12 @@ namespace Colibri
 		return m_label;
 	}
 	//-------------------------------------------------------------------------
-	void Editbox::setTransformDirty()
+	void Editbox::setTransformDirty( uint32_t dirtyReason )
 	{
-		if( m_label && m_label->getSize() != m_size )
-			m_label->setSize( getSizeAfterClipping() );
-		Renderable::setTransformDirty();
+		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
+		if( m_label && m_label->getSize() != sizeAfterClipping )
+			m_label->setSize( sizeAfterClipping );
+		Renderable::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::_notifyActionKeyMovement( Borders::Borders direction )

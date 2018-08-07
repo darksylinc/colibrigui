@@ -42,16 +42,19 @@ namespace Colibri
 		int32_t	m_maxValue;
 		int32_t	m_denominator;
 
-		Ogre::Vector2	m_valueLocationFraction;
-		Ogre::Vector2	m_arrowButtonSize;
+		float			m_arrowMargin;
+		/// This size is always for horizontal arrows. The .xy gets swapped as .yx for vertical spinners
+		Ogre::Vector2	m_arrowSize;
 
+		bool			m_calcFixedSizeFromMaxWidth;
 		bool			m_horizontal;
 		HorizWidgetDir::HorizWidgetDir	m_horizDir;
 
+		float						m_fixedWidth;
 		std::vector<std::string>	m_options;
 
-		void setArrowSize( Button *arrowWidget );
-		void updateOptionLabel();
+		void calculateMaximumWidth();
+		void updateOptionLabel( bool sizeOrAvailableOptionsChanged=false );
 
 	public:
 		Spinner( ColibriManager *manager );
@@ -134,7 +137,32 @@ namespace Colibri
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
 		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }
 
-		virtual void setTransformDirty();
+		/** Sets whether the distance between the arrows should remain constant regardless
+			of the option currently being selected.
+
+			When autoCalculateFromMaxWidth == false and fixedWidth <= 0, the distance between
+			the arrows will vary depending on the width of the string of the current option.
+
+			Otherwise, the arrows will remain at a fixed distance, thus the arrows will
+			stop moving (and sometimes, the text too) every time an option is changed.
+		@remarks
+			When both autoCalculateFromMaxWidth = false and fixedWidth <= 0,
+			this setting is disabled.
+		@param autoCalculateFromMaxWidth
+			True to autocalculate fixedWidth from all available options,
+			thus fixedWidth argument will be ignored.
+
+			Note: If the spinner is in numeric mode and m_denominator != 1,
+			the autocalculation may not be accurate.
+		@param fixedWidth
+			When autoCalculateFromMaxWidth is false; this value lets you manually
+			specify the fixed size (in canvas units).
+		*/
+		void setFixedWidth( bool autoCalculateFromMaxWidth, float fixedWidth );
+		bool getCalcFixedSizeFromMaxWidth() const				{ return m_calcFixedSizeFromMaxWidth; }
+		float getFixedWidth() const								{ return m_fixedWidth; }
+
+		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );

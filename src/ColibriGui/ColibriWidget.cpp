@@ -174,7 +174,7 @@ namespace Colibri
 			parent->m_children.push_back( this );
 		}
 		parent->setWidgetNavigationDirty();
-		setTransformDirty();
+		setTransformDirty( TransformDirtyPosition | TransformDirtyOrientation );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setPressable( bool pressable )
@@ -736,7 +736,7 @@ namespace Colibri
 		return m_children;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setTransformDirty()
+	void Widget::setTransformDirty( uint32_t dirtyReason )
 	{
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = true;
@@ -746,7 +746,7 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			(*itor)->setTransformDirty();
+			(*itor)->setTransformDirty( TransformDirtyParentCaller | dirtyReason );
 			++itor;
 		}
 	}
@@ -762,32 +762,32 @@ namespace Colibri
 		m_position = topLeft;
 		m_size = size;
 		m_orientation = orientation;
-		setTransformDirty();
+		setTransformDirty( TransformDirtyAll );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size )
 	{
 		m_position = topLeft;
 		m_size = size;
-		setTransformDirty();
+		setTransformDirty( TransformDirtyPosition | TransformDirtyScale );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setTopLeft( const Ogre::Vector2 &topLeft )
 	{
 		m_position = topLeft;
-		setTransformDirty();
+		setTransformDirty( TransformDirtyPosition );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setSize( const Ogre::Vector2 &size )
 	{
 		m_size = size;
-		setTransformDirty();
+		setTransformDirty( TransformDirtyScale );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setOrientation( const Ogre::Matrix3 &orientation )
 	{
 		m_orientation = orientation;
-		setTransformDirty();
+		setTransformDirty( TransformDirtyOrientation );
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setCenter( const Ogre::Vector2 &center )

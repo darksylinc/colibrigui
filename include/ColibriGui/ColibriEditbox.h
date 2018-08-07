@@ -58,7 +58,7 @@ namespace Colibri
 		virtual bool isTextMultiline() const;
 		virtual bool wantsTextInput() const;
 
-		virtual void setTransformDirty();
+		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );
 	};
