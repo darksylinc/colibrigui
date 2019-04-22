@@ -178,7 +178,6 @@ namespace Colibri
 			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
 																	  *apiObject.passCache,
 																	  queuedRenderable,
-																	  vao->getInputLayoutId(),
 																	  false );
 			if( lastHlmsCacheHash != hlmsCache->hash )
 			{

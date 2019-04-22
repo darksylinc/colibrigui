@@ -23,9 +23,9 @@
 		#define outColour outPs.colour0
 	@end
 
-	glyphCol = OGRE_BufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
-												   uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
-														floor(inPs.uvText.x)) ) );
+	glyphCol = bufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
+											  uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
+												   floor(inPs.uvText.x)) ) );
 	@property( syntax == metal )
 		outColour.w = unpack_unorm4x8_to_float( glyphCol ).x;
 	@end
