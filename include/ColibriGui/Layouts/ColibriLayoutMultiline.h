@@ -28,8 +28,27 @@ namespace Colibri
 	{
 		LayoutCellVec	m_cells;
 	public:
-		/// True to layout all cells as a column
-		/// False to layout all cells as a row
+		/// True to layout all cells in the first line as a column
+		/// There will 'm_numLines' columns.
+		/// Calling addCell consecutively and asuming B is bigger than the rest and m_numLines = 2 then:
+		///		A D
+		///		B E
+		///		B
+		///		C F
+		///
+		/// Thus m_proportion[1] of each cell in the first column can be honoured but m_proportion[0]
+		/// cannot (see LayoutMultiline::m_expandToCoverSoftMaxSize).
+		///
+		/// False to layout all cells in the first line as a row
+		/// There will 'm_numLines' rows.
+		/// Calling addCell consecutively and asuming B is bigger than the rest and m_numLines = 2 then:
+		///		A B B C
+		///		D E   F
+		///
+		/// Thus m_proportion[0] of each cell in the first row can be honoured but m_proportion[1]
+		/// cannot (see LayoutMultiline::m_expandToCoverSoftMaxSize).
+		///
+		/// If in doubt, imagine what would happen to a single line in LayoutLine::m_vertical
 		bool m_vertical;
 
 		/** Specifies whether cells at the edges (i.e. left & right or top & bottom)
@@ -52,6 +71,17 @@ namespace Colibri
 			LineLayout: This option only works when the first and/or last cell have m_proportion = false
 		*/
 		bool m_evenMarginSpaceAtEdges;
+
+		/** When m_vertical = false, the value of LayoutCell::m_proportional[1] cannot be honoured.
+			Likewise when m_vertical = true, LayoutCell::m_proportional[0] cannot be honoured.
+
+			When m_expandToCoverSoftSize = false, all lines are layed out consecutively as
+			tight as possible (i.e. as if m_proportional[!m_vertical] = 0).
+
+			When m_expandToCoverSoftSize = true, all lines are spaced out evenly to cover all of
+			m_softMaxSize (i.e. as if m_proportional[!m_vertical] = 1)
+		*/
+		bool m_expandToCoverSoftMaxSize;
 
 		size_t m_numLines;
 

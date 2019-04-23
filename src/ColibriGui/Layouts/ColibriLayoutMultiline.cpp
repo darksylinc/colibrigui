@@ -9,6 +9,7 @@ namespace Colibri
 		LayoutBase( colibriManager ),
 		m_vertical( true ),
 		m_evenMarginSpaceAtEdges( true ),
+		m_expandToCoverSoftMaxSize( false ),
 		m_numLines( 1u )
 	{
 	}
@@ -245,8 +246,9 @@ namespace Colibri
 											hardMaxSize[bVertical] );
 		const float sizeToDistribute = Ogre::max( maxLineSize - nonProportionalSize, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
-		maxOtherSize = Ogre::min( Ogre::max( maxOtherSize, softMaxSize[!bVertical] ),
-								  hardMaxSize[!bVertical] );
+		if( m_expandToCoverSoftMaxSize )
+			maxOtherSize = Ogre::max( maxOtherSize, softMaxSize[!bVertical] / numLines );
+		maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] / numLines );
 
 		const float spaceLeftForMargins =
 				fabsf( maxLineSize - std::min( hardMaxSize[bVertical],
@@ -509,6 +511,12 @@ namespace Colibri
 			}
 		}
 
+		if( m_expandToCoverSoftMaxSize )
+		{
+			maxedVal[!m_vertical] = Ogre::max( maxedVal[!m_vertical],
+											  m_softMaxSize[!m_vertical] / numLines );
+		}
+
 		Ogre::Vector2 retVal( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
 							  m_vertical ? accumVal.y : (maxedVal.y * numLines) );
 		retVal.makeFloor( m_hardMaxSize );
@@ -548,8 +556,14 @@ namespace Colibri
 			++itor;
 		}
 
-		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
-							  m_vertical ? accumVal.y : maxedVal.y );
+		if( m_expandToCoverSoftMaxSize )
+		{
+			maxedVal[!m_vertical] = Ogre::max( maxedVal[!m_vertical],
+											  m_softMaxSize[!m_vertical] / numLines );
+		}
+
+		Ogre::Vector2 retVal( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
+							  m_vertical ? accumVal.y : (maxedVal.y * numLines) );
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}
