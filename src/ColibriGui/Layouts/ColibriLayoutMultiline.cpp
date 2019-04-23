@@ -446,6 +446,7 @@ namespace Colibri
 		Ogre::Vector2 maxedVal( Ogre::Vector2::ZERO );
 		Ogre::Vector2 accumVal( Ogre::Vector2::ZERO );
 
+		//Calculate the size of a single line based on the biggest line
 		LayoutCellVec::const_iterator itor = m_cells.begin();
 		LayoutCellVec::const_iterator end  = m_cells.begin() + numCellsPerLine;
 
@@ -508,8 +509,8 @@ namespace Colibri
 			}
 		}
 
-		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
-							  m_vertical ? accumVal.y : maxedVal.y );
+		Ogre::Vector2 retVal( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
+							  m_vertical ? accumVal.y : (maxedVal.y * numLines) );
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}
