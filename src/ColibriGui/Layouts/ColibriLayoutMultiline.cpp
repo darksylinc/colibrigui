@@ -146,7 +146,7 @@ namespace Colibri
 			return _a > _b;
 		}
 	};
-	void LayoutMultiline::layout()
+	void LayoutMultiline::layout( bool isRootLayout )
 	{
 		if( m_cells.empty() )
 			return;
@@ -181,12 +181,15 @@ namespace Colibri
 		const Ogre::Vector2 softMaxSize = m_softMaxSize;
 		const Ogre::Vector2 hardMaxSize = m_hardMaxSize;
 
+		const Ogre::Vector2 layoutMargin = isRootLayout ? m_margin : Ogre::Vector2::ZERO;
+
 		//Sum all proportions
 		size_t maxProportion = 0;
 		float minMaxSize = 0;		//Vertical / Horizontal size
-		float maxOtherSize = 0;		//Horizontal / Vertical size (opposite axis of minMaxSize)
+		float maxOtherSize = layoutMargin[!m_vertical];	//Horizontal / Vertical size
+														//(opposite axis of minMaxSize)
 		float nonProportionalSize = 0;
-		float accumMarginSize = 0;
+		float accumMarginSize = layoutMargin[m_vertical];
 
 		{
 			LayoutCellVec::const_iterator itor = m_cells.begin();
@@ -416,7 +419,7 @@ namespace Colibri
 
 				topLeft[!bVertical] += y * maxOtherSize;
 
-				cell->setCellOffset( m_topLeft + topLeft );
+				cell->setCellOffset( m_topLeft + topLeft + (layoutMargin * 0.5f) );
 				cell->setCellSize( finalCellSize );
 
 				accumOffset += cellSizes[x];
@@ -428,7 +431,7 @@ namespace Colibri
 
 		if( m_adjustableWindow )
 		{
-			Ogre::Vector2 windowSize = this->getCellSize();
+			Ogre::Vector2 windowSize = this->getCellSize() + layoutMargin;
 
 			m_adjustableWindow->setSizeAfterClipping( windowSize );
 			m_adjustableWindow->sizeScrollToFit();
