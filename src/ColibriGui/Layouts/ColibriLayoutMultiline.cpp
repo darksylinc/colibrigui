@@ -456,7 +456,6 @@ namespace Colibri
 		{
 			const LayoutCell *cell0 = *itor;
 
-			Ogre::Vector2 biggestMinSizeInColumn = cell0->getCellMinSize();
 			Ogre::Vector2 biggestCellSize = cell0->getCellSize();
 			Ogre::Vector2 biggestMargin = cell0->m_margin;
 
@@ -467,13 +466,12 @@ namespace Colibri
 
 				const LayoutCell *cell = *(itor + line * numCellsPerLine);
 
-				biggestMinSizeInColumn.makeCeil( cell->getCellMinSize() );
 				const Ogre::Vector2 cellSize = cell->getCellSize();
 				biggestCellSize.makeCeil( cellSize );
 				biggestMargin.makeCeil( cell->m_margin );
 			}
 
-			accumVal += biggestMinSizeInColumn + biggestMargin;
+			accumVal += biggestCellSize + biggestMargin;
 			maxedVal.makeCeil( biggestCellSize + biggestMargin );
 
 			++itor;

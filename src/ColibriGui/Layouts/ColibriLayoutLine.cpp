@@ -404,10 +404,9 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize() + (*itor)->m_margin;
 			Ogre::Vector2 cellSize = (*itor)->getCellSize() + (*itor)->m_margin;
 			maxedVal.makeCeil( cellSize );
-			accumVal += minCellSize;
+			accumVal += cellSize;
 			++itor;
 		}
 
