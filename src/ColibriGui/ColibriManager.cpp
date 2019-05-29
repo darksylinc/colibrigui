@@ -641,9 +641,8 @@ namespace Colibri
 			m_windows.push_back( retVal );
 		else
 		{
-			retVal->m_parent = parent;
 			parent->m_childWindows.push_back( retVal );
-			parent->_setParent( retVal );
+			retVal->_setParent( parent );
 		}
 
 		retVal->_initialize();
@@ -1146,10 +1145,12 @@ namespace Colibri
 		if( m_keyboardFocusedPair.window && !m_keyboardFocusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
-			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
-
-			scrollToWidget( m_keyboardFocusedPair.widget );
+			if( m_keyboardFocusedPair.widget )
+			{
+				m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
+				m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+				scrollToWidget( m_keyboardFocusedPair.widget );
+			}
 		}
 
 		if( m_keyDirDown != Borders::NumBorders )
