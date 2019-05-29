@@ -933,7 +933,7 @@ namespace Colibri
 		while( itor != end )
 		{
 			Widget *widget = *itor;
-			maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSizeAfterClipping() );
+			maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
 			++itor;
 		}
 
