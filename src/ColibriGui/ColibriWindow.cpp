@@ -111,18 +111,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()
 	{
-		Ogre::Vector2 scrollableArea( Ogre::Vector2::ZERO );
-
-		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.end();
-
-		while( itor != end )
-		{
-			Widget *widget = *itor;
-			scrollableArea.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
-			++itor;
-		}
-
+		const Ogre::Vector2 scrollableArea( calculateChildrenSize() );
 		calculateMaxScrollFromScrollableArea( scrollableArea );
 	}
 	//-------------------------------------------------------------------------

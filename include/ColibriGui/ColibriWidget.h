@@ -512,6 +512,8 @@ namespace Colibri
 		const Ogre::Matrix3& getDerivedOrientation() const;
 		Ogre::Vector2 getDerivedCenter() const;
 
+		Ogre::Vector2 calculateChildrenSize() const;
+
 		// LayoutCell overrides
 		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_override;
 		virtual void setCellSize( const Ogre::Vector2 &size ) colibri_override;

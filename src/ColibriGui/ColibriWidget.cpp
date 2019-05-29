@@ -924,6 +924,22 @@ namespace Colibri
 		return (m_derivedTopLeft + m_derivedBottomRight) * 0.5f;
 	}
 	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::calculateChildrenSize() const
+	{
+		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
+		WidgetVec::const_iterator itor = m_children.begin();
+		WidgetVec::const_iterator end  = m_children.end();
+
+		while( itor != end )
+		{
+			Widget *widget = *itor;
+			maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSizeAfterClipping() );
+			++itor;
+		}
+
+		return maxSize;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setCellOffset( const Ogre::Vector2 &topLeft )
 	{
 		setTopLeft( topLeft );

@@ -40,6 +40,16 @@ namespace Colibri
 		return m_label;
 	}
 	//-------------------------------------------------------------------------
+	void Button::sizeToFit( float maxAllowedWidth,
+							TextHorizAlignment::TextHorizAlignment newHorizPos,
+							TextVertAlignment::TextVertAlignment newVertPos,
+							States::States baseState )
+	{
+		m_label->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
+		const Ogre::Vector2 maxSize( calculateChildrenSize() );
+		setSize( maxSize );
+	}
+	//-------------------------------------------------------------------------
 	void Button::setTransformDirty( uint32_t dirtyReason )
 	{
 		if( m_label )
