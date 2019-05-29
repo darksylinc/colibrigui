@@ -679,7 +679,7 @@ namespace Colibri
 		if( window == m_cursorFocusedPair.window )
 			m_cursorFocusedPair = FocusPair();
 
-		if( window->m_parent )
+		if( !window->m_parent )
 		{
 			WindowVec::iterator itor = std::find( m_windows.begin(), m_windows.end(), window );
 
