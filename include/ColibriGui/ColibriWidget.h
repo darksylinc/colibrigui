@@ -412,8 +412,11 @@ namespace Colibri
 		const WidgetVec& getChildren() const;
 		/// Note it may be < getChildren().size(), as this value only returns pure widgets.
 		/// Windows can be children from other windows, but are not counted for getNumWidgets
-		/// See m_numWidgets
+		/// See Widget::m_numWidgets
 		size_t getNumWidgets() const;
+
+		/// See Widget::m_numWidgets
+		size_t getOffsetStartWindowChildren() const;
 
 		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
 						   const Ogre::Matrix3 &orientation );

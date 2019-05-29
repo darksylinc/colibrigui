@@ -56,12 +56,16 @@ namespace Colibri
 		}
 
 		{
-			WindowVec::const_iterator itor = m_childWindows.begin();
-			WindowVec::const_iterator end  = m_childWindows.end();
+			WindowVec childWindowsCopy = m_childWindows;
+			WindowVec::const_iterator itor = childWindowsCopy.begin();
+			WindowVec::const_iterator end  = childWindowsCopy.end();
 
 			while( itor != end )
 				m_manager->destroyWindow( *itor++ );
 
+			const size_t offsetStartWindowChildren = getOffsetStartWindowChildren();
+			COLIBRI_ASSERT( childWindowsCopy.size() == (m_children.size() - offsetStartWindowChildren) );
+			m_children.erase( m_children.begin() + offsetStartWindowChildren, m_children.end() );
 			m_childWindows.clear();
 		}
 

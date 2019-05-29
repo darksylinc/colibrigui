@@ -736,6 +736,13 @@ namespace Colibri
 		return m_children;
 	}
 	//-------------------------------------------------------------------------
+	size_t Widget::getOffsetStartWindowChildren() const
+	{
+		const size_t windowChildrenStart =  m_numNonRenderables + m_numWidgets;
+		COLIBRI_ASSERT_LOW( windowChildrenStart <= m_children.size() );
+		return windowChildrenStart;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setTransformDirty( uint32_t dirtyReason )
 	{
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
