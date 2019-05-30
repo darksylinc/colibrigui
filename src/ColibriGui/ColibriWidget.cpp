@@ -935,7 +935,7 @@ namespace Colibri
 	{
 		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
 		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.end();
+		WidgetVec::const_iterator end  = m_children.begin() + getOffsetStartWindowChildren();
 
 		while( itor != end )
 		{

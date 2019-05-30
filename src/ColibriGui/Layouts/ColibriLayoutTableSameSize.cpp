@@ -174,6 +174,9 @@ namespace Colibri
 		{
 			Ogre::Vector2 windowSize = this->getCellSize() + layoutMargin;
 
+			m_adjustableWindow->setSizeAfterClipping( windowSize );
+			windowSize = m_adjustableWindow->getSize();
+			windowSize.makeFloor( m_hardMaxSize );
 			m_adjustableWindow->setSize( windowSize );
 			m_adjustableWindow->sizeScrollToFit();
 		}

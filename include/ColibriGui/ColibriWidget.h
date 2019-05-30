@@ -515,6 +515,7 @@ namespace Colibri
 		const Ogre::Matrix3& getDerivedOrientation() const;
 		Ogre::Vector2 getDerivedCenter() const;
 
+		/// Does not consider child windows
 		Ogre::Vector2 calculateChildrenSize() const;
 
 		// LayoutCell overrides
