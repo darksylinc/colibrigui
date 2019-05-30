@@ -23,7 +23,7 @@ namespace Colibri
 		/// For smooth scrolling, m_nextScroll contains the scroll destination,
 		/// eventually over time m_currentScroll = m_nextScroll.
 		Ogre::Vector2 m_nextScroll;
-		Ogre::Vector2 m_maxScroll;
+		Ogre::Vector2 m_scrollableArea;
 
 		/// In range [0; m_windowsStart)
 		uint16_t	m_defaultChildWidget;
@@ -74,12 +74,13 @@ namespace Colibri
 		/// Sets the maximum scroll setScrollImmediate/setScrollAnimated can go. 0 to disable scrolling
 		/// The value is in canvas space.
 		void setMaxScroll( const Ogre::Vector2 &maxScroll );
-		/// Calls setMaxScroll by calculating how much scroll is needed based on the current size,
-		/// the clipping borders, and the input scrollable area you want the window to contain
-		void calculateMaxScrollFromScrollableArea( const Ogre::Vector2 &scrollableArea );
 
-		const Ogre::Vector2& getMaxScroll() const						{ return m_maxScroll; }
-		Ogre::Vector2 getScrollableArea() const;
+		/// Calculates how much scroll is needed based on the current size,
+		/// the clipping borders, and the scrollable area
+		Ogre::Vector2 getMaxScroll() const;
+
+		void setScrollableArea( const Ogre::Vector2 &scrollableArea );
+		const Ogre::Vector2& getScrollableArea() const;
 
 		/// Returns true if getMaxScroll() is non-zero in any direction.
 		bool hasScroll() const;

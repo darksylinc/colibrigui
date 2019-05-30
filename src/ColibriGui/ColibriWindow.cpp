@@ -13,7 +13,7 @@ namespace Colibri
 		Renderable( manager ),
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_nextScroll( Ogre::Vector2::ZERO ),
-		m_maxScroll( Ogre::Vector2::ZERO ),
+		m_scrollableArea( Ogre::Vector2::ZERO ),
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
@@ -77,7 +77,8 @@ namespace Colibri
 		m_nextScroll = nextScroll;
 		if( !animateOutOfRange )
 		{
-			m_nextScroll.makeFloor( m_maxScroll );
+			const Ogre::Vector2 maxScroll = getMaxScroll();
+			m_nextScroll.makeFloor( maxScroll );
 			m_nextScroll.makeCeil( Ogre::Vector2::ZERO );
 		}
 	}
@@ -85,7 +86,8 @@ namespace Colibri
 	void Window::setScrollImmediate( const Ogre::Vector2 &scroll )
 	{
 		m_currentScroll = scroll;
-		m_currentScroll.makeFloor( m_maxScroll );
+		const Ogre::Vector2 maxScroll = getMaxScroll();
+		m_currentScroll.makeFloor( maxScroll );
 		m_currentScroll.makeCeil( Ogre::Vector2::ZERO );
 		m_nextScroll = m_currentScroll;
 	}
@@ -93,30 +95,36 @@ namespace Colibri
 	void Window::setMaxScroll( const Ogre::Vector2 &maxScroll )
 	{
 		COLIBRI_ASSERT_LOW( maxScroll.x >= 0 && maxScroll.y >= 0 );
-		m_maxScroll = maxScroll;
+		m_scrollableArea = maxScroll - m_clipBorderBR - m_clipBorderTL + m_size;
 	}
 	//-------------------------------------------------------------------------
-	void Window::calculateMaxScrollFromScrollableArea( const Ogre::Vector2 &scrollableArea )
+	Ogre::Vector2 Window::getMaxScroll() const
 	{
-		Ogre::Vector2 maxScroll = scrollableArea - m_size + m_clipBorderTL + m_clipBorderBR;
+		Ogre::Vector2 maxScroll = m_scrollableArea - m_size + m_clipBorderTL + m_clipBorderBR;
 		maxScroll.makeCeil( Ogre::Vector2::ZERO );
-		setMaxScroll( maxScroll );
+		return maxScroll;
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Window::getScrollableArea() const
+	void Window::setScrollableArea( const Ogre::Vector2 &scrollableArea )
 	{
-		return m_maxScroll + m_size - m_clipBorderTL - m_clipBorderBR;
+		COLIBRI_ASSERT_LOW( m_scrollableArea.x >= 0 && m_scrollableArea.y >= 0 );
+		m_scrollableArea = scrollableArea;
+	}
+	//-------------------------------------------------------------------------
+	const Ogre::Vector2& Window::getScrollableArea() const
+	{
+		return m_scrollableArea;
 	}
 	//-------------------------------------------------------------------------
 	bool Window::hasScroll() const
 	{
-		return m_maxScroll.x > 0 || m_maxScroll.y > 0;
+		const Ogre::Vector2 maxScroll = getMaxScroll();
+		return maxScroll.x > 0 || maxScroll.y > 0;
 	}
 	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()
 	{
-		const Ogre::Vector2 scrollableArea( calculateChildrenSize() );
-		calculateMaxScrollFromScrollableArea( scrollableArea );
+		m_scrollableArea = calculateChildrenSize();
 	}
 	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Window::getCurrentScroll() const
@@ -131,14 +139,16 @@ namespace Colibri
 		TODO_should_flag_transforms_dirty; //??? should we?
 		const Ogre::Vector2 pixelSize = m_manager->getPixelSize();
 
+		const Ogre::Vector2 maxScroll = getMaxScroll();
+
 		if( m_nextScroll.y < 0.0f )
 		{
 			m_nextScroll.y = Ogre::Math::lerp( 0.0f, m_nextScroll.y,
 											   exp2f( -15.0f * timeSinceLast ) );
 		}
-		if( m_nextScroll.y > m_maxScroll.y )
+		if( m_nextScroll.y > maxScroll.y )
 		{
-			m_nextScroll.y = Ogre::Math::lerp( m_maxScroll.y, m_nextScroll.y,
+			m_nextScroll.y = Ogre::Math::lerp( maxScroll.y, m_nextScroll.y,
 											   exp2f( -15.0f * timeSinceLast ) );
 		}
 		if( m_nextScroll.x < 0.0f )
@@ -146,9 +156,9 @@ namespace Colibri
 			m_nextScroll.x = Ogre::Math::lerp( 0.0f, m_nextScroll.x,
 											   exp2f( -15.0f * timeSinceLast ) );
 		}
-		if( m_nextScroll.x > m_maxScroll.x )
+		if( m_nextScroll.x > maxScroll.x )
 		{
-			m_nextScroll.x = Ogre::Math::lerp( m_maxScroll.x, m_nextScroll.x,
+			m_nextScroll.x = Ogre::Math::lerp( maxScroll.x, m_nextScroll.x,
 											   exp2f( -15.0f * timeSinceLast ) );
 		}
 
