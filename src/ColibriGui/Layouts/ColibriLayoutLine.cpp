@@ -149,10 +149,12 @@ namespace Colibri
 			return _a > _b;
 		}
 	};
-	void LayoutLine::layout( bool isRootLayout )
+	void LayoutLine::layout()
 	{
 		if( m_cells.empty() )
 			return;
+
+		syncFromWindowSize();
 
 		const bool bVertical = m_vertical;
 
@@ -163,14 +165,11 @@ namespace Colibri
 		std::vector<size_t> exceededCells;
 		exceededCells.reserve( m_cells.size() );
 
-		const Ogre::Vector2 softMaxSize = m_softMaxSize;
-		const Ogre::Vector2 hardMaxSize = m_hardMaxSize;
-
-		const Ogre::Vector2 layoutMargin = isRootLayout ? (m_margin * 0.5f) : Ogre::Vector2::ZERO;
+		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? (m_margin * 0.5f) : Ogre::Vector2::ZERO;
 
 		//Sum all proportions
 		size_t maxProportion = 0;
-		float minMaxSize = 0;		//Vertical / Horizontal size
+		float sizeToDistribute = 0;		//Vertical / Horizontal size
 		float maxOtherSize = layoutMargin[!m_vertical];	//Horizontal / Vertical size
 														//(opposite axis of minMaxSize)
 		float nonProportionalSize = 0;
@@ -183,13 +182,14 @@ namespace Colibri
 			while( itor != end )
 			{
 				const LayoutCell *cell = *itor;
-				maxProportion += cell->m_proportion[bVertical];
-				minMaxSize += cell->getCellMinSize()[bVertical];
-				const Ogre::Vector2 cellSize = cell->getCellSize();
+				maxProportion	+= cell->m_proportion[bVertical];
+				const Ogre::Vector2 cellMinSize = cell->getCellMinSize();
 				maxOtherSize = Ogre::max( maxOtherSize,
-										  cellSize[!bVertical] + cell->m_margin[!bVertical] );
+										  cellMinSize[!bVertical] + cell->m_margin[!bVertical] );
 				if( !cell->m_proportion[bVertical] )
-					nonProportionalSize += cellSize[bVertical];
+					nonProportionalSize += cellMinSize[bVertical];
+				else
+					sizeToDistribute += cellMinSize[bVertical];
 				accumMarginSize += cell->m_margin[bVertical];
 				++itor;
 			}
@@ -204,56 +204,61 @@ namespace Colibri
 			}
 		}
 
+		Ogre::Vector2 adjWindowBorders( Ogre::Vector2::ZERO );
+		if( m_adjustableWindow )
+			adjWindowBorders = m_adjustableWindow->getBorderCombined();
+
 		//Calculate all cell sizes as if there were no size restrictions
 		const size_t numCells = m_cells.size();
-		const float maxLineSize = std::min( std::max( softMaxSize[bVertical] - accumMarginSize,
-													  minMaxSize ),
-											hardMaxSize[bVertical] );
-		const float sizeToDistribute = Ogre::max( maxLineSize - nonProportionalSize, 0.0f );
+		const Ogre::Vector2 softMaxSize = m_currentSize;
+		const Ogre::Vector2 hardMaxSize = m_hardMaxSize - adjWindowBorders;
+		sizeToDistribute = std::max( softMaxSize[bVertical] - accumMarginSize - nonProportionalSize,
+									 sizeToDistribute );
+		sizeToDistribute = std::min( sizeToDistribute, hardMaxSize[bVertical] - nonProportionalSize );
+		sizeToDistribute = std::max( sizeToDistribute, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
-		maxOtherSize = Ogre::min( Ogre::max( maxOtherSize, softMaxSize[!bVertical] ),
-								  hardMaxSize[!bVertical] );
+		maxOtherSize = Ogre::max( maxOtherSize, softMaxSize[!bVertical] );
+		maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] );
 
-		const float spaceLeftForMargins =
-				fabsf( maxLineSize - std::min( hardMaxSize[bVertical],
-											   (maxLineSize + accumMarginSize) ) );
+		const float spaceLeftForMargins = std::min( hardMaxSize[bVertical] -
+													sizeToDistribute -
+													nonProportionalSize,
+													accumMarginSize );
 		//marginFactor will be in range [0; 1] because
 		//spaceLeftForMargins is in range [0; accumMarginSize]
 		const float marginFactor =
 				accumMarginSize > 1e-6f ? (spaceLeftForMargins / accumMarginSize) : 1.0f;
 
-//		m_size[bVertical] = maxLineSize;
-//		m_size[!bVertical] = maxOtherSize;
-
+		//Now check if there are proportional cells which will
+		//be assigned a size lower than they can shrink
 		for( size_t i=0; i<numCells; ++i )
 		{
 			const LayoutCell *cell = m_cells[i];
 
 			uint16_t proportion = cell->m_proportion[bVertical];
 
-			float cellLineSize;
+			float minCellSize = cell->getCellMinSize()[bVertical];
 			if( proportion > 0 )
-				cellLineSize = proportion * (sizeToDistribute * invMaxProportion);
+			{
+				float cellLineSize = proportion * (sizeToDistribute * invMaxProportion);
+
+				//Push this cell as being able to shrink if needed
+				if( cellLineSize > minCellSize )
+					freeCells.push_back( i );
+				else
+					exceededCells.push_back( i );
+
+				cellSizes[i] = cellLineSize;
+			}
 			else
 			{
-				Ogre::Vector2 cellSize = cell->getCellSize();
-				cellSize.makeCeil( cell->getCellMinSize() );
-				cellLineSize = cellSize[bVertical];
+				cellSizes[i] = minCellSize;
 			}
-
-			float minCellSize = cell->getCellMinSize()[bVertical];
-
-			//Push this cell as being able to shrink if needed
-			if( cellLineSize > minCellSize )
-				freeCells.push_back( i );
-			else
-				exceededCells.push_back( i );
-
-			cellSizes[i] = cellLineSize;
 		}
 
 		if( !exceededCells.empty() )
 		{
+			//Some proportional cells must steal size from other proportional cells
 			bool hasUnresolvedCells = false;
 
 			//Sort by priority, so low priority cells steal from other low priority before the
@@ -319,8 +324,7 @@ namespace Colibri
 			{
 				//We must honour the entire line being <= hardMaxSize
 				//So far we only had cells with m_proportion != 0 in exceededCells since the
-				//ones w/ m_proportion = 0 had been set to max( getCellSize, getMinCellSize ).
-				//They may have shrunk though, since they were in freeCells.
+				//ones w/ m_proportion = 0 had been set to getMinCellSize.
 				//If we are here, both proportional and non-proportional cells can no longer
 				//be shrunk any further (or if they can, their priority is too high)
 				//We need to shrink all cells proportionally to fit inside hardMaxSize
@@ -339,12 +343,18 @@ namespace Colibri
 		if( m_evenMarginSpaceAtEdges && !m_cells.front()->m_expand[bVertical] )
 			accumOffset += m_cells.front()->m_margin[bVertical] * (0.5f * marginFactor);
 
+		const Ogre::Vector2 layoutTopLeft = m_adjustableWindow ? Ogre::Vector2::ZERO : m_topLeft;
+
 		//Now apply sizes and offsets
 		for( size_t i=0; i<numCells; ++i )
 		{
 			LayoutCell *cell = m_cells[i];
 
 			Ogre::Vector2 finalCellSize = cell->getCellSize();
+
+			Ogre::Vector2 hardCellSize;
+			hardCellSize[bVertical]		= cellSizes[i];
+			hardCellSize[!bVertical]	= maxOtherSize;
 
 			if( cell->m_expand[bVertical] )
 			{
@@ -356,15 +366,17 @@ namespace Colibri
 				finalCellSize[bVertical] = std::min( finalCellSize[bVertical], cellSizes[i] );
 			}
 
+			const Ogre::Vector2 cellMinSize = cell->getCellMinSize();
 			if( cell->m_expand[!bVertical] )
 			{
-				const Ogre::Vector2 cellMinSize = cell->getCellMinSize();
 				float otherAvailableSize = maxOtherSize - cellMinSize[!bVertical];
 				otherAvailableSize = Ogre::max( otherAvailableSize, 0.0f );
 
 				finalCellSize[!bVertical] = maxOtherSize - Ogre::min( otherAvailableSize,
 																	  cell->m_margin[!bVertical] );
 			}
+
+			finalCellSize.makeCeil( cellMinSize );
 
 			const Ogre::Vector2 halfMargin = cell->m_margin * (0.5f * marginFactor);
 
@@ -374,25 +386,20 @@ namespace Colibri
 			Ogre::Vector2 topLeft = getTopLeft( bVertical, gridLoc, accumOffset, cellSizes[i],
 												maxOtherSize, finalCellSize, halfMargin );
 
-			cell->setCellOffset( m_topLeft + topLeft + (layoutMargin * 0.5f) );
-			cell->setCellSize( finalCellSize );
+			cell->setCellOffset( layoutTopLeft + topLeft + (layoutMargin * 0.5f) );
+			cell->setCellSize( finalCellSize, hardCellSize );
 
 			accumOffset += cellSizes[i];
 			accumOffset += cell->m_margin[bVertical] * marginFactor;
 		}
 
-		tellChildrenToUpdateLayout( m_cells );
-
+		const Ogre::Vector2 oldSize = m_currentSize;
+		calculateCurrentSize();
+		m_currentSize.makeCeil( oldSize );
 		if( m_adjustableWindow )
-		{
-			Ogre::Vector2 windowSize = this->getCellSize() + layoutMargin;
+			syncToWindowSize();
 
-			m_adjustableWindow->setSizeAfterClipping( windowSize );
-			windowSize = m_adjustableWindow->getSize();
-			windowSize.makeFloor( m_hardMaxSize );
-			m_adjustableWindow->setSize( windowSize );
-			m_adjustableWindow->sizeScrollToFit();
-		}
+		tellChildrenToUpdateLayout( m_cells );
 	}
 	//-------------------------------------------------------------------------
 	void LayoutLine::notifyLayoutUpdated()
@@ -400,7 +407,7 @@ namespace Colibri
 		layout();
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 LayoutLine::getCellSize() const
+	void LayoutLine::calculateCurrentSize()
 	{
 		Ogre::Vector2 maxedVal( Ogre::Vector2::ZERO );
 		Ogre::Vector2 accumVal( Ogre::Vector2::ZERO );
@@ -425,10 +432,9 @@ namespace Colibri
 				accumVal += m_cells.back()->m_margin * 0.5f;
 		}
 
-		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
-							  m_vertical ? accumVal.y : maxedVal.y );
-		retVal.makeFloor( m_hardMaxSize );
-		return retVal;
+		m_currentSize = Ogre::Vector2( m_vertical ? maxedVal.x : accumVal.x,
+									   m_vertical ? accumVal.y : maxedVal.y );
+		m_currentSize.makeFloor( m_hardMaxSize );
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 LayoutLine::getCellMinSize() const
@@ -442,13 +448,14 @@ namespace Colibri
 		while( itor != end )
 		{
 			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize();
-			maxedVal.makeCeil( minCellSize );
-			accumVal += minCellSize;
+			maxedVal.makeCeil( minCellSize + (*itor)->m_margin );
+			accumVal += minCellSize + (*itor)->m_margin;
 			++itor;
 		}
 
 		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
 							  m_vertical ? accumVal.y : maxedVal.y );
+		retVal.makeCeil( m_minSize );
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}

@@ -78,7 +78,7 @@ namespace Demo
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
-		mainWindow->setTransform( Ogre::Vector2( 960, 0 ), Ogre::Vector2( 960, 0 ) );
+		mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 450, 0 ) );
 
 		//When m_breadthFirst is set to true, it can cause significant performance
 		//increases for UI-heavy applications. But be sure you understand it i.e.
@@ -89,30 +89,33 @@ namespace Demo
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
-		button0->setSize( Ogre::Vector2( 350, 64 ) );
+		button0->m_minSize = Ogre::Vector2( 350, 64 );
 		button0->getLabel()->setText( "This is a button" );
+		button0->sizeToFit();
 		layout->addCell( button0 );
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
-		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->getButton()->getLabel()->setText( "This is a checkbox" );
 		layout->addCell( checkbox0 );
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
-		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->setTriState( true );
 		checkbox0->getButton()->getLabel()->setText( "This is a tri-state checkbox" );
+//		checkbox0->sizeToFit();
+//		checkbox0->setSize( checkbox0->getSize() + Ogre::Vector2( 0, 32 ) );
 		layout->addCell( checkbox0 );
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
-		checkbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->getButton()->getLabel()->setText( "This checkbox has the tickmark outside" );
 		checkbox0->setCheckboxMode( Colibri::Checkbox::TickButton );
 		layout->addCell( checkbox0 );
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->m_minSize = Ogre::Vector2( 350, 64 );
 		spinner0->getLabel()->setText( "Options" );
 		{
 			std::vector<std::string> options;
@@ -126,20 +129,20 @@ namespace Demo
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->m_minSize = Ogre::Vector2( 350, 64 );
 		spinner0->getLabel()->setText( "Numeric Spinner" );
 		layout->addCell( spinner0 );
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
 		spinner0->setTopLeft( Ogre::Vector2::ZERO );
-		spinner0->setSize( Ogre::Vector2( 350, 64 ) );
+		spinner0->m_minSize = Ogre::Vector2( 350, 64 );
 		spinner0->setFixedWidth( true, 0 );
 		spinner0->setHorizWidgetDir( Colibri::HorizWidgetDir::AutoRTL );
 		spinner0->getLabel()->setText( "This spinner is on the other side" );
 		layout->addCell( spinner0 );
 
 		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
-		editbox0->setSize( Ogre::Vector2( 350, 64 ) );
+		editbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		editbox0->setText( "You can edit this text" );
 		editbox0->m_expand[0] = true;
 		layout->addCell( editbox0 );
@@ -152,19 +155,19 @@ namespace Demo
 			while( itor != end )
 			{
 				(*itor)->m_margin = 5.0f;
+				(*itor)->m_expand[0] = true;
 
 				++itor;
 			}
 		}
 
-		layout->m_softMaxSize = mainWindow->getSizeAfterClipping();
-		layout->m_adjustableWindow = mainWindow;
-		layout->layout();
+		layout->setAdjustableWindow( mainWindow );
+		layout->m_hardMaxSize = colibriManager->getCanvasSize();
 
 		Colibri::LayoutLine *layoutW = new Colibri::LayoutLine( colibriManager );
+		layoutW->setCellSize( colibriManager->getCanvasSize() );
 		layoutW->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
-		layoutW->addCell( mainWindow );
-		layoutW->m_softMaxSize = colibriManager->getCanvasSize();
+		layoutW->addCell( layout );
 		layoutW->layout();
 #if 0
 		//Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );

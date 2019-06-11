@@ -473,6 +473,7 @@ namespace Colibri
 
 		const Ogre::Vector2& getBorderTopLeft() const		{ return m_clipBorderTL; }
 		const Ogre::Vector2& getBorderBottomRight() const	{ return m_clipBorderBR; }
+		Ogre::Vector2 getBorderCombined() const				{ return m_clipBorderTL + m_clipBorderBR; }
 
 		/// Call this function before calling getDerivedTopLeft & co and it was asserting.
 		/// Do not do it too often as it is not the most efficient solution.

@@ -19,30 +19,28 @@ namespace Colibri
 	protected:
 		ColibriManager	*m_manager;
 
+		/** Current size.
+
+			For the root layout, cells inside this layout are allowed to grow m_currentSize
+			until m_hardMaxSize is reached, but m_currentSize will never shrink.
+
+			A parent layout may shrink m_currentSize of their children until m_minSize is reached
+			if constraints deem this necessary.
+		*/
+		Ogre::Vector2	m_currentSize;
+
+		/** When not null, it will modify the window's client size to fit the objects,
+			and modify its scroll area if m_hardMaxSize was exceeded
+		*/
+		Window * colibrigui_nullable m_adjustableWindow;
+
 		void tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells );
 
+		void syncFromWindowSize();
+		void syncToWindowSize();
+
 	public:
-		/// True to layout all cells as a column
-		/// False to layout all cells as a row
 		Ogre::Vector2	m_topLeft;
-
-		/** Maximum size to distribute the size proportionally. If the all the cells combined
-			are bigger than this size, then this maximum size is enlarged until all objects fit.
-
-			If there are proportional cells, these cells will be enlarged until softMaxSize is full.
-
-			This option is meant for scrolling windows:
-				* m_softMaxSize should be set to the size of the window
-				* If the window is big enough to fit, then all objects are distributed
-				  proportionally to fit the entire window
-				* If the window is too small, then scrolling can be used
-
-			Only the x component is used if bVertical = false, only the y component is used
-			otherwise.
-
-			@see	LayoutBase::m_hardMaxSize
-		*/
-		Ogre::Vector2	m_softMaxSize;
 
 		/** Maximum allowed size. Rows/columns are not allowed to exceed this size.
 
@@ -53,23 +51,24 @@ namespace Colibri
 			widgets can't be rendered correctly and minimum cell sizes won't be respected.
 			The cells simply do not fit the restricted space.
 
-			@see	LayoutBase::m_softMaxSize
+			@see	LayoutBase::m_minSize
 			@see	LayoutCell::m_priority
 			@see	LayoutCell::getCellSize
 			@see	LayoutCell::getCellMinSize
 		*/
 		Ogre::Vector2	m_hardMaxSize;
 
-		/** When not null, it will modify the window's client size to fit the objects,
-			and modify its scroll area if m_hardMaxSize was exceeded
-		*/
-		Window * colibrigui_nullable m_adjustableWindow;
-
 	public:
 		LayoutBase( ColibriManager *colibriManager );
 
+		void setAdjustableWindow( Window * colibrigui_nullable window );
+		Window * colibrigui_nullable getAdjustableWindow() const;
+
 		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;
 		void setCellSize( const Ogre::Vector2 &size ) colibri_final;
+		virtual void setCellSize( const Ogre::Vector2 &size,
+								  const Ogre::Vector2 &hardSize ) colibri_final;
+		virtual Ogre::Vector2 getCellSize() const colibri_override;
 	};
 }
 

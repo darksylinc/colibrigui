@@ -160,6 +160,24 @@ namespace Colibri
 		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
+	void Checkbox::sizeToFit( float maxAllowedWidth,
+							  TextHorizAlignment::TextHorizAlignment newHorizPos,
+							  TextVertAlignment::TextVertAlignment newVertPos,
+							  States::States baseState )
+	{
+		m_button->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
+		const Ogre::Vector2 buttonSize = m_button->getSize();
+
+		Ogre::Vector2 newSize = buttonSize;
+
+		if( m_mode == TickButton )
+			newSize.x = m_tickmarkSize.x + m_tickmarkMargin * 2.0f + buttonSize.x;
+		else
+			newSize.x = (m_tickmarkSize.x + m_tickmarkMargin * 2.0f) * 2.0f + buttonSize.x;
+		newSize.y = std::max( m_tickmarkSize.y, newSize.y );
+		setSize( newSize );
+	}
+	//-------------------------------------------------------------------------
 	void Checkbox::setTransformDirty( uint32_t dirtyReason )
 	{
 		//Only update the tickmark if our size is directly being changed, not our parent's

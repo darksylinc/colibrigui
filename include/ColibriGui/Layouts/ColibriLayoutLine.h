@@ -113,6 +113,8 @@ namespace Colibri
 												const Ogre::Vector2 &finalCellSize,
 												const Ogre::Vector2 &halfMargin );
 
+		void calculateCurrentSize();
+
 	public:
 		LayoutLine( ColibriManager *colibriManager );
 
@@ -125,11 +127,10 @@ namespace Colibri
 			When true, this is the root layout and needs to apply its own margins
 			into its children because no one else will
 		*/
-		void layout( bool isRootLayout=false );
+		void layout();
 
 		virtual void notifyLayoutUpdated() colibri_override;
 
-		virtual Ogre::Vector2 getCellSize() const colibri_override;
 		virtual Ogre::Vector2 getCellMinSize() const colibri_override;
 	};
 }

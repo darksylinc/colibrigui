@@ -81,6 +81,12 @@ namespace Colibri
 
 		uint8_t getMaxValue() const						{ return m_triState ? 2u : 1u; }
 
+		/// @copydoc Label::sizeToFit
+		void sizeToFit( float maxAllowedWidth=std::numeric_limits<float>::max(),
+						TextHorizAlignment::TextHorizAlignment newHorizPos=TextHorizAlignment::Left,
+						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
+						States::States baseState=States::NumStates );
+
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void notifyWidgetAction( Widget *widget, Action::Action action );

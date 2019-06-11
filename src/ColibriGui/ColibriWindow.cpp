@@ -128,7 +128,8 @@ namespace Colibri
 	bool Window::hasScroll() const
 	{
 		const Ogre::Vector2 maxScroll = getMaxScroll();
-		return maxScroll.x > 0 || maxScroll.y > 0;
+		const Ogre::Vector2 &pixelSize = m_manager->getPixelSize();
+		return maxScroll.x >= pixelSize.x * 0.05f || maxScroll.y >= pixelSize.y * 0.05f;
 	}
 	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()

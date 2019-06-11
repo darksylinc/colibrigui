@@ -2,7 +2,7 @@
 
 #pragma once
 
-#if __clang__
+#if __clang__ && !defined( Q_CREATOR_RUN )
 	#define colibrigui_nullable _Nullable
 	#define colibrigui_nonnull _Nonnull
 	#define COLIBRIGUI_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")

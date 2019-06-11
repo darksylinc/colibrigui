@@ -31,7 +31,7 @@ namespace Colibri
 		m_breadthFirst( false ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
-		m_size( manager->getCanvasSize() ),
+		m_size( Ogre::Vector2::ZERO ),
 		m_orientation( Ogre::Matrix3::IDENTITY ),
 		m_derivedTopLeft( Ogre::Vector2::ZERO ),
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
@@ -738,7 +738,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	size_t Widget::getOffsetStartWindowChildren() const
 	{
-		const size_t windowChildrenStart =  m_numNonRenderables + m_numWidgets;
+		const size_t windowChildrenStart = m_numWidgets;
 		COLIBRI_ASSERT_LOW( windowChildrenStart <= m_children.size() );
 		return windowChildrenStart;
 	}
@@ -964,6 +964,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::getCellMinSize() const
 	{
-		return m_size;
+		Ogre::Vector2 retVal( m_minSize );
+		retVal.makeCeil( calculateChildrenSize() );
+		return retVal;
 	}
 }

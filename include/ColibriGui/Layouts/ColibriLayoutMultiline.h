@@ -129,7 +129,6 @@ namespace Colibri
 
 		virtual void notifyLayoutUpdated() colibri_override;
 
-		virtual Ogre::Vector2 getCellSize() const colibri_override;
 		virtual Ogre::Vector2 getCellMinSize() const colibri_override;
 	};
 }

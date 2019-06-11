@@ -26,6 +26,7 @@ namespace Colibri
 	{
 	public:
 		LayoutCell();
+		virtual ~LayoutCell();
 
 		/// The layout system works by proportionally distributing the
 		/// available width and or height to each cell using a weighted blend
@@ -61,6 +62,22 @@ namespace Colibri
 
 		/// When true, the size of the cell will expanded to fit the entire cell.
 		/// Otherwise, it will be equal to the cell size or smaller
+		///
+		/// If this value is false:
+		/// Example when proportion = 0. Final size will be:
+		///		setCellSize( min( max( getMinCellSize(), getCellSize() ), hardLimit ) );
+		/// Example when proportion = 1. Final size will be:
+		///		setCellSize( min( max( getMinCellSize(), proportionalSize ), hardLimit ) );
+		///
+		/// If this value is true:
+		/// Example when proportion = 0. Final size will be:
+		///		setCellSize( min( getMinCellSize(), hardLimit ) );
+		/// Example when proportion = 1. Final size will be:
+		///		setCellSize( min( proportionalSize, hardLimit ) );
+		///
+		/// Basically when m_expand is false, getCellSize() has potentially an influence on
+		/// the final size. When this value is true, getCellSize() is completely ignored and
+		/// only m_proportion, getCellMinSize() and layout restrictions are taken into account.
 		bool		m_expand[2];
 
 		/** When these conditions are met:
@@ -84,13 +101,32 @@ namespace Colibri
 		GridLocations::GridLocations	m_gridLocation;
 
 		/// Empty space between each cell. In virtual canvas units.
+		/// If two cells have the same margin, the distance will be:
+		/// margin/2 - CELL - margin/2 - margin/2 - CELL - margin/2
+		///
+		/// @see	LayoutLine::m_evenMarginSpaceAtEdges
 		Ogre::Vector2	m_margin;
+
+
+		/// See LayoutCell::getCellMinSize
+		///
+		/// This value is here because all derived classes have a need of this variable
+		/// one way or another. However getCellMinSize is pure virtual.
+		///
+		/// Most implementations won't allow the return value of getCellMinSize to be
+		/// smaller than m_minSize
+		Ogre::Vector2	m_minSize;
 
 		virtual void notifyLayoutUpdated() {}
 
 		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) = 0;
 		virtual void setCellSize( const Ogre::Vector2 &size ) = 0;
+		virtual void setCellSize( const Ogre::Vector2 &size, const Ogre::Vector2 &hardSize );
 		virtual Ogre::Vector2 getCellSize() const = 0;
+		/// The min size. A cell should ideally not be shrunk below this size
+		/// Note that this returned value does not include m_margin, however
+		/// margins are often considered by layouts as part of the min size, thus actual
+		/// min size will be getCellMinSize() + m_margin
 		virtual Ogre::Vector2 getCellMinSize() const = 0;
 	};
 
