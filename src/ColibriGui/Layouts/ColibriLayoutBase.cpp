@@ -8,6 +8,7 @@ namespace Colibri
 		m_manager( colibriManager ),
 		m_currentSize( Ogre::Vector2::ZERO ),
 		m_adjustableWindow( 0 ),
+		m_preventScrolling( false ),
 		m_topLeft( Ogre::Vector2::ZERO ),
 		m_hardMaxSize( Ogre::Vector2( std::numeric_limits<float>::max() ) )
 	{

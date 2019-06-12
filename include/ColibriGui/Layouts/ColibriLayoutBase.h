@@ -30,10 +30,15 @@ namespace Colibri
 		Ogre::Vector2	m_currentSize;
 
 		/** When not null, it will modify the window's client size to fit the objects,
-			and modify its scroll area if m_hardMaxSize was exceeded
+			and modify its scroll area if m_hardMaxSize was exceeded unless m_preventScrolling
+			is true.
 		*/
 		Window * colibrigui_nullable m_adjustableWindow;
 
+	public:
+		bool m_preventScrolling;
+
+	protected:
 		void tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells );
 
 		void syncFromWindowSize();

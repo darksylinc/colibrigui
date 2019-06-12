@@ -46,7 +46,7 @@ namespace Colibri
 							States::States baseState )
 	{
 		m_label->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
-		const Ogre::Vector2 maxSize( calculateChildrenSize() );
+		const Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
 		setSize( maxSize );
 	}
 	//-------------------------------------------------------------------------
