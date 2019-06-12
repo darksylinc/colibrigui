@@ -965,7 +965,7 @@ namespace Colibri
 	Ogre::Vector2 Widget::getCellMinSize() const
 	{
 		Ogre::Vector2 retVal( m_minSize );
-		retVal.makeCeil( calculateChildrenSize() );
+		retVal.makeCeil( calculateChildrenSize() + getBorderCombined() );
 		return retVal;
 	}
 }

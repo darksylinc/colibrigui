@@ -209,25 +209,37 @@ namespace Colibri
 			adjWindowBorders = m_adjustableWindow->getBorderCombined();
 
 		//Calculate all cell sizes as if there were no size restrictions
+		const bool canScroll = m_adjustableWindow != 0;
 		const size_t numCells = m_cells.size();
 		const Ogre::Vector2 softMaxSize = m_currentSize;
 		const Ogre::Vector2 hardMaxSize = m_hardMaxSize - adjWindowBorders;
 		sizeToDistribute = std::max( softMaxSize[bVertical] - accumMarginSize - nonProportionalSize,
 									 sizeToDistribute );
-		sizeToDistribute = std::min( sizeToDistribute, hardMaxSize[bVertical] - nonProportionalSize );
+		if( !canScroll )
+		{
+			sizeToDistribute = std::min( sizeToDistribute,
+										 hardMaxSize[bVertical] - nonProportionalSize );
+		}
 		sizeToDistribute = std::max( sizeToDistribute, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
 		maxOtherSize = Ogre::max( maxOtherSize, softMaxSize[!bVertical] );
-		maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] );
+		float nonProportionalFactor = 1.0f;
+		if( !canScroll )
+		{
+			maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] );
+			//If nonProportionalSize is bigger than hardMaxSize, widgets just don't fit.
+			//Make them all proportionally smaller.
+			nonProportionalFactor = std::min( hardMaxSize[bVertical] / nonProportionalSize, 1.0f );
+		}
 
-		const float spaceLeftForMargins = std::min( hardMaxSize[bVertical] -
-													sizeToDistribute -
-													nonProportionalSize,
-													accumMarginSize );
+		const float spaceLeftForMargins = Ogre::Math::Clamp( hardMaxSize[bVertical] -
+															 sizeToDistribute -
+															 nonProportionalSize,
+															 0.0f, accumMarginSize );
 		//marginFactor will be in range [0; 1] because
 		//spaceLeftForMargins is in range [0; accumMarginSize]
 		const float marginFactor =
-				accumMarginSize > 1e-6f ? (spaceLeftForMargins / accumMarginSize) : 1.0f;
+				(!canScroll && accumMarginSize > 1e-6f) ? (spaceLeftForMargins / accumMarginSize) : 1.0f;
 
 		//Now check if there are proportional cells which will
 		//be assigned a size lower than they can shrink
@@ -252,7 +264,7 @@ namespace Colibri
 			}
 			else
 			{
-				cellSizes[i] = minCellSize;
+				cellSizes[i] = minCellSize * nonProportionalFactor;
 			}
 		}
 
@@ -451,6 +463,21 @@ namespace Colibri
 			maxedVal.makeCeil( minCellSize + (*itor)->m_margin );
 			accumVal += minCellSize + (*itor)->m_margin;
 			++itor;
+		}
+
+		if( m_evenMarginSpaceAtEdges && !m_cells.empty() )
+		{
+			if( !m_cells.front()->m_expand[m_vertical] )
+				accumVal += m_cells.front()->m_margin * 0.5f;
+
+			if( !m_cells.back()->m_expand[m_vertical] )
+				accumVal += m_cells.back()->m_margin * 0.5f;
+		}
+
+		if( m_adjustableWindow )
+		{
+			maxedVal += m_adjustableWindow->getBorderCombined();
+			accumVal += m_adjustableWindow->getBorderCombined();
 		}
 
 		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,

@@ -55,6 +55,10 @@ namespace Colibri
 			@see	LayoutCell::m_priority
 			@see	LayoutCell::getCellSize
 			@see	LayoutCell::getCellMinSize
+		@remarks
+			Layouts which have an m_adjustableWindow are considered scrollable, and thus
+			will layout widgets beyond m_hardMaxSize, but the window itself won't get bigger
+			than this size.
 		*/
 		Ogre::Vector2	m_hardMaxSize;
 
