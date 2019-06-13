@@ -247,9 +247,9 @@ namespace Colibri
 		{
 			const LayoutCell *cell = m_cells[i];
 
-			uint16_t proportion = cell->m_proportion[bVertical];
+			const uint16_t proportion = cell->m_proportion[bVertical];
 
-			float minCellSize = cell->getCellMinSize()[bVertical];
+			const float minCellSize = cell->getCellMinSize()[bVertical];
 			if( proportion > 0 )
 			{
 				float cellLineSize = proportion * (sizeToDistribute * invMaxProportion);
