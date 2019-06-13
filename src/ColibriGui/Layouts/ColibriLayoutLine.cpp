@@ -170,10 +170,10 @@ namespace Colibri
 		//Sum all proportions
 		size_t maxProportion = 0;
 		float sizeToDistribute = 0;		//Vertical / Horizontal size
-		float maxOtherSize = layoutMargin[!m_vertical];	//Horizontal / Vertical size
-														//(opposite axis of minMaxSize)
+		float maxOtherSize = layoutMargin[!m_vertical] * 2.0f;	//Horizontal / Vertical size
+																//(opposite axis of minMaxSize)
 		float nonProportionalSize = 0;
-		float accumMarginSize = layoutMargin[m_vertical];
+		float accumMarginSize = layoutMargin[m_vertical] * 2.0f;
 
 		{
 			LayoutCellVec::const_iterator itor = m_cells.begin();
@@ -255,7 +255,7 @@ namespace Colibri
 				float cellLineSize = proportion * (sizeToDistribute * invMaxProportion);
 
 				//Push this cell as being able to shrink if needed
-				if( cellLineSize > minCellSize )
+				if( cellLineSize >= minCellSize )
 					freeCells.push_back( i );
 				else
 					exceededCells.push_back( i );

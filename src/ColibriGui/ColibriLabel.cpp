@@ -1448,6 +1448,8 @@ namespace Colibri
 			m_position.y = m_position.y + oldSize.y - m_size.y;
 			break;
 		}
+
+		m_minSize = m_size;
 	}
 	//-------------------------------------------------------------------------
 	void Label::setTransformDirty( uint32_t dirtyReason )

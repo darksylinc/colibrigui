@@ -519,6 +519,8 @@ namespace Colibri
 		/// Does not consider child windows
 		Ogre::Vector2 calculateChildrenSize() const;
 
+		void setSizeAndCellMinSize( const Ogre::Vector2 &size );
+
 		// LayoutCell overrides
 		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_override;
 		virtual void setCellSize( const Ogre::Vector2 &size ) colibri_override;

@@ -947,6 +947,12 @@ namespace Colibri
 		return maxSize;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setSizeAndCellMinSize( const Ogre::Vector2 &size )
+	{
+		setSize( size );
+		m_minSize = size;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setCellOffset( const Ogre::Vector2 &topLeft )
 	{
 		setTopLeft( topLeft );
