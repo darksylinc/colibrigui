@@ -247,6 +247,8 @@ namespace Colibri
 		if( m_adjustableWindow )
 			adjWindowBorders = m_adjustableWindow->getBorderCombined();
 
+		m_currentSize.makeCeil( m_minSize );
+
 		//Calculate all cell sizes as if there were no size restrictions
 		const bool canScroll = m_adjustableWindow != 0 && !m_preventScrolling;
 		const Ogre::Vector2 softMaxSize = m_currentSize;
