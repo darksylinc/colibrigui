@@ -1,5 +1,4 @@
 
-#if 0
 #include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriWindow.h"
@@ -92,7 +91,9 @@ namespace Colibri
 		Ogre::Vector2 biggestSize( 0.0f );
 
 		{
-			Ogre::Vector2 softMaxSizePerCell = m_softMaxSize / Ogre::Vector2( numColumns, numRows );
+			Ogre::Vector2 softMaxSize = m_currentSize;
+			softMaxSize.makeCeil( m_minSize );
+			Ogre::Vector2 softMaxSizePerCell = softMaxSize / Ogre::Vector2( numColumns, numRows );
 			const Ogre::Vector2 hardMaxSizePerCell = (hardMaxSize - layoutMargin) /
 													 Ogre::Vector2( numColumns, numRows );
 
@@ -103,20 +104,20 @@ namespace Colibri
 			{
 				const LayoutCell *cell = *itor;
 
-				Ogre::Vector2 cellSize = cell->getCellSize() + cell->m_margin;
-				const Ogre::Vector2 cellMinSize = cell->getCellMinSize() + cell->m_margin;
+				Ogre::Vector2 cellMinSize = cell->getCellMinSize() + cell->m_margin;
 
 				softMaxSizePerCell.makeCeil( cellMinSize );
-				cellSize.makeCeil( softMaxSizePerCell );
-				cellSize.makeFloor( hardMaxSizePerCell );
+				cellMinSize.makeCeil( softMaxSizePerCell );
+				cellMinSize.makeFloor( hardMaxSizePerCell );
 
-				biggestSize.makeCeil( cellSize );
+				biggestSize.makeCeil( cellMinSize );
 
 				++itor;
 			}
 		}
 
 		Ogre::Vector2 accumOffset( 0.0f );
+		const Ogre::Vector2 layoutTopLeft = m_adjustableWindow ? Ogre::Vector2::ZERO : m_topLeft;
 
 		//Now apply sizes and offsets
 		for( size_t y=0; y<numRows; ++y )
@@ -137,6 +138,8 @@ namespace Colibri
 				availableSize -= finalMargin;
 
 				Ogre::Vector2 cellSize = biggestSize - finalMargin;
+
+				Ogre::Vector2 hardCellSize = cellSize;
 
 				Ogre::Vector2 finalCellSize = cell->getCellSize();
 
@@ -159,8 +162,8 @@ namespace Colibri
 				const Ogre::Vector2 topLeft = getTopLeft( gridLoc, accumOffset, cellSize,
 														  finalCellSize, halfMargin );
 
-				cell->setCellOffset( m_topLeft + topLeft + (layoutMargin * 0.5f) );
-				cell->setCellSize( finalCellSize );
+				cell->setCellOffset( layoutTopLeft + topLeft + (layoutMargin * 0.5f) );
+				cell->setCellSize( finalCellSize, hardCellSize );
 
 				accumOffset.x += biggestSize.x;
 			}
@@ -169,46 +172,16 @@ namespace Colibri
 			accumOffset.y += biggestSize.y;
 		}
 
-		tellChildrenToUpdateLayout( m_cells );
-
+		m_currentSize = biggestSize * Ogre::Vector2( numColumns, numRows );
 		if( m_adjustableWindow )
-		{
-			Ogre::Vector2 windowSize = this->getCellSize() + layoutMargin;
+			syncToWindowSize();
 
-			m_adjustableWindow->setSizeAfterClipping( windowSize );
-			windowSize = m_adjustableWindow->getSize();
-			windowSize.makeFloor( m_hardMaxSize );
-			m_adjustableWindow->setSize( windowSize );
-			m_adjustableWindow->sizeScrollToFit();
-		}
+		tellChildrenToUpdateLayout( m_cells );
 	}
 	//-------------------------------------------------------------------------
 	void LayoutTableSameSize::notifyLayoutUpdated()
 	{
 		layout();
-	}
-	//-------------------------------------------------------------------------
-	Ogre::Vector2 LayoutTableSameSize::getCellSize() const
-	{
-		Ogre::Vector2 biggestSize( Ogre::Vector2::ZERO );
-
-		LayoutCellVec::const_iterator itor = m_cells.begin();
-		LayoutCellVec::const_iterator end  = m_cells.end();
-
-		while( itor != end )
-		{
-			Ogre::Vector2 minCellSize = (*itor)->getCellSize() + (*itor)->m_margin;
-			biggestSize.makeCeil( minCellSize );
-			++itor;
-		}
-
-		const size_t numColumns	= m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
-		const size_t numRows	= !m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
-
-		biggestSize = biggestSize * Ogre::Vector2( numColumns, numRows );
-
-		biggestSize.makeFloor( m_hardMaxSize );
-		return biggestSize;
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 LayoutTableSameSize::getCellMinSize() const
@@ -220,7 +193,7 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize();
+			Ogre::Vector2 minCellSize = (*itor)->getCellMinSize() + (*itor)->m_margin;
 			biggestSize.makeCeil( minCellSize );
 			++itor;
 		}
@@ -230,8 +203,8 @@ namespace Colibri
 
 		biggestSize = biggestSize * Ogre::Vector2( numColumns, numRows );
 
+		biggestSize.makeCeil( m_minSize );
 		biggestSize.makeFloor( m_hardMaxSize );
 		return biggestSize;
 	}
 }
-#endif

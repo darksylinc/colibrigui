@@ -121,6 +121,8 @@ namespace Colibri
 	public:
 		LayoutMultiline( ColibriManager *colibriManager );
 
+		const LayoutCellVec& getCells() const;
+
 		void addCell( LayoutCell *cell );
 
 		/** Moves and resizes all cells to be layed out as either a row or a column.
