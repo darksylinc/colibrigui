@@ -88,7 +88,7 @@ namespace Colibri
 		/// Calculates & sets the required scrollable area based on the current size of all child
 		/// widgets & windows; and our current size.
 		/// This function will not call sizeToFit on children. You'll likely want to call this last.
-		void sizeScrollToFit();
+		virtual void sizeScrollToFit() colibri_override;
 
 		/// Returns true if it's still updating its scroll and the
 		/// focused widget by the mouse cursor is potentially dirty

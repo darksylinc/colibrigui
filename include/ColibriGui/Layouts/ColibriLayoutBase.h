@@ -33,7 +33,7 @@ namespace Colibri
 			and modify its scroll area if m_hardMaxSize was exceeded unless m_preventScrolling
 			is true.
 		*/
-		Window * colibrigui_nullable m_adjustableWindow;
+		Widget * colibrigui_nullable m_adjustableWindow;
 
 	public:
 		bool m_preventScrolling;
@@ -71,7 +71,7 @@ namespace Colibri
 		LayoutBase( ColibriManager *colibriManager );
 
 		void setAdjustableWindow( Window * colibrigui_nullable window );
-		Window * colibrigui_nullable getAdjustableWindow() const;
+		Widget * colibrigui_nullable getAdjustableWindow() const;
 
 		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;
 		void setCellSize( const Ogre::Vector2 &size ) colibri_final;
