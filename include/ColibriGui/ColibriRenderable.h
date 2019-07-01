@@ -117,9 +117,9 @@ namespace Colibri
 							 Ogre::Vector2 parentDerivedBR,
 							 Ogre::Vector2 invSize );
 
-		virtual void _notifyCanvasChanged();
+		virtual void _notifyCanvasChanged() colibri_override;
 
-		virtual void stateChanged( States::States newState );
+		virtual void stateChanged( States::States newState ) colibri_override;
 
 	public:
 		Renderable( ColibriManager *manager );
@@ -151,7 +151,7 @@ namespace Colibri
 		void _setSkinPack( SkinInfo const * colibrigui_nonnull const * colibrigui_nullable skinInfos );
 
 		virtual void setState( States::States state, bool smartHighlight=true,
-							   bool broadcastEnable=false );
+							   bool broadcastEnable=false ) colibri_override;
 
 		/** Calls setClipBorders and makes the clipping region to match that of the current skin
 
@@ -162,9 +162,10 @@ namespace Colibri
 		void setClipBordersMatchSkin();
 		void setClipBordersMatchSkin( States::States state );
 
-		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
+		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao,
+									  Ogre::VertexArrayObject *textVao ) colibri_final;
 
-		virtual bool isRenderable() const	{ return true; }
+		virtual bool isRenderable() const colibri_final	{ return true; }
 
 		const StateInformation& getStateInformation( States::States state = States::NumStates ) const;
 

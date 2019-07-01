@@ -41,15 +41,15 @@ namespace Colibri
 
 		Window* getParentAsWindow() const;
 
-		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
+		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved ) colibri_override;
 
 	public:
 		Window( ColibriManager *manager );
-		virtual ~Window();
+		virtual ~Window() colibri_override;
 
-		virtual void _initialize();
-		virtual void _destroy();
-		virtual bool isWindow() const	{ return true; }
+		virtual void _initialize() colibri_override;
+		virtual void _destroy() colibri_override;
+		virtual bool isWindow() const colibri_final	{ return true; }
 
 		/** Smoothly scrolls from current location towards input destination.
 		@param nextScroll
@@ -66,7 +66,7 @@ namespace Colibri
 		/// if it's still animating.
 		/// To get the final scroll to achieve once animation finishes, use getNextScroll
 		/// This value may be temporarily outside the range [0; m_maxScroll]
-		virtual const Ogre::Vector2& getCurrentScroll() const;
+		virtual const Ogre::Vector2& getCurrentScroll() const colibri_final;
 		/// Returns the final scroll position. See getCurrentScroll
 		/// This value may be temporarily outside the range [0; m_maxScroll]
 		const Ogre::Vector2& getNextScroll() const						{ return m_nextScroll; }
@@ -97,7 +97,7 @@ namespace Colibri
 		/// See Widget::setWidgetNavigationDirty
 		/// Notifies all of our children widgets are dirty and we need to recalculate them.
 		/// Also inform our parent windows they need to call us for recalculation
-		virtual void setWidgetNavigationDirty();
+		virtual void setWidgetNavigationDirty() colibri_override;
 
 		/// Similar to setWidgetNavigationDirty, but you should call this if this window
 		/// has changed, and we'll inform our parent that it needs to recalculate

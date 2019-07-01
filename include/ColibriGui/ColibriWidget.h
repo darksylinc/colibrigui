@@ -230,7 +230,7 @@ namespace Colibri
 		virtual const Ogre::Vector2& getCurrentScroll() const;
 
 		// WidgetListener overload
-		virtual void notifyWidgetDestroyed( Widget *widget );
+		virtual void notifyWidgetDestroyed( Widget *widget ) colibri_override;
 
 		void addListener( WidgetListener *listener );
 		void removeListener( WidgetListener *listener );
