@@ -449,8 +449,8 @@ namespace Colibri
 		m_currentSize = Ogre::Vector2( m_vertical ? maxedVal.x : accumVal.x,
 									   m_vertical ? accumVal.y : maxedVal.y );
 		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? m_margin : Ogre::Vector2::ZERO;
-		m_currentSize.makeCeil( m_minSize );
 		m_currentSize += layoutMargin;
+		m_currentSize.makeCeil( m_minSize );
 		m_currentSize.makeFloor( m_hardMaxSize );
 	}
 	//-------------------------------------------------------------------------
@@ -488,8 +488,8 @@ namespace Colibri
 		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
 							  m_vertical ? accumVal.y : maxedVal.y );
 		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? m_margin : Ogre::Vector2::ZERO;
-		retVal.makeCeil( m_minSize );
 		retVal += layoutMargin;
+		retVal.makeCeil( m_minSize );
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}

@@ -557,8 +557,8 @@ namespace Colibri
 
 		m_currentSize = Ogre::Vector2( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
 									   m_vertical ? accumVal.y : (maxedVal.y * numLines) );
-		m_currentSize.makeCeil( m_minSize );
 		m_currentSize += layoutMargin;
+		m_currentSize.makeCeil( m_minSize );
 		m_currentSize.makeFloor( m_hardMaxSize );
 	}
 	//-------------------------------------------------------------------------
@@ -631,8 +631,8 @@ namespace Colibri
 
 		Ogre::Vector2 retVal( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
 							  m_vertical ? accumVal.y : (maxedVal.y * numLines) );
-		retVal.makeCeil( m_minSize );
 		retVal += layoutMargin;
+		retVal.makeCeil( m_minSize );
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}
