@@ -165,15 +165,15 @@ namespace Colibri
 		std::vector<size_t> exceededCells;
 		exceededCells.reserve( m_cells.size() );
 
-		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? (m_margin * 0.5f) : Ogre::Vector2::ZERO;
+		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? m_margin : Ogre::Vector2::ZERO;
 
 		//Sum all proportions
 		size_t maxProportion = 0;
 		float sizeToDistribute = 0;		//Vertical / Horizontal size
-		float maxOtherSize = layoutMargin[!m_vertical] * 2.0f;	//Horizontal / Vertical size
-																//(opposite axis of minMaxSize)
+		float maxOtherSize = layoutMargin[!m_vertical];	//Horizontal / Vertical size
+														//(opposite axis of minMaxSize)
 		float nonProportionalSize = 0;
-		float accumMarginSize = layoutMargin[m_vertical] * 2.0f;
+		float accumMarginSize = layoutMargin[m_vertical];
 
 		{
 			LayoutCellVec::const_iterator itor = m_cells.begin();
@@ -213,8 +213,8 @@ namespace Colibri
 		//Calculate all cell sizes as if there were no size restrictions
 		const bool canScroll = m_adjustableWindow != 0 && !m_preventScrolling;
 		const size_t numCells = m_cells.size();
-		const Ogre::Vector2 softMaxSize = m_currentSize;
-		const Ogre::Vector2 hardMaxSize = m_hardMaxSize - adjWindowBorders;
+		const Ogre::Vector2 softMaxSize = m_currentSize - layoutMargin;
+		const Ogre::Vector2 hardMaxSize = m_hardMaxSize - adjWindowBorders - layoutMargin;
 		sizeToDistribute = std::max( softMaxSize[bVertical] - accumMarginSize - nonProportionalSize,
 									 sizeToDistribute );
 		if( !canScroll )
@@ -448,6 +448,9 @@ namespace Colibri
 
 		m_currentSize = Ogre::Vector2( m_vertical ? maxedVal.x : accumVal.x,
 									   m_vertical ? accumVal.y : maxedVal.y );
+		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? m_margin : Ogre::Vector2::ZERO;
+		m_currentSize.makeCeil( m_minSize );
+		m_currentSize += layoutMargin;
 		m_currentSize.makeFloor( m_hardMaxSize );
 	}
 	//-------------------------------------------------------------------------
@@ -484,7 +487,9 @@ namespace Colibri
 
 		Ogre::Vector2 retVal( m_vertical ? maxedVal.x : accumVal.x,
 							  m_vertical ? accumVal.y : maxedVal.y );
+		const Ogre::Vector2 layoutMargin = m_adjustableWindow ? m_margin : Ogre::Vector2::ZERO;
 		retVal.makeCeil( m_minSize );
+		retVal += layoutMargin;
 		retVal.makeFloor( m_hardMaxSize );
 		return retVal;
 	}

@@ -43,8 +43,7 @@ namespace Colibri
 		if( !m_adjustableWindow )
 			return;
 
-		const Ogre::Vector2 layoutMargin = m_margin * 0.5f;
-		Ogre::Vector2 windowSize = m_currentSize + layoutMargin;
+		Ogre::Vector2 windowSize = m_currentSize;
 
 		m_adjustableWindow->setTopLeft( m_topLeft );
 
@@ -55,9 +54,9 @@ namespace Colibri
 		m_adjustableWindow->sizeScrollToFit();
 	}
 	//-------------------------------------------------------------------------
-	void LayoutBase::setAdjustableWindow( Window * colibrigui_nullable window )
+	void LayoutBase::setAdjustableWindow( Widget *widget )
 	{
-		m_adjustableWindow = window;
+		m_adjustableWindow = widget;
 		m_currentSize = m_adjustableWindow->getSize();
 	}
 	//-------------------------------------------------------------------------

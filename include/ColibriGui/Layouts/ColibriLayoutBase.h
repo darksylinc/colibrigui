@@ -70,7 +70,7 @@ namespace Colibri
 	public:
 		LayoutBase( ColibriManager *colibriManager );
 
-		void setAdjustableWindow( Window * colibrigui_nullable window );
+		void setAdjustableWindow( Widget * colibrigui_nullable window );
 		Widget * colibrigui_nullable getAdjustableWindow() const;
 
 		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;

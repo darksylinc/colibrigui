@@ -69,6 +69,11 @@
         "Button"                : "ButtonSkin",
         "Spinner"               : "ButtonSkin",
         "SpinnerBtnDecrement"   : "ButtonSkin",
-        "SpinnerBtnIncrement"   : "ButtonSkin"
+        "SpinnerBtnIncrement"   : "ButtonSkin",
+        "Checkbox"              : "ButtonSkin",
+        "CheckboxTickmarkUnchecked"     : "ButtonSkin",
+        "CheckboxTickmarkChecked"       : "ButtonSkin",
+        "CheckboxTickmarkThirdState"    : "ButtonSkin",
+        "Editbox"               : "ButtonSkin"
     }
 }
