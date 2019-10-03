@@ -65,6 +65,18 @@ namespace Colibri
 		return m_adjustableWindow;
 	}
 	//-------------------------------------------------------------------------
+	void LayoutBase::setMarginToAllCells( const LayoutCellVec &cells, const Ogre::Vector2 &margin )
+	{
+		LayoutCellVec::const_iterator itor = cells.begin();
+		LayoutCellVec::const_iterator endt = cells.end();
+
+		while( itor != endt )
+		{
+			(*itor)->m_margin = margin;
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
 	void LayoutBase::setCellOffset( const Ogre::Vector2 &topLeft )
 	{
 		m_topLeft = topLeft;

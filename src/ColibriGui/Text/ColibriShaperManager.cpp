@@ -540,7 +540,7 @@ namespace Colibri
 			//Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
 			if( m_glyphAtlasBuffer )
 				m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
-			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PF_L8, m_atlasCapacity,
+			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PFG_R8_UNORM, m_atlasCapacity,
 																Ogre::BT_DEFAULT, 0, false );
 			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
 

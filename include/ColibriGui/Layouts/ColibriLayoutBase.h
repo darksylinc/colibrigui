@@ -73,6 +73,9 @@ namespace Colibri
 		void setAdjustableWindow( Widget * colibrigui_nullable window );
 		Widget * colibrigui_nullable getAdjustableWindow() const;
 
+		/// Utility function to batch apply margins to all cells in a list. Not recursive.
+		static void setMarginToAllCells( const LayoutCellVec &cells, const Ogre::Vector2 &margin );
+
 		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;
 		void setCellSize( const Ogre::Vector2 &size ) colibri_final;
 		virtual void setCellSize( const Ogre::Vector2 &size,
