@@ -3,6 +3,8 @@
 #include "ColibriGui/ColibriManager.h"
 
 #include "OgreSceneManager.h"
+#include "Vao/OgreVaoManager.h"
+#include "Vao/OgreVertexArrayObject.h"
 
 namespace Ogre
 {

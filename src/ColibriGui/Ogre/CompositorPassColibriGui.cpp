@@ -38,21 +38,17 @@ namespace Ogre
 
 		profilingBegin();
 
-		CompositorWorkspaceListener *listener = mParentNode->getWorkspace()->getListener();
-		if( listener )
-			listener->passEarlyPreExecute( this );
+		notifyPassEarlyPreExecuteListeners();
 
 		executeResourceTransitions();
 
 		//Fire the listener in case it wants to change anything
-		if( listener )
-			listener->passPreExecute( this );
+		notifyPassPreExecuteListeners();
 
 		m_colibriManager->prepareRenderCommands();
 		m_colibriManager->render();
 
-		if( listener )
-			listener->passPosExecute( this );
+		notifyPassPosExecuteListeners();
 
 		profilingEnd();
 	}

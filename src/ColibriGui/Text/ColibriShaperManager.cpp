@@ -6,6 +6,7 @@
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 
 #include "Vao/OgreTexBufferPacked.h"
+#include "Vao/OgreVaoManager.h"
 
 #include "OgreLwString.h"
 
