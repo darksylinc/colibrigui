@@ -1,11 +1,13 @@
 cmake_minimum_required( VERSION 3.5 )
 
-# Works on Windows
-set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build_result/lib/${CMAKE_BUILD_TYPE}" CACHE
-	PATH "Directory where all the .lib files are dumped." FORCE )
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY
-	"${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}" CACHE
-	PATH "Directory where .exe and .dll files are dumped." FORCE )
+if( NOT COLIBRIGUI_LIB_ONLY )
+	# Works on Windows
+	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build_result/lib/${CMAKE_BUILD_TYPE}" CACHE
+		PATH "Directory where all the .lib files are dumped." FORCE )
+	set( CMAKE_RUNTIME_OUTPUT_DIRECTORY
+		"${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}" CACHE
+		PATH "Directory where .exe and .dll files are dumped." FORCE )
+endif()
 
 # Works on Linux
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" )

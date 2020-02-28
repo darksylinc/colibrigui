@@ -38,7 +38,7 @@
 	#define COLIBRI_ASSERTS_ENABLED
 #endif
 
-#include "debugbreak/debugbreak.h"
+#include "ColibriGui/debugbreak/debugbreak/debugbreak.h"
 
 namespace Colibri
 {

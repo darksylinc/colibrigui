@@ -13,7 +13,7 @@
 cmake_minimum_required( VERSION 3.3 )
 project( ColibriGui )
 
-if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
+if( ${CMAKE_VERSION} VERSION_GREATER 3.9 AND NOT COLIBRIGUI_LIB_ONLY )
 	# We need to do this first, as OGRE.cmake will add another FindDoxygen.cmake file
 	# which is older than the system-provided one.
 	find_package(	Doxygen
@@ -21,14 +21,25 @@ if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
 					OPTIONAL_COMPONENTS mscgen dia )
 endif()
 
-set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
+if( NOT COLIBRIGUI_LIB_ONLY )
+	set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
 
-include( CMake/Bootstrap.cmake )
-include( CMake/Dependencies/OGRE.cmake )
+	include( CMake/Bootstrap.cmake )
+	include( CMake/Dependencies/OGRE.cmake )
+else()
+	include( CMake/Bootstrap.cmake )
+endif()
 
 add_subdirectory( Dependencies )
 
-setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES )
+if( NOT COLIBRIGUI_LIB_ONLY )
+	setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES )
+else()
+	include_directories( "${OGRE_SOURCE}/OgreMain/include" )
+	include_directories( "${OGRE_BINARIES}/include" )
+	include_directories( "${OGRE_SOURCE}/Components/Hlms/Common/include" )
+	include_directories( "${OGRE_SOURCE}/Components/Hlms/Unlit/include" )
+endif()
 
 # Setup our application
 include_directories( "./include" )
@@ -43,15 +54,24 @@ if( MSVC90 )
 	include_directories( "./Dependencies/MSVC_Fix" )
 endif()
 
-add_recursive( ./src SOURCES )
-add_recursive( ./include HEADERS )
+if( NOT COLIBRIGUI_LIB_ONLY )
+	add_recursive( ./src SOURCES )
+	add_recursive( ./include HEADERS )
+else()
+	add_recursive( ./src/ColibriGui SOURCES )
+	add_recursive( ./include/ColibriGui HEADERS )
+endif()
 
 if( APPLE )
 	file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
 	set( RESOURCES ${RESOURCES} ./Data/Resources.cfg ./bin/Data )
 endif()
 
-add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
+if( NOT COLIBRIGUI_LIB_ONLY )
+	add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
+else()
+	add_library( ${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS} )
+endif()
 
 target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} )
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
