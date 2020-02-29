@@ -60,7 +60,12 @@ namespace Colibri
 		for( size_t i=0; i<States::NumStates; ++i )
 			m_stateInformation[i].materialName = ColibriManager::c_defaultTextDatablockNames[i];
 
-		setDatablock( manager->getDefaultTextDatablock()[States::Idle] );
+		Ogre::HlmsDatablock *datablock = manager->getDefaultTextDatablock()[States::Idle];
+		COLIBRI_ASSERT_MEDIUM(
+			datablock &&
+			"getDefaultTextDatablock returned false. Please call setOgre first, and ensure the "
+			"ShaperManager (fonts) has already been properly initialized" );
+		setDatablock( datablock );
 	}
 	//-------------------------------------------------------------------------
 	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
