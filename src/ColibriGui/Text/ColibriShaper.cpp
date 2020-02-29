@@ -284,7 +284,9 @@ namespace Colibri
 				}
 			}
 
-			if( i < glyphCount && glyphInfo[i].codepoint != 0 )
+			// Newlines are codepoint == 0
+			// if( i < glyphCount && glyphInfo[i].codepoint != 0 )
+			if( i < glyphCount )
 			{
 				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
 																		  glyphInfo[i].codepoint,
