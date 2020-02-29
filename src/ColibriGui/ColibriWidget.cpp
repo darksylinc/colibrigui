@@ -62,6 +62,9 @@ namespace Colibri
 		//Remove ourselves from being our parent's child
 		WidgetVec::iterator itor = std::find( m_children.begin(), m_children.end(),
 											  childWidgetBeingRemoved );
+
+		COLIBRI_ASSERT_MEDIUM( itor != m_children.end() || m_destructionStarted );
+
 		if( itor != m_children.end() )
 		{
 			//It may not be found if we're also in destruction phase
@@ -82,8 +85,6 @@ namespace Colibri
 				--m_numWidgets;
 			}
 		}
-
-		COLIBRI_ASSERT_MEDIUM( itor != m_children.end() || m_destructionStarted );
 
 		return retVal;
 	}
