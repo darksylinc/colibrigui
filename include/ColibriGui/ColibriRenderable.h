@@ -159,6 +159,18 @@ namespace Colibri
 
 		void setSkinPack( Ogre::IdString skinPackName );
 
+		/** Override's the skin's border size and then calls setClipBordersMatchSkin
+		@param borderSize
+			The size of all 4 borders
+		@param forState
+			The state to use, use special value States::NumStates to apply for all states
+		@param bClipBordersMatchSkin
+			When false, we don't call setClipBordersMatchSkin
+		*/
+		void setBorderSize( float borderSize[colibrigui_nonnull Borders::NumBorders],
+							States::States forState = States::NumStates,
+							bool bClipBordersMatchSkin = true );
+
 		/** Directly set the skins via pointers instead of requiring map lookups.
 		@param skinInfo
 			Must not be null.

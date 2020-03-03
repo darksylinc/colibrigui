@@ -457,6 +457,8 @@ namespace Colibri
 			These parameters call are likely going to be overwritten by
 			Renderable::setClipBordersMatchSkin every time the virtual function Widget::setState
 			is called
+
+			@see Renderable::setBorderSize
 		@param clipBorders
 		*/
 		void setClipBorders( float clipBorders[colibrigui_nonnull Borders::NumBorders] );
