@@ -167,7 +167,7 @@ namespace Colibri
 		@param bClipBordersMatchSkin
 			When false, we don't call setClipBordersMatchSkin
 		*/
-		void setBorderSize( float borderSize[colibrigui_nonnull Borders::NumBorders],
+		void setBorderSize( const float borderSize[colibrigui_nonnull Borders::NumBorders],
 							States::States forState = States::NumStates,
 							bool bClipBordersMatchSkin = true );
 

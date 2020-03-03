@@ -109,7 +109,7 @@ namespace Colibri
 		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::setBorderSize( float borderSize[colibrigui_nonnull Borders::NumBorders],
+	void Renderable::setBorderSize( const float borderSize[colibrigui_nonnull Borders::NumBorders],
 									States::States forState, bool bClipBordersMatchSkin )
 	{
 		if( forState == States::NumStates )
