@@ -84,6 +84,10 @@ namespace Colibri
 
 	/**
 	@class Renderable
+		Renderables are visible. They're actually useful since they can be used to render 2D images
+		instead of common widgets such as buttons or edit boxes.
+
+	@remarks
 		Renderable must derive from Ogre::ColibriOgreRenderable (or encapsulated class)
 		We can only share Vaos & Vertex Buffers, which will be owned by Window.
 	*/
@@ -138,7 +142,20 @@ namespace Colibri
 		void setVisualsEnabled( bool bEnabled );
 		virtual bool isVisualsEnabled() const colibri_final;
 
-		void setSkin( Ogre::IdString skinName, States::States forState );
+		/** Sets an individual skin (not a pack!) to be used during a specifc state
+
+			A skin pack is instead a collection of different skins, one for each state.
+			To set a pack use setSkinPack.
+
+			The main reason to use this function is if you intend to draw UI images, rather
+			than buttons or other widgets (e.g. you need to set a particular image, which
+			doesn't have disabled/highlighted states), since packs are more suitable for widgets
+		@param skinName
+			Name of the skin to use, i.e. m_manager->getSkinManager()->getSkins().find( skinName )
+		@param forState
+			The state to use, use special value States::NumStates to set this skin to all states
+		*/
+		void setSkin( Ogre::IdString skinName, States::States forState = States::NumStates );
 
 		void setSkinPack( Ogre::IdString skinPackName );
 
