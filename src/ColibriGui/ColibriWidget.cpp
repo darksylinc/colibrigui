@@ -908,6 +908,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	ColibriManager *Widget::getManager() { return m_manager; }
+	//-------------------------------------------------------------------------
 	const Ogre::Vector2& Widget::getDerivedTopLeft() const
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_transformOutOfDate );

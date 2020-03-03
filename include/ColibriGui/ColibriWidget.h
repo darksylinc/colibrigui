@@ -506,6 +506,8 @@ namespace Colibri
 
 		virtual void _notifyCanvasChanged();
 
+		ColibriManager *getManager();
+
 		/**
 		@remarks
 			Do not assume derived top left <= derived bottom right.
