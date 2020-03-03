@@ -7,6 +7,8 @@
             "tex_resolution" : ["width", "height"],
             "grid_uv" :
             {
+                "Comment0" : "grid_uv specifies the source. i.e. divide the source texture in a 3x3 grid and set the UVs for each tile",
+
                 "all" : ["top", "left", "width", "height"],
                 "enclosing" : [["top", "left", "width", "height"], ["border_x", "border_y"]],
                 "enclosing" : [["top", "left", "width", "height"], ["border_left_x", "border_top_y"], ["border_right_x", "border_bottom_y"] ],
@@ -15,6 +17,7 @@
             },
             "borders" :
             {
+                "Comment0" : "The default size of borders during display: Widgets may be resized, but their borders will always be this same size (unless changed explicitly via setClipBorders)",
 
                 "all" : ["size", "repeat_size"],
                 "left" : ["size", "repeat_size"],
