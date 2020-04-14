@@ -203,7 +203,8 @@ namespace Colibri
 	{
 		const size_t idx = Widget::notifyParentChildIsDestroyed( childWidgetBeingRemoved );
 
-		if( m_defaultChildWidget >= idx )
+		//If removing the child at index 0, keep the default as 0 rather than trying to subtract it.
+		if( m_defaultChildWidget >= idx && m_defaultChildWidget != 0 )
 			--m_defaultChildWidget;
 
 		return idx;

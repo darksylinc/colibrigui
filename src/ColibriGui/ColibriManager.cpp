@@ -702,6 +702,8 @@ namespace Colibri
 	{
 		if( widget == m_cursorFocusedPair.widget )
 			m_cursorFocusedPair.widget = 0;
+		if( widget == m_keyboardFocusedPair.widget )
+			m_keyboardFocusedPair.widget = 0;
 
 		if( widget->isWindow() )
 		{
