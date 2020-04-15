@@ -707,8 +707,9 @@ namespace Colibri
 		if( widget == m_keyboardFocusedPair.widget )
 			m_keyboardFocusedPair.widget = 0;
 
-		//If a widget was created and destroyed before update was called, there would still be some entries for that widget's labels in the dirty labels list.
-		//When update is later called it would read invalid pointers. Calling this here prevents that.
+		// If a widget was created and destroyed before update was called, there would still be some
+		// entries for that widget's labels in the dirty labels list. When update is later called it
+		// would read invalid pointers. Calling this here prevents that.
 		_updateDirtyLabels();
 
 		//Make sure this widget is not in the dirtyWidgets list.
