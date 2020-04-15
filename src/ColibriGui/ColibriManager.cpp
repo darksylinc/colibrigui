@@ -678,6 +678,8 @@ namespace Colibri
 	{
 		if( window == m_cursorFocusedPair.window )
 			m_cursorFocusedPair = FocusPair();
+		if( window == m_keyboardFocusedPair.window )
+			m_keyboardFocusedPair = FocusPair();
 
 		if( !window->m_parent )
 		{
@@ -704,6 +706,17 @@ namespace Colibri
 			m_cursorFocusedPair.widget = 0;
 		if( widget == m_keyboardFocusedPair.widget )
 			m_keyboardFocusedPair.widget = 0;
+
+		//If a widget was created and destroyed before update was called, there would still be some entries for that widget's labels in the dirty labels list.
+		//When update is later called it would read invalid pointers. Calling this here prevents that.
+		_updateDirtyLabels();
+
+		//Make sure this widget is not in the dirtyWidgets list.
+		WidgetVec::iterator itor = std::find( m_dirtyWidgets.begin(), m_dirtyWidgets.end(), widget );
+		if( itor != m_dirtyWidgets.end() )
+		{
+			m_dirtyWidgets.erase( itor );
+		}
 
 		if( widget->isWindow() )
 		{
