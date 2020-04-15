@@ -678,6 +678,8 @@ namespace Colibri
 	{
 		if( window == m_cursorFocusedPair.window )
 			m_cursorFocusedPair = FocusPair();
+		if( window == m_keyboardFocusedPair.window )
+			m_keyboardFocusedPair = FocusPair();
 
 		if( !window->m_parent )
 		{
