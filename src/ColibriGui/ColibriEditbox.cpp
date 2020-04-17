@@ -168,6 +168,8 @@ namespace Colibri
 				std::string result;
 				uStr.toUTF8String( result );
 				m_label->setText( result );
+
+				m_manager->_updateDirtyLabels();
 			}
 
 			showCaret();
