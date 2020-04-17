@@ -484,8 +484,14 @@ namespace Colibri
 		/// See ColibriManager::setTextEdit
 		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
 
-		/// See ColibriManager::setTextSpecialKeyPressed
-		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod );
+		/** See ColibriManager::setTextSpecialKeyPressed
+		@param repetition
+			Number of times we should repeat this key (i.e. to simulate a button being held down
+			during low framerates)
+
+			This value must be > 0
+		*/
+		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition );
 
 		/// See ColibriManager::setTextInput
 		virtual void _setTextInput( const char *text );

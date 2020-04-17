@@ -588,7 +588,7 @@ namespace Colibri
 	void ColibriManager::setTextSpecialKeyPressed( uint32_t keyCode, uint16_t keyMod )
 	{
 		if( m_keyboardFocusedPair.widget )
-			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode, keyMod );
+			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode, keyMod, 1u );
 		if( m_keyDirDown != Borders::NumBorders )
 			setKeyDirectionReleased( m_keyDirDown );
 		m_keyTextInputDown	= keyCode;
@@ -1138,13 +1138,18 @@ namespace Colibri
 
 		if( m_keyTextInputDown )
 		{
+			size_t repetition = 0u;
 			while( m_keyRepeatWaitTimer >= m_keyRepeatDelay )
 			{
-				m_keyboardFocusedPair.widget->_setTextSpecialKey( m_keyTextInputDown,
-																  m_keyModInputDown );
+				++repetition;
 				m_keyRepeatWaitTimer -= m_timeDelayPerKeyStroke;
 			}
 
+			if( repetition > 0u )
+			{
+				m_keyboardFocusedPair.widget->_setTextSpecialKey( m_keyTextInputDown, m_keyModInputDown,
+																  repetition );
+			}
 			m_keyRepeatWaitTimer += timeSinceLast;
 		}
 

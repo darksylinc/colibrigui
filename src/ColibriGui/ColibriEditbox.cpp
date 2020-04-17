@@ -137,8 +137,10 @@ namespace Colibri
 		TODO_text_edit;
 	}
 	//------------------------------------------------------------------------
-	void Editbox::_setTextSpecialKey( uint32_t keyCode, uint16_t keyMod )
+	void Editbox::_setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition )
 	{
+		COLIBRI_ASSERT_LOW( repetition > 0u );
+
 		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
 		{
 			bool isAtLimit = (keyCode == KeyCode::Backspace && m_cursorPos == 0) ||
@@ -149,18 +151,35 @@ namespace Colibri
 				const std::string &oldText = m_label->getText();
 				UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 
+				uint32_t lastCursorPosToDelete = m_cursorPos;
 				if( keyCode == KeyCode::Backspace )
 				{
-					//Set the new cursor position
-					m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
+					for( size_t i = 0u; i < repetition; ++i )
+					{
+						// Set the new cursor position
+						m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
+						if( i == 0u )
+							lastCursorPosToDelete = m_cursorPos;
+					}
+				}
+				else
+				{
+					for( size_t i = 0u; i < repetition - 1u; ++i )
+					{
+						lastCursorPosToDelete =
+							m_label->advanceGlyphToNextCluster( lastCursorPosToDelete );
+					}
 				}
 
-				size_t glyphStart;
-				size_t glyphLength;
-				m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
+				size_t firstGlyphStart, firstGlyphLength;
+				size_t lastGlyphStart, lastGlyphLength;
+				m_label->getGlyphStartUtf16( m_cursorPos, firstGlyphStart, firstGlyphLength );
+				m_label->getGlyphStartUtf16( lastCursorPosToDelete, lastGlyphStart, lastGlyphLength );
+
+				size_t glyphLength = lastGlyphStart + lastGlyphLength - firstGlyphStart;
 				if( glyphLength > 0 )
 				{
-					uStr.remove( static_cast<int32_t>( glyphStart ),
+					uStr.remove( static_cast<int32_t>( firstGlyphStart ),
 								 static_cast<int32_t>( glyphLength ) );
 				}
 
@@ -182,13 +201,23 @@ namespace Colibri
 			m_cursorPos = static_cast<uint32_t>( m_label->getGlyphCount() );
 			showCaret();
 		}
-		else if( keyCode == KeyCode::Tab )
+		else if( keyCode == KeyCode::Tab || keyCode == KeyCode::Enter )
 		{
-			_setTextInput( "\t" );
-		}
-		else if( keyCode == KeyCode::Enter )
-		{
-			_setTextInput( "\n" );
+			const size_t c_maxRepetition = 512u;
+			char inBuffer[c_maxRepetition + 1u];
+			size_t maxRepetition = std::min( c_maxRepetition, repetition );
+			if( keyCode == KeyCode::Tab )
+			{
+				for( size_t i = 0u; i < maxRepetition; ++i )
+					inBuffer[i] = '\t';
+			}
+			else if( keyCode == KeyCode::Enter )
+			{
+				for( size_t i = 0u; i < maxRepetition; ++i )
+					inBuffer[i] = '\n';
+			}
+			inBuffer[maxRepetition] = '\0';
+			_setTextInput( inBuffer );
 		}
 		else if( keyCode == 'c' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
 		{
@@ -200,7 +229,10 @@ namespace Colibri
 			ColibriListener *colibriListener = m_manager->getColibriListener();
 			char *clipboardText = 0;
 			if( colibriListener->getClipboardText( &clipboardText ) )
-				_setTextInput( clipboardText );
+			{
+				for( size_t i = 0u; i < repetition; ++i )
+					_setTextInput( clipboardText );
+			}
 		}
 	}
 	//-------------------------------------------------------------------------

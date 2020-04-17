@@ -867,7 +867,7 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
-	void Widget::_setTextSpecialKey( uint32_t keyCode, uint16_t keyMod )
+	void Widget::_setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition )
 	{
 	}
 	//-------------------------------------------------------------------------
