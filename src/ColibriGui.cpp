@@ -38,6 +38,16 @@
     #include "shlobj.h"
 #endif
 
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE || OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
+    #include "OSX/macUtils.h"
+        #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
+    #include "System/iOS/iOSUtils.h"
+    #else
+        #include "System/OSX/OSXUtils.h"
+    #endif
+#endif
+
+
 #define TODO_fix_leak
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -177,6 +187,13 @@ namespace Demo
 					hlmsColibri->setTextureBufferDefaultSize( 512 * 1024 );
 				}
 			}
+
+            #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+                //Now setup is complete enough to allow permanent addition of the /Data/ path.
+                //Ideally this would have been there from the beginning,
+                //but this is difficult with reading in specific resources2.cfg files.
+                mResourcePath += "/Data/";
+            #endif
 		}
 
         virtual void setupResources(void)
@@ -207,12 +224,18 @@ namespace Demo
 				}
 			};
 
+            Ogre::String dataPath;
+            #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+                dataPath = mResourcePath + "/Data/";
+            #else
+                dataPath = "../Data/";
+            #endif
 			ShaperSettings shaperSettings[3] =
 			{
-				ShaperSettings( "en", "../Data/Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
-				ShaperSettings( "ar", "../Data/Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
+				ShaperSettings( "en", "Fonts/DejaVuSerif.ttf", HB_SCRIPT_LATIN, true ),
+				ShaperSettings( "ar", "Fonts/amiri-0.104/amiri-regular.ttf", HB_SCRIPT_ARABIC, false,
 				Colibri::HorizReadingDir::RTL ),
-				ShaperSettings( "ch", "../Data/Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
+				ShaperSettings( "ch", "Fonts/fireflysung-1.3.0/fireflysung.ttf", HB_SCRIPT_HAN, false,
 				Colibri::HorizReadingDir::LTR, true )
 			};
 
@@ -223,7 +246,8 @@ namespace Demo
 			for( size_t i=0; i<sizeof( shaperSettings ) / sizeof( shaperSettings[0] ); ++i )
 			{
 				Colibri::Shaper *shaper;
-				shaper = shaperManager->addShaper( shaperSettings[i].script, shaperSettings[i].fullpath,
+                const Ogre::String fullPath = dataPath + shaperSettings[i].fullpath;
+				shaper = shaperManager->addShaper( shaperSettings[i].script, fullPath.c_str(),
 												   shaperSettings[i].locale );
 				if( shaperSettings[i].useKerning )
 					shaper->addFeatures( Colibri::Shaper::KerningOn );
@@ -263,7 +287,14 @@ namespace Demo
         ColibriGuiGraphicsSystem( GameState *gameState ) :
             GraphicsSystem( gameState )
         {
-            mResourcePath = "../Data/";
+            #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+                //mResourcePath = Ogre::macBundlePath() + "/Contents/Resources/Data/";
+                //This can't be /Data/ for some of the early setup.
+                //This is changed after that setup.
+                mResourcePath = Ogre::macBundlePath() + "/Contents/Resources/";
+            #else
+                mResourcePath = "../Data/";
+            #endif
 			mAlwaysAskForConfig = false;
 
             //It's recommended that you set this path to:
@@ -337,11 +368,11 @@ namespace Demo
                 }
             }
 #elif OGRE_PLATFORM == OGRE_PLATFORM_APPLE || OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
-            mWriteAccessFolder = macCachePath() + "/ColibriGui/";
+            mWriteAccessFolder = Ogre::macCachePath() + "/ColibriGui/";
             //Create "pathToCache/ColibriGui"
-            mWriteAccessFolder += "/ColibriGui/";
-            result = mkdir( mWriteAccessFolder.c_str(), S_IRWXU|S_IRWXG );
-            errorReason = errno;
+            //mWriteAccessFolder += "/ColibriGui/";
+            int result = mkdir( mWriteAccessFolder.c_str(), S_IRWXU|S_IRWXG );
+            int errorReason = errno;
 
             if( result && errorReason != EEXIST )
             {
