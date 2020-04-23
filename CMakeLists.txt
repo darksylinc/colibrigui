@@ -115,14 +115,6 @@ if( APPLE )
 	#set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework QuartzCore -framework UIKit -framework Metal -framework MetalKit -framework ModelIO" )
 	#set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework IOKit -framework CoreAudio -framework QuartzCore -framework Metal -framework MetalKit -framework ModelIO" )
 	set( CMAKE_EXE_LINKER_FLAGS "
-		-framework AudioToolbox
-		-framework CoreAudio
-		-framework CoreVideo
-		-framework CoreFoundation
-		-framework Carbon
-		-framework Cocoa
-		-framework IOKit
-		-framework ForceFeedback
 		-framework QuartzCore
 		-framework Metal
 		-framework OpenGL
