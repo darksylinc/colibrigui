@@ -3,10 +3,14 @@
 # In Windows you built Ogre into Dependencies/Ogre/build
 # In Linux you built Release into Dependencies/Ogre/build/Release
 # In Linux you built Debug into Dependencies/Ogre/build/Debug
+# In MacOS you did the same as Linux, and didn't build Ogre as frameworks.
 #
 # If your source code is not at "Dependencies/Ogre"; you can use "mklink /D" to create
 # a symbolic link to where the source code is located on Windows.
 # On Linux, you can use "ln -s"
+
+#If you get errors finding doxygen, i.e 'Could NOT find Doxygen (missing: dot)', you need to install graphviz, as well as doxygen
+#apt install graphviz, brew install graphviz
 
 #set( CMAKE_TOOLCHAIN_FILE CMake/iOS.cmake )
 
@@ -55,20 +59,43 @@ if( MSVC90 )
 endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )
-	add_recursive( ./src SOURCES )
-	add_recursive( ./include HEADERS )
+	#add_recursive( ./src SOURCES )
+	#add_recursive( ./include HEADERS )
+
+	#add_recursive( ./src/OgreCommon/System/OSX/*.mm SOURCES )
+
+	#add_recursive would have added all .mm files, including the ios ones. We need to be able to set specifics.
+	file(GLOB_RECURSE SOURCES "src/*.cpp")
+	file(GLOB_RECURSE HEADERS "include/*.h")
+	if( APPLE )
+		file(GLOB_RECURSE MMSOURCES "src/OgreCommon/System/OSX/*.mm")
+	endif()
+
 else()
 	add_recursive( ./src/ColibriGui SOURCES )
 	add_recursive( ./include/ColibriGui HEADERS )
 endif()
 
 if( APPLE )
-	file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
-	set( RESOURCES ${RESOURCES} ./Data/Resources.cfg ./bin/Data )
+	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
+	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+	set(CMAKE_CXX_FLAGS "-x objective-c++")
+
+	#Set the pluginFolder path in the plugins.cfg file.
+	#Make a copy of the original one so it can be edited.
+	execute_process(COMMAND "cp" "${OGRE_BINARIES}/bin/plugins.cfg" "/tmp/plugins.cfg")
+	execute_process(COMMAND bash -c "/usr/bin/sed -i '' 's#PluginFolder=#PluginFolder=${OGRE_BINARIES}/lib/macosx/${CMAKE_BUILD_TYPE}/#g' /tmp/plugins.cfg")
+
+	#file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
+	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resourcesMac/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/")
 endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )
-	add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
+	if( APPLE )
+		add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${MMSOURCES} ${RESOURCES} )
+	else()
+		add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
+	endif()
 else()
 	add_library( ${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS} )
 endif()
@@ -83,9 +110,25 @@ endif()
 if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO" )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES RESOURCE "${RESOURCES}" )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/Info.plist )
+	set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/src/OgreCommon/System/OSX/Resources/Info.plist )
 	#set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_ICON_FILE SampleBrowser_OSX.icns)
-	set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework QuartzCore -framework UIKit -framework Metal -framework MetalKit -framework ModelIO" )
+	#set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework QuartzCore -framework UIKit -framework Metal -framework MetalKit -framework ModelIO" )
+	#set( CMAKE_EXE_LINKER_FLAGS "-framework Foundation -framework CoreGraphics -framework IOKit -framework CoreAudio -framework QuartzCore -framework Metal -framework MetalKit -framework ModelIO" )
+	set( CMAKE_EXE_LINKER_FLAGS "
+		-framework AudioToolbox
+		-framework CoreAudio
+		-framework CoreVideo
+		-framework CoreFoundation
+		-framework Carbon
+		-framework Cocoa
+		-framework IOKit
+		-framework ForceFeedback
+		-framework QuartzCore
+		-framework Metal
+		-framework OpenGL
+	")
+
+
 endif()
 
 if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
