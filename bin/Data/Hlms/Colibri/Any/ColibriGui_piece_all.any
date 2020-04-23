@@ -5,11 +5,6 @@
 		float2 uvText @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
 		NO_INTERPOLATION_PREFIX uint glyphOffsetStart	NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
 		NO_INTERPOLATION_PREFIX uint pixelsPerRow		NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
-
-		float gl_ClipDistance0;
-		float gl_ClipDistance1;
-		float gl_ClipDistance2;
-		float gl_ClipDistance3;
 	@end
 @end
 

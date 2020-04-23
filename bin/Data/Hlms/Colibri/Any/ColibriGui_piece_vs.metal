@@ -9,15 +9,6 @@
 	@end
 @end
 
-@property( colibri_text == 0 )
-	@piece( custom_VStoPS )
-		float gl_ClipDistance0;
-		float gl_ClipDistance1;
-		float gl_ClipDistance2;
-		float gl_ClipDistance3;
-	@end
-@end
-
 @piece( custom_vs_uniformDeclaration )
 	, uint gl_VertexID	[[vertex_id]]
 @end
@@ -31,10 +22,10 @@
 
 	#define worldViewProj 1.0f
 
-	outVs.gl_ClipDistance0 = input.normal.x;
-	outVs.gl_ClipDistance1 = input.normal.y;
-	outVs.gl_ClipDistance2 = input.normal.z;
-	outVs.gl_ClipDistance3 = input.normal.w;
+	outVs.gl_ClipDistance0[0] = input.normal.x;
+	outVs.gl_ClipDistance0[1] = input.normal.y;
+	outVs.gl_ClipDistance0[2] = input.normal.z;
+	outVs.gl_ClipDistance0[3] = input.normal.w;
 
 	@property( colibri_text )
 		uint vertId = (uint(gl_VertexID) - worldMaterialIdx[drawId].w) % 6u;
