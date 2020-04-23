@@ -22,10 +22,10 @@
 
 	#define worldViewProj 1.0f
 
-	outVs.gl_ClipDistance0[0] = input.normal.x;
-	outVs.gl_ClipDistance0[1] = input.normal.y;
-	outVs.gl_ClipDistance0[2] = input.normal.z;
-	outVs.gl_ClipDistance0[3] = input.normal.w;
+	outVs.gl_ClipDistance[0] = input.normal.x;
+	outVs.gl_ClipDistance[1] = input.normal.y;
+	outVs.gl_ClipDistance[2] = input.normal.z;
+	outVs.gl_ClipDistance[3] = input.normal.w;
 
 	@property( colibri_text )
 		uint vertId = (uint(gl_VertexID) - worldMaterialIdx[drawId].w) % 6u;
