@@ -96,8 +96,10 @@ namespace Colibri
 	protected:
 		StateInformation m_stateInformation[States::NumStates];
 
+	public:
 		Ogre::ColourValue	m_colour;
 
+	protected:
 		/// WARNING: Most of the code assumes m_numVertices is hardcoded to 6*9;
 		/// this value is dynamic because certain widgets (such as Labels) can
 		/// have arbitrary number of vertices and the rest of the code

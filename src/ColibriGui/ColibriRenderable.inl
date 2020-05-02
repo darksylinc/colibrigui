@@ -145,7 +145,8 @@ namespace Colibri
 
 		if( m_visualsEnabled )
 		{
-			m_currVertexBufferOffset = vertexBuffer - m_manager->_getVertexBufferBase();
+			m_currVertexBufferOffset =
+				static_cast<uint32_t>( vertexBuffer - m_manager->_getVertexBufferBase() );
 
 			uint8_t rgbaColour[4];
 			rgbaColour[0] = static_cast<uint8_t>( m_colour.r * 255.0f + 0.5f );
