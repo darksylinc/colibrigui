@@ -26,6 +26,9 @@
                 "bottom" : ["size", "repeat_size"]
             },
 
+            "Comment1" : "colour can either have 3 or 4 elements (RGB vs RGBA)",
+            "colour" : [1.0, 1.0, 1.0, 1.0],
+
             "copy_from" : "other skin name that must've been defined first (i.e. before this skin)!"
         }
     },

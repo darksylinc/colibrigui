@@ -25,6 +25,7 @@ namespace Colibri
 		float			borderSize[Borders::NumBorders];
 		float			borderRepeatSize[Borders::NumBorders]; /// 0 or negative means disable repeat
 		float			centerAspectRatio;
+		Ogre::ColourValue defaultColour;
 		Ogre::IdString	materialName;
 	};
 
@@ -96,8 +97,8 @@ namespace Colibri
 	protected:
 		StateInformation m_stateInformation[States::NumStates];
 
-	public:
-		Ogre::ColourValue	m_colour;
+		bool              m_overrideSkinColour;
+		Ogre::ColourValue m_colour;
 
 	protected:
 		/// WARNING: Most of the code assumes m_numVertices is hardcoded to 6*9;
@@ -143,6 +144,22 @@ namespace Colibri
 		*/
 		void setVisualsEnabled( bool bEnabled );
 		virtual bool isVisualsEnabled() const colibri_final;
+
+		/** Sets a custom colour
+		@param overrideSkinColour
+			When false, we ignore 'colour' argument and reset back to using the skin's default
+
+			When true, we always use the set 'colour', regardless of current state.
+			Each state may have its own skin colour, hence this overrides all of them
+		@param colour
+			The colour to use.
+			Ignored if overrideSkinColour = false
+		*/
+		void setColour( bool overrideSkinColour, const Ogre::ColourValue &colour );
+
+		const Ogre::ColourValue &getColour() const;
+
+		bool getOverrideSkinColour() const;
 
 		/** Sets an individual skin (not a pack!) to be used during a specifc state
 

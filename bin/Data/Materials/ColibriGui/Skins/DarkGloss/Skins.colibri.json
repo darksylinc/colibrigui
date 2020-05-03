@@ -127,7 +127,8 @@
         {
             "material" : "ProgressBarLayerProgress",
             "tex_resolution" : [128, 64],
-            "grid_uv" : { "center" : [0, 0, 128, 64] }
+            "grid_uv" : { "center" : [0, 0, 128, 64] },
+            "colour" : [0.2, 0.7, 0.0]
         },
         "ProgressbarLayer1" :
         {

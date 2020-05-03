@@ -29,6 +29,7 @@ namespace Colibri
 		ColibriOgreRenderable( Ogre::Id::generateNewId<Ogre::ColibriOgreRenderable>(),
 							   manager->getOgreObjectMemoryManager(),
 							   manager->getOgreSceneManager(), 0u, manager ),
+		m_overrideSkinColour( false ),
 		m_colour( Ogre::ColourValue::White ),
 		m_numVertices( 6u * 9u ),
 		m_currVertexBufferOffset( 0 ),
@@ -58,6 +59,19 @@ namespace Colibri
 		return m_visualsEnabled;
 	}
 	//-------------------------------------------------------------------------
+	void Renderable::setColour( bool overrideSkinColour, const Ogre::ColourValue &colour )
+	{
+		m_overrideSkinColour = overrideSkinColour;
+		if( overrideSkinColour )
+			m_colour = colour;
+		else
+			m_colour = m_stateInformation[m_currentState].defaultColour;
+	}
+	//-------------------------------------------------------------------------
+	const Ogre::ColourValue &Renderable::getColour() const { return m_colour; }
+	//-------------------------------------------------------------------------
+	bool Renderable::getOverrideSkinColour() const { return m_overrideSkinColour; }
+	//-------------------------------------------------------------------------
 	void Renderable::setSkin( Ogre::IdString skinName, States::States forState )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();
@@ -80,6 +94,9 @@ namespace Colibri
 			}
 		}
 
+		if( !m_overrideSkinColour )
+			m_colour = m_stateInformation[m_currentState].defaultColour;
+
 		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
@@ -100,6 +117,9 @@ namespace Colibri
 				}
 			}
 		}
+
+		if( !m_overrideSkinColour )
+			m_colour = m_stateInformation[m_currentState].defaultColour;
 
 		setClipBordersMatchSkin();
 	}
@@ -138,12 +158,18 @@ namespace Colibri
 			}
 		}
 
+		if( !m_overrideSkinColour )
+			m_colour = m_stateInformation[m_currentState].defaultColour;
+
 		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
 	void Renderable::setState( States::States state, bool smartHighlight, bool broadcastEnable )
 	{
 		Widget::setState( state, smartHighlight, broadcastEnable );
+
+		if( !m_overrideSkinColour )
+			m_colour = m_stateInformation[m_currentState].defaultColour;
 
 		if( mHlmsDatablock->getName() != m_stateInformation[m_currentState].materialName )
 			setDatablock( m_stateInformation[m_currentState].materialName );

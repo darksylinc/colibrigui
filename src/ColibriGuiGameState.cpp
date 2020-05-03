@@ -151,14 +151,13 @@ namespace Demo
 		progressBar0 = colibriManager->createWidget<Colibri::Progressbar>( mainWindow );
 		progressBar0->m_minSize = Ogre::Vector2( 350, 64 );
 		progressBar0->setProgress( 0.75f );
-		progressBar0->getProgressLayer()->m_colour = Ogre::ColourValue( 0.2f, 0.7f, 0.0f );
 		layout->addCell( progressBar0 );
 
 		progressBar1 = colibriManager->createWidget<Colibri::Progressbar>( mainWindow );
 		progressBar1->m_minSize = Ogre::Vector2( 350, 64 );
 		progressBar1->setProgress( 0.75f );
 		progressBar1->setVertical( true );
-		progressBar1->getProgressLayer()->m_colour = Ogre::ColourValue( 0.0f, 0.7f, 0.2f );
+		progressBar1->getProgressLayer()->setColour( true, Ogre::ColourValue( 0.0f, 0.7f, 0.2f ) );
 		layout->addCell( progressBar1 );
 
 		{

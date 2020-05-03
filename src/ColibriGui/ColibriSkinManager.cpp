@@ -164,6 +164,7 @@ namespace Colibri
 				skinInfo.stateInfo.uvTopLeftBottomRight[GridLocations::Center] =
 						Ogre::Vector4( 0, 0, 1, 1 );
 				skinInfo.stateInfo.centerAspectRatio = 1.0f;
+				skinInfo.stateInfo.defaultColour = Ogre::ColourValue::White;
 
 				const rapidjson::Value &skinValue = itor->value;
 
@@ -352,6 +353,23 @@ namespace Colibri
 							skinInfo.stateInfo.borderSize[i] = borderSizeRepeat.x;
 							skinInfo.stateInfo.borderRepeatSize[i] = borderSizeRepeat.y;
 						}
+					}
+				}
+
+				itTmp = skinValue.FindMember( "colour" );
+				if( itTmp != skinValue.MemberEnd() &&  //
+					itTmp->value.IsArray() &&
+					( itTmp->value.Size() == 3u || itTmp->value.Size() == 4u ) &&
+					itTmp->value[0].IsDouble() &&  //
+					itTmp->value[1].IsDouble() &&  //
+					itTmp->value[2].IsDouble() &&
+					( itTmp->value.Size() == 3u || itTmp->value[3].IsDouble() ) )
+				{
+					const size_t numElements = itTmp->value.Size();
+					for( size_t i = 0u; i < numElements; ++i )
+					{
+						skinInfo.stateInfo.defaultColour[i] =
+							static_cast<float>( itTmp->value[i].GetDouble() );
 					}
 				}
 
