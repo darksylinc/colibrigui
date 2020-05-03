@@ -74,12 +74,20 @@ namespace Colibri
 		m_cursorPos = std::numeric_limits<uint32_t>::max();
 	}
 	//-------------------------------------------------------------------------
-	void Editbox::setState( States::States state, bool smartHighlight,
-							bool broadcastEnable )
+	void Editbox::setState( States::States state, bool smartHighlight, bool broadcastEnable )
 	{
 		const bool wasActive = requiresActiveUpdate();
 
 		Renderable::setState( state, smartHighlight, broadcastEnable );
+
+		// Widget::setState did not re-enable children we control. Do it manually
+		if( !broadcastEnable )
+		{
+			if( m_caret->isDisabled() )
+				m_caret->setState( state, smartHighlight, false );
+			if( m_label->isDisabled() )
+				m_label->setState( state, smartHighlight, false );
+		}
 
 		const bool isActive = requiresActiveUpdate();
 

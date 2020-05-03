@@ -59,6 +59,24 @@ namespace Colibri
 	class Widget;
 	class Window;
 
+	namespace LogSeverity
+	{
+		enum LogSeverity
+		{
+			/// Fatal error found and cannot continue, or severe error detected,
+			/// attempting to continue could quite certainly cause corruption, crashes.
+			/// This is for very bad things, like double frees detected, dangling pointers,
+			/// divisions by zero, integer/buffer overflow, inconsistent state, etc.
+			Fatal,
+			/// Severe error, but not as severe as fatal. However it's not
+			/// impossible that corruption / crashes could happen.
+			Error,
+			/// Wrong usage detected; or a recoverable error.
+			Warning,
+			Info
+		};
+	}
+
 	namespace Action
 	{
 		enum Action
@@ -352,6 +370,8 @@ namespace Colibri
 			CheckboxTickmarkChecked,
 			CheckboxTickmarkThirdState,
 			Editbox,
+			ProgressbarLayer0,
+			ProgressbarLayer1,
 			NumSkinWidgetTypes
 		};
 	}

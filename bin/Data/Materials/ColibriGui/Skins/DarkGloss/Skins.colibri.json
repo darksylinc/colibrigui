@@ -4,7 +4,7 @@
         "Button_idle" :
         {
             "material" : "Atlas",
-            "tex_resolution" : [256, 512],
+            "tex_resolution" : [512, 512],
             "grid_uv" :
             {
                 "enclosing" : [[0, 0, 256, 128], [4, 4]]
@@ -50,7 +50,7 @@
         "Background" :
         {
             "material" : "Atlas",
-            "tex_resolution" : [256, 512],
+            "tex_resolution" : [512, 512],
             "grid_uv" :
             {
                 "enclosing" : [[0, 384, 128, 128], [2, 20], [2, 2]]
@@ -65,7 +65,7 @@
         "SpinnerBtnDecrement_idle" :
         {
             "material" : "AtlasTransparent",
-            "tex_resolution" : [256, 512],
+            "tex_resolution" : [512, 512],
             "grid_uv" : { "center" : [160, 416, 64, 32] }
         },
         "SpinnerBtnDecrement_disabled" :
@@ -87,7 +87,7 @@
         "SpinnerBtnIncrement_idle" :
         {
             "material" : "AtlasTransparent",
-            "tex_resolution" : [256, 512],
+            "tex_resolution" : [512, 512],
             "grid_uv" : { "center" : [160, 384, 64, 32] }
         },
         "SpinnerBtnIncrement_disabled" :
@@ -109,7 +109,7 @@
         "CheckboxTickmarkUnchecked" :
         {
             "material" : "Atlas",
-            "tex_resolution" : [256, 512],
+            "tex_resolution" : [512, 512],
             "grid_uv" : { "center" : [128, 384, 32, 32] }
         },
         "CheckboxTickmarkChecked" :
@@ -121,6 +121,26 @@
         {
             "copy_from" : "CheckboxTickmarkUnchecked",
             "grid_uv" : { "center" : [128, 448, 32, 32] }
+        },
+
+        "ProgressbarLayer0" :
+        {
+            "material" : "ProgressBarLayerProgress",
+            "tex_resolution" : [128, 64],
+            "grid_uv" : { "center" : [0, 0, 128, 64] }
+        },
+        "ProgressbarLayer1" :
+        {
+            "material" : "AtlasTransparent",
+            "tex_resolution" : [512, 512],
+            "grid_uv" :
+            {
+                "enclosing" : [[256, 0, 256, 128], [20, 20]]
+            },
+            "borders" :
+            {
+                "all" : [5, 10]
+            }
         }
     },
 
@@ -158,6 +178,15 @@
         "CheckboxTickmarkThirdState" :
         {
             "all" : "CheckboxTickmarkThirdState"
+        },
+        "ProgressbarLayer0" :
+        {
+            "all" : "ProgressbarLayer0",
+            "progress_bar_type" : "behind_glass"
+        },
+        "ProgressbarLayer1" :
+        {
+            "all" : "ProgressbarLayer1"
         }
     },
 
@@ -172,6 +201,8 @@
         "CheckboxTickmarkUnchecked"     : "CheckboxTickmarkUnchecked",
         "CheckboxTickmarkChecked"       : "CheckboxTickmarkChecked",
         "CheckboxTickmarkThirdState"    : "CheckboxTickmarkThirdState",
-        "Editbox"               : "Button"
+        "Editbox"               : "Button",
+        "ProgressbarLayer0"     : "ProgressbarLayer0",
+        "ProgressbarLayer1"     : "ProgressbarLayer1"
     }
 }

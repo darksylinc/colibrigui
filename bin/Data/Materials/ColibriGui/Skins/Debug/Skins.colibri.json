@@ -74,6 +74,8 @@
         "CheckboxTickmarkUnchecked"     : "ButtonSkin",
         "CheckboxTickmarkChecked"       : "ButtonSkin",
         "CheckboxTickmarkThirdState"    : "ButtonSkin",
-        "Editbox"               : "ButtonSkin"
+        "Editbox"               : "ButtonSkin",
+        "ProgressbarLayer0"     : "ButtonSkin",
+        "ProgressbarLayer1"     : "ButtonSkin"
     }
 }

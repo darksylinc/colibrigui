@@ -24,3 +24,7 @@ hlms AtlasBrighterTransparent unlit
 	scene_blend alpha_blend
 	diffuse_map Atlas.png
 }
+hlms ProgressBarLayerProgress unlit
+{
+	diffuse_map ProgressBar_l0.png
+}

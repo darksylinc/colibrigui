@@ -86,20 +86,15 @@ namespace Colibri
 	void Renderable::setSkinPack( Ogre::IdString skinName )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();
-		const SkinInfoMap &skins = skinManager->getSkins();
-		const SkinPackMap &skinPacks = skinManager->getSkinPacks();
-
-		SkinPackMap::const_iterator itor = skinPacks.find( skinName );
-		if( itor != skinPacks.end() )
+		const SkinPack *pack = skinManager->findSkinPack( skinName );
+		if( pack )
 		{
-			const SkinPack &pack = itor->second;
-
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 			{
-				SkinInfoMap::const_iterator itSkinInfo = skins.find( pack.skinInfo[i] );
-				if( itSkinInfo != skins.end() )
+				const SkinInfo *skin = skinManager->findSkin( *pack, static_cast<States::States>( i ) );
+				if( skin )
 				{
-					m_stateInformation[i] = itSkinInfo->second.stateInfo;
+					m_stateInformation[i] = skin->stateInfo;
 					if( i == m_currentState )
 						setDatablock( m_stateInformation[i].materialName );
 				}

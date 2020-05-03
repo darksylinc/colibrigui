@@ -31,6 +31,7 @@
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriSpinner.h"
+#include "ColibriGui/ColibriProgressbar.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
@@ -48,6 +49,8 @@ namespace Demo
 	Colibri::Spinner *spinner0 = 0;
 	Colibri::Checkbox *checkbox0 = 0;
 	Colibri::Editbox *editbox0 = 0;
+	Colibri::Progressbar *progressBar0 = 0;
+	Colibri::Progressbar *progressBar1 = 0;
 
     ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -144,6 +147,19 @@ namespace Demo
 		editbox0->setText( "You can edit this text" );
 		editbox0->m_expand[0] = true;
 		layout->addCell( editbox0 );
+
+		progressBar0 = colibriManager->createWidget<Colibri::Progressbar>( mainWindow );
+		progressBar0->m_minSize = Ogre::Vector2( 350, 64 );
+		progressBar0->setProgress( 0.75f );
+		progressBar0->getProgressLayer()->m_colour = Ogre::ColourValue( 0.2f, 0.7f, 0.0f );
+		layout->addCell( progressBar0 );
+
+		progressBar1 = colibriManager->createWidget<Colibri::Progressbar>( mainWindow );
+		progressBar1->m_minSize = Ogre::Vector2( 350, 64 );
+		progressBar1->setProgress( 0.75f );
+		progressBar1->setVertical( true );
+		progressBar1->getProgressLayer()->m_colour = Ogre::ColourValue( 0.0f, 0.7f, 0.2f );
+		layout->addCell( progressBar1 );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();

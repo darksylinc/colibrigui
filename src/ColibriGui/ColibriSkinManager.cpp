@@ -2,6 +2,8 @@
 #include "ColibriGui/ColibriSkinManager.h"
 #include "ColibriGui/ColibriManager.h"
 
+#include "ColibriGui/ColibriProgressbar.h"
+
 #include "OgreLwString.h"
 #include "rapidjson/document.h"
 
@@ -382,6 +384,8 @@ namespace Colibri
 			{
 				SkinPack skinPack;
 
+				skinPack.progressBarType = 0u;
+
 				skinPack.name = itor->name.GetString();
 				const rapidjson::Value &skinValue = itor->value;
 
@@ -393,6 +397,16 @@ namespace Colibri
 					skinPack.skinInfo[0] = itTmp->value.GetString();
 					for( size_t i=1u; i<States::NumStates; ++i )
 						skinPack.skinInfo[i] = skinPack.skinInfo[0];
+				}
+
+				itTmp = skinValue.FindMember( "progress_bar_type" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsString() )
+				{
+					Ogre::LwConstString progressBarType(
+						Ogre::LwString::FromUnsafeCStr( itTmp->value.GetString() ) );
+
+					if( progressBarType == "behind_glass" )
+						skinPack.progressBarType = Progressbar::BehindGlass;
 				}
 
 				const char *states[States::NumStates] =
@@ -458,7 +472,9 @@ namespace Colibri
 			"CheckboxTickmarkUnchecked",
 			"CheckboxTickmarkChecked",
 			"CheckboxTickmarkThirdState",
-			"Editbox"
+			"Editbox",
+			"ProgressbarLayer0",
+			"ProgressbarLayer1"
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];
@@ -478,6 +494,53 @@ namespace Colibri
 		m_colibriManager->setDefaultSkins( defaultSkins );
 	}
 	//-------------------------------------------------------------------------
+	SkinPack const *colibrigui_nullable
+	SkinManager::findSkinPack( Ogre::IdString name, LogSeverity::LogSeverity logSeverity ) const
+	{
+		SkinPack const *retVal = 0;
+
+		SkinPackMap::const_iterator itor = m_skinPacks.find( name );
+		if( itor == m_skinPacks.end() )
+		{
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+			errorMsg.a( "[SkinManager::findSkinPack] Skin pack '", name.getFriendlyText().c_str(),
+						"' not found!" );
+			m_colibriManager->getLogListener()->log( errorMsg.c_str(), logSeverity );
+		}
+		else
+		{
+			retVal = &itor->second;
+		}
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	SkinInfo const *colibrigui_nullable SkinManager::findSkin(
+		const SkinPack &pack, States::States state, LogSeverity::LogSeverity logSeverity ) const
+	{
+		SkinInfo const *retVal = 0;
+
+		SkinInfoMap::const_iterator itor;
+		itor = m_skins.find( pack.skinInfo[States::Disabled] );
+		if( itor == m_skins.end() )
+		{
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+			errorMsg.a( "[SkinManager::findSkin] Skin '", pack.skinInfo[state].getFriendlyText().c_str(),
+						"' not found from pack '", pack.name.c_str(), "'" );
+			m_colibriManager->getLogListener()->log( errorMsg.c_str(), logSeverity );
+		}
+		else
+		{
+			retVal = &itor->second;
+		}
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
 	void SkinManager::loadSkins( const char *fullPath )
 	{
 		LogListener *log = m_colibriManager->getLogListener();
@@ -495,14 +558,14 @@ namespace Colibri
 		}
 
 		inFile.seekg( 0, std::ios_base::end );
-		const size_t fileSize = inFile.tellg();
+		const size_t fileSize = static_cast<size_t>( inFile.tellg() );
 		inFile.seekg( 0, std::ios_base::beg );
 
 		if( fileSize > 0 )
 		{
 			std::vector<char> fileData;
 			fileData.resize( fileSize + 1u );
-			inFile.read( &fileData[0], fileSize );
+			inFile.read( &fileData[0], static_cast<std::ifstream::streampos>( fileSize ) );
 			fileData[fileSize] = '\0'; //Add null terminator
 
 			std::string filename = fullPath;

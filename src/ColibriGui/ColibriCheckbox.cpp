@@ -60,6 +60,20 @@ namespace Colibri
 		m_button = 0;
 	}
 	//-------------------------------------------------------------------------
+	void Checkbox::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	{
+		Widget::setState( state, smartHighlight, broadcastEnable );
+
+		// Widget::setState did not re-enable children we control. Do it manually
+		if( !broadcastEnable )
+		{
+			if( m_button->isDisabled() )
+				m_button->setState( state, smartHighlight, false );
+			if( m_tickmark->isDisabled() )
+				m_tickmark->setState( state, smartHighlight, false );
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Checkbox::setSkinPack( Ogre::IdString skinPackName )
 	{
 		m_button->setSkinPack( skinPackName );

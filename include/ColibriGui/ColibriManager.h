@@ -9,30 +9,14 @@ namespace Colibri
 {
 	typedef std::vector<Label*> LabelVec;
 
-	namespace LogSeverity
-	{
-		enum LogSeverity
-		{
-			/// Fatal error found and cannot continue, or severe error detected,
-			/// attempting to continue could quite certainly cause corruption, crashes.
-			/// This is for very bad things, like double frees detected, dangling pointers,
-			/// divisions by zero, integer/buffer overflow, inconsistent state, etc.
-			Fatal,
-			/// Severe error, but not as severe as fatal. However it's not
-			/// impossible that corruption / crashes could happen.
-			Error,
-			/// Wrong usage detected; or a recoverable error.
-			Warning,
-			Info
-		};
-	}
-
 	/**
 	@class LogListener
 	*/
 	class LogListener
 	{
 	public:
+		virtual ~LogListener();
+
 		virtual void log( const char *text, Colibri::LogSeverity::LogSeverity severity ) {}
 	};
 
@@ -42,6 +26,8 @@ namespace Colibri
 	class ColibriListener
 	{
 	public:
+		virtual ~ColibriListener();
+
 		/** See SDL_SetClipboardText. We just send a null-terminated UTF8 string
 		@param text
 		*/
@@ -151,6 +137,7 @@ namespace Colibri
 
 		SkinInfo const * colibrigui_nullable
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
+		uint8_t m_defaultProgressBarType;
 
 		UiVertex		*m_vertexBufferBase;
 		GlyphVertex		*m_textVertexBufferBase;
@@ -200,6 +187,7 @@ namespace Colibri
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
 		Ogre::HlmsDatablock * colibrigui_nonnull * colibrigui_nullable getDefaultTextDatablock()
 																	{ return m_defaultTextDatablock; }
+		Ogre::HlmsManager *getOgreHlmsManager();
 
 		/// When true, swaps the controls for RTL languages such as arabic. That means spinners
 		/// increment when clicking left button, for example
@@ -232,6 +220,8 @@ namespace Colibri
 							  [colibrigui_nonnull SkinWidgetTypes::NumSkinWidgetTypes] );
 		SkinInfo const * colibrigui_nonnull const * colibrigui_nullable
 				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
+
+		uint8_t getDefaultProgressBarType() const;
 
 		/// This pointers can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock * colibrigui_nullable getDefaultTextDatablock( States::States state ) const;

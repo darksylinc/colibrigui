@@ -54,6 +54,9 @@ namespace Colibri
 		virtual void _initialize();
 		virtual void _destroy();
 
+		virtual void setState( States::States state, bool smartHighlight=true,
+							   bool broadcastEnable=false );
+
 		Button* getButton()								{ return m_button; }
 
 		void setSkinPack( Ogre::IdString skinPackName );

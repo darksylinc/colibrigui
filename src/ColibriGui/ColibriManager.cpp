@@ -69,6 +69,7 @@ namespace Colibri
 		m_defaultArrowSize( 15.0f, 15.0f ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 ),
+		m_defaultProgressBarType( 0u ),
 		m_vertexBufferBase( 0 ),
 		m_textVertexBufferBase( 0 )
 	#if COLIBRIGUI_DEBUG_MEDIUM
@@ -198,6 +199,11 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	Ogre::HlmsManager *ColibriManager::getOgreHlmsManager()
+	{
+		return m_root->getHlmsManager();
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::setSwapRTLControls( bool swapRtl )
 	{
 		m_swapRTLControls = swapRtl;
@@ -241,7 +247,7 @@ namespace Colibri
 		const SkinInfoMap &skins = m_skinManager->getSkins();
 		const SkinPackMap &skinPacks = m_skinManager->getSkinPacks();
 
-		for( size_t widgetType=0; widgetType<SkinWidgetTypes::NumSkinWidgetTypes; ++widgetType )
+		for( size_t widgetType=0u; widgetType<SkinWidgetTypes::NumSkinWidgetTypes; ++widgetType )
 		{
 			const std::string &skinName = defaultSkinPacks[widgetType];
 
@@ -261,6 +267,15 @@ namespace Colibri
 				}
 			}
 		}
+
+		const std::string &skinName = defaultSkinPacks[SkinWidgetTypes::ProgressbarLayer0];
+
+		if( !skinName.empty() )
+		{
+			SkinPackMap::const_iterator itor = skinPacks.find( skinName );
+			if( itor != skinPacks.end() )
+				m_defaultProgressBarType = itor->second.progressBarType;
+		}
 	}
 	//-------------------------------------------------------------------------
 	SkinInfo const * colibrigui_nonnull const * colibrigui_nullable ColibriManager::getDefaultSkin(
@@ -268,6 +283,8 @@ namespace Colibri
 	{
 		return m_defaultSkins[widgetType];
 	}
+	//-------------------------------------------------------------------------
+	uint8_t ColibriManager::getDefaultProgressBarType() const { return m_defaultProgressBarType; }
 	//-------------------------------------------------------------------------
 	Ogre::HlmsDatablock * colibrigui_nullable
 	ColibriManager::getDefaultTextDatablock( States::States state ) const
@@ -1346,4 +1363,10 @@ namespace Colibri
 		m_renderingStarted = false;
 #endif
 	}
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
+	LogListener::~LogListener() {}
+	//-------------------------------------------------------------------------
+	ColibriListener::~ColibriListener() {}
 }
