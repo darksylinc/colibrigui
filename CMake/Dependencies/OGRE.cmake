@@ -144,7 +144,7 @@ function( setupResourceFileFromTemplate )
 	message( STATUS "Generating ${CMAKE_SOURCE_DIR}/bin/Data/resources2.cfg from template
 		${CMAKE_SOURCE_DIR}/CMake/Templates/Resources.cfg.in" )
 	if( APPLE )
-		set( OGRE_MEDIA_DIR "" )
+		set( OGRE_MEDIA_DIR "Contents/Resources/" )
 	else()
 		set( OGRE_MEDIA_DIR "../" )
 	endif()

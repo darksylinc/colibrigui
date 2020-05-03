@@ -246,7 +246,7 @@ namespace Demo
 			for( size_t i=0; i<sizeof( shaperSettings ) / sizeof( shaperSettings[0] ); ++i )
 			{
 				Colibri::Shaper *shaper;
-                const Ogre::String fullPath = dataPath + shaperSettings[i].fullpath;
+				const Ogre::String fullPath = dataPath + shaperSettings[i].fullpath;
 				shaper = shaperManager->addShaper( shaperSettings[i].script, fullPath.c_str(),
 												   shaperSettings[i].locale );
 				if( shaperSettings[i].useKerning )

@@ -9,7 +9,8 @@
 # a symbolic link to where the source code is located on Windows.
 # On Linux, you can use "ln -s"
 
-#If you get errors finding doxygen, i.e 'Could NOT find Doxygen (missing: dot)', you need to install graphviz, as well as doxygen
+#If you get errors finding doxygen, i.e 'Could NOT find Doxygen (missing: dot)',
+#you need to install graphviz, as well as doxygen
 #apt install graphviz, brew install graphviz
 
 #set( CMAKE_TOOLCHAIN_FILE CMake/iOS.cmake )
@@ -64,7 +65,8 @@ if( NOT COLIBRIGUI_LIB_ONLY )
 
 	#add_recursive( ./src/OgreCommon/System/OSX/*.mm SOURCES )
 
-	#add_recursive would have added all .mm files, including the ios ones. We need to be able to set specifics.
+	#add_recursive would have added all .mm files, including the ios ones.
+	#We need to be able to set specifics.
 	file(GLOB_RECURSE SOURCES "src/*.cpp")
 	file(GLOB_RECURSE HEADERS "include/*.h")
 	if( APPLE )
@@ -77,17 +79,17 @@ else()
 endif()
 
 if( APPLE )
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11")
-	set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
-	set(CMAKE_CXX_FLAGS "-x objective-c++")
+	set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
+	set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
+	set( CMAKE_CXX_FLAGS "-x objective-c++" )
 
 	#Set the pluginFolder path in the plugins.cfg file.
 	#Make a copy of the original one so it can be edited.
-	execute_process(COMMAND "cp" "${OGRE_BINARIES}/bin/plugins.cfg" "/tmp/plugins.cfg")
-	execute_process(COMMAND bash -c "/usr/bin/sed -i '' 's#PluginFolder=#PluginFolder=${OGRE_BINARIES}/lib/macosx/${CMAKE_BUILD_TYPE}/#g' /tmp/plugins.cfg")
+	execute_process( COMMAND "cp" "${OGRE_BINARIES}/bin/plugins.cfg" "/tmp/plugins.cfg" )
+	execute_process( COMMAND bash -c "/usr/bin/sed -i '' 's#PluginFolder=#PluginFolder=${OGRE_BINARIES}/lib/macosx/${CMAKE_BUILD_TYPE}/#g' /tmp/plugins.cfg" )
 
 	#file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
-	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resourcesMac/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/")
+	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resourcesMac/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/" )
 endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )
