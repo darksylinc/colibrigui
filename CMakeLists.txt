@@ -89,7 +89,7 @@ if( APPLE )
 	execute_process( COMMAND bash -c "/usr/bin/sed -i '' 's#PluginFolder=#PluginFolder=${OGRE_BINARIES}/lib/macosx/${CMAKE_BUILD_TYPE}/#g' /tmp/plugins.cfg" )
 
 	#file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
-	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resourcesMac/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/" )
+	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/" )
 endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )
