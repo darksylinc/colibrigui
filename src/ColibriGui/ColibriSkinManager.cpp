@@ -385,6 +385,8 @@ namespace Colibri
 				SkinPack skinPack;
 
 				skinPack.progressBarType = 0u;
+				skinPack.progressBarAnimSpeed = 0.0f;
+				skinPack.progressBarAnimLength = 1.0f;
 
 				skinPack.name = itor->name.GetString();
 				const rapidjson::Value &skinValue = itor->value;
@@ -408,6 +410,14 @@ namespace Colibri
 					if( progressBarType == "behind_glass" )
 						skinPack.progressBarType = Progressbar::BehindGlass;
 				}
+
+				itTmp = skinValue.FindMember( "progress_anim_speed" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+					skinPack.progressBarAnimSpeed = static_cast<float>( itTmp->value.GetDouble() );
+
+				itTmp = skinValue.FindMember( "progress_anim_length" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+					skinPack.progressBarAnimLength = static_cast<float>( itTmp->value.GetDouble() );
 
 				const char *states[States::NumStates] =
 				{

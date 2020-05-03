@@ -32,7 +32,9 @@ namespace Colibri
 		std::string			name;
 		Ogre::IdString		skinInfo[States::NumStates];
 		/// See Progressbar::DisplayType
-		uint8_t				progressBarType;
+		uint8_t progressBarType;
+		float   progressBarAnimSpeed;
+		float   progressBarAnimLength;
 	};
 
 	typedef std::map<Ogre::IdString, SkinInfo> SkinInfoMap;

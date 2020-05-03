@@ -17,8 +17,8 @@ namespace Colibri
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
 		m_vertical( false ),
 		m_progress( 0.5f ),
-		m_animSpeed( 1.0f ),
-		m_animLength( 0.16f ),
+		m_animSpeed( 0.0f ),
+		m_animLength( 1.0f ),
 		m_displayType( BehindGlass ),
 		m_skinCopy( 0 )
 	{
@@ -29,7 +29,18 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Progressbar::_initialize()
 	{
-		m_displayType = static_cast<DisplayType>( m_manager->getDefaultProgressBarType() );
+		const Ogre::IdString skinPackName =
+			m_manager->getDefaultSkinPackName( SkinWidgetTypes::ProgressbarLayer0 );
+		const SkinManager *skinManager = m_manager->getSkinManager();
+
+		const SkinPack *defaultSkinPack = skinManager->findSkinPack( skinPackName, LogSeverity::Fatal );
+
+		if( !defaultSkinPack )
+			return;
+
+		m_displayType = static_cast<DisplayType>( defaultSkinPack->progressBarType );
+		m_animSpeed = defaultSkinPack->progressBarAnimSpeed;
+		m_animLength = defaultSkinPack->progressBarAnimLength;
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i] = m_manager->createWidget<Renderable>( this );
@@ -115,6 +126,8 @@ namespace Colibri
 			return;
 
 		m_displayType = static_cast<DisplayType>( skinPackL0->progressBarType );
+		m_animSpeed = skinPackL0->progressBarAnimSpeed;
+		m_animLength = skinPackL0->progressBarAnimLength;
 
 		{
 			// Assign the frame layer's skin
@@ -315,6 +328,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Progressbar::_update( float timeSinceLast )
 	{
+		if( m_currentState == States::Disabled )
+			return;
+
 		Ogre::Matrix4 animMat;
 		animMat.makeTransform( Ogre::Vector3( -m_accumTime, 0, 0 ),
 							   Ogre::Vector3( m_animLength * m_progress, 1.0f, 1.0f ),

@@ -69,7 +69,6 @@ namespace Colibri
 		m_defaultArrowSize( 15.0f, 15.0f ),
 		m_skinManager( 0 ),
 		m_shaperManager( 0 ),
-		m_defaultProgressBarType( 0u ),
 		m_vertexBufferBase( 0 ),
 		m_textVertexBufferBase( 0 )
 	#if COLIBRIGUI_DEBUG_MEDIUM
@@ -242,7 +241,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setDefaultSkins(
-			std::string defaultSkinPacks[SkinWidgetTypes::NumSkinWidgetTypes] )
+		std::string defaultSkinPacks[SkinWidgetTypes::NumSkinWidgetTypes] )
 	{
 		const SkinInfoMap &skins = m_skinManager->getSkins();
 		const SkinPackMap &skinPacks = m_skinManager->getSkinPacks();
@@ -253,6 +252,8 @@ namespace Colibri
 
 			if( !skinName.empty() )
 			{
+				m_defaultSkinPackNames[widgetType] = skinName;
+
 				SkinPackMap::const_iterator itor = skinPacks.find( skinName );
 				if( itor != skinPacks.end() )
 				{
@@ -267,15 +268,6 @@ namespace Colibri
 				}
 			}
 		}
-
-		const std::string &skinName = defaultSkinPacks[SkinWidgetTypes::ProgressbarLayer0];
-
-		if( !skinName.empty() )
-		{
-			SkinPackMap::const_iterator itor = skinPacks.find( skinName );
-			if( itor != skinPacks.end() )
-				m_defaultProgressBarType = itor->second.progressBarType;
-		}
 	}
 	//-------------------------------------------------------------------------
 	SkinInfo const * colibrigui_nonnull const * colibrigui_nullable ColibriManager::getDefaultSkin(
@@ -284,7 +276,11 @@ namespace Colibri
 		return m_defaultSkins[widgetType];
 	}
 	//-------------------------------------------------------------------------
-	uint8_t ColibriManager::getDefaultProgressBarType() const { return m_defaultProgressBarType; }
+	Ogre::IdString ColibriManager::getDefaultSkinPackName(
+		SkinWidgetTypes::SkinWidgetTypes widgetType ) const
+	{
+		return m_defaultSkinPackNames[widgetType];
+	}
 	//-------------------------------------------------------------------------
 	Ogre::HlmsDatablock * colibrigui_nullable
 	ColibriManager::getDefaultTextDatablock( States::States state ) const

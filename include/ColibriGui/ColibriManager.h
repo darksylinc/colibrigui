@@ -3,6 +3,8 @@
 
 #include "ColibriGui/ColibriWidget.h"
 
+#include "OgreIdString.h"
+
 COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
@@ -137,7 +139,7 @@ namespace Colibri
 
 		SkinInfo const * colibrigui_nullable
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
-		uint8_t m_defaultProgressBarType;
+		Ogre::IdString m_defaultSkinPackNames[SkinWidgetTypes::NumSkinWidgetTypes];
 
 		UiVertex		*m_vertexBufferBase;
 		GlyphVertex		*m_textVertexBufferBase;
@@ -221,7 +223,7 @@ namespace Colibri
 		SkinInfo const * colibrigui_nonnull const * colibrigui_nullable
 				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
-		uint8_t getDefaultProgressBarType() const;
+		Ogre::IdString getDefaultSkinPackName( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
 		/// This pointers can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock * colibrigui_nullable getDefaultTextDatablock( States::States state ) const;
