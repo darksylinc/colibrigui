@@ -48,8 +48,10 @@ namespace Colibri
 
 		bool        m_vertical;
 		float       m_progress;
+	public:
 		float       m_animSpeed;
 		float       m_animLength;
+	protected:
 		float		m_accumTime;
 		DisplayType m_displayType;
 
