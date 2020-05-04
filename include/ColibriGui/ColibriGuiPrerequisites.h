@@ -50,6 +50,7 @@ namespace Colibri
 	class Label;
 	class LayoutCell;
 	class LogListener;
+	class Progressbar;
 	class Renderable;
 	struct ShapedGlyph;
 	class Shaper;
