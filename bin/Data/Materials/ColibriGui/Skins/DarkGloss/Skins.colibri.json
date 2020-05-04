@@ -184,8 +184,8 @@
         {
             "all" : "ProgressbarLayer0",
             "progress_bar_type" : "behind_glass",
-            "progress_anim_speed" : 3.0,
-            "progress_anim_length" : 0.1
+            "progress_anim_speed" : 0.5,
+            "progress_anim_length" : 0.5
         },
         "ProgressbarLayer1" :
         {

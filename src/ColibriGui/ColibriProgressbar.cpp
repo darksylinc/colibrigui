@@ -334,8 +334,16 @@ namespace Colibri
 		Ogre::Matrix4 animMat;
 		animMat.makeTransform( Ogre::Vector3( -m_accumTime, 0, 0 ),
 							   Ogre::Vector3( m_animLength * m_progress, 1.0f, 1.0f ),
-							   Ogre::Quaternion( Ogre::Radian( m_vertical ? (float)-M_PI : 0.0f ),
-												 Ogre::Vector3::UNIT_Z ) );
+							   Ogre::Quaternion::IDENTITY );
+
+		if( m_vertical )
+		{
+			Ogre::Matrix4 animMat2;
+			animMat2.makeTransform(
+				Ogre::Vector3::ZERO, Ogre::Vector3::UNIT_SCALE,
+				Ogre::Quaternion( Ogre::Radian( (float)M_PI / 2.0f ), Ogre::Vector3::UNIT_Z ) );
+			animMat = animMat * animMat2;
+		}
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_progressLayerDatablock[i]->setAnimationMatrix( 0u, animMat );
