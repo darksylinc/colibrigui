@@ -102,6 +102,22 @@ namespace Colibri
 		return m_layers[progressLayer];
 	}
 	//-------------------------------------------------------------------------
+	void Progressbar::setVisualsEnabled( bool bEnabled )
+	{
+		if( bEnabled != m_layers[0]->isVisualsEnabled() )
+		{
+			if( bEnabled )
+				m_manager->_addUpdateWidget( this );
+			else
+				m_manager->_removeUpdateWidget( this );
+		}
+
+		for( size_t i = 0u; i < 2u; ++i )
+			m_layers[i]->setVisualsEnabled( bEnabled );
+	}
+	//-------------------------------------------------------------------------
+	bool Progressbar::isVisualsEnabled() const { return m_layers[0]->isVisualsEnabled(); }
+	//-------------------------------------------------------------------------
 	void Progressbar::setState( States::States state, bool smartHighlight, bool broadcastEnable )
 	{
 		Widget::setState( state, smartHighlight, broadcastEnable );

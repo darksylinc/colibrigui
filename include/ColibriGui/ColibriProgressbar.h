@@ -46,13 +46,15 @@ namespace Colibri
 	protected:
 		Renderable *colibrigui_nullable m_layers[2];
 
-		bool        m_vertical;
-		float       m_progress;
+		bool  m_vertical;
+		float m_progress;
+
 	public:
-		float       m_animSpeed;
-		float       m_animLength;
+		float m_animSpeed;
+		float m_animLength;
+
 	protected:
-		float		m_accumTime;
+		float       m_accumTime;
 		DisplayType m_displayType;
 
 		Ogre::HlmsUnlitDatablock *colibrigui_nullable m_progressLayerDatablock[2];
@@ -76,6 +78,10 @@ namespace Colibri
 
 		Renderable *getFrameLayer();
 		Renderable *getProgressLayer();
+
+		/// @copydoc Renderable::setVisualsEnabled
+		void         setVisualsEnabled( bool bEnabled );
+		virtual bool isVisualsEnabled() const colibri_final;
 
 		virtual void setState( States::States state, bool smartHighlight = true,
 							   bool broadcastEnable = false );
