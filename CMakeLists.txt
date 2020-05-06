@@ -22,7 +22,7 @@ if( ${CMAKE_VERSION} VERSION_GREATER 3.9 AND NOT COLIBRIGUI_LIB_ONLY )
 	# We need to do this first, as OGRE.cmake will add another FindDoxygen.cmake file
 	# which is older than the system-provided one.
 	find_package(	Doxygen
-					REQUIRED dot
+					COMPONENTS dot
 					OPTIONAL_COMPONENTS mscgen dia )
 endif()
 
