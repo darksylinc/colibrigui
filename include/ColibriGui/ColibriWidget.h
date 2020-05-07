@@ -128,7 +128,7 @@ namespace Colibri
 		bool m_breadthFirst;
 
 		/// A value for any sort of use. Colibri does not use it in any way.
-		Ogre::uint64 m_UserId;
+		uint64_t m_userId;
 
 	protected:
 		States::States			m_currentState;
