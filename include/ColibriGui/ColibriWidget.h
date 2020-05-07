@@ -127,6 +127,9 @@ namespace Colibri
 		/// @see	Widget::isUltimatelyBreadthFirst
 		bool m_breadthFirst;
 
+		/// A value for any sort of use. Colibri does not use it in any way.
+		Ogre::uint64 m_UserId;
+
 	protected:
 		States::States			m_currentState;
 
