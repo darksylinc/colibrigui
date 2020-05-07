@@ -19,6 +19,7 @@ namespace Colibri
 		m_progress( 0.5f ),
 		m_animSpeed( 0.0f ),
 		m_animLength( 1.0f ),
+		m_accumTime( 0.0f ),
 		m_displayType( BehindGlass ),
 		m_skinCopy( 0 )
 	{
