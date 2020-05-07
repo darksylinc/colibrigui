@@ -29,6 +29,7 @@ namespace Colibri
 		m_pressable( true ),
 		m_culled( false ),
 		m_breadthFirst( false ),
+		m_userId( 0 ),
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( Ogre::Vector2::ZERO ),
