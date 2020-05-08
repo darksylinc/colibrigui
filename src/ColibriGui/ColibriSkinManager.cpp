@@ -502,7 +502,9 @@ namespace Colibri
 			"CheckboxTickmarkThirdState",
 			"Editbox",
 			"ProgressbarLayer0",
-			"ProgressbarLayer1"
+			"ProgressbarLayer1",
+			"SliderLine",
+			"SliderHandle"
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];
@@ -645,4 +647,3 @@ namespace Colibri
 			loadDefaultSkinPacks( itTmp->value, filename );
 	}
 }
-

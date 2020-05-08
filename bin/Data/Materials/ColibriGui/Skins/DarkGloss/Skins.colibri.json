@@ -206,6 +206,8 @@
         "CheckboxTickmarkThirdState"    : "CheckboxTickmarkThirdState",
         "Editbox"               : "Button",
         "ProgressbarLayer0"     : "ProgressbarLayer0",
-        "ProgressbarLayer1"     : "ProgressbarLayer1"
+        "ProgressbarLayer1"     : "ProgressbarLayer1",
+        "SliderLine"            : "Button",
+        "SliderHandle"          : "Button"
     }
 }

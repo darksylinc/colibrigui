@@ -373,6 +373,8 @@ namespace Colibri
 			Editbox,
 			ProgressbarLayer0,
 			ProgressbarLayer1,
+			SliderLine,
+			SliderHandle,
 			NumSkinWidgetTypes
 		};
 	}
