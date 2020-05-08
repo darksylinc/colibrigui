@@ -26,6 +26,9 @@ namespace Colibri
 		Renderable *colibrigui_nullable m_layers[2];
 
 		float m_sliderValue;
+		/// When directional actions (keyboard buttons) are applied,
+		/// this is how much the slider value be increased or decreased.
+		float m_directionChangeAmount;
 
 	protected:
 
@@ -56,6 +59,10 @@ namespace Colibri
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
 		virtual void notifyCursorMoved( const Ogre::Vector2& posNDC );
+		virtual void _notifyActionKeyMovement( Borders::Borders direction );
+
+		float getDirectionChangeAmount() const { return m_directionChangeAmount; }
+		void setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
 
 	private:
 		void _processCursorPosition( const Ogre::Vector2& pos );

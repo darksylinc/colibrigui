@@ -9,12 +9,16 @@ namespace Colibri
 	Slider::Slider( ColibriManager *manager ) :
 		Widget( manager ),
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
-		m_sliderValue( 0.0f )
+		m_sliderValue( 0.0f ),
+		m_directionChangeAmount( 0.1f )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
 		m_clickable = true;
 		m_keyboardNavigable = true;
+
+		m_autoSetNextWidget[Borders::Left] = false;
+		m_autoSetNextWidget[Borders::Right] = false;
 	}
 	//-------------------------------------------------------------------------
 	void Slider::_initialize()
@@ -146,6 +150,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Slider::notifyCursorMoved( const Ogre::Vector2& posNDC ){
 		_processCursorPosition( posNDC );
+	}
+	//-------------------------------------------------------------------------
+	void Slider::_notifyActionKeyMovement( Borders::Borders direction )
+	{
+		if( direction == Borders::Left )
+			setValue( m_sliderValue - m_directionChangeAmount );
+		else if( direction == Borders::Right )
+			setValue( m_sliderValue + m_directionChangeAmount );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setValue( float value )
