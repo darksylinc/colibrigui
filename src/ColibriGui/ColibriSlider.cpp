@@ -6,11 +6,15 @@
 
 namespace Colibri
 {
+	//TODO global for now
+	static const float handleSize = 30.0f;
+
 	Slider::Slider( ColibriManager *manager ) :
 		Widget( manager ),
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
 		m_sliderValue( 0.0f ),
-		m_directionChangeAmount( 0.1f )
+		m_directionChangeAmount( 0.1f ),
+		m_cursorOffset( 0.0f )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
@@ -77,8 +81,8 @@ namespace Colibri
 
 		if(state == States::Pressed)
 		{
-			_processCursorPosition( m_manager->getMouseCursorPosNdc() );
-		}
+			_processCursorPosition( m_manager->getMouseCursorPosNdc(), true );
+		}else m_cursorOffset = 0.0f;
 
 		// Widget::setState did not re-enable children we control. Do it manually
 		if( !broadcastEnable )
@@ -104,18 +108,19 @@ namespace Colibri
 		//const Ogre::Vector2 framePosition = getLocalTopLeft();
 		const Ogre::Vector2 framePosition = Ogre::Vector2::ZERO;
 		const float lineY = framePosition.y + (frameSize.y / 2.0f) - (sliderLineHeight / 2.0f);
-		m_layers[0]->setTopLeft( Ogre::Vector2(framePosition.x, lineY) );
 
-		// The width is used to its full, but the height is always a constant.
-		m_layers[0]->setSize( Ogre::Vector2(frameSize.x, sliderLineHeight) );
+		// Half a handle is added to the line on each side as padding.
+		m_layers[0]->setTopLeft( Ogre::Vector2(framePosition.x + handleSize / 2.0f, lineY) );
+
+		// Other than the padding, the width is used to its full, but the height is always a constant.
+		const float reducedLineWidth = frameSize.x - handleSize;
+		m_layers[0]->setSize( Ogre::Vector2(reducedLineWidth, sliderLineHeight) );
 
 
 		// Slider handle
-		const float handleSize = frameSize.y / 2.0f;
 		m_layers[1]->setSize( Ogre::Vector2(handleSize, handleSize) );
 
-
-		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + frameSize.x * m_sliderValue, sliderLineHeight) );
+		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + (reducedLineWidth * m_sliderValue), lineY - handleSize / 2.0f) );
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );
@@ -133,17 +138,24 @@ namespace Colibri
 		Widget::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
-	void Slider::_processCursorPosition( const Ogre::Vector2& pos ){
+	void Slider::_processCursorPosition( const Ogre::Vector2& pos, bool cursorBegin ){
 		if( this->intersects( pos ) )
 		{
 			if(m_currentState == States::Pressed)
 			{
-				const float sliderWidth = m_derivedBottomRight.x - m_derivedTopLeft.x;
+				const float sliderWidth = getSliderLine()->getDerivedBottomRight().x - getSliderLine()->getDerivedTopLeft().x;
 				const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
+				const float posX = mouseRelativeX / sliderWidth;
 
-				const float value = mouseRelativeX / sliderWidth;
+				if( cursorBegin && getSliderHandle()->intersects(pos) )
+				{
+					// The user actually clicked on the handle, rather than part of the line.
+					// If this happens, apply an offset to the mouse movements, so the handle doesn't jump.
+					const Ogre::Vector2 widgetSize = getSize();
+					m_cursorOffset = posX - m_sliderValue;
+				}
 
-				setValue(value);
+				setValue(posX - m_cursorOffset);
 			}
 		}
 	}

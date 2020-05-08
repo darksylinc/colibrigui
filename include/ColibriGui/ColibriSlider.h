@@ -30,6 +30,8 @@ namespace Colibri
 		/// this is how much the slider value be increased or decreased.
 		float m_directionChangeAmount;
 
+		float m_cursorOffset;
+
 	protected:
 
 		void updateSlider();
@@ -65,7 +67,7 @@ namespace Colibri
 		void setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
 
 	private:
-		void _processCursorPosition( const Ogre::Vector2& pos );
+		void _processCursorPosition( const Ogre::Vector2& pos, bool cursorBegin = false );
 	};
 }  // namespace Colibri
 
