@@ -71,6 +71,11 @@ namespace Colibri
 	{
 		Widget::setState( state, smartHighlight, broadcastEnable );
 
+		if(state == States::Pressed)
+		{
+			_processCursorPosition( m_manager->getMouseCursorPosNdc() );
+		}
+
 		// Widget::setState did not re-enable children we control. Do it manually
 		if( !broadcastEnable )
 		{
@@ -122,6 +127,25 @@ namespace Colibri
 		}
 
 		Widget::setTransformDirty( dirtyReason );
+	}
+	//-------------------------------------------------------------------------
+	void Slider::_processCursorPosition( const Ogre::Vector2& pos ){
+		if( this->intersects( pos ) )
+		{
+			if(m_currentState == States::Pressed)
+			{
+				const float sliderWidth = m_derivedBottomRight.x - m_derivedTopLeft.x;
+				const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
+
+				const float value = mouseRelativeX / sliderWidth;
+
+				setValue(value);
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Slider::notifyCursorMoved( const Ogre::Vector2& posNDC ){
+		_processCursorPosition( posNDC );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setValue( float value )

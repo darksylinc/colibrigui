@@ -517,6 +517,9 @@ namespace Colibri
 
 		ColibriManager *getManager();
 
+		/// Notify the widget that the cursor moved somewhere within its bounds.
+		virtual void notifyCursorMoved( const Ogre::Vector2& posNDC );
+
 		/**
 		@remarks
 			Do not assume derived top left <= derived bottom right.

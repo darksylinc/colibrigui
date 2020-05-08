@@ -520,6 +520,10 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::notifyCursorMoved( const Ogre::Vector2& posNDC )
+	{
+	}
+	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )
 	{
 		WidgetVec::const_iterator itor = m_children.begin();

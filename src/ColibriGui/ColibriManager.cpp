@@ -374,6 +374,11 @@ namespace Colibri
 			}
 		}
 
+		if(focusedPair.widget){
+			//Notify the widget that the mouse moved.
+			focusedPair.widget->notifyCursorMoved( newPosNdc );
+		}
+
 		m_cursorFocusedPair = focusedPair;
 	}
 	//-------------------------------------------------------------------------

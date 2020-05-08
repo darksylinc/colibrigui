@@ -54,6 +54,11 @@ namespace Colibri
 		Renderable *colibrigui_nullable getSliderHandle();
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+
+		virtual void notifyCursorMoved( const Ogre::Vector2& posNDC );
+
+	private:
+		void _processCursorPosition( const Ogre::Vector2& pos );
 	};
 }  // namespace Colibri
 

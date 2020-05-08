@@ -341,10 +341,10 @@ namespace Demo
 		button->setOrientation( rotMat );
 		angle += timeSinceLast;*/
 
-		static float count = 0.0f;
-		count += 0.01;
-		float value = 0.5f + 0.5f * sin(count);
-		slider1->setValue( value );
+		// static float count = 0.0f;
+		// count += 0.01;
+		// float value = 0.5f + 0.5f * sin(count);
+		// slider1->setValue( value );
 
         TutorialGameState::update( timeSinceLast );
     }
