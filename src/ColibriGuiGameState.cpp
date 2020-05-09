@@ -53,6 +53,7 @@ namespace Demo
 	Colibri::Progressbar *progressBar0 = 0;
 	Colibri::Progressbar *progressBar1 = 0;
 	Colibri::Slider *slider1 = 0;
+	Colibri::Label *sliderLabel = 0;
 
     ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -163,8 +164,13 @@ namespace Demo
 		layout->addCell( progressBar1 );
 
 		slider1 = colibriManager->createWidget<Colibri::Slider>( mainWindow );
-		slider1->m_minSize = Ogre::Vector2( 350, 64 );
+		slider1->m_minSize = Ogre::Vector2( 350, 32 );
 		layout->addCell( slider1 );
+
+		sliderLabel = colibriManager->createWidget<Colibri::Label>( mainWindow );
+		sliderLabel->sizeToFit();
+		sliderLabel->m_minSize = Ogre::Vector2( 350, 32 );
+		layout->addCell( sliderLabel );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();
@@ -341,10 +347,13 @@ namespace Demo
 		button->setOrientation( rotMat );
 		angle += timeSinceLast;*/
 
-		// static float count = 0.0f;
-		// count += 0.01;
-		// float value = 0.5f + 0.5f * sin(count);
-		// slider1->setValue( value );
+		static float prevValue = -1.0f;
+		float currentValue = slider1->getValue();
+		if( prevValue != currentValue )
+		{
+			sliderLabel->setText( std::to_string(currentValue) );
+			prevValue = currentValue;
+		}
 
         TutorialGameState::update( timeSinceLast );
     }

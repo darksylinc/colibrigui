@@ -152,7 +152,6 @@ namespace Colibri
 				{
 					// The user actually clicked on the handle, rather than part of the line.
 					// If this happens, apply an offset to the mouse movements, so the handle doesn't jump.
-					const Ogre::Vector2 widgetSize = getSize();
 					m_cursorOffset = posX - m_sliderValue;
 				}
 
