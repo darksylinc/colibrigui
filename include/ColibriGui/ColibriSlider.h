@@ -54,6 +54,7 @@ namespace Colibri
 
 		// Set the value of the slider. Right now this is between 0 and 1 only.
 		void setValue( float value );
+		float getValue() const { return m_sliderValue; };
 
 		Renderable *colibrigui_nullable getSliderLine();
 		Renderable *colibrigui_nullable getSliderHandle();

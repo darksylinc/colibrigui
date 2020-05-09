@@ -88,6 +88,9 @@ namespace Colibri
 		/// Whether this widget can go into States::Pressed state via keyboard or mouse cursor.
 		/// (assuming it is either clickable or keyboard navigable, otherwise it would be impossible)
 		bool					m_pressable;
+		/// If the cursor is interacting with this widget, no scroll can take place if this is true.
+		/// This is useful for widgets which require some sort of mouse movement to function.
+		bool					m_consumesScroll;
 
 		bool m_culled;
 	public:
@@ -209,6 +212,8 @@ namespace Colibri
 
 		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
+
+		bool consumesScroll() const			{ return m_consumesScroll; }
 
 		void setHidden( bool hidden );
 		bool isHidden() const				{ return m_hidden; }

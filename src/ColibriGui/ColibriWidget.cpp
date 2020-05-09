@@ -27,6 +27,7 @@ namespace Colibri
 		m_keyboardNavigable( false ),
 		m_childrenClickable( false ),
 		m_pressable( true ),
+		m_consumesScroll( false ),
 		m_culled( false ),
 		m_breadthFirst( false ),
 		m_userId( 0 ),
