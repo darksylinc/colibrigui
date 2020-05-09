@@ -6,15 +6,14 @@
 
 namespace Colibri
 {
-	//TODO global for now
-	static const float handleSize = 30.0f;
 
 	Slider::Slider( ColibriManager *manager ) :
 		Widget( manager ),
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
 		m_sliderValue( 0.0f ),
 		m_directionChangeAmount( 0.1f ),
-		m_cursorOffset( 0.0f )
+		m_cursorOffset( 0.0f ),
+		m_handleSize( 10.0f )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
@@ -105,23 +104,25 @@ namespace Colibri
 		const Ogre::Vector2 frameSize = getSize();
 		static const float sliderLineHeight = 5.0f;
 
+		m_handleSize = frameSize.y * 0.8f;
+
 		// Slider line
 		//const Ogre::Vector2 framePosition = getLocalTopLeft();
 		const Ogre::Vector2 framePosition = Ogre::Vector2::ZERO;
 		const float lineY = framePosition.y + (frameSize.y / 2.0f) - (sliderLineHeight / 2.0f);
 
 		// Half a handle is added to the line on each side as padding.
-		m_layers[0]->setTopLeft( Ogre::Vector2(framePosition.x + handleSize / 2.0f, lineY) );
+		m_layers[0]->setTopLeft( Ogre::Vector2(framePosition.x + m_handleSize / 2.0f, lineY) );
 
 		// Other than the padding, the width is used to its full, but the height is always a constant.
-		const float reducedLineWidth = frameSize.x - handleSize;
+		const float reducedLineWidth = frameSize.x - m_handleSize;
 		m_layers[0]->setSize( Ogre::Vector2(reducedLineWidth, sliderLineHeight) );
 
 
 		// Slider handle
-		m_layers[1]->setSize( Ogre::Vector2(handleSize, handleSize) );
+		m_layers[1]->setSize( Ogre::Vector2(m_handleSize, m_handleSize) );
 
-		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + (reducedLineWidth * m_sliderValue), lineY - handleSize / 2.0f) );
+		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + (reducedLineWidth * m_sliderValue), lineY - m_handleSize / 2.0f) );
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );

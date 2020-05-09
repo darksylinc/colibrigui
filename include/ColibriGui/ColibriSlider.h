@@ -31,6 +31,7 @@ namespace Colibri
 		float m_directionChangeAmount;
 
 		float m_cursorOffset;
+		float m_handleSize;
 
 	protected:
 
