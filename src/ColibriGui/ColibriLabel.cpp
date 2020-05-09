@@ -164,6 +164,35 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Label::setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx,
+							   States::States forState )
+	{
+		m_colour = colour;
+		if( forState == States::NumStates )
+		{
+			for( size_t i = 0; i < States::NumStates; ++i )
+				setTextColour( colour, richTextTextIdx, static_cast<States::States>( i ) );
+		}
+		else
+		{
+			if( richTextTextIdx == (size_t)-1 )
+			{
+				RichTextVec::iterator itor = m_richText[forState].begin();
+				RichTextVec::iterator endt = m_richText[forState].end();
+
+				while( itor != endt )
+				{
+					itor->rgba32 = m_colour.getAsABGR();
+					++itor;
+				}
+			}
+			else if( richTextTextIdx < m_richText[forState].size() )
+			{
+				m_richText[forState][richTextTextIdx].rgba32 = m_colour.getAsABGR();
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Label::validateRichText( States::States state )
 	{
 		const size_t textSize = m_text[state].size();
@@ -176,7 +205,7 @@ namespace Colibri
 			rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
 			rt.font = m_defaultFont;
 			rt.offset = 0;
-			rt.length = textSize;
+			rt.length = static_cast<uint32_t>( textSize );
 			rt.readingDir = HorizReadingDir::Default;
 			rt.glyphStart = rt.glyphEnd = 0;
 			m_richText[state].push_back( rt );
@@ -193,12 +222,12 @@ namespace Colibri
 			{
 				if( itor->offset > textSize )
 				{
-					itor->offset = textSize;
+					itor->offset = static_cast<uint32_t>( textSize );
 					invalidRtDetected = true;
 				}
 				if( itor->offset + itor->length > textSize )
 				{
-					itor->length = textSize - itor->offset;
+					itor->length = static_cast<uint32_t>( textSize - itor->offset );
 					invalidRtDetected = true;
 				}
 
@@ -292,7 +321,7 @@ namespace Colibri
 			while( itor != end )
 			{
 				RichText &richText = *itor;
-				richText.glyphStart = m_shapes[state].size();
+				richText.glyphStart = static_cast<uint32_t>( m_shapes[state].size() );
 				const char *utf8Str = m_text[state].c_str() + richText.offset;
 				TextHorizAlignment::TextHorizAlignment actualDir =
 						shaperManager->renderString( utf8Str, richText, itor - m_richText[state].begin(),

@@ -148,6 +148,22 @@ namespace Colibri
 		void setDefaultFont( uint16_t defaultFont );
 		uint16_t getDefaultFont() const								{ return m_defaultFont; }
 
+		/** Changes the colour of the current text (either all of it or a block); and sets
+			the default colour for new text to the input colour
+		@remarks
+			This operations is very fast, as it doesn't need to reconstruct the glyphs
+		@param colour
+			The colour of the text
+		@param richTextTextIdx
+			The index of the rich text to modify. -1 to modify all blocks (i.e. the whole text)
+			When out of bounds, it doesn't do anything except changing the default text colour
+			for new text
+		@param forState
+			The state to modify. States::NumStates to modify all of them
+		*/
+		void setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx = (size_t)-1,
+							States::States forState = States::NumStates );
+
 		/** Enables a shadow of the text behind each character, for highlighting or
 			making the text easier to read, specially against backgrounds of the same
 			colour as the text.
