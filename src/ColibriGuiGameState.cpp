@@ -301,6 +301,7 @@ namespace Demo
 			SdlInputHandler *inputHandler = mGraphicsSystem->getInputHandler();
 			inputHandler->setGrabMousePointer( false );
 			inputHandler->setMouseVisible( true );
+			inputHandler->setMouseRelative( false );
 			tried = true;
 		}
 
