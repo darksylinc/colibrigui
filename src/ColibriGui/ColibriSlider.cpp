@@ -181,5 +181,7 @@ namespace Colibri
 		m_sliderValue = value;
 
 		updateSlider();
+
+		callActionListeners( Action::ValueChanged );
 	}
 }  // namespace Colibri
