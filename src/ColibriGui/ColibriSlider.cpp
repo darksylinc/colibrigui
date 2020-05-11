@@ -27,7 +27,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Slider::_initialize()
 	{
-		for( size_t i = 0u; i < 2u; ++i ){
+		for( size_t i = 0u; i < 2u; ++i )
+		{
 			m_layers[i] = m_manager->createWidget<Renderable>( this );
 			m_layers[i]->_initialize();
 		}
@@ -101,6 +102,8 @@ namespace Colibri
 		if( !m_layers[0] )
 			return;  //_initialize hasn't been called yet
 
+		const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
+
 		const Ogre::Vector2 frameSize = getSize();
 		static const float sliderLineHeight = 5.0f;
 
@@ -122,7 +125,8 @@ namespace Colibri
 		// Slider handle
 		m_layers[1]->setSize( Ogre::Vector2(m_handleSize, m_handleSize) );
 
-		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + (reducedLineWidth * m_sliderValue), lineY - m_handleSize / 2.0f) );
+		const float targetSliderValue = rightToLeft ? 1 - m_sliderValue : m_sliderValue;
+		m_layers[1]->setTopLeft( Ogre::Vector2(framePosition.x + (reducedLineWidth * targetSliderValue), lineY - m_handleSize / 2.0f) );
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );
@@ -141,23 +145,24 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Slider::_processCursorPosition( const Ogre::Vector2& pos, bool cursorBegin ){
-		if( this->intersects( pos ) )
+		if( m_currentState == States::Pressed && this->intersects( pos ) )
 		{
-			if(m_currentState == States::Pressed)
+			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
+
+			const float sliderWidth = getSliderLine()->getDerivedBottomRight().x - getSliderLine()->getDerivedTopLeft().x;
+			const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
+			float posX = mouseRelativeX / sliderWidth;
+			if(rightToLeft)
+				posX = 1 - posX;
+
+			if( cursorBegin && getSliderHandle()->intersects(pos) )
 			{
-				const float sliderWidth = getSliderLine()->getDerivedBottomRight().x - getSliderLine()->getDerivedTopLeft().x;
-				const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
-				const float posX = mouseRelativeX / sliderWidth;
-
-				if( cursorBegin && getSliderHandle()->intersects(pos) )
-				{
-					// The user actually clicked on the handle, rather than part of the line.
-					// If this happens, apply an offset to the mouse movements, so the handle doesn't jump.
-					m_cursorOffset = posX - m_sliderValue;
-				}
-
-				setValue(posX - m_cursorOffset);
+				// The user actually clicked on the handle, rather than part of the line.
+				// If this happens, apply an offset to the mouse movements, so the handle doesn't jump.
+				m_cursorOffset = posX - m_sliderValue;
 			}
+
+			setValue(posX - m_cursorOffset);
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -167,10 +172,13 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Slider::_notifyActionKeyMovement( Borders::Borders direction )
 	{
+		const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
+		const float targetDirectionAmount = rightToLeft ? -m_directionChangeAmount : m_directionChangeAmount;
+
 		if( direction == Borders::Left )
-			setValue( m_sliderValue - m_directionChangeAmount );
+			setValue( m_sliderValue - targetDirectionAmount );
 		else if( direction == Borders::Right )
-			setValue( m_sliderValue + m_directionChangeAmount );
+			setValue( m_sliderValue + targetDirectionAmount );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setValue( float value )
