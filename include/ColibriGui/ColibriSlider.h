@@ -34,7 +34,6 @@ namespace Colibri
 		float m_handleSize;
 
 	protected:
-
 		void updateSlider();
 
 	public:
@@ -42,9 +41,6 @@ namespace Colibri
 
 		virtual void _initialize();
 		virtual void _destroy();
-
-		Renderable *getFrameLayer();
-		Renderable *getProgressLayer();
 
 		/// @copydoc Renderable::setVisualsEnabled
 		void         setVisualsEnabled( bool bEnabled );
@@ -54,22 +50,22 @@ namespace Colibri
 							   bool broadcastEnable = false );
 
 		// Set the value of the slider. Right now this is between 0 and 1 only.
-		void setValue( float value );
-		float getValue() const { return m_sliderValue; };
+		void  setValue( float value );
+		float getValue() const { return m_sliderValue; }
 
-		Renderable *colibrigui_nullable getSliderLine();
-		Renderable *colibrigui_nullable getSliderHandle();
+		Renderable *getSliderLine();
+		Renderable *getSliderHandle();
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
-		virtual void notifyCursorMoved( const Ogre::Vector2& posNDC );
+		virtual void notifyCursorMoved( const Ogre::Vector2 &posNDC );
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );
 
+		void  setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
 		float getDirectionChangeAmount() const { return m_directionChangeAmount; }
-		void setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
 
 	private:
-		void _processCursorPosition( const Ogre::Vector2& pos, bool cursorBegin = false );
+		void _processCursorPosition( const Ogre::Vector2 &pos, bool cursorBegin = false );
 	};
 }  // namespace Colibri
 
