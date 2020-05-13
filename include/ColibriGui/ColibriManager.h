@@ -280,7 +280,12 @@ namespace Colibri
 	public:
 		void setKeyDirectionPressed( Borders::Borders direction );
 		void setKeyDirectionReleased( Borders::Borders direction );
-		void setScroll( const Ogre::Vector2 &scrollAmount );
+		/**
+		@return
+			True if the scroll was consumed by a widget.
+			False otherwise
+		*/
+		bool setScroll( const Ogre::Vector2 &scrollAmount );
 
 		/// For understanding these params, see SDL_TextEditingEvent
 		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );

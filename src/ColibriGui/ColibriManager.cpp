@@ -374,6 +374,11 @@ namespace Colibri
 			}
 		}
 
+		if(focusedPair.widget){
+			//Notify the widget that the mouse moved.
+			focusedPair.widget->notifyCursorMoved( newPosNdc );
+		}
+
 		m_cursorFocusedPair = focusedPair;
 	}
 	//-------------------------------------------------------------------------
@@ -386,11 +391,14 @@ namespace Colibri
 		if( m_allowingScrollGestureWhileButtonDown && (m_allowingScrollAlways ||
 			(m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll())) )
 		{
-			setCancel();
-			//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
-			m_allowingScrollGestureWhileButtonDown = true;
-			setScroll( (oldPos - m_mouseCursorPosNdc) * 0.5f * m_canvasSize );
+			bool scrollConsumed = setScroll( (oldPos - m_mouseCursorPosNdc) * 0.5f * m_canvasSize );
 			//^^ setScroll will call updateWidgetsFocusedByCursor if necessary
+
+			if( !scrollConsumed ){
+				setCancel();
+				//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
+				m_allowingScrollGestureWhileButtonDown = true;
+			}
 		}
 		else
 		{
@@ -579,17 +587,25 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount )
+	bool ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount )
 	{
 		Window *window = m_cursorFocusedPair.window;
 		if( window )
 		{
+			if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget->consumesScroll() )
+			{
+				//If the widget focused by the cursor consumes the scroll, just update and leave.
+				updateWidgetsFocusedByCursor();
+				return true;
+			}
 			window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
 
 			updateAllDerivedTransforms();
 			//If is possible the button we were highlighting is no longer behind the cursor
 			updateWidgetsFocusedByCursor();
 		}
+
+		return false;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )

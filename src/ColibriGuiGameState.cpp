@@ -32,6 +32,7 @@
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/ColibriProgressbar.h"
+#include "ColibriGui/ColibriSlider.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
@@ -51,6 +52,8 @@ namespace Demo
 	Colibri::Editbox *editbox0 = 0;
 	Colibri::Progressbar *progressBar0 = 0;
 	Colibri::Progressbar *progressBar1 = 0;
+	Colibri::Slider *slider1 = 0;
+	Colibri::Label *sliderLabel = 0;
 
     ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
@@ -159,6 +162,15 @@ namespace Demo
 		progressBar1->setVertical( true );
 		progressBar1->getProgressLayer()->setColour( true, Ogre::ColourValue( 0.0f, 0.7f, 0.2f ) );
 		layout->addCell( progressBar1 );
+
+		slider1 = colibriManager->createWidget<Colibri::Slider>( mainWindow );
+		slider1->m_minSize = Ogre::Vector2( 350, 32 );
+		layout->addCell( slider1 );
+
+		sliderLabel = colibriManager->createWidget<Colibri::Label>( mainWindow );
+		sliderLabel->sizeToFit();
+		sliderLabel->m_minSize = Ogre::Vector2( 350, 32 );
+		layout->addCell( sliderLabel );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();
@@ -334,6 +346,14 @@ namespace Demo
 		rotMat.FromEulerAnglesXYZ( Ogre::Degree( 0 ), Ogre::Radian( 0 ), Ogre::Radian( angle ) );
 		button->setOrientation( rotMat );
 		angle += timeSinceLast;*/
+
+		static float prevValue = -1.0f;
+		float currentValue = slider1->getValue();
+		if( prevValue != currentValue )
+		{
+			sliderLabel->setText( std::to_string(currentValue) );
+			prevValue = currentValue;
+		}
 
         TutorialGameState::update( timeSinceLast );
     }

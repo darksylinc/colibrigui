@@ -27,6 +27,7 @@ namespace Colibri
 		m_keyboardNavigable( false ),
 		m_childrenClickable( false ),
 		m_pressable( true ),
+		m_consumesScroll( false ),
 		m_culled( false ),
 		m_breadthFirst( false ),
 		m_userId( 0 ),
@@ -518,6 +519,10 @@ namespace Colibri
 		retVal.window = getFirstParentWindow();
 
 		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::notifyCursorMoved( const Ogre::Vector2& posNDC )
+	{
 	}
 	//-------------------------------------------------------------------------
 	void Widget::broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao )
