@@ -82,6 +82,7 @@ namespace Colibri
 		void setTriState( bool triState );
 		bool getTriState() const						{ return m_triState; }
 
+		uint8_t getCurrentValue() const 				{ return m_currentValue; }
 		uint8_t getMaxValue() const						{ return m_triState ? 2u : 1u; }
 
 		/// @copydoc Label::sizeToFit
