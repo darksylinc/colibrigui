@@ -6,6 +6,7 @@
 
 #include "OgreLwString.h"
 #include "rapidjson/document.h"
+#include <rapidjson/error/en.h>
 
 #include <fstream>
 
@@ -626,6 +627,10 @@ namespace Colibri
 		{
 			errorMsg.clear();
 			errorMsg.a( "[SkinManager::loadSkins]: Invalid JSON string in file ", filename );
+			log->log( errorMsg.c_str(), LogSeverity::Error );
+
+			errorMsg.clear();
+			errorMsg.a( "[SkinManager::loadSkins]: ", rapidjson::GetParseError_En(d.GetParseError()) );
 			log->log( errorMsg.c_str(), LogSeverity::Error );
 			return;
 		}
