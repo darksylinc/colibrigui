@@ -84,6 +84,62 @@ I've always wanted a GUI meant for video games that would fit the following crit
 
 None of the libraries I knew or tried met all of the criteria, so I decided to write one
 
+Aside from international support, which is very important for me (Colibri supports arabic
+and hebrew [RTL layouts](https://tech.trivago.com/2015/04/27/right-to-left/), RTL text,
+chinese and japanese top-to-down-right-to-left text, and of course... CJK font support),
+with Colibri I wrote the shader with performance in mind and a layout engine which works
+very similar to wxWidgets.
+
+In fact I can design my layouts in wxFormBuilder and then write them on Colibri's.
+
+There were other reasons (one of my clients is VERY picky about UI alignment so the
+layout engine solved me a lot of arguments with him. I wrote the layout engine with him in
+mind).
+
+Regarding performance: Aside that we try to use as fewer draw calls and state changes as
+possible using modern rendering practices, we have a [breadth-first mode](https://github.com/darksylinc/colibrigui/blob/fe47825a9146846e3b655c301baaa4a413d86e6b/include/ColibriGui/ColibriWidget.h#L131) to
+render efficiently a common UI pattern in games:
+
+In games it's quite common to render a button, then a child image, then a button,
+another child image, and so on. Imagine an inventory menu.
+
+Typically the parent button is always the same, but the child is different
+(uses different picture, material, or may be text which requires a different shader).
+An UV atlas helps at this, but in my experience it doesn't help too much in real world cases.
+
+Breadth first potentially sacrifices drawing correctness for speed, as it will draw
+all parents first (e.g. all buttons first), then all children (first the images,
+then the text or vice versa). This lets us draw everything in roughly 3 draw calls
+(1 for the buttons, 1 for the icons assuming they share similar materials and the
+same texture array, and 1 for the text.).
+
+This works fine as long as the widgets rendered in breadth first are not overlapping.
+
+I had a bone with most Text rendering solutions: Most solutions lack sharpness
+(due to poor use of font atlases), and also lack rich text features like bolding,
+italic, colouring, adding a shadow, adding an outline (ok Colibri doesn't support
+outline either). In many cases you can do colour and shadow by hand using multiple
+text elements (for shadows, create another text in black behind and displace it).
+But Colibri lets you support all of this with just one ColibriLabel.
+
+There's so many games with ilegible text out there. And then when customers complain
+they can't increase the font size because it breaks the whole UI. In Colibri that
+(mostly) doesn't happen thanks to the layout engine, which automatically resizes
+everything.<br/>
+The function "sizeToFit" from Labels have been inspired by Apple's UILabel.
+In fact ColibriLabel was inspired by UILabel. It's such a good class.
+
+One more element I needed is that I planned to use Colibri in a threaded environment
+(render-split model to be exact. Logic thread needs to communicate with render thread
+about UI state, render thread manages and owns the UI). It gets very hard to do that
+right with a 3rd party library that sneakily decided to use a global variable, TLS,
+or something else that would break in this environment.<br/>
+Writing it myself ensures it will work.
+
+Last but not least, I like pretty and glossy skins, and most UIs don't look pretty (IMO)
+out of the box. This is purely on the artistic side. Windows 10 feels like a massive
+step backwards from Windows 7 in that regard.
+
 ### Is this library just for video games?
 
 While that is intended use, you don't have to. Any multimedia equipment that requires
