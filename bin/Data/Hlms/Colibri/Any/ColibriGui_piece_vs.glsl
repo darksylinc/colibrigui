@@ -11,7 +11,7 @@
 
 @piece( custom_vs_preExecution )
 	@property( !colibri_text )
-		uint colibriDrawId = drawId + ((uint(gl_VertexID) - worldMaterialIdx[drawId].w) / 54u);
+		uint colibriDrawId = inVs_drawId + ((uint(gl_VertexID) - worldMaterialIdx[inVs_drawId].w) / 54u);
 		#undef finalDrawId
 		#define finalDrawId colibriDrawId
 	@end
@@ -24,7 +24,7 @@
 	gl_ClipDistance[3] = normal.w;
 
 	@property( colibri_text )
-		uint vertId = (uint(gl_VertexID) - worldMaterialIdx[drawId].w) % 6u;
+		uint vertId = (uint(gl_VertexID) - worldMaterialIdx[inVs_drawId].w) % 6u;
 		outVs.uvText.x = (vertId <= 1u || vertId == 5u) ? 0.0f : float( blendIndices.x );
 		outVs.uvText.y = (vertId == 0u || vertId >= 4u) ? 0.0f : float( blendIndices.y );
 		outVs.pixelsPerRow		= blendIndices.x;

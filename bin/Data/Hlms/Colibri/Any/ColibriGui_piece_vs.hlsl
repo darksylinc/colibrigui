@@ -14,7 +14,7 @@
 
 @piece( custom_vs_preExecution )
 	@property( !colibri_text )
-		uint colibriDrawId = input.drawId + (uint(gl_VertexID) / 54u);
+		uint colibriDrawId = inVs_drawId + (uint(gl_VertexID) / 54u);
 		#undef finalDrawId
 		#define finalDrawId colibriDrawId
 	@end
