@@ -69,6 +69,7 @@ namespace Ogre
 		mGlyphAtlasBuffer( 0 )
 	{
 		mTexUnitSlotStart = 3u;
+		mSamplerUnitSlotStart = 3u;
     }
 	HlmsColibri::HlmsColibri( Archive *dataFolder, ArchiveVec *libraryFolders,
 							  HlmsTypes type, const String &typeName ) :
@@ -76,6 +77,7 @@ namespace Ogre
 		mGlyphAtlasBuffer( 0 )
 	{
 		mTexUnitSlotStart = 3u;
+		mSamplerUnitSlotStart = 3u;
     }
     //-----------------------------------------------------------------------------------
 	HlmsColibri::~HlmsColibri()
