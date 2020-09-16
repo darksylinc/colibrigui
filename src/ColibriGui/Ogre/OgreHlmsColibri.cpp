@@ -180,7 +180,11 @@ namespace Ogre
 
             rebindTexBuffer( commandBuffer );
 
+#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR <= 2
             mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
+#else
+            mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock, 2 );
+#endif
         }
 
         //Don't bind the material buffer on caster passes (important to keep
