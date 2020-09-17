@@ -23,6 +23,8 @@ compositor_node RenderingNode
 
         pass custom colibri_gui
         {
+            // Colibri doesn't have load/store semantics.
+            // It appends itself to the previous pass'
         }
     }
 }
