@@ -58,6 +58,10 @@ namespace Ogre
 	protected:
 		TexBufferPacked *mGlyphAtlasBuffer;
 
+#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
+		virtual void setupRootLayout( RootLayout &rootLayout );
+#endif
+
 		virtual const HlmsCache* createShaderCacheEntry( uint32 renderableHash,
 														 const HlmsCache &passCache,
 														 uint32 finalHash,

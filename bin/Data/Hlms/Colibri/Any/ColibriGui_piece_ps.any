@@ -1,8 +1,8 @@
 @property( colibri_gui && colibri_text )
 
 @piece( custom_ps_uniformDeclaration )
-	@property( syntax == glsl )
-		/*layout(binding = 2) */uniform samplerBuffer glyphAtlas;
+	@property( syntax == glsl || syntax == glslvk )
+		vulkan_layout( ogre_T2 ) uniform samplerBuffer glyphAtlas;
 	@end
 	@property( syntax == hlsl )
 		Buffer<unorm float> glyphAtlas : register(t2);
@@ -15,11 +15,10 @@
 @piece( custom_ps_preLights )
 	@property( syntax == metal )
 		uchar glyphCol;
-	@end
-	@property( syntax != metal )
+	@else
 		float glyphCol;
 	@end
-	@property( syntax != glsl )
+	@property( syntax != glsl && syntax != glslvk )
 		#define outColour outPs.colour0
 	@end
 
@@ -28,8 +27,7 @@
 												   floor(inPs.uvText.x)) ) );
 	@property( syntax == metal )
 		diffuseCol.w = unpack_unorm4x8_to_float( glyphCol ).x;
-	@end
-	@property( syntax != metal )
+	@else
 		diffuseCol.w = glyphCol;
 	@end
 @end

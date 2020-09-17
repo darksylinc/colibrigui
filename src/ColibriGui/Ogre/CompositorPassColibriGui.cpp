@@ -8,6 +8,8 @@
 #include "Compositor/OgreCompositorWorkspaceListener.h"
 
 #include "OgrePixelFormatGpuUtils.h"
+#include "OgreRenderSystem.h"
+#include "OgreSceneManager.h"
 
 namespace Ogre
 {
@@ -21,9 +23,8 @@ namespace Ogre
 		m_colibriManager( colibriManager ),
 		mDefinition( definition )
 	{
-		initialize( rtv );
-
-		setResolutionToColibri( mAnyTargetTexture->getWidth(), mAnyTargetTexture->getHeight() );
+		TextureGpu *texture = mParentNode->getDefinedTexture( rtv->colourAttachments[0].textureName );
+		setResolutionToColibri( texture->getWidth(), texture->getHeight() );
 	}
 	//-----------------------------------------------------------------------------------
 	void CompositorPassColibriGui::execute( const Camera *lodCamera )
@@ -40,7 +41,8 @@ namespace Ogre
 
 		notifyPassEarlyPreExecuteListeners();
 
-		executeResourceTransitions();
+		//analyzeBarriers();
+		//executeResourceTransitions();
 
 		//Fire the listener in case it wants to change anything
 		notifyPassPreExecuteListeners();

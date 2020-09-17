@@ -40,6 +40,9 @@ THE SOFTWARE.
 #include "OgreCamera.h"
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
+#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
+#include "OgreRootLayout.h"
+#endif
 
 #include "OgreDescriptorSetTexture.h"
 #include "OgreTextureGpu.h"
@@ -83,6 +86,20 @@ namespace Ogre
 	HlmsColibri::~HlmsColibri()
 	{
 	}
+#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
+	//-----------------------------------------------------------------------------------
+	void HlmsColibri::setupRootLayout( RootLayout &rootLayout )
+	{
+		HlmsUnlit::setupRootLayout( rootLayout );
+
+		if( getProperty( "colibri_text" ) )
+		{
+			DescBindingRange *descBindingRanges = rootLayout.mDescBindingRanges[0];
+			descBindingRanges[DescBindingTypes::TexBuffer].start = 2u;
+			descBindingRanges[DescBindingTypes::TexBuffer].end = 3u;
+		}
+	}
+#endif
 	//-----------------------------------------------------------------------------------
 	const HlmsCache* HlmsColibri::createShaderCacheEntry( uint32 renderableHash,
 														  const HlmsCache &passCache,
@@ -92,7 +109,7 @@ namespace Ogre
 		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry( renderableHash, passCache,
 																	 finalHash, queuedRenderable );
 
-		if( mShaderProfile == "hlsl" || mShaderProfile == "metal" )
+		if( mShaderProfile != "glsl" )
 			return retVal; //D3D embeds the texture slots in the shader.
 
 		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
@@ -183,7 +200,7 @@ namespace Ogre
 #if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR <= 2
             mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock );
 #else
-            mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock, 2 );
+			mListener->hlmsTypeChanged( casterPass, commandBuffer, datablock, 2 );
 #endif
         }
 
