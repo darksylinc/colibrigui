@@ -2,6 +2,9 @@
 
 @piece( custom_ps_uniformDeclaration )
 	@property( syntax == glsl || syntax == glslvk )
+		@property( ogre_version < 2003000 )
+			#define vulkan_layout(x)
+		@end
 		vulkan_layout( ogre_T2 ) uniform samplerBuffer glyphAtlas;
 	@end
 	@property( syntax == hlsl )
@@ -21,6 +24,9 @@
 	@property( syntax != glsl && syntax != glslvk )
 		#define outColour outPs.colour0
 	@end
+	@property( ogre_version < 2003000 )
+		#define diffuseCol outColour
+	@end
 
 	glyphCol = bufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
 											  uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
@@ -29,6 +35,12 @@
 		diffuseCol.w = unpack_unorm4x8_to_float( glyphCol ).x;
 	@else
 		diffuseCol.w = glyphCol;
+	@end
+
+	@property( ogre_version < 2003000 )
+		outColour.xyz = float3( 1.0f, 1.0f, 1.0f );
+		@property( hlms_colour )outColour *= inPs.colour @insertpiece( MultiplyDiffuseConst );@end
+		@property( !hlms_colour && diffuse )outColour *= material.diffuse;@end
 	@end
 @end
 

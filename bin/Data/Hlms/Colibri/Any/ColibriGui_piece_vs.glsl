@@ -1,6 +1,10 @@
 @property( colibri_gui )
 
 @piece( custom_vs_attributes )
+	@property( ogre_version < 2003000 )
+		#define vulkan_layout(x)
+	@end
+
 	vulkan_layout( OGRE_NORMAL ) in float4 normal;
 
 	@property( colibri_text )

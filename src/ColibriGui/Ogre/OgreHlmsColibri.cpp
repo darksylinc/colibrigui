@@ -133,11 +133,19 @@ namespace Ogre
 			setProperty( "colibri_gui", 1 );
 			setProperty( HlmsBaseProp::IdentityWorld, 1 );
 			setProperty( HlmsBaseProp::PsoClipDistances, 4 );
+
+			setProperty( "ogre_version", ( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 +
+										   OGRE_VERSION_PATCH ) );
 		}
 
-		//See Colibri::Label
+		// See Colibri::Label
 		if( customParams.find( 6373 ) != customParams.end() )
+		{
 			setProperty( "colibri_text", 1 );
+
+			setProperty( "ogre_version", ( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 +
+										   OGRE_VERSION_PATCH ) );
+		}
 	}
 	//-----------------------------------------------------------------------------------
 	void HlmsColibri::setGlyphAtlasBuffer( TexBufferPacked *texBuffer )
