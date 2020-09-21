@@ -574,7 +574,7 @@ namespace Colibri
 				lineWidth	= 0;
 			}
 
-			lineWidth = Ogre::max( lineWidth, bottomRight.x );
+			lineWidth = std::max( lineWidth, bottomRight.x );
 			minTopLeft.makeFloor( topLeft );
 			maxBottomRight.makeCeil( bottomRight );
 
@@ -685,7 +685,7 @@ namespace Colibri
 				lineWidth	= 0;
 			}
 
-			lineWidth = Ogre::max( lineWidth, bottomRight.y );
+			lineWidth = std::max( lineWidth, bottomRight.y );
 			minTopLeft.makeFloor( topLeft );
 			maxBottomRight.makeCeil( bottomRight );
 
@@ -984,25 +984,25 @@ namespace Colibri
 
 					if( !shapedGlyph.isNewline && !changesLine )
 					{
-						lineHeight = Ogre::max( lineHeight, shapedGlyph.glyph->newlineSize );
-						mostTop = Ogre::min( mostTop, shapedGlyph.caretPos.y );
-						mostBottom = Ogre::max( mostBottom, shapedGlyph.caretPos.y );
+						lineHeight = std::max( lineHeight, shapedGlyph.glyph->newlineSize );
+						mostTop = std::min( mostTop, shapedGlyph.caretPos.y );
+						mostBottom = std::max( mostBottom, shapedGlyph.caretPos.y );
 						if( isHorizontal )
 						{
-							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x +
+							mostLeft = std::min( mostLeft, shapedGlyph.caretPos.x +
+												 shapedGlyph.offset.x +
+												 shapedGlyph.glyph->bearingX );
+							mostRight = std::max( mostRight, shapedGlyph.caretPos.x +
 												  shapedGlyph.offset.x +
-												  shapedGlyph.glyph->bearingX );
-							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-												   shapedGlyph.offset.x +
-												   shapedGlyph.glyph->bearingX +
-												   shapedGlyph.glyph->width );
+												  shapedGlyph.glyph->bearingX +
+												  shapedGlyph.glyph->width );
 						}
 						else
 						{
-							mostLeft = Ogre::min( mostLeft, shapedGlyph.caretPos.x -
+							mostLeft = std::min( mostLeft, shapedGlyph.caretPos.x -
+												 lineHeight * 0.5f );
+							mostRight = std::max( mostRight, shapedGlyph.caretPos.x +
 												  lineHeight * 0.5f );
-							mostRight = Ogre::max( mostRight, shapedGlyph.caretPos.x +
-												   lineHeight * 0.5f );
 						}
 					}
 

@@ -218,8 +218,8 @@ namespace Colibri
 					biggestMargin.makeCeil( cell->m_margin );
 				}
 
-				maxOtherSize = Ogre::max( maxOtherSize, biggestMinSizeInColumn[!bVertical] +
-														biggestMargin[!bVertical] );
+				maxOtherSize = std::max( maxOtherSize, biggestMinSizeInColumn[!bVertical] +
+													   biggestMargin[!bVertical] );
 				if( !cell0->m_proportion[bVertical] )
 					nonProportionalSize += biggestMinSizeInColumn[bVertical];
 				else
@@ -263,11 +263,11 @@ namespace Colibri
 		sizeToDistribute = std::max( sizeToDistribute, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
 		if( m_expandToCoverSoftMaxSize )
-			maxOtherSize = Ogre::max( maxOtherSize, softMaxSize[!bVertical] / numLines );
+			maxOtherSize = std::max( maxOtherSize, softMaxSize[!bVertical] / numLines );
 		float nonProportionalFactor = 1.0f;
 		if( !canScroll )
 		{
-			maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] / numLines );
+			maxOtherSize = std::min( maxOtherSize, hardMaxSize[!bVertical] / numLines );
 			//If nonProportionalSize is bigger than hardMaxSize, widgets just don't fit.
 			//Make them all proportionally smaller.
 			nonProportionalFactor = std::min( hardMaxSize[bVertical] / nonProportionalSize, 1.0f );
@@ -430,10 +430,10 @@ namespace Colibri
 				if( cell->m_expand[!bVertical] )
 				{
 					float otherAvailableSize = maxOtherSize - cellMinSize[!bVertical];
-					otherAvailableSize = Ogre::max( otherAvailableSize, 0.0f );
+					otherAvailableSize = std::max( otherAvailableSize, 0.0f );
 
-					finalCellSize[!bVertical] = maxOtherSize - Ogre::min( otherAvailableSize,
-																		  cell->m_margin[!bVertical] );
+					finalCellSize[!bVertical] = maxOtherSize - std::min( otherAvailableSize,
+																		 cell->m_margin[!bVertical] );
 				}
 
 				finalCellSize.makeCeil( cellMinSize );
@@ -551,8 +551,8 @@ namespace Colibri
 		if( m_expandToCoverSoftMaxSize )
 		{
 			const Ogre::Vector2 softMaxSize = m_currentSize - layoutMargin;
-			maxedVal[!m_vertical] = Ogre::max( maxedVal[!m_vertical],
-											   softMaxSize[!m_vertical] / numLines );
+			maxedVal[!m_vertical] = std::max( maxedVal[!m_vertical],
+											  softMaxSize[!m_vertical] / numLines );
 		}
 
 		m_currentSize = Ogre::Vector2( m_vertical ? (maxedVal.x * numLines) : accumVal.x,
@@ -602,8 +602,8 @@ namespace Colibri
 		if( m_expandToCoverSoftMaxSize )
 		{
 			const Ogre::Vector2 softMaxSize = m_currentSize - layoutMargin;
-			maxedVal[!m_vertical] = Ogre::max( maxedVal[!m_vertical],
-											   softMaxSize[!m_vertical] / numLines );
+			maxedVal[!m_vertical] = std::max( maxedVal[!m_vertical],
+											  softMaxSize[!m_vertical] / numLines );
 		}
 
 		if( m_evenMarginSpaceAtEdges && !m_cells.empty() )

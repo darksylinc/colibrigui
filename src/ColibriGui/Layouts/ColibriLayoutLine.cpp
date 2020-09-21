@@ -184,8 +184,8 @@ namespace Colibri
 				const LayoutCell *cell = *itor;
 				maxProportion	+= cell->m_proportion[bVertical];
 				const Ogre::Vector2 cellMinSize = cell->getCellMinSize();
-				maxOtherSize = Ogre::max( maxOtherSize,
-										  cellMinSize[!bVertical] + cell->m_margin[!bVertical] );
+				maxOtherSize = std::max( maxOtherSize,
+										 cellMinSize[!bVertical] + cell->m_margin[!bVertical] );
 				if( !cell->m_proportion[bVertical] )
 					nonProportionalSize += cellMinSize[bVertical];
 				else
@@ -224,11 +224,11 @@ namespace Colibri
 		}
 		sizeToDistribute = std::max( sizeToDistribute, 0.0f );
 		const float invMaxProportion = 1.0f / static_cast<float>( maxProportion );
-		maxOtherSize = Ogre::max( maxOtherSize, softMaxSize[!bVertical] );
+		maxOtherSize = std::max( maxOtherSize, softMaxSize[!bVertical] );
 		float nonProportionalFactor = 1.0f;
 		if( !canScroll )
 		{
-			maxOtherSize = Ogre::min( maxOtherSize, hardMaxSize[!bVertical] );
+			maxOtherSize = std::min( maxOtherSize, hardMaxSize[!bVertical] );
 			//If nonProportionalSize is bigger than hardMaxSize, widgets just don't fit.
 			//Make them all proportionally smaller.
 			nonProportionalFactor = std::min( hardMaxSize[bVertical] / nonProportionalSize, 1.0f );
@@ -384,10 +384,10 @@ namespace Colibri
 			if( cell->m_expand[!bVertical] )
 			{
 				float otherAvailableSize = maxOtherSize - cellMinSize[!bVertical];
-				otherAvailableSize = Ogre::max( otherAvailableSize, 0.0f );
+				otherAvailableSize = std::max( otherAvailableSize, 0.0f );
 
-				finalCellSize[!bVertical] = maxOtherSize - Ogre::min( otherAvailableSize,
-																	  cell->m_margin[!bVertical] );
+				finalCellSize[!bVertical] = maxOtherSize - std::min( otherAvailableSize,
+																	 cell->m_margin[!bVertical] );
 			}
 
 			finalCellSize.makeCeil( cellMinSize );
