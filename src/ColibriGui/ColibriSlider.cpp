@@ -12,7 +12,9 @@ namespace Colibri
 		m_sliderValue( 0.0f ),
 		m_directionChangeAmount( 0.1f ),
 		m_cursorOffset( 0.0f ),
-		m_handleSize( 10.0f )
+		m_handleSize( 10.0f ),
+		m_vertical( false ),
+		m_alwaysInside( false )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
@@ -74,7 +76,7 @@ namespace Colibri
 
 		if( state == States::Pressed )
 		{
-			_processCursorPosition( m_manager->getMouseCursorPosNdc(), true );
+			processCursorPosition( m_manager->getMouseCursorPosNdc(), true );
 		}
 		else
 			m_cursorOffset = 0.0f;
@@ -102,24 +104,29 @@ namespace Colibri
 
 		m_handleSize = frameSize.y * 0.8f;
 
+		const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
+
 		// Slider line
 		// const Ogre::Vector2 framePosition = getLocalTopLeft();
 		const Ogre::Vector2 framePosition = Ogre::Vector2::ZERO;
-		const float lineY = framePosition.y + ( frameSize.y / 2.0f ) - ( sliderLineHeight / 2.0f );
+		const float lineTop = framePosition.y + ( frameSize.y - sliderLineHeight ) * 0.5f;
 
-		// Half a handle is added to the line on each side as padding.
-		m_layers[0]->setTopLeft( Ogre::Vector2( framePosition.x + m_handleSize / 2.0f, lineY ) );
+		// Horizontally: Half a handle is added to the line on each side as padding.
+		// Vertically: Center the line
+		m_layers[0]->setTopLeft( Ogre::Vector2( framePosition.x + handlePadding * 0.5f, lineTop ) );
 
-		// Other than the padding, the width is used to its full, but the height is always a constant.
-		const float reducedLineWidth = frameSize.x - m_handleSize;
+		// Other than the padding, the width is used to its full, but the height is always constant.
+		const float reducedLineWidth = frameSize.x - handlePadding;
 		m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
+
+		const float slideableArea = m_alwaysInside ? ( frameSize.x - m_handleSize ) : reducedLineWidth;
 
 		// Slider handle
 		m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
 
-		const float targetSliderValue = rightToLeft ? 1 - m_sliderValue : m_sliderValue;
-		m_layers[1]->setTopLeft( Ogre::Vector2(
-			framePosition.x + ( reducedLineWidth * targetSliderValue ), lineY - m_handleSize / 2.0f ) );
+		const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
+		m_layers[1]->setTopLeft( Ogre::Vector2( framePosition.x + ( slideableArea * targetSliderValue ),
+												lineTop + ( sliderLineHeight - m_handleSize ) * 0.5f ) );
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );
@@ -137,7 +144,7 @@ namespace Colibri
 		Widget::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
-	void Slider::_processCursorPosition( const Ogre::Vector2 &pos, bool cursorBegin )
+	void Slider::processCursorPosition( const Ogre::Vector2 &pos, bool cursorBegin )
 	{
 		if( m_currentState == States::Pressed && this->intersects( pos ) )
 		{
@@ -161,18 +168,29 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Slider::notifyCursorMoved( const Ogre::Vector2 &posNDC ) { _processCursorPosition( posNDC ); }
+	void Slider::notifyCursorMoved( const Ogre::Vector2 &posNDC ) { processCursorPosition( posNDC ); }
 	//-------------------------------------------------------------------------
 	void Slider::_notifyActionKeyMovement( Borders::Borders direction )
 	{
-		const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
-		const float targetDirectionAmount =
-			rightToLeft ? -m_directionChangeAmount : m_directionChangeAmount;
+		if( !m_vertical )
+		{
+			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
+			const float targetDirectionAmount =
+				rightToLeft ? -m_directionChangeAmount : m_directionChangeAmount;
 
-		if( direction == Borders::Left )
-			setValue( m_sliderValue - targetDirectionAmount );
-		else if( direction == Borders::Right )
-			setValue( m_sliderValue + targetDirectionAmount );
+			if( direction == Borders::Left )
+				setValue( m_sliderValue - targetDirectionAmount );
+			else if( direction == Borders::Right )
+				setValue( m_sliderValue + targetDirectionAmount );
+		}
+		else
+		{
+			const float targetDirectionAmount = m_directionChangeAmount;
+			if( direction == Borders::Top )
+				setValue( m_sliderValue + targetDirectionAmount );
+			else if( direction == Borders::Bottom )
+				setValue( m_sliderValue - targetDirectionAmount );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setValue( float value )
@@ -184,5 +202,23 @@ namespace Colibri
 		updateSlider();
 
 		callActionListeners( Action::ValueChanged );
+	}
+	//-------------------------------------------------------------------------
+	void Slider::setAlwaysInside( bool bAlwaysInside )
+	{
+		m_alwaysInside = bAlwaysInside;
+		updateSlider();
+	}
+	//-------------------------------------------------------------------------
+	void Slider::setVertical( bool bVertical )
+	{
+		m_vertical = bVertical;
+
+		m_autoSetNextWidget[Borders::Left] = !bVertical;
+		m_autoSetNextWidget[Borders::Right] = !bVertical;
+		m_autoSetNextWidget[Borders::Top] = bVertical;
+		m_autoSetNextWidget[Borders::Bottom] = bVertical;
+
+		updateSlider();
 	}
 }  // namespace Colibri

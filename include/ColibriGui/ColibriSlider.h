@@ -32,9 +32,13 @@ namespace Colibri
 
 		float m_cursorOffset;
 		float m_handleSize;
+		bool  m_vertical;
+		bool  m_alwaysInside;
 
 	protected:
 		void updateSlider();
+
+		void processCursorPosition( const Ogre::Vector2 &pos, bool cursorBegin = false );
 
 	public:
 		Slider( ColibriManager *manager );
@@ -53,6 +57,34 @@ namespace Colibri
 		void  setValue( float value );
 		float getValue() const { return m_sliderValue; }
 
+		/// When false, the handle reaches half outside when at 0% and 100%
+		/// When true, the handle is always contained inside the background
+		///
+		/// e.g. at 0%
+		///
+		///	@code
+		/// m_alwaysInside = false:
+		///
+		///		  |                  |
+		///     -----                |
+		///		| |-|----------------|
+		///		-----                |
+		///		  |                  |
+		///
+		/// m_alwaysInside = true:
+		///
+		///		  |                  |
+		///       -----              |
+		///		  |---|--------------|
+		///		  -----              |
+		///		  |                  |
+		/// @endcode
+		void setAlwaysInside( bool bAlwaysInside );
+		bool getAlwaysInside() const { return m_alwaysInside; }
+
+		void setVertical( bool bVertical );
+		bool getVertical() const { return m_vertical; }
+
 		Renderable *getSliderLine();
 		Renderable *getSliderHandle();
 
@@ -63,9 +95,6 @@ namespace Colibri
 
 		void  setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
 		float getDirectionChangeAmount() const { return m_directionChangeAmount; }
-
-	private:
-		void _processCursorPosition( const Ogre::Vector2 &pos, bool cursorBegin = false );
 	};
 }  // namespace Colibri
 
