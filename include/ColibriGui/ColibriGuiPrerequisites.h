@@ -57,6 +57,7 @@ namespace Colibri
 	class ShaperManager;
 	struct SkinInfo;
 	class SkinManager;
+	class Slider;
 	class Widget;
 	class Window;
 
