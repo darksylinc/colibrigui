@@ -100,33 +100,66 @@ namespace Colibri
 		const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
 
 		const Ogre::Vector2 frameSize = getSize();
-		static const float sliderLineHeight = 5.0f;
 
-		m_handleSize = frameSize.y * 0.8f;
+		// const Ogre::Vector2 frameOrigin = getLocalTopLeft();
+		const Ogre::Vector2 frameOrigin = Ogre::Vector2::ZERO;
 
-		const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
+		if( !m_vertical )
+		{
+			m_handleSize = frameSize.y * 0.8f;
+			const float sliderLineHeight = 5.0f;
+			const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
 
-		// Slider line
-		// const Ogre::Vector2 framePosition = getLocalTopLeft();
-		const Ogre::Vector2 framePosition = Ogre::Vector2::ZERO;
-		const float lineTop = framePosition.y + ( frameSize.y - sliderLineHeight ) * 0.5f;
+			// Slider line
+			const float lineTop = frameOrigin.y + ( frameSize.y - sliderLineHeight ) * 0.5f;
 
-		// Horizontally: Half a handle is added to the line on each side as padding.
-		// Vertically: Center the line
-		m_layers[0]->setTopLeft( Ogre::Vector2( framePosition.x + handlePadding * 0.5f, lineTop ) );
+			// Horizontally: Half a handle is added to the line on each side as padding.
+			// Vertically: Center the line
+			m_layers[0]->setTopLeft( Ogre::Vector2( frameOrigin.x + handlePadding * 0.5f, lineTop ) );
 
-		// Other than the padding, the width is used to its full, but the height is always constant.
-		const float reducedLineWidth = frameSize.x - handlePadding;
-		m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
+			// Other than the padding, the width is used to its full, but the height is always constant.
+			const float reducedLineWidth = frameSize.x - handlePadding;
+			m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
 
-		const float slideableArea = m_alwaysInside ? ( frameSize.x - m_handleSize ) : reducedLineWidth;
+			const float slideableArea =
+				m_alwaysInside ? ( frameSize.x - m_handleSize ) : reducedLineWidth;
 
-		// Slider handle
-		m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
+			// Slider handle
+			m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
 
-		const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
-		m_layers[1]->setTopLeft( Ogre::Vector2( framePosition.x + ( slideableArea * targetSliderValue ),
-												lineTop + ( sliderLineHeight - m_handleSize ) * 0.5f ) );
+			const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
+			m_layers[1]->setTopLeft(
+				Ogre::Vector2( frameOrigin.x + ( slideableArea * targetSliderValue ),
+							   lineTop + ( sliderLineHeight - m_handleSize ) * 0.5f ) );
+		}
+		else
+		{
+			m_handleSize = frameSize.x * 0.8f;
+			const float sliderLineWidth = 5.0f;
+			const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
+
+			// Slider line
+			const float lineLeft = frameOrigin.x + ( frameSize.x - sliderLineWidth ) * 0.5f;
+
+			// Vertically: Half a handle is added to the line on each side as padding.
+			// Horizontally: Center the line
+			m_layers[0]->setTopLeft( Ogre::Vector2( lineLeft, frameOrigin.y + handlePadding * 0.5f ) );
+
+			// Other than the padding, the width is used to its full, but the height is always constant.
+			const float reducedLineHeight = frameSize.y - handlePadding;
+			m_layers[0]->setSize( Ogre::Vector2( sliderLineWidth, reducedLineHeight ) );
+
+			const float slideableArea =
+				m_alwaysInside ? ( frameSize.y - m_handleSize ) : reducedLineHeight;
+
+			// Slider handle
+			m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
+
+			const float targetSliderValue = 1.0f - m_sliderValue;
+			m_layers[1]->setTopLeft(
+				Ogre::Vector2( lineLeft + ( sliderLineWidth - m_handleSize ) * 0.5f,
+							   frameOrigin.y + ( slideableArea * targetSliderValue ) ) );
+		}
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );
@@ -148,23 +181,44 @@ namespace Colibri
 	{
 		if( m_currentState == States::Pressed && this->intersects( pos ) )
 		{
-			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
-
-			const float sliderWidth =
-				getSliderLine()->getDerivedBottomRight().x - getSliderLine()->getDerivedTopLeft().x;
-			const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
-			float posX = mouseRelativeX / sliderWidth;
-			if( rightToLeft )
-				posX = 1 - posX;
-
-			if( cursorBegin && getSliderHandle()->intersects( pos ) )
+			if( !m_vertical )
 			{
-				// The user actually clicked on the handle, rather than part of the line.
-				// If this happens, apply an offset to the mouse movements, so the handle doesn't jump.
-				m_cursorOffset = posX - m_sliderValue;
-			}
+				const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
 
-			setValue( posX - m_cursorOffset );
+				const float sliderWidth =
+					getSliderLine()->getDerivedBottomRight().x - getSliderLine()->getDerivedTopLeft().x;
+				const float mouseRelativeX = pos.x - m_derivedTopLeft.x;
+				float posX = mouseRelativeX / sliderWidth;
+				if( rightToLeft )
+					posX = 1.0f - posX;
+
+				if( cursorBegin && getSliderHandle()->intersects( pos ) )
+				{
+					// The user actually clicked on the handle, rather than part of the line.
+					// If this happens, apply an offset to the mouse movements, so the handle doesn't
+					// jump.
+					m_cursorOffset = posX - m_sliderValue;
+				}
+
+				setValue( posX - m_cursorOffset );
+			}
+			else
+			{
+				const float sliderHeight =
+					getSliderLine()->getDerivedBottomRight().y - getSliderLine()->getDerivedTopLeft().y;
+				const float mouseRelativeY = pos.y - m_derivedTopLeft.y;
+				float posY = 1.0f - mouseRelativeY / sliderHeight;
+
+				if( cursorBegin && getSliderHandle()->intersects( pos ) )
+				{
+					// The user actually clicked on the handle, rather than part of the line.
+					// If this happens, apply an offset to the mouse movements, so the handle doesn't
+					// jump.
+					m_cursorOffset = posY - m_sliderValue;
+				}
+
+				setValue( posY - m_cursorOffset );
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
