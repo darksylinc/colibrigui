@@ -30,10 +30,11 @@ namespace Colibri
 		/// this is how much the slider value be increased or decreased.
 		float m_directionChangeAmount;
 
-		float m_cursorOffset;
-		float m_handleSize;
-		bool  m_vertical;
-		bool  m_alwaysInside;
+		float         m_cursorOffset;
+		float         m_lineSize;
+		Ogre::Vector2 m_handleProportion;
+		bool          m_vertical;
+		bool          m_alwaysInside;
 
 	protected:
 		void updateSlider();
@@ -52,6 +53,23 @@ namespace Colibri
 
 		virtual void setState( States::States state, bool smartHighlight = true,
 							   bool broadcastEnable = false );
+
+		/** Sets the size of the handle relative to the full
+			width (m_vertical = true) or height (m_vertical = false) of the Slider.
+
+			And sets the size of the handle, fixed in virtual canvas units
+
+		@param handleProportion
+			Should be in range [0; 1].
+			Values outside that range are accepted but may cause visual artifacts
+			If both .x and .y are the same value, then the handle will be square
+		@param lineSize
+			Should be in range [0; inf)
+			In virtual canvas units
+		*/
+		void setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize );
+		const Ogre::Vector2 &getHandleProportion() const { return m_handleProportion; }
+		float                getLineSize() const { return m_lineSize; }
 
 		// Set the value of the slider. Right now this is between 0 and 1 only.
 		void  setValue( float value );

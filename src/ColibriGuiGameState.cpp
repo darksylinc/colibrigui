@@ -45,6 +45,7 @@ namespace Demo
 	extern Colibri::ColibriManager *colibriManager;
 	Colibri::ColibriManager *colibriManager = 0;
 	Colibri::Window *mainWindow = 0;
+	Colibri::Window *vertWindow = 0;
 	Colibri::Button *button0 = 0;
 	Colibri::Button *button1 = 0;
 	Colibri::Spinner *spinner0 = 0;
@@ -53,16 +54,17 @@ namespace Demo
 	Colibri::Progressbar *progressBar0 = 0;
 	Colibri::Progressbar *progressBar1 = 0;
 	Colibri::Slider *slider1 = 0;
+	Colibri::Slider *slider2 = 0;
 	Colibri::Label *sliderLabel = 0;
 
-    ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
+	ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
 	{
-    }
-    //-----------------------------------------------------------------------------------
-    void ColibriGuiGameState::createScene01(void)
-    {
-        mCameraController = new CameraController( mGraphicsSystem, false );
+	}
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::createScene01(void)
+	{
+		mCameraController = new CameraController( mGraphicsSystem, false );
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
@@ -78,16 +80,20 @@ namespace Demo
 
 		mainWindow = colibriManager->createWindow( 0 );
 		//mainWindow->setVisualsEnabled( false );
+		vertWindow = colibriManager->createWindow( 0 );
 
 		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
 		mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 450, 0 ) );
+		vertWindow->setTransform( Ogre::Vector2( colibriManager->getCanvasSize().x - 64, 0 ),
+								  Ogre::Vector2( 64, 450 ) );
 
 		//When m_breadthFirst is set to true, it can cause significant performance
 		//increases for UI-heavy applications. But be sure you understand it i.e.
 		//it may not render correctly if your widgets have children and they overlap.
 		mainWindow->m_breadthFirst = true;
+		vertWindow->m_breadthFirst = true;
 
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
@@ -185,6 +191,12 @@ namespace Demo
 				++itor;
 			}
 		}
+
+		// Do not put slider2 in the layout
+		slider2 = colibriManager->createWidget<Colibri::Slider>( vertWindow );
+		slider2->m_minSize = Ogre::Vector2( 32, 320 );
+		slider2->setSize( slider2->m_minSize );
+		slider2->setVertical( true );
 
 		layout->setAdjustableWindow( mainWindow );
 		layout->m_hardMaxSize = colibriManager->getCanvasSize();
@@ -296,16 +308,16 @@ namespace Demo
 #endif
 		mainWindow->sizeScrollToFit();
 
-        TutorialGameState::createScene01();
-    }
+		TutorialGameState::createScene01();
+	}
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::destroyScene()
 	{
 		colibriManager->destroyWindow( mainWindow );
 		delete colibriManager;
 	}
-    //-----------------------------------------------------------------------------------
-    void ColibriGuiGameState::update( float timeSinceLast )
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::update( float timeSinceLast )
 	{
 		static bool tried = false;
 		if( !tried )
@@ -355,10 +367,10 @@ namespace Demo
 			prevValue = currentValue;
 		}
 
-        TutorialGameState::update( timeSinceLast );
-    }
-    //-----------------------------------------------------------------------------------
-    void ColibriGuiGameState::generateDebugText( float timeSinceLast, Ogre::String &outText )
+		TutorialGameState::update( timeSinceLast );
+	}
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::generateDebugText( float timeSinceLast, Ogre::String &outText )
 	{
 		TutorialGameState::generateDebugText( timeSinceLast, outText );
 	}
@@ -439,14 +451,14 @@ namespace Demo
 			}
 		}
 	}
-    //-----------------------------------------------------------------------------------
-    void ColibriGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )
-    {
-        if( (arg.keysym.mod & ~(KMOD_NUM|KMOD_CAPS)) != 0 )
-        {
-            TutorialGameState::keyReleased( arg );
-            return;
-        }
+	//-----------------------------------------------------------------------------------
+	void ColibriGuiGameState::keyReleased( const SDL_KeyboardEvent &arg )
+	{
+		if( (arg.keysym.mod & ~(KMOD_NUM|KMOD_CAPS)) != 0 )
+		{
+			TutorialGameState::keyReleased( arg );
+			return;
+		}
 
 		const bool isTextInputActive = SDL_IsTextInputActive();
 		const bool isTextMultiline = colibriManager->isTextMultiline();
@@ -477,5 +489,5 @@ namespace Demo
 		}
 
 		TutorialGameState::keyReleased( arg );
-    }
+	}
 }

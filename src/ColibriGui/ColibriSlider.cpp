@@ -12,7 +12,8 @@ namespace Colibri
 		m_sliderValue( 0.0f ),
 		m_directionChangeAmount( 0.1f ),
 		m_cursorOffset( 0.0f ),
-		m_handleSize( 10.0f ),
+		m_lineSize( 5.0f ),
+		m_handleProportion( 0.8f ),
 		m_vertical( false ),
 		m_alwaysInside( false )
 	{
@@ -97,8 +98,6 @@ namespace Colibri
 		if( !m_layers[0] )
 			return;  //_initialize hasn't been called yet
 
-		const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
-
 		const Ogre::Vector2 frameSize = getSize();
 
 		// const Ogre::Vector2 frameOrigin = getLocalTopLeft();
@@ -106,9 +105,11 @@ namespace Colibri
 
 		if( !m_vertical )
 		{
-			m_handleSize = frameSize.y * 0.8f;
-			const float sliderLineHeight = 5.0f;
-			const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
+			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
+
+			const float sliderLineHeight = m_lineSize;
+			const Ogre::Vector2 handleSize = m_handleProportion * frameSize.y;
+			const float handlePadding = m_alwaysInside ? 0.0f : handleSize.x;
 
 			// Slider line
 			const float lineTop = frameOrigin.y + ( frameSize.y - sliderLineHeight ) * 0.5f;
@@ -122,21 +123,21 @@ namespace Colibri
 			m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
 
 			const float slideableArea =
-				m_alwaysInside ? ( frameSize.x - m_handleSize ) : reducedLineWidth;
+				m_alwaysInside ? ( frameSize.x - handleSize.x ) : reducedLineWidth;
 
 			// Slider handle
-			m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
+			m_layers[1]->setSize( handleSize );
 
 			const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
 			m_layers[1]->setTopLeft(
 				Ogre::Vector2( frameOrigin.x + ( slideableArea * targetSliderValue ),
-							   lineTop + ( sliderLineHeight - m_handleSize ) * 0.5f ) );
+							   lineTop + ( sliderLineHeight - handleSize.y ) * 0.5f ) );
 		}
 		else
 		{
-			m_handleSize = frameSize.x * 0.8f;
-			const float sliderLineWidth = 5.0f;
-			const float handlePadding = m_alwaysInside ? 0.0f : m_handleSize;
+			const float sliderLineWidth = m_lineSize;
+			const Ogre::Vector2 handleSize = m_handleProportion * frameSize.x;
+			const float handlePadding = m_alwaysInside ? 0.0f : handleSize.y;
 
 			// Slider line
 			const float lineLeft = frameOrigin.x + ( frameSize.x - sliderLineWidth ) * 0.5f;
@@ -150,14 +151,14 @@ namespace Colibri
 			m_layers[0]->setSize( Ogre::Vector2( sliderLineWidth, reducedLineHeight ) );
 
 			const float slideableArea =
-				m_alwaysInside ? ( frameSize.y - m_handleSize ) : reducedLineHeight;
+				m_alwaysInside ? ( frameSize.y - handleSize.y ) : reducedLineHeight;
 
 			// Slider handle
-			m_layers[1]->setSize( Ogre::Vector2( m_handleSize, m_handleSize ) );
+			m_layers[1]->setSize( handleSize );
 
 			const float targetSliderValue = 1.0f - m_sliderValue;
 			m_layers[1]->setTopLeft(
-				Ogre::Vector2( lineLeft + ( sliderLineWidth - m_handleSize ) * 0.5f,
+				Ogre::Vector2( lineLeft + ( sliderLineWidth - handleSize.x ) * 0.5f,
 							   frameOrigin.y + ( slideableArea * targetSliderValue ) ) );
 		}
 
@@ -247,6 +248,13 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Slider::setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize )
+	{
+		m_handleProportion = handleProportion;
+		m_lineSize = lineSize;
+		updateSlider();
+	}
+	//-------------------------------------------------------------------------
 	void Slider::setValue( float value )
 	{
 		value = Ogre::Math::saturate( value );
@@ -268,10 +276,10 @@ namespace Colibri
 	{
 		m_vertical = bVertical;
 
-		m_autoSetNextWidget[Borders::Left] = !bVertical;
-		m_autoSetNextWidget[Borders::Right] = !bVertical;
-		m_autoSetNextWidget[Borders::Top] = bVertical;
-		m_autoSetNextWidget[Borders::Bottom] = bVertical;
+		m_autoSetNextWidget[Borders::Left] = bVertical;
+		m_autoSetNextWidget[Borders::Right] = bVertical;
+		m_autoSetNextWidget[Borders::Top] = !bVertical;
+		m_autoSetNextWidget[Borders::Bottom] = !bVertical;
 
 		updateSlider();
 	}
