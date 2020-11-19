@@ -382,6 +382,15 @@ namespace Colibri
 		m_cursorFocusedPair = focusedPair;
 	}
 	//-------------------------------------------------------------------------
+	Ogre::Vector2 ColibriManager::snapToPixels( const Ogre::Vector2 &canvasPos ) const
+	{
+		Ogre::Vector2 tmp = m_halfWindowResolution * canvasPos * m_invCanvasSize2x;
+		tmp.x = std::round( tmp.x );
+		tmp.y = std::round( tmp.y );
+		tmp = tmp * m_canvasSize * m_pixelSize;
+		return tmp;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
 		const Ogre::Vector2 oldPos = m_mouseCursorPosNdc;

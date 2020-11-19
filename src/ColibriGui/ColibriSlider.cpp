@@ -140,9 +140,14 @@ namespace Colibri
 			m_layers[1]->setSize( handleSize );
 
 			const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
-			m_layers[1]->setTopLeft(
-				Ogre::Vector2( frameOrigin.x + ( slideableArea * targetSliderValue ),
-							   lineTop + ( sliderLineHeight - handleSize.y ) * 0.5f ) );
+
+			Ogre::Vector2 handleTopLeft( frameOrigin.x + ( slideableArea * targetSliderValue ),
+										 lineTop + ( sliderLineHeight - handleSize.y ) * 0.5f );
+			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
+			// However it still does a very good job at preventing the handle from "wobbling" as
+			// the user moves it
+			handleTopLeft = m_manager->snapToPixels( handleTopLeft );
+			m_layers[1]->setTopLeft( handleTopLeft );
 		}
 		else
 		{
@@ -168,9 +173,13 @@ namespace Colibri
 			m_layers[1]->setSize( handleSize );
 
 			const float targetSliderValue = 1.0f - m_sliderValue;
-			m_layers[1]->setTopLeft(
-				Ogre::Vector2( lineLeft + ( sliderLineWidth - handleSize.x ) * 0.5f,
-							   frameOrigin.y + ( slideableArea * targetSliderValue ) ) );
+			Ogre::Vector2 handleTopLeft( lineLeft + ( sliderLineWidth - handleSize.x ) * 0.5f,
+										 frameOrigin.y + ( slideableArea * targetSliderValue ) );
+			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
+			// However it still does a very good job at preventing the handle from "wobbling" as
+			// the user moves it
+			handleTopLeft = m_manager->snapToPixels( handleTopLeft );
+			m_layers[1]->setTopLeft( handleTopLeft );
 		}
 
 		for( size_t i = 0u; i < 2u; ++i )

@@ -256,6 +256,8 @@ namespace Colibri
 		const Ogre::Vector2& getHalfWindowResolution() const		{ return m_halfWindowResolution; }
 		const Ogre::Vector2& getInvWindowResolution2x() const		{ return m_invWindowResolution2x; }
 
+		Ogre::Vector2 snapToPixels( const Ogre::Vector2 &canvasPos ) const;
+
 		void setMouseCursorMoved( Ogre::Vector2 newPosInCanvas );
 		/**
 		@param allowScrollGesture
