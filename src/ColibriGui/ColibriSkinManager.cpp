@@ -407,6 +407,11 @@ namespace Colibri
 				skinPack.progressBarAnimSpeed = 0.0f;
 				skinPack.progressBarAnimLength = 1.0f;
 
+				skinPack.sliderLineSize = 5.0f;
+				skinPack.sliderHandleProportion[0] = 0.8f;
+				skinPack.sliderHandleProportion[1] = 0.8f;
+				skinPack.sliderAlwaysInside = false;
+
 				skinPack.name = itor->name.GetString();
 				const rapidjson::Value &skinValue = itor->value;
 
@@ -437,6 +442,36 @@ namespace Colibri
 				itTmp = skinValue.FindMember( "progress_anim_length" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
 					skinPack.progressBarAnimLength = static_cast<float>( itTmp->value.GetDouble() );
+
+				itTmp = skinValue.FindMember( "slider_line_size" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+					skinPack.sliderLineSize = static_cast<float>( itTmp->value.GetDouble() );
+
+				itTmp = skinValue.FindMember( "slider_handle_proportion" );
+				if( itTmp != skinValue.MemberEnd() )
+				{
+					if( itTmp->value.IsDouble() )
+					{
+						// Same value for both XY
+						skinPack.sliderHandleProportion[0] =
+							static_cast<float>( itTmp->value.GetDouble() );
+						skinPack.sliderHandleProportion[1] =
+							static_cast<float>( itTmp->value.GetDouble() );
+					}
+					else if( itTmp->value.IsArray() && itTmp->value.Size() == 2u &&
+							 itTmp->value[0].IsDouble() && itTmp->value[1].IsDouble() )
+					{
+						// Separate values
+						skinPack.sliderHandleProportion[0] =
+							static_cast<float>( itTmp->value[0].GetDouble() );
+						skinPack.sliderHandleProportion[1] =
+							static_cast<float>( itTmp->value[1].GetDouble() );
+					}
+				}
+
+				itTmp = skinValue.FindMember( "slider_always_inside" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsBool() )
+					skinPack.sliderAlwaysInside = itTmp->value.GetBool();
 
 				const char *states[States::NumStates] =
 				{

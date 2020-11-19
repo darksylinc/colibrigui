@@ -190,6 +190,13 @@
         "ProgressbarLayer1" :
         {
             "all" : "ProgressbarLayer1"
+        },
+        "SliderLine" :
+        {
+            "auto" : "Button",
+            "slider_line_size" : 15.0,
+            "slider_handle_proportion" : [0.8, 0.8],
+            "slider_always_inside" : true
         }
     },
 
@@ -207,7 +214,7 @@
         "Editbox"               : "Button",
         "ProgressbarLayer0"     : "ProgressbarLayer0",
         "ProgressbarLayer1"     : "ProgressbarLayer1",
-        "SliderLine"            : "Button",
+        "SliderLine"            : "SliderLine",
         "SliderHandle"          : "Button"
     }
 }

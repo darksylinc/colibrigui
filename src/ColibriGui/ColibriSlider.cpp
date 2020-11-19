@@ -35,6 +35,17 @@ namespace Colibri
 			m_layers[i]->_initialize();
 		}
 
+		const Ogre::IdString skinPackName =
+			m_manager->getDefaultSkinPackName( SkinWidgetTypes::SliderLine );
+		const SkinManager *skinManager = m_manager->getSkinManager();
+
+		const SkinPack *defaultSkinPack = skinManager->findSkinPack( skinPackName, LogSeverity::Fatal );
+
+		m_lineSize = defaultSkinPack->sliderLineSize;
+		m_handleProportion[0] = defaultSkinPack->sliderHandleProportion[0];
+		m_handleProportion[1] = defaultSkinPack->sliderHandleProportion[1];
+		m_alwaysInside = defaultSkinPack->sliderAlwaysInside;
+
 		getSliderLine()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderLine ) );
 		getSliderHandle()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderHandle ) );
 

@@ -35,6 +35,10 @@ namespace Colibri
 		uint8_t progressBarType;
 		float   progressBarAnimSpeed;
 		float   progressBarAnimLength;
+
+		float sliderLineSize;
+		float sliderHandleProportion[2];
+		bool  sliderAlwaysInside;
 	};
 
 	typedef std::map<Ogre::IdString, SkinInfo> SkinInfoMap;
