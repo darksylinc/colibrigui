@@ -4,6 +4,7 @@
 #include "ColibriGui/ColibriWidget.h"
 
 #include "OgreId.h"
+#include "OgreIdString.h"
 
 namespace Ogre
 {
@@ -46,6 +47,12 @@ namespace Colibri
 
 		virtual void _initialize();
 		virtual void _destroy();
+
+		/// Sets a different skin pack (than default) for line and/or handle
+		///
+		/// Leave an empty Ogre::IdString() if you wish to retain the previous skin pack,
+		/// i.e. only changing one of them
+		void setSkinPack( Ogre::IdString linePackName, Ogre::IdString handlePackName );
 
 		/// @copydoc Renderable::setVisualsEnabled
 		void         setVisualsEnabled( bool bEnabled );

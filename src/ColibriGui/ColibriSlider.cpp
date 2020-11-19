@@ -70,6 +70,24 @@ namespace Colibri
 			m_layers[i] = 0;
 	}
 	//-------------------------------------------------------------------------
+	void Slider::setSkinPack( Ogre::IdString linePackName, Ogre::IdString handlePackName )
+	{
+		if( linePackName != Ogre::IdString() )
+		{
+			const SkinManager *skinManager = m_manager->getSkinManager();
+			const SkinPack *linePack = skinManager->findSkinPack( linePackName, LogSeverity::Fatal );
+			m_lineSize = linePack->sliderLineSize;
+			m_handleProportion[0] = linePack->sliderHandleProportion[0];
+			m_handleProportion[1] = linePack->sliderHandleProportion[1];
+			m_alwaysInside = linePack->sliderAlwaysInside;
+
+			getSliderLine()->setSkinPack( linePackName );
+		}
+
+		if( handlePackName != Ogre::IdString() )
+			getSliderHandle()->setSkinPack( handlePackName );
+	}
+	//-------------------------------------------------------------------------
 	Renderable *Slider::getSliderLine() { return m_layers[0]; }
 	//-------------------------------------------------------------------------
 	Renderable *Slider::getSliderHandle() { return m_layers[1]; }
