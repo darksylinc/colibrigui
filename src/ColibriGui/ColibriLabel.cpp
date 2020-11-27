@@ -770,13 +770,20 @@ namespace Colibri
 								Ogre::Vector2 parentDerivedTL,
 								Ogre::Vector2 parentDerivedBR,
 								Ogre::Vector2 invSize,
-								uint32_t offset )
+								uint32_t offset,
+								float canvasAspectRatio,
+								float invCanvasAspectRatio,
+								Matrix2x3 derivedRot )
 	{
 		TODO_this_is_a_workaround_neg_y;
+		Ogre::Vector2 tmp2d;
+
 		#define COLIBRI_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
 									clipDistanceRight, clipDistanceBottom ) \
-			vertexBuffer->x = _x; \
-			vertexBuffer->y = -_y; \
+			tmp2d = Widget::mul( derivedRot, _x, _y * invCanvasAspectRatio ); \
+			tmp2d.y *= canvasAspectRatio; \
+			vertexBuffer->x = tmp2d.x; \
+			vertexBuffer->y = -tmp2d.y; \
 			vertexBuffer->width = glyphWidth; \
 			vertexBuffer->height = glyphHeight; \
 			vertexBuffer->offset = offset;\
@@ -936,12 +943,16 @@ namespace Colibri
 	{
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
-		//Snap position to pixels
+		// Snap position to pixels
 		Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
 		derivedTopLeft = (derivedTopLeft + 1.0f) * halfWindowRes;
 		derivedTopLeft.x = roundf( derivedTopLeft.x );
 		derivedTopLeft.y = roundf( derivedTopLeft.y );
 		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
+
+		const Matrix2x3 derivedRot = m_derivedOrientation;
+		const float canvasAr = m_manager->getCanvasAspectRatio();
+		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
 		RichTextVec::const_iterator itRichText = m_richText[m_currentState].begin();
 		RichTextVec::const_iterator enRichText = m_richText[m_currentState].end();
@@ -1026,12 +1037,13 @@ namespace Colibri
 						topLeft		= derivedTopLeft + topLeft * invWindowRes;
 						bottomRight	= derivedTopLeft + bottomRight * invWindowRes;
 
-						addQuad( textVertBuffer,
-								 topLeft - backgroundDisplacement,
-								 bottomRight + backgroundDisplacement,
-								 1, 1,
-								 backgroundColour, parentDerivedTL, parentDerivedBR, invSize,
-								 0 );
+						addQuad( textVertBuffer,                                               //
+								 topLeft - backgroundDisplacement,                             //
+								 bottomRight + backgroundDisplacement,                         //
+								 1, 1,                                                         //
+								 backgroundColour, parentDerivedTL, parentDerivedBR, invSize,  //
+								 0,                                                            //
+								 canvasAr, invCanvasAr, derivedRot );
 						textVertBuffer += 6u;
 						m_numVertices += 6u;
 
@@ -1069,7 +1081,7 @@ namespace Colibri
 										 GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Vector2 &parentCurrentScrollPos,
-										 const Ogre::Matrix3 &parentRot )
+										 const Matrix2x3 &parentRot )
 	{
 		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
 
@@ -1121,6 +1133,10 @@ namespace Colibri
 		derivedTopLeft.y = roundf( derivedTopLeft.y );
 		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
 
+		const Matrix2x3 derivedRot = m_derivedOrientation;
+		const float canvasAr = m_manager->getCanvasAspectRatio();
+		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
+
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
 
@@ -1145,22 +1161,24 @@ namespace Colibri
 
 				if( m_shadowOutline )
 				{
-					addQuad( textVertBuffer,
-							 topLeft + shadowDisplacement,
-							 bottomRight + shadowDisplacement,
-							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-							 shadowColour, parentDerivedTL, parentDerivedBR, invSize,
-							 shapedGlyph.glyph->offsetStart );
+					addQuad( textVertBuffer,                                           //
+							 topLeft + shadowDisplacement,                             //
+							 bottomRight + shadowDisplacement,                         //
+							 shapedGlyph.glyph->width, shapedGlyph.glyph->height,      //
+							 shadowColour, parentDerivedTL, parentDerivedBR, invSize,  //
+							 shapedGlyph.glyph->offsetStart,                           //
+							 canvasAr, invCanvasAr, derivedRot );
 					textVertBuffer += 6u;
 					m_numVertices += 6u;
 				}
 
 				const RichText &richText = m_richText[m_currentState][shapedGlyph.richTextIdx];
 
-				addQuad( textVertBuffer, topLeft, bottomRight,
-						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,
-						 richText.rgba32, parentDerivedTL, parentDerivedBR, invSize,
-						 shapedGlyph.glyph->offsetStart );
+				addQuad( textVertBuffer, topLeft, bottomRight,                        //
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,         //
+						 richText.rgba32, parentDerivedTL, parentDerivedBR, invSize,  //
+						 shapedGlyph.glyph->offsetStart,                              //
+						 canvasAr, invCanvasAr, derivedRot );
 				textVertBuffer += 6u;
 
 				m_numVertices += 6u;
@@ -1172,7 +1190,7 @@ namespace Colibri
 		*_textVertBuffer = textVertBuffer;
 
 		const Ogre::Vector2 outerTopLeft = this->m_derivedTopLeft;
-		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		const Matrix2x3 &finalRot = this->m_derivedOrientation;
 		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
 													   m_clipBorderTL * invCanvasSize2x;
 

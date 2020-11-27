@@ -119,7 +119,7 @@ namespace Colibri
 		Widget* colibrigui_nullable getDefaultWidget() const;
 
 		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot ) colibri_override;
+												  const Matrix2x3 &parentRot ) colibri_override;
 
 		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
 											  RESTRICT_ALIAS vertexBuffer,
@@ -127,7 +127,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot ) colibri_final;
+											  const Matrix2x3 &parentRot ) colibri_final;
 	};
 }
 

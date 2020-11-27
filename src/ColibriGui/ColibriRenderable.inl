@@ -22,13 +22,20 @@ namespace Colibri
 									 uint8_t *rgbaColour,
 									 Ogre::Vector2 parentDerivedTL,
 									 Ogre::Vector2 parentDerivedBR,
-									 Ogre::Vector2 invSize )
+									 Ogre::Vector2 invSize,
+									 float canvasAspectRatio,
+									 float invCanvasAspectRatio,
+									 Matrix2x3 derivedRot )
 	{
 		TODO_this_is_a_workaround_neg_y;
+		Ogre::Vector2 tmp2d;
+
 		#define COLIBRI_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
 									clipDistanceRight, clipDistanceBottom ) \
-			vertexBuffer->x = _x; \
-			vertexBuffer->y = -_y; \
+			tmp2d = Widget::mul( derivedRot, _x, _y * invCanvasAspectRatio ); \
+			tmp2d.y *= canvasAspectRatio; \
+			vertexBuffer->x = tmp2d.x; \
+			vertexBuffer->y = -tmp2d.y; \
 			vertexBuffer->u = static_cast<uint16_t>( _u * 65535.0f ); \
 			vertexBuffer->v = static_cast<uint16_t>( _v * 65535.0f ); \
 			vertexBuffer->rgbaColour[0] = rgbaColour[0]; \
@@ -92,7 +99,7 @@ namespace Colibri
 													 RESTRICT_ALIAS _textVertBuffer,
 													 const Ogre::Vector2 &parentPos,
 													 const Ogre::Vector2 &parentScrollPos,
-													 const Ogre::Matrix3 &parentRot,
+													 const Matrix2x3 &parentRot,
 													 const Ogre::Vector2 &currentScrollPos,
 													 bool forWindows )
 	{
@@ -166,77 +173,87 @@ namespace Colibri
 					stateInfo.borderSize[Borders::Top] * pixelSize2x.y );
 			const Ogre::Vector2 borderBottomRight( stateInfo.borderSize[Borders::Right] * pixelSize2x.x,
 					stateInfo.borderSize[Borders::Bottom] * pixelSize2x.y );
-			const Ogre::Vector2 innerTopLeft		= outerTopLeft + mul( this->m_derivedOrientation,
-																		  borderTopLeft );
-			const Ogre::Vector2 innerBottomRight	= outerBottomRight - mul( this->m_derivedOrientation,
-																			  borderBottomRight );
+			const Ogre::Vector2 innerTopLeft		= outerTopLeft + borderTopLeft;
+			const Ogre::Vector2 innerBottomRight	= outerBottomRight - borderBottomRight;
 			TODO_borderRepeatSize;
 //            stateInfo.borderRepeatSize[Borders::Left] / (innerBottomRight.x - innerTopLeft.x);
 //            stateInfo.borderRepeatSize[Borders::Right] / (innerBottomRight.x - innerTopLeft.x);
 //            stateInfo.borderRepeatSize[Borders::Top] / (innerBottomRight.y - innerTopLeft.y);
 //            stateInfo.borderRepeatSize[Borders::Bottom] / (innerBottomRight.y - innerTopLeft.y);
 
-			//1st row
-			addQuad( vertexBuffer,
-					 outerTopLeft, innerTopLeft,
-					 stateInfo.uvTopLeftBottomRight[0],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			const float canvasAr = m_manager->getCanvasAspectRatio();
+			const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
+
+			// 1st row
+			addQuad( vertexBuffer,                                           //
+					 outerTopLeft, innerTopLeft,                             //
+					 stateInfo.uvTopLeftBottomRight[0],                      //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerTopLeft.x, outerTopLeft.y ),
-					 Ogre::Vector2( innerBottomRight.x, innerTopLeft.y ),
-					 stateInfo.uvTopLeftBottomRight[1],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                           //
+					 Ogre::Vector2( innerTopLeft.x, outerTopLeft.y ),        //
+					 Ogre::Vector2( innerBottomRight.x, innerTopLeft.y ),    //
+					 stateInfo.uvTopLeftBottomRight[1],                      //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerBottomRight.x, outerTopLeft.y ),
-					 Ogre::Vector2( outerBottomRight.x, innerTopLeft.y ),
-					 stateInfo.uvTopLeftBottomRight[2],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                           //
+					 Ogre::Vector2( innerBottomRight.x, outerTopLeft.y ),    //
+					 Ogre::Vector2( outerBottomRight.x, innerTopLeft.y ),    //
+					 stateInfo.uvTopLeftBottomRight[2],                      //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			//2nd row
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( outerTopLeft.x, innerTopLeft.y ),
-					 Ogre::Vector2( innerTopLeft.x, innerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[3],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			// 2nd row
+			addQuad( vertexBuffer,                                           //
+					 Ogre::Vector2( outerTopLeft.x, innerTopLeft.y ),        //
+					 Ogre::Vector2( innerTopLeft.x, innerBottomRight.y ),    //
+					 stateInfo.uvTopLeftBottomRight[3],                      //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerTopLeft.x, innerTopLeft.y ),
-					 Ogre::Vector2( innerBottomRight.x, innerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[4],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                             //
+					 Ogre::Vector2( innerTopLeft.x, innerTopLeft.y ),          //
+					 Ogre::Vector2( innerBottomRight.x, innerBottomRight.y ),  //
+					 stateInfo.uvTopLeftBottomRight[4],                        //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,    //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerBottomRight.x, innerTopLeft.y ),
-					 Ogre::Vector2( outerBottomRight.x, innerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[5],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                             //
+					 Ogre::Vector2( innerBottomRight.x, innerTopLeft.y ),      //
+					 Ogre::Vector2( outerBottomRight.x, innerBottomRight.y ),  //
+					 stateInfo.uvTopLeftBottomRight[5],                        //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,    //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			//3rd row
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( outerTopLeft.x, innerBottomRight.y ),
-					 Ogre::Vector2( innerTopLeft.x, outerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[6],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			// 3rd row
+			addQuad( vertexBuffer,                                           //
+					 Ogre::Vector2( outerTopLeft.x, innerBottomRight.y ),    //
+					 Ogre::Vector2( innerTopLeft.x, outerBottomRight.y ),    //
+					 stateInfo.uvTopLeftBottomRight[6],                      //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerTopLeft.x, innerBottomRight.y ),
-					 Ogre::Vector2( innerBottomRight.x, outerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[7],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                             //
+					 Ogre::Vector2( innerTopLeft.x, innerBottomRight.y ),      //
+					 Ogre::Vector2( innerBottomRight.x, outerBottomRight.y ),  //
+					 stateInfo.uvTopLeftBottomRight[7],                        //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,    //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
-			addQuad( vertexBuffer,
-					 Ogre::Vector2( innerBottomRight.x, innerBottomRight.y ),
-					 Ogre::Vector2( outerBottomRight.x, outerBottomRight.y ),
-					 stateInfo.uvTopLeftBottomRight[8],
-					rgbaColour, parentDerivedTL, parentDerivedBR, invSize );
+			addQuad( vertexBuffer,                                             //
+					 Ogre::Vector2( innerBottomRight.x, innerBottomRight.y ),  //
+					 Ogre::Vector2( outerBottomRight.x, outerBottomRight.y ),  //
+					 stateInfo.uvTopLeftBottomRight[8],                        //
+					 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,    //
+					 canvasAr, invCanvasAr, this->m_derivedOrientation );
 			vertexBuffer += 6u;
 
 			*_vertexBuffer = vertexBuffer;
 		}
 
-		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		const Matrix2x3 &finalRot = this->m_derivedOrientation;
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 

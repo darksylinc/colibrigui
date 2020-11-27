@@ -17,6 +17,8 @@ namespace Colibri
 		Borders::NumBorders
 	};
 
+	const Matrix2x3 Matrix2x3::IDENTITY( 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f );
+
 	Widget::Widget( ColibriManager *manager ) :
 		m_parent( 0 ),
 		m_numNonRenderables( 0 ),
@@ -34,16 +36,18 @@ namespace Colibri
 		m_currentState( States::Idle ),
 		m_position( Ogre::Vector2::ZERO ),
 		m_size( Ogre::Vector2::ZERO ),
-		m_orientation( Ogre::Matrix3::IDENTITY ),
+		m_orientation( Ogre::Vector4( 1.0f, 0.0f,  //
+									  0.0f, 1.0f ) ),
 		m_derivedTopLeft( Ogre::Vector2::ZERO ),
 		m_derivedBottomRight( Ogre::Vector2::ZERO ),
-		m_derivedOrientation( Ogre::Matrix3::IDENTITY ),
+		m_derivedOrientation( Matrix2x3::IDENTITY ),
 		m_clipBorderTL( Ogre::Vector2::ZERO ),
 		m_clipBorderBR( Ogre::Vector2::ZERO ),
 		m_accumMinClipTL( -1.0f ),
 		m_accumMaxClipBR( 1.0f )
-  #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
-	,	m_transformOutOfDate( false ),
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
+		,
+		m_transformOutOfDate( false ),
 		m_destructionStarted( false )
   #endif
 	{
@@ -70,7 +74,7 @@ namespace Colibri
 		if( itor != m_children.end() )
 		{
 			//It may not be found if we're also in destruction phase
-			retVal = itor - m_children.begin();
+			retVal = static_cast<size_t>( itor - m_children.begin() );
 			m_children.erase( itor );
 
 			COLIBRI_ASSERT( (retVal < m_numWidgets && !childWidgetBeingRemoved->isWindow()) ||
@@ -125,7 +129,7 @@ namespace Colibri
 			WidgetVec children;
 			children.swap( m_children );
 			WidgetVec::const_iterator itor = children.begin();
-			WidgetVec::const_iterator end  = children.begin() + m_numWidgets;
+			WidgetVec::const_iterator end = children.begin() + ptrdiff_t( m_numWidgets );
 
 			while( itor != end )
 				m_manager->destroyWidget( *itor++ );
@@ -255,28 +259,66 @@ namespace Colibri
 			m_children.erase( itor );*/
 	}
 	//-------------------------------------------------------------------------
-	Ogre::Vector2 Widget::mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos )
+	Ogre::Vector2 Widget::mul( const Ogre::Vector4 &m2x2, Ogre::Vector2 xyPos )
 	{
-		Ogre::Vector3 result = matrix * Ogre::Vector3( xyPos.x, xyPos.y, 0.0f );
-		return Ogre::Vector2( result.x, result.y );
+		Ogre::Vector2 result;
+		result.x = m2x2.x * xyPos.x + m2x2.y * xyPos.y;
+		result.y = m2x2.z * xyPos.x + m2x2.w * xyPos.y;
+		return result;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::updateDerivedTransform( const Ogre::Vector2 &parentPos,
-										 const Ogre::Matrix3 &parentRot )
+	Ogre::Vector2 Widget::mul( const Matrix2x3 &mat, Ogre::Vector2 xyPos )
 	{
-		const Ogre::Matrix3 finalRot = parentRot * m_orientation;
+		Ogre::Vector2 result;
+		result.x = mat.m[0][0] * xyPos.x + mat.m[0][1] * xyPos.y + mat.m[0][2];
+		result.y = mat.m[1][0] * xyPos.x + mat.m[1][1] * xyPos.y + mat.m[1][2];
+		return result;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::mul( const Matrix2x3 &mat, float x, float y )
+	{
+		Ogre::Vector2 result;
+		result.x = mat.m[0][0] * x + mat.m[0][1] * y + mat.m[0][2];
+		result.y = mat.m[1][0] * x + mat.m[1][1] * y + mat.m[1][2];
+		return result;
+	}
+	//-------------------------------------------------------------------------
+	Matrix2x3 Widget::mul( const Matrix2x3 &a, const Matrix2x3 &b )
+	{
+		Matrix2x3 r;
+		r.m[0][0] = a.m[0][0] * b.m[0][0] + a.m[0][1] * b.m[1][0];
+		r.m[0][1] = a.m[0][0] * b.m[0][1] + a.m[0][1] * b.m[1][1];
+		r.m[0][2] = a.m[0][0] * b.m[0][2] + a.m[0][1] * b.m[1][2] + a.m[0][2];
 
-		Ogre::Vector2 center = getCenter();
+		r.m[1][0] = a.m[1][0] * b.m[0][0] + a.m[1][1] * b.m[1][0];
+		r.m[1][1] = a.m[1][0] * b.m[0][1] + a.m[1][1] * b.m[1][1];
+		r.m[1][2] = a.m[1][0] * b.m[0][2] + a.m[1][1] * b.m[1][2] + a.m[1][2];
 
-		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
-		Ogre::Vector2 relCenter		= center * invCanvasSize2x;
+		return r;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::updateDerivedTransform( const Ogre::Vector2 &parentPos, const Matrix2x3 &parentRot )
+	{
+		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
+		const Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
 
-		Ogre::Vector2 derivedHalfSize	= mul( finalRot, m_size * 0.5f * invCanvasSize2x );
-		Ogre::Vector2 derivedCenter		= mul( finalRot, relCenter ) + parentPos;
+		m_derivedTopLeft = parentPos + m_position * invCanvasSize2x;
+		m_derivedBottomRight = m_derivedTopLeft + m_size * invCanvasSize2x;
 
-		m_derivedTopLeft		= derivedCenter - derivedHalfSize;
-		m_derivedBottomRight	= derivedCenter + derivedHalfSize;
-		m_derivedOrientation	= finalRot;
+		Ogre::Vector2 ndcCenter = ( m_derivedTopLeft + m_derivedBottomRight ) * 0.5f;
+		ndcCenter.y *= invCanvasAr;
+		const Ogre::Vector2 rotatedNdcCenter = mul( m_orientation, ndcCenter );
+
+		const Ogre::Vector2 centerDiff = (ndcCenter - rotatedNdcCenter);
+
+		m_derivedOrientation.m[0][0] = m_orientation.x;
+		m_derivedOrientation.m[0][1] = m_orientation.y;
+		m_derivedOrientation.m[0][2] = centerDiff.x;
+		m_derivedOrientation.m[1][0] = m_orientation.z;
+		m_derivedOrientation.m[1][1] = m_orientation.w;
+		m_derivedOrientation.m[1][2] = centerDiff.y;
+
+		m_derivedOrientation = mul( parentRot, m_derivedOrientation );
 
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_transformOutOfDate = false;
@@ -538,7 +580,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
-											  const Ogre::Matrix3 &parentRot )
+											  const Matrix2x3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -546,7 +588,7 @@ namespace Colibri
 		const Ogre::Vector2 outerTopLeft	= this->m_derivedTopLeft;
 		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft + m_clipBorderTL * invCanvasSize2x;
 
-		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		const Matrix2x3 &finalRot = this->m_derivedOrientation;
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
@@ -561,7 +603,7 @@ namespace Colibri
 										  GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
 										  const Ogre::Vector2 &parentPos,
 										  const Ogre::Vector2 &parentCurrentScrollPos,
-										  const Ogre::Matrix3 &parentRot )
+										  const Matrix2x3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -771,7 +813,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
-							   const Ogre::Matrix3 &orientation )
+							   const Ogre::Vector4 &orientation )
 	{
 		m_position = topLeft;
 		m_size = size;
@@ -798,9 +840,19 @@ namespace Colibri
 		setTransformDirty( TransformDirtyScale );
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setOrientation( const Ogre::Matrix3 &orientation )
+	void Widget::setOrientation( const Ogre::Vector4 &orientation )
 	{
 		m_orientation = orientation;
+		setTransformDirty( TransformDirtyOrientation );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setOrientation( const Ogre::Radian rotationAngle )
+	{
+		const float valueRadians = rotationAngle.valueRadians();
+		m_orientation.x = std::cos( valueRadians );
+		m_orientation.z = std::sin( valueRadians );
+		m_orientation.y = -m_orientation.z;
+		m_orientation.w = m_orientation.x;
 		setTransformDirty( TransformDirtyOrientation );
 	}
 	//-------------------------------------------------------------------------
@@ -865,7 +917,7 @@ namespace Colibri
 		else
 		{
 			//If we have no parent, then we're definitely a window
-			updateDerivedTransform( -Ogre::Vector2::UNIT_SCALE, Ogre::Matrix3::IDENTITY );
+			updateDerivedTransform( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -928,7 +980,7 @@ namespace Colibri
 		return m_derivedBottomRight;
 	}
 	//-------------------------------------------------------------------------
-	const Ogre::Matrix3& Widget::getDerivedOrientation() const
+	const Matrix2x3 &Widget::getDerivedOrientation() const
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_transformOutOfDate );
 		return m_derivedOrientation;

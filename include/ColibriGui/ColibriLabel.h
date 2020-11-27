@@ -110,7 +110,10 @@ namespace Colibri
 							 Ogre::Vector2 parentDerivedTL,
 							 Ogre::Vector2 parentDerivedBR,
 							 Ogre::Vector2 invSize,
-							 uint32_t offset );
+							 uint32_t offset,
+							 float canvasAspectRatio,
+							 float invCanvasAspectRatio,
+							 Matrix2x3 derivedRot );
 
 	public:
 		Label( ColibriManager *manager );
@@ -291,7 +294,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot ) colibri_final;
+											  const Matrix2x3 &parentRot ) colibri_final;
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 

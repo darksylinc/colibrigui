@@ -297,6 +297,8 @@ namespace Colibri
 		m_pixelSize2x = 2.0f / windowResolution;
 		m_halfWindowResolution	= windowResolution / 2.0f;
 		m_invWindowResolution2x = 2.0f / windowResolution;
+		m_canvasAspectRatio = canvasSize.x / canvasSize.y;
+		m_canvasInvAspectRatio = canvasSize.y / canvasSize.x;
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();
@@ -586,12 +588,11 @@ namespace Colibri
 	void ColibriManager::updateAllDerivedTransforms()
 	{
 		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
+		WindowVec::const_iterator end = m_windows.end();
 
 		while( itor != end )
 		{
-			(*itor)->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE,
-												  Ogre::Matrix3::IDENTITY );
+			( *itor )->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
 			++itor;
 		}
 	}
@@ -1292,10 +1293,8 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			(*itor)->_fillBuffersAndCommands( &vertex, &vertexText,
-											  -Ogre::Vector2::UNIT_SCALE,
-											  Ogre::Vector2::ZERO,
-											  Ogre::Matrix3::IDENTITY );
+			( *itor )->_fillBuffersAndCommands( &vertex, &vertexText, -Ogre::Vector2::UNIT_SCALE,
+												Ogre::Vector2::ZERO, Matrix2x3::IDENTITY );
 			++itor;
 		}
 

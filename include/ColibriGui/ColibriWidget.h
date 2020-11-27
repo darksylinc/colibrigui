@@ -6,7 +6,7 @@
 #include "ColibriGui/Layouts/ColibriLayoutCell.h"
 
 #include "OgreVector2.h"
-#include "OgreMatrix3.h"
+#include "OgreVector4.h"
 
 COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
@@ -37,6 +37,24 @@ namespace Colibri
 
 		WidgetListenerPair( WidgetListener *_listener ) :
 			refCount( 0 ), listener( _listener ) {}
+	};
+
+	struct Matrix2x3
+	{
+		float m[2][3];
+
+		static const Matrix2x3 IDENTITY;
+
+		Matrix2x3() {}
+		Matrix2x3( float m00, float m01, float m02, float m10, float m11, float m12 )
+		{
+			m[0][0] = m00;
+			m[0][1] = m01;
+			m[0][2] = m02;
+			m[1][0] = m10;
+			m[1][1] = m11;
+			m[1][2] = m12;
+		}
 	};
 
 	typedef std::vector<WidgetListenerPair> WidgetListenerPairVec;
@@ -141,11 +159,11 @@ namespace Colibri
 
 		Ogre::Vector2	m_position;
 		Ogre::Vector2	m_size;
-		Ogre::Matrix3	m_orientation;
+		Ogre::Vector4	m_orientation; // 2x2 matrix
 
 		Ogre::Vector2	m_derivedTopLeft;
 		Ogre::Vector2	m_derivedBottomRight;
-		Ogre::Matrix3	m_derivedOrientation;
+		Matrix2x3		m_derivedOrientation;
 
 		Ogre::Vector2	m_clipBorderTL;
 		Ogre::Vector2	m_clipBorderBR;
@@ -162,9 +180,12 @@ namespace Colibri
 
 		WidgetListenerPairVec::iterator findListener( WidgetListener *listener );
 
-		static Ogre::Vector2 mul( const Ogre::Matrix3 &matrix, Ogre::Vector2 xyPos );
+		static Ogre::Vector2 mul( const Ogre::Vector4 &m2x2, Ogre::Vector2 xyPos );
+		static Ogre::Vector2 mul( const Matrix2x3 &mat, Ogre::Vector2 xyPos );
+		static Ogre::Vector2 mul( const Matrix2x3 &mat, float x, float y );
+		static Matrix2x3 mul( const Matrix2x3 &a, const Matrix2x3 &b );
 
-		void updateDerivedTransform( const Ogre::Vector2 &parentPos, const Ogre::Matrix3 &parentRot );
+		void updateDerivedTransform( const Ogre::Vector2 &parentPos, const Matrix2x3 &parentRot );
 
 		/** Notifies a parent that the input is about to be removed. It's similar to
 			notifyWidgetDestroyed, except this is explicitly about child-parent
@@ -345,7 +366,7 @@ namespace Colibri
 		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao, Ogre::VertexArrayObject *textVao );
 
 		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
-												  const Ogre::Matrix3 &parentRot );
+												  const Matrix2x3 &parentRot );
 
 		/** Fills vertexBuffer & textVertBuffer for rendering, perfoming occlussion culling.
 			It also updates derived transforms. Derived classes change their functionality.
@@ -370,7 +391,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot );
+											  const Matrix2x3 &parentRot );
 	protected:
 		void addNonRenderableCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
 
@@ -427,11 +448,45 @@ namespace Colibri
 		size_t getOffsetStartWindowChildren() const;
 
 		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
-						   const Ogre::Matrix3 &orientation );
+						   const Ogre::Vector4 &orientation );
 		void setTransform( const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size );
 		void setTopLeft( const Ogre::Vector2 &topLeft );
 		void setSize( const Ogre::Vector2 &size );
-		void setOrientation( const Ogre::Matrix3 &orientation );
+		/** Sets a 2x2 matrix to apply a rotation (or shearing) effect on the widget
+			Rotation is done around the center of the widget.
+
+			Orientation is inherited by children widgets.
+
+		@remarks
+			IMPORTANT: This matrix is for visual purposes ONLY and very basic. This means:
+
+				1. Clipping against parent widget ignores this matrix. This means a rotated
+				   widget may be rendered outside of its parent window. A widget that is
+				   partially clipped when not rotated will also look weird when rotated.
+				2. Mouse events ignore the matrix. Clicks and hover will pretend the widget
+				   is not rotated.
+				3. Keyboard ignores the matrix. Rotating a widget 90° causes down button
+				   to go left and left button to go upwards.
+
+			Despite these heavy limitations, orientation matrices are
+			still useful for certain effects:
+
+				1. Mild animation/rotation e.g.
+				   oscilate rotation in range [-5°; 5°] to draw attention
+				2. Round objects that rotate around its center (e.g. loading animation)
+				3. Non-interactive widgets (images), like an arrow pointing towards a specific
+				   location on screen
+				4. Unorthodox unaligned UIs with large hitboxes (e.g. Persona 5's UI)
+
+		@param orientation
+			2x2 matrix
+				.xy is 00 01
+				.zw is 10 11
+		*/
+		void setOrientation( const Ogre::Vector4 &orientation );
+		/// Sets rotation using an angle. Rotation is Clockwise.
+		/// See Widget::setOrientation remarks.
+		void setOrientation( const Ogre::Radian rotationAngle );
 
 		void setCenter( const Ogre::Vector2 &center );
 		Ogre::Vector2 getCenter() const;
@@ -439,7 +494,7 @@ namespace Colibri
 		const Ogre::Vector2& getLocalTopLeft() const			{ return m_position; }
 		Ogre::Vector2 getLocalBottomRight() const				{ return m_position + m_size; }
 		const Ogre::Vector2& getSize() const					{ return m_size; }
-		const Ogre::Matrix3& getOrientation() const				{ return m_orientation; }
+		const Ogre::Vector4& getOrientation() const				{ return m_orientation; }
 
 		/** Establishes the clipping area to apply to our children widgets. Childrens
 			will be clipped against:
@@ -532,9 +587,9 @@ namespace Colibri
 			at the top left corner, while the top left function will return a value
 			at the bottom right corner.
 		*/
-		const Ogre::Vector2& getDerivedTopLeft() const;
-		const Ogre::Vector2& getDerivedBottomRight() const;
-		const Ogre::Matrix3& getDerivedOrientation() const;
+		const Ogre::Vector2 &getDerivedTopLeft() const;
+		const Ogre::Vector2 &getDerivedBottomRight() const;
+		const Matrix2x3 &    getDerivedOrientation() const;
 		Ogre::Vector2 getDerivedCenter() const;
 
 		/// Does not consider child windows

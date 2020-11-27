@@ -331,7 +331,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Window::_updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
-											  const Ogre::Matrix3 &parentRot )
+											  const Matrix2x3 &parentRot )
 	{
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -341,7 +341,7 @@ namespace Colibri
 													   (m_clipBorderTL - m_currentScroll) *
 													   invCanvasSize2x;
 
-		const Ogre::Matrix3 finalRot = this->m_derivedOrientation;
+		const Matrix2x3 &finalRot = this->m_derivedOrientation;
 		WidgetVec::const_iterator itor = m_children.begin();
 		WidgetVec::const_iterator end  = m_children.end();
 
@@ -356,7 +356,7 @@ namespace Colibri
 										 GlyphVertex ** RESTRICT_ALIAS textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Vector2 &parentCurrentScrollPos,
-										 const Ogre::Matrix3 &parentRot )
+										 const Matrix2x3 &parentRot )
 	{
 		Renderable::_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
 											 parentCurrentScrollPos, parentRot, m_currentScroll, true );

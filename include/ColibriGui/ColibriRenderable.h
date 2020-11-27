@@ -122,7 +122,10 @@ namespace Colibri
 							 uint8_t *rgbaColour,
 							 Ogre::Vector2 parentDerivedTL,
 							 Ogre::Vector2 parentDerivedBR,
-							 Ogre::Vector2 invSize );
+							 Ogre::Vector2 invSize,
+							 float canvasAspectRatio,
+							 float invCanvasAspectRatio,
+							 Matrix2x3 parentRot );
 
 		virtual void _notifyCanvasChanged() colibri_override;
 
@@ -223,7 +226,7 @@ namespace Colibri
 											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot,
+											 const Matrix2x3 &parentRot,
 											 const Ogre::Vector2 &currentScrollPos,
 											 bool forWindows );
 		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
@@ -232,7 +235,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Ogre::Matrix3 &parentRot ) colibri_override;
+											  const Matrix2x3 &parentRot ) colibri_override;
 	};
 }
 

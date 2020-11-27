@@ -328,7 +328,7 @@ namespace Colibri
 											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Vector2 &parentCurrentScrollPos,
-											 const Ogre::Matrix3 &parentRot )
+											 const Matrix2x3 &parentRot )
 	{
 		_fillBuffersAndCommands( vertexBuffer, textVertBuffer, parentPos,
 								 parentCurrentScrollPos, parentRot, Ogre::Vector2::ZERO, false );

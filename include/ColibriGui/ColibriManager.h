@@ -105,6 +105,8 @@ namespace Colibri
 		Ogre::Vector2				m_pixelSize2x;
 		Ogre::Vector2				m_halfWindowResolution;
 		Ogre::Vector2				m_invWindowResolution2x;
+		float						m_canvasAspectRatio;
+		float						m_canvasInvAspectRatio;
 
 		/// Window and/or Widget currently being in focus
 		FocusPair		m_cursorFocusedPair;
@@ -255,6 +257,9 @@ namespace Colibri
 		const Ogre::Vector2& getPixelSize2x() const					{ return m_pixelSize2x; }
 		const Ogre::Vector2& getHalfWindowResolution() const		{ return m_halfWindowResolution; }
 		const Ogre::Vector2& getInvWindowResolution2x() const		{ return m_invWindowResolution2x; }
+
+		float getCanvasAspectRatio() const { return m_canvasAspectRatio; }
+		float getCanvasInvAspectRatio() const { return m_canvasInvAspectRatio; }
 
 		Ogre::Vector2 snapToPixels( const Ogre::Vector2 &canvasPos ) const;
 
