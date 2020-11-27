@@ -46,7 +46,7 @@ namespace Colibri
 			vertexBuffer->clipDistance[Borders::Left]	= clipDistanceLeft; \
 			vertexBuffer->clipDistance[Borders::Right]	= clipDistanceRight; \
 			vertexBuffer->clipDistance[Borders::Bottom]	= clipDistanceBottom; \
-			++vertexBuffer;
+			++vertexBuffer
 
 		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y,
 							uvTopLeftBottomRight.x, uvTopLeftBottomRight.y,

@@ -323,10 +323,10 @@ namespace Colibri
 				RichText &richText = *itor;
 				richText.glyphStart = static_cast<uint32_t>( m_shapes[state].size() );
 				const char *utf8Str = m_text[state].c_str() + richText.offset;
-				TextHorizAlignment::TextHorizAlignment actualDir =
-						shaperManager->renderString( utf8Str, richText, itor - m_richText[state].begin(),
-													 m_vertReadingDir, m_shapes[state] );
-				richText.glyphEnd = m_shapes[state].size();
+				TextHorizAlignment::TextHorizAlignment actualDir = shaperManager->renderString(
+					utf8Str, richText, static_cast<uint32_t>( itor - m_richText[state].begin() ),
+					m_vertReadingDir, m_shapes[state] );
+				richText.glyphEnd = static_cast<uint32_t>( m_shapes[state].size() );
 
 				if( alignmentUnknown )
 				{
@@ -452,8 +452,8 @@ namespace Colibri
 
 			Ogre::Vector2 caretPos = nextWord.startCaretPos;
 
-			ShapedGlyphVec::iterator itor = m_shapes[state].begin() + nextWord.offset;
-			ShapedGlyphVec::iterator end  = itor + nextWord.length;
+			ShapedGlyphVec::iterator itor = m_shapes[state].begin() + ptrdiff_t( nextWord.offset );
+			ShapedGlyphVec::iterator end  = itor + ptrdiff_t( nextWord.length );
 
 			while( itor != end )
 			{
@@ -792,7 +792,7 @@ namespace Colibri
 			vertexBuffer->clipDistance[Borders::Left]	= clipDistanceLeft; \
 			vertexBuffer->clipDistance[Borders::Right]	= clipDistanceRight; \
 			vertexBuffer->clipDistance[Borders::Bottom]	= clipDistanceBottom; \
-			++vertexBuffer;
+			++vertexBuffer
 
 		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y,
 							0u, 0u,
@@ -858,7 +858,7 @@ namespace Colibri
 
 		word.offset = word.offset + word.length;
 
-		ShapedGlyphVec::const_iterator itor = m_shapes[state].begin() + word.offset;
+		ShapedGlyphVec::const_iterator itor = m_shapes[state].begin() + ptrdiff_t( word.offset );
 		ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
 
 		ShapedGlyph firstGlyph = *itor;
@@ -904,7 +904,8 @@ namespace Colibri
 			}
 		}
 
-		word.length = itor - (m_shapes[state].begin() + word.offset);
+		word.length =
+			static_cast<size_t>( itor - ( m_shapes[state].begin() + ptrdiff_t( word.offset ) ) );
 
 		inOutWord = word;
 
@@ -1098,7 +1099,8 @@ namespace Colibri
 		if( !m_visualsEnabled )
 			return;
 
-		m_currVertexBufferOffset = textVertBuffer - m_manager->_getTextVertexBufferBase();
+		m_currVertexBufferOffset =
+			static_cast<uint32_t>( textVertBuffer - m_manager->_getTextVertexBufferBase() );
 
 		const uint32_t shadowColour = m_shadowColour.getAsABGR();
 
