@@ -65,7 +65,7 @@ namespace Colibri
 				static_cast<SkinWidgetTypes::SkinWidgetTypes>( skinWidgetTypeProgress ) );
 
 			COLIBRI_ASSERT_LOW( !m_progressLayerDatablock[0] && "_initialize already called!" );
-			cloneSkinAndDatablock( skinInfo[States::Disabled], skinInfo[States::Idle] );
+			cloneSkinAndDatablock( skinInfo );
 
 			Renderable *progressLayer = getProgressLayer();
 			progressLayer->_setSkinPack( m_skinInfos );
@@ -185,31 +185,37 @@ namespace Colibri
 		if( !skinPack )
 			return;
 
-		const SkinInfo *disabledSkin = skinManager->findSkin( *skinPack, States::Disabled );
-		const SkinInfo *idleSkin = skinManager->findSkin( *skinPack, States::Idle );
+		SkinInfo const *colibrigui_nullable skinInfos[States::NumStates];
 
-		if( !disabledSkin || !idleSkin )
-			return;
+		for( size_t i = 0u; i < States::NumStates; ++i )
+			skinInfos[i] = skinManager->findSkin( *skinPack, static_cast<States::States>( i ) );
 
-		cloneSkinAndDatablock( disabledSkin, idleSkin );
+		if( !skinInfos[States::Disabled] || !skinInfos[States::Disabled] )
+		{
+			m_manager->getLogListener()->log(
+				"Progressbar::cloneSkinAndDatablock called but skin pack did not specify a skin for "
+				"Idle and/or Disabled states for the progress layer. "
+				"Progressbar will not look correctly",
+				LogSeverity::Warning );
+		}
+		else
+		{
+			cloneSkinAndDatablock( skinInfos );
+		}
 	}
 	//-------------------------------------------------------------------------
-	void Progressbar::cloneSkinAndDatablock( const SkinInfo *disabledSkin, const SkinInfo *idleSkin )
+	void Progressbar::cloneSkinAndDatablock( const SkinInfo *const *skinInfos )
 	{
 		Ogre::HlmsManager *hlmsManager = m_manager->getOgreHlmsManager();
 
-		const SkinWidgetTypes::SkinWidgetTypes widgetType = m_displayType == Basic
-																? SkinWidgetTypes::ProgressbarLayer1
-																: SkinWidgetTypes::ProgressbarLayer0;
-
 		// Temporarily assign a different skin since we need to destroy
 		// this one (and switching would cause reading dangling pointers)
-		getProgressLayer()->_setSkinPack( m_manager->getDefaultSkin( widgetType ) );
+		getProgressLayer()->_setSkinPack( skinInfos );
 		destroyClonedData();
 
 		Ogre::HlmsDatablock *datablocks[2] = {
-			hlmsManager->getDatablock( disabledSkin->stateInfo.materialName ),
-			hlmsManager->getDatablock( idleSkin->stateInfo.materialName ),
+			hlmsManager->getDatablock( skinInfos[States::Disabled]->stateInfo.materialName ),
+			hlmsManager->getDatablock( skinInfos[States::Idle]->stateInfo.materialName ),
 		};
 
 		for( size_t i = 0u; i < 2u; ++i )
@@ -231,13 +237,11 @@ namespace Colibri
 
 			Ogre::Matrix4 animMat( Ogre::Matrix4::IDENTITY );
 			animMat.setTrans( Ogre::Vector3( 0, 0, 0 ) );
-			animMat.setScale( Ogre::Vector3( 0.16f, 1.0f, 1.0f ) );
+			animMat.setScale( Ogre::Vector3( m_animLength, 1.0f, 1.0f ) );
 			m_progressLayerDatablock[i]->setAnimationMatrix( 0u, animMat );
 		}
 
-		memcpy( m_skinInfos, m_manager->getDefaultSkin( widgetType ), sizeof( m_skinInfos ) );
-
-		SkinInfo const *colibrigui_nonnull const *skinInfos = m_manager->getDefaultSkin( widgetType );
+		memcpy( m_skinInfos, skinInfos, sizeof( m_skinInfos ) );
 
 		m_skinCopy = new SkinInfo[2];
 		memset( m_skinCopy, 0, sizeof( SkinInfo ) * 2u );

@@ -66,7 +66,8 @@ namespace Colibri
 		/// Assumes m_displayType has already been set
 		void cloneSkinAndDatablock( Ogre::IdString skinPackName );
 		/// Assumes m_displayType has already been set
-		void cloneSkinAndDatablock( const SkinInfo *disabledSkin, const SkinInfo *idleSkin );
+		void cloneSkinAndDatablock(
+			SkinInfo const *colibrigui_nonnull const *colibrigui_nonnull skinInfos );
 		void destroyClonedData();
 		void updateProgressbar();
 

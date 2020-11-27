@@ -467,6 +467,8 @@ namespace Colibri
 				   is not rotated.
 				3. Keyboard ignores the matrix. Rotating a widget 90° causes down button
 				   to go left and left button to go upwards.
+				4. If widgets overlap when rotated; child objects may not be rendered correctly
+				   if Widget::m_breadthFirst is set
 
 			Despite these heavy limitations, orientation matrices are
 			still useful for certain effects:
