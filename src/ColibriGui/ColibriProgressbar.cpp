@@ -16,6 +16,7 @@ namespace Colibri
 		Widget( manager ),
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
 		m_vertical( false ),
+		m_animated( false ),
 		m_progress( 0.5f ),
 		m_animSpeed( 0.0f ),
 		m_animLength( 1.0f ),
@@ -25,7 +26,6 @@ namespace Colibri
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 		memset( m_progressLayerDatablock, 0, sizeof( m_progressLayerDatablock ) );
-		memset( m_skinInfos, 0, sizeof( m_skinInfos ) );
 	}
 	//-------------------------------------------------------------------------
 	void Progressbar::_initialize()
@@ -42,6 +42,7 @@ namespace Colibri
 		m_displayType = static_cast<DisplayType>( defaultSkinPack->progressBarType );
 		m_animSpeed = defaultSkinPack->progressBarAnimSpeed;
 		m_animLength = defaultSkinPack->progressBarAnimLength;
+		m_animated = defaultSkinPack->progressBarIsAnimated;
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i] = m_manager->createWidget<Renderable>( this );
@@ -65,22 +66,26 @@ namespace Colibri
 				static_cast<SkinWidgetTypes::SkinWidgetTypes>( skinWidgetTypeProgress ) );
 
 			COLIBRI_ASSERT_LOW( !m_progressLayerDatablock[0] && "_initialize already called!" );
-			cloneSkinAndDatablock( skinInfo );
+
+			SkinInfo const *colibrigui_nonnull newSkinInfos[States::NumStates];
+			cloneSkinAndDatablock( skinInfo, newSkinInfos, defaultSkinPack->progressBarIsAnimated );
 
 			Renderable *progressLayer = getProgressLayer();
-			progressLayer->_setSkinPack( m_skinInfos );
+			progressLayer->_setSkinPack( newSkinInfos );
 		}
 
 		updateProgressbar();
 
 		Widget::_initialize();
 
-		m_manager->_addUpdateWidget( this );
+		if( m_animated )
+			m_manager->_addUpdateWidget( this );
 	}
 	//-------------------------------------------------------------------------
 	void Progressbar::_destroy()
 	{
-		m_manager->_removeUpdateWidget( this );
+		if( m_animated )
+			m_manager->_removeUpdateWidget( this );
 
 		Widget::_destroy();
 
@@ -105,7 +110,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Progressbar::setVisualsEnabled( bool bEnabled )
 	{
-		if( bEnabled != m_layers[0]->isVisualsEnabled() )
+		if( bEnabled != m_layers[0]->isVisualsEnabled() && m_animated )
 		{
 			if( bEnabled )
 				m_manager->_addUpdateWidget( this );
@@ -142,9 +147,18 @@ namespace Colibri
 		if( !skinPackL0 )
 			return;
 
+		if( m_animated != skinPackL0->progressBarIsAnimated )
+		{
+			if( m_animated )
+				m_manager->_removeUpdateWidget( this );
+			if( skinPackL0->progressBarIsAnimated )
+				m_manager->_addUpdateWidget( this );
+		}
+
 		m_displayType = static_cast<DisplayType>( skinPackL0->progressBarType );
 		m_animSpeed = skinPackL0->progressBarAnimSpeed;
 		m_animLength = skinPackL0->progressBarAnimLength;
+		m_animated = skinPackL0->progressBarIsAnimated;
 
 		{
 			// Assign the frame layer's skin
@@ -159,10 +173,11 @@ namespace Colibri
 			Ogre::IdString skinPackProgressName =
 				m_displayType == Basic ? skinPackLayer1Name : skinPackLayer0Name;
 
-			cloneSkinAndDatablock( skinPackProgressName );
+			SkinInfo const *colibrigui_nonnull newSkinInfos[States::NumStates];
+			cloneSkinAndDatablock( skinPackProgressName, newSkinInfos );
 
 			Renderable *progressLayer = getProgressLayer();
-			progressLayer->_setSkinPack( m_skinInfos );
+			progressLayer->_setSkinPack( newSkinInfos );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -178,7 +193,9 @@ namespace Colibri
 		updateProgressbar();
 	}
 	//-------------------------------------------------------------------------
-	void Progressbar::cloneSkinAndDatablock( Ogre::IdString skinPackName )
+	void Progressbar::cloneSkinAndDatablock( Ogre::IdString skinPackName,
+											 const SkinInfo *colibrigui_nonnull *colibrigui_nonnull
+												 outSkinInfos )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();
 		const SkinPack *skinPack = skinManager->findSkinPack( skinPackName, LogSeverity::Fatal );
@@ -200,11 +217,12 @@ namespace Colibri
 		}
 		else
 		{
-			cloneSkinAndDatablock( skinInfos );
+			cloneSkinAndDatablock( skinInfos, outSkinInfos, skinPack->progressBarIsAnimated );
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Progressbar::cloneSkinAndDatablock( const SkinInfo *const *skinInfos )
+	void Progressbar::cloneSkinAndDatablock( const SkinInfo *const *skinInfos,
+											 SkinInfo const **outSkinInfos, const bool bIsAnimated )
 	{
 		Ogre::HlmsManager *hlmsManager = m_manager->getOgreHlmsManager();
 
@@ -212,6 +230,12 @@ namespace Colibri
 		// this one (and switching would cause reading dangling pointers)
 		getProgressLayer()->_setSkinPack( skinInfos );
 		destroyClonedData();
+
+		if( !bIsAnimated )
+		{
+			memcpy( outSkinInfos, skinInfos, sizeof( SkinInfo * ) * States::NumStates );
+			return;
+		}
 
 		Ogre::HlmsDatablock *datablocks[2] = {
 			hlmsManager->getDatablock( skinInfos[States::Disabled]->stateInfo.materialName ),
@@ -241,7 +265,7 @@ namespace Colibri
 			m_progressLayerDatablock[i]->setAnimationMatrix( 0u, animMat );
 		}
 
-		memcpy( m_skinInfos, skinInfos, sizeof( m_skinInfos ) );
+		memcpy( outSkinInfos, skinInfos, sizeof( SkinInfo * ) * States::NumStates );
 
 		m_skinCopy = new SkinInfo[2];
 		memset( m_skinCopy, 0, sizeof( SkinInfo ) * 2u );
@@ -257,8 +281,8 @@ namespace Colibri
 
 		// Set all states to match States::Idle, except Disabled (see our class' remarks)
 		for( size_t i = 0u; i < States::NumStates; ++i )
-			m_skinInfos[i] = &m_skinCopy[1];
-		m_skinInfos[States::Disabled] = &m_skinCopy[0];
+			outSkinInfos[i] = &m_skinCopy[1];
+		outSkinInfos[States::Disabled] = &m_skinCopy[0];
 	}
 	//-------------------------------------------------------------------------
 	void Progressbar::destroyClonedData()
@@ -275,8 +299,6 @@ namespace Colibri
 
 		delete[] m_skinCopy;
 		m_skinCopy = 0;
-
-		memset( m_skinInfos, 0, sizeof( m_skinInfos ) );
 	}
 	//-------------------------------------------------------------------------
 	void Progressbar::updateProgressbar()

@@ -33,6 +33,7 @@ namespace Colibri
 		Ogre::IdString		skinInfo[States::NumStates];
 		/// See Progressbar::DisplayType
 		uint8_t progressBarType;
+		bool	progressBarIsAnimated;
 		float   progressBarAnimSpeed;
 		float   progressBarAnimLength;
 

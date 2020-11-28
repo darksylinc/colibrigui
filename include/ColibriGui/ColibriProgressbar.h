@@ -47,6 +47,7 @@ namespace Colibri
 		Renderable *colibrigui_nullable m_layers[2];
 
 		bool  m_vertical;
+		bool  m_animated;
 		float m_progress;
 
 	public:
@@ -61,13 +62,16 @@ namespace Colibri
 
 		/// Stores a hard copy for idle & disabled, with a custom material so we can animate it
 		SkinInfo *colibrigui_nullable m_skinCopy;
-		SkinInfo const *colibrigui_nullable m_skinInfos[States::NumStates];
 
 		/// Assumes m_displayType has already been set
-		void cloneSkinAndDatablock( Ogre::IdString skinPackName );
+		void cloneSkinAndDatablock( Ogre::IdString  skinPackName,
+									const SkinInfo *colibrigui_nonnull *colibrigui_nonnull
+																		outSkinInfos );
 		/// Assumes m_displayType has already been set
-		void cloneSkinAndDatablock(
-			SkinInfo const *colibrigui_nonnull const *colibrigui_nonnull skinInfos );
+		void cloneSkinAndDatablock( SkinInfo const *colibrigui_nonnull const *colibrigui_nonnull
+																			  skinInfos,
+									const SkinInfo *colibrigui_nonnull *colibrigui_nonnull outSkinInfos,
+									const bool                                             bIsAnimated );
 		void destroyClonedData();
 		void updateProgressbar();
 

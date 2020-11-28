@@ -404,6 +404,7 @@ namespace Colibri
 				SkinPack skinPack;
 
 				skinPack.progressBarType = 0u;
+				skinPack.progressBarIsAnimated = false;
 				skinPack.progressBarAnimSpeed = 0.0f;
 				skinPack.progressBarAnimLength = 1.0f;
 
@@ -434,6 +435,10 @@ namespace Colibri
 					if( progressBarType == "behind_glass" )
 						skinPack.progressBarType = Progressbar::BehindGlass;
 				}
+
+				itTmp = skinValue.FindMember( "progress_bar_animated" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsBool() )
+					skinPack.progressBarIsAnimated = itTmp->value.GetBool();
 
 				itTmp = skinValue.FindMember( "progress_anim_speed" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
