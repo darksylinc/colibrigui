@@ -88,6 +88,11 @@ namespace Colibri
 		bool m_windowNavigationDirty;
 		bool m_numGlyphsDirty;
 
+		/// Is any window dirty
+		bool m_zOrderWindowDirty;
+		/// Is a window stored in this list immediately dirty.
+		bool m_zOrderHasDirtyChildren;
+
 		Ogre::Root					* colibrigui_nullable m_root;
 		Ogre::VaoManager			* colibrigui_nullable m_vaoManager;
 		Ogre::ObjectMemoryManager	* colibrigui_nullable m_objectMemoryManager;
@@ -169,6 +174,8 @@ namespace Colibri
 		void autosetNavigation( const std::vector<T> &container, size_t start, size_t numWidgets );
 
 		void autosetNavigation( Window *window );
+
+		void updateZOrderDirty();
 
 		/// Ensure its immediate parent window has the given widget within its visible bounds.
 		void scrollToWidget( Widget *widget );
@@ -356,6 +363,10 @@ namespace Colibri
 		void autosetNavigation();
 
 		void _setWindowNavigationDirty();
+		/// Notify the manager that a window has its z order dirty.
+		/// @param windowInListDirty should be true if a window this manager directly
+		/// owns is dirty.
+		void _setZOrderWindowDirty( bool windowInListDirty );
 		void _addDirtyLabel( Label *label );
 
 		void update( float timeSinceLast );

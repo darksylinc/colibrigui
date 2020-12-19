@@ -44,6 +44,7 @@ namespace Colibri
 		m_colibriListener( &DefaultColibriListener ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
+		m_zOrderWindowDirty( false ),
 		m_numGlyphsDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
@@ -1122,9 +1123,26 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::updateZOrderDirty()
+	{
+		if( m_zOrderWindowDirty )
+		{
+			Window::reorderWindowVec( m_zOrderHasDirtyChildren, m_windows );
+
+			m_zOrderWindowDirty = false;
+		}
+		m_zOrderHasDirtyChildren = false;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::_setWindowNavigationDirty()
 	{
 		m_windowNavigationDirty = true;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_setZOrderWindowDirty( bool windowInListDirty )
+	{
+		m_zOrderWindowDirty = true;
+		m_zOrderHasDirtyChildren = windowInListDirty;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_addDirtyLabel( Label *label )
@@ -1225,6 +1243,11 @@ namespace Colibri
 		}
 
 		bool cursorFocusDirty = false;
+
+		if( m_zOrderWindowDirty )
+		{
+			updateZOrderDirty();
+		}
 
 		WindowVec::const_iterator itor = m_windows.begin();
 		WindowVec::const_iterator end  = m_windows.end();

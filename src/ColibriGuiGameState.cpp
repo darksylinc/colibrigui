@@ -57,6 +57,37 @@ namespace Demo
 	Colibri::Slider *slider2 = 0;
 	Colibri::Label *sliderLabel = 0;
 
+	Colibri::Window *overlapWindow1 = 0;
+	Colibri::Window *overlapWindow2 = 0;
+	Colibri::Button *orderButtonBack = 0;
+	Colibri::Button *orderButtonFront = 0;
+	Colibri::Window *innerOverlapWindow1 = 0;
+	Colibri::Window *innerOverlapWindow2 = 0;
+	Colibri::Button *innerToggleOrder = 0;
+
+	class DemoWidgetListener : public Colibri::WidgetActionListener
+	{
+		virtual void notifyWidgetAction( Colibri::Widget *widget, Colibri::Action::Action action )
+		{
+			if( action == Colibri::Action::Action::PrimaryActionPerform )
+			{
+				if( widget == orderButtonBack )
+					overlapWindow1->setZOrder(3);
+				else if( widget == orderButtonFront )
+					overlapWindow1->setZOrder(5);
+				else if( widget == innerToggleOrder )
+				{
+					uint8_t oldOrder = innerOverlapWindow1->getZOrder();
+					innerOverlapWindow1->setZOrder(innerOverlapWindow2->getZOrder());
+					innerOverlapWindow2->setZOrder(oldOrder);
+					innerOverlapWindow2->setTopLeft(innerOverlapWindow2->getLocalTopLeft());
+					innerOverlapWindow1->setTopLeft(innerOverlapWindow1->getLocalTopLeft());
+				}
+			}
+		}
+	};
+	DemoWidgetListener* demoActionListener;
+
 	ColibriGuiGameState::ColibriGuiGameState( const Ogre::String &helpDescription ) :
 		TutorialGameState( helpDescription )
 	{
@@ -206,6 +237,51 @@ namespace Demo
 		layoutW->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 		layoutW->addCell( layout );
 		layoutW->layout();
+
+
+		//Overlapping windows
+		demoActionListener = new DemoWidgetListener();
+
+		Colibri::LayoutLine *layoutOverlapping = new Colibri::LayoutLine( colibriManager );
+		overlapWindow1 = colibriManager->createWindow( 0 );
+		overlapWindow1->setTransform(Ogre::Vector2(650, 250), Ogre::Vector2(300, 300));
+		overlapWindow1->setZOrder(3);
+
+		orderButtonBack = colibriManager->createWidget<Colibri::Button>( overlapWindow1 );
+		orderButtonBack->m_minSize = Ogre::Vector2( 350, 64 );
+		orderButtonBack->getLabel()->setText( "Send to back" );
+		orderButtonBack->sizeToFit();
+
+		orderButtonBack->addActionListener(demoActionListener);
+		orderButtonFront = colibriManager->createWidget<Colibri::Button>( overlapWindow1 );
+		orderButtonFront->m_minSize = Ogre::Vector2( 350, 64 );
+		orderButtonFront->getLabel()->setText( "Bring to front" );
+		orderButtonFront->sizeToFit();
+		orderButtonFront->addActionListener(demoActionListener);
+
+		overlapWindow2 = colibriManager->createWindow( 0 );
+		overlapWindow2->setTransform(Ogre::Vector2(750, 450), Ogre::Vector2(300, 300));
+		overlapWindow2->setZOrder(4);
+
+		layoutOverlapping->addCell( orderButtonBack );
+		layoutOverlapping->addCell( orderButtonFront );
+		layoutOverlapping->layout();
+
+		{
+			innerOverlapWindow1 = colibriManager->createWindow( overlapWindow2 );
+			innerOverlapWindow1->setTransform(Ogre::Vector2(10, 10), Ogre::Vector2(100, 100));
+			innerOverlapWindow1->setZOrder(1);
+			innerToggleOrder = colibriManager->createWidget<Colibri::Button>( overlapWindow2 );
+			innerToggleOrder->m_minSize = Ogre::Vector2( 350, 64 );
+			innerToggleOrder->getLabel()->setText( "Switch order" );
+			innerToggleOrder->setTopLeft(Ogre::Vector2(0, 120));
+			innerToggleOrder->addActionListener(demoActionListener);
+			innerToggleOrder->sizeToFit();
+			innerOverlapWindow2 = colibriManager->createWindow( overlapWindow2 );
+			innerOverlapWindow2->setTransform(Ogre::Vector2(20, 20), Ogre::Vector2(100, 100));
+			innerOverlapWindow2->setZOrder(4);
+		}
+
 #if 0
 		//Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		Colibri::LayoutMultiline *layout = new Colibri::LayoutMultiline( colibriManager );
@@ -313,7 +389,12 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::destroyScene()
 	{
+		colibriManager->destroyWidget( orderButtonBack );
+		colibriManager->destroyWidget( orderButtonFront );
 		colibriManager->destroyWindow( mainWindow );
+		colibriManager->destroyWindow( overlapWindow1 );
+		colibriManager->destroyWindow( overlapWindow2 );
+		delete demoActionListener;
 		delete colibriManager;
 	}
 	//-----------------------------------------------------------------------------------
