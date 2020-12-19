@@ -110,6 +110,20 @@ namespace Colibri
 		/// This is useful for widgets which require some sort of mouse movement to function.
 		bool					m_consumesScroll;
 
+		/// When true the current widget needs to have its children reordered.
+		/// A widget can still have dirty children but not need its list reordered,
+		/// for instance if the dirty widgets are further down the tree.
+		bool		m_zOrderDirty;
+		/// When true this widget has a child at some point in its tree which is dirty.
+		bool		m_zOrderHasDirtyChildren;
+		uint8_t		m_zOrder;
+
+		void notifyZOrderChildWindowIsDirty( bool firstCall );
+
+		/// Perform the re-ordering of widgets based on their z-order.
+		/// This will also recursively search for other dirty widgets in the list.
+		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets );
+
 		bool m_culled;
 	public:
 		/// When true, this widgets and its children will be rendered in breadth first
@@ -297,6 +311,19 @@ namespace Colibri
 
 		void callActionListeners( Action::Action action );
 
+		/// Set order in which this widget should be drawn.
+		/// Windows with a higher z order value will be drawn last,
+		/// and therefore above windows with a lower value.
+		/// Windows with the same z value will be drawn according to their creation order.
+		/// This function triggers a re-order of the windows list.
+		void setZOrder( uint8_t z );
+		uint8_t getZOrder() const { return m_zOrder; }
+		bool getZOrderDirty() const { return m_zOrderDirty; }
+		bool getZOrderHasDirtyChildren() const { return m_zOrderHasDirtyChildren; }
+
+		/// Traverse this node and its children, resolving any z order dirty flags.
+		void updateZOrderDirty();
+
 		/** Gets called when user hits a direction with the keyboard, and there's no next widget
 			to go to (thus we capture that and may be interpreted as an action. eg. Spinners use this)
 		@param direction
@@ -414,6 +441,11 @@ namespace Colibri
 			When false, this is either depth first or executor, depending on the value of m_breadthFirst
 		*/
 		void addChildrenCommands( ApiEncapsulatedObjects &apiObject, bool collectingBreadthFirst );
+
+		static bool _compareWidgetZOrder( const Widget* w1, const Widget* w2 )
+		{
+			return w1->getZOrder() < w2->getZOrder();
+		}
 
 	public:
 

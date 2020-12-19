@@ -44,7 +44,7 @@ namespace Colibri
 		m_colibriListener( &DefaultColibriListener ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
-		m_zOrderWindowDirty( false ),
+		m_zOrderWidgetDirty( false ),
 		m_numGlyphsDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
@@ -1125,13 +1125,38 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateZOrderDirty()
 	{
-		if( m_zOrderWindowDirty )
+		if( m_zOrderWidgetDirty )
 		{
-			Window::reorderWindowVec( m_zOrderHasDirtyChildren, m_windows );
+			reorderWindowVec( m_zOrderHasDirtyChildren, m_windows );
 
-			m_zOrderWindowDirty = false;
+			m_zOrderWidgetDirty = false;
 		}
 		m_zOrderHasDirtyChildren = false;
+	}
+	//-------------------------------------------------------------------------
+	bool compareZOrder( const Window* w1, const Window* w2 )
+	{
+		return w1->getZOrder() < w2->getZOrder();
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::reorderWindowVec( bool windowInListDirty, WindowVec& windows )
+	{
+		if( windowInListDirty )
+		{
+			std::stable_sort( windows.begin(), windows.end(), compareZOrder );
+		}
+
+		WindowVec::iterator itor = windows.begin();
+		WindowVec::iterator end  = windows.end();
+
+		while( itor != end )
+		{
+			if( (*itor)->getZOrderHasDirtyChildren() )
+			{
+				(*itor)->updateZOrderDirty();
+			}
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_setWindowNavigationDirty()
@@ -1141,7 +1166,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::_setZOrderWindowDirty( bool windowInListDirty )
 	{
-		m_zOrderWindowDirty = true;
+		m_zOrderWidgetDirty = true;
 		m_zOrderHasDirtyChildren = windowInListDirty;
 	}
 	//-------------------------------------------------------------------------
@@ -1244,7 +1269,7 @@ namespace Colibri
 
 		bool cursorFocusDirty = false;
 
-		if( m_zOrderWindowDirty )
+		if( m_zOrderWidgetDirty )
 		{
 			updateZOrderDirty();
 		}

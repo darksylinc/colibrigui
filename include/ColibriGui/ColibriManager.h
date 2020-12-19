@@ -88,10 +88,11 @@ namespace Colibri
 		bool m_windowNavigationDirty;
 		bool m_numGlyphsDirty;
 
-		/// Is any window dirty
-		bool m_zOrderWindowDirty;
-		/// Is a window stored in this list immediately dirty.
+		/// Is any widget dirty
+		bool m_zOrderWidgetDirty;
+		/// Is one of the windows stored by this manager immediately dirty.
 		bool m_zOrderHasDirtyChildren;
+		void reorderWindowVec( bool windowInListDirty, WindowVec& windows );
 
 		Ogre::Root					* colibrigui_nullable m_root;
 		Ogre::VaoManager			* colibrigui_nullable m_vaoManager;
