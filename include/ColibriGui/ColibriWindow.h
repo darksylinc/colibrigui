@@ -34,14 +34,27 @@ namespace Colibri
 		/// When true, all of our immediate children (widgets or windows)
 		/// are not dirty, but one of our children's child is.
 		bool		m_childrenNavigationDirty;
+		/// When true the current window needs to have its window list reordered.
+		/// A window can still have dirty child windows but not need its list reordered.
+		bool		m_zOrderWindowDirty;
+		/// When true this window contains a child in its window list which is dirty.
+		bool		m_zOrderHasDirtyChildren;
+
+		uint8_t		m_zOrder;
 
 		WindowVec m_childWindows;
 
 		void notifyChildWindowIsDirty();
+		void notifyZOrderChildWindowIsDirty( bool firstCall );
 
 		Window* getParentAsWindow() const;
 
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved ) colibri_override;
+
+		/// Perform the re-ordering of windows based on their z-order.
+		/// This will also recursively search for other dirty windows in the list.
+		/// This function is static so ColibriManager can use it with its WindowVec as well.
+		static void reorderWindowVec( bool windowInListDirty, WindowVec& win, WidgetVec* widgetVec = 0 );
 
 	public:
 		Window( ColibriManager *manager );
@@ -111,6 +124,18 @@ namespace Colibri
 		void detachChild( Window *window );
 		/// Detaches from current parent. Does nothing if already parentless
 		void detachFromParent();
+
+		/// Set order in which this window should be drawn.
+		/// Windows with a higher z order value will be drawn last,
+		/// and therefore above windows with a lower value.
+		/// Windows with the same value are drawn in an undefined order.
+		/// This function triggers a re-order of the windows list.
+		void setZOrder( uint8_t z );
+		uint8_t getZOrder() const { return m_zOrder; }
+		bool getZOrderWindowDirty() const { return m_zOrderWindowDirty; }
+		bool getZOrderHasDirtyChildren() const { return m_zOrderHasDirtyChildren; }
+
+		void updateZOrderDirty();
 
 		/// Makes this widget the default widget (i.e. which widget the cursor
 		/// defaults to when the window is created)
