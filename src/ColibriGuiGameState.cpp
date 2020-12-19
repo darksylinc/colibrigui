@@ -63,25 +63,29 @@ namespace Demo
 	Colibri::Button *orderButtonFront = 0;
 	Colibri::Window *innerOverlapWindow1 = 0;
 	Colibri::Window *innerOverlapWindow2 = 0;
+	Colibri::Button* innerOverlapButton1 = 0;
+	Colibri::Button* innerOverlapButton2 = 0;
 	Colibri::Button *innerToggleOrder = 0;
 
 	class DemoWidgetListener : public Colibri::WidgetActionListener
 	{
+	public:
+		virtual ~DemoWidgetListener() {}
 		virtual void notifyWidgetAction( Colibri::Widget *widget, Colibri::Action::Action action )
 		{
 			if( action == Colibri::Action::Action::PrimaryActionPerform )
 			{
 				if( widget == orderButtonBack )
-					overlapWindow1->setZOrder(3);
+					overlapWindow1->setZOrder( 3 );
 				else if( widget == orderButtonFront )
-					overlapWindow1->setZOrder(5);
+					overlapWindow1->setZOrder( 5 );
 				else if( widget == innerToggleOrder )
 				{
 					uint8_t oldOrder = innerOverlapWindow1->getZOrder();
-					innerOverlapWindow1->setZOrder(innerOverlapWindow2->getZOrder());
-					innerOverlapWindow2->setZOrder(oldOrder);
-					innerOverlapWindow2->setTopLeft(innerOverlapWindow2->getLocalTopLeft());
-					innerOverlapWindow1->setTopLeft(innerOverlapWindow1->getLocalTopLeft());
+					innerOverlapWindow1->setZOrder( innerOverlapWindow2->getZOrder() );
+					innerOverlapButton1->setZOrder( innerOverlapWindow2->getZOrder() );
+					innerOverlapWindow2->setZOrder( oldOrder );
+					innerOverlapButton2->setZOrder( oldOrder );
 				}
 			}
 		}
@@ -113,7 +117,7 @@ namespace Demo
 		//mainWindow->setVisualsEnabled( false );
 		vertWindow = colibriManager->createWindow( 0 );
 
-		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
+		//Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 		//mainWindow->setDatablock( hlms->getDefaultDatablock() );
 
 		mainWindow->setTransform( Ogre::Vector2( 0, 0 ), Ogre::Vector2( 450, 0 ) );
@@ -269,17 +273,27 @@ namespace Demo
 
 		{
 			innerOverlapWindow1 = colibriManager->createWindow( overlapWindow2 );
-			innerOverlapWindow1->setTransform(Ogre::Vector2(10, 10), Ogre::Vector2(100, 100));
+			innerOverlapWindow1->setTransform( Ogre::Vector2(10, 10), Ogre::Vector2(100, 100) );
 			innerOverlapWindow1->setZOrder(1);
+			innerOverlapWindow2 = colibriManager->createWindow( overlapWindow2 );
+			innerOverlapWindow2->setTransform( Ogre::Vector2(20, 20), Ogre::Vector2(100, 100) );
+			innerOverlapWindow2->setZOrder(4);
+
+			innerOverlapButton1 = colibriManager->createWidget<Colibri::Button>( overlapWindow2 );
+			innerOverlapButton1->getLabel()->setText( "First" );
+			innerOverlapButton1->setTransform( Ogre::Vector2(150, 10), Ogre::Vector2(100, 100) );
+			innerOverlapButton1->setZOrder(1);
+			innerOverlapButton2 = colibriManager->createWidget<Colibri::Button>( overlapWindow2 );
+			innerOverlapButton2->setTransform( Ogre::Vector2(160, 20), Ogre::Vector2(100, 100) );
+			innerOverlapButton2->setZOrder(2);
+			innerOverlapButton2->getLabel()->setText( "Second" );
+
 			innerToggleOrder = colibriManager->createWidget<Colibri::Button>( overlapWindow2 );
 			innerToggleOrder->m_minSize = Ogre::Vector2( 350, 64 );
 			innerToggleOrder->getLabel()->setText( "Switch order" );
-			innerToggleOrder->setTopLeft(Ogre::Vector2(0, 120));
+			innerToggleOrder->setTopLeft( Ogre::Vector2(0, 120) );
 			innerToggleOrder->addActionListener(demoActionListener);
 			innerToggleOrder->sizeToFit();
-			innerOverlapWindow2 = colibriManager->createWindow( overlapWindow2 );
-			innerOverlapWindow2->setTransform(Ogre::Vector2(20, 20), Ogre::Vector2(100, 100));
-			innerOverlapWindow2->setZOrder(4);
 		}
 
 #if 0

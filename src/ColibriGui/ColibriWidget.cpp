@@ -44,7 +44,10 @@ namespace Colibri
 		m_clipBorderTL( Ogre::Vector2::ZERO ),
 		m_clipBorderBR( Ogre::Vector2::ZERO ),
 		m_accumMinClipTL( -1.0f ),
-		m_accumMaxClipBR( 1.0f )
+		m_accumMaxClipBR( 1.0f ),
+		m_zOrderDirty( false ),
+		m_zOrderHasDirtyChildren( false ),
+		m_zOrder( 0 )
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		,
 		m_transformOutOfDate( false ),
@@ -835,6 +838,61 @@ namespace Colibri
 		m_position = topLeft;
 		m_size = size;
 		setTransformDirty( TransformDirtyPosition | TransformDirtyScale );
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setZOrder( uint8_t z )
+	{
+		if( m_parent )
+		{
+			getParent()->m_zOrderDirty = true;
+		}
+		m_zOrder = z;
+		notifyZOrderChildWindowIsDirty( true );
+		//The above function sets this to true in the case of recursive calls up the tree.
+		//However from here we know no children should be set as dirty, so set it back to false.
+		m_zOrderHasDirtyChildren = false;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::notifyZOrderChildWindowIsDirty( bool firstCall )
+	{
+		m_zOrderHasDirtyChildren = true;
+
+		if( m_parent )
+		{
+			Widget *parentWindow = getParent();
+			parentWindow->notifyZOrderChildWindowIsDirty( false );
+		}
+		else
+		{
+			m_manager->_setZOrderWindowDirty( firstCall );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Widget::reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets )
+	{
+		if( widgetInListDirty )
+		{
+			std::stable_sort( widgets.begin(), widgets.end(), _compareWidgetZOrder );
+		}
+
+		WidgetVec::iterator itor = widgets.begin();
+		WidgetVec::iterator end  = widgets.end();
+
+		while( itor != end )
+		{
+			if( (*itor)->getZOrderHasDirtyChildren() )
+			{
+				(*itor)->updateZOrderDirty();
+			}
+			++itor;
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Widget::updateZOrderDirty()
+	{
+		reorderWidgetVec( getZOrderDirty(), m_children );
+		m_zOrderDirty = false;
+		m_zOrderHasDirtyChildren = false;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setTopLeft( const Ogre::Vector2 &topLeft )

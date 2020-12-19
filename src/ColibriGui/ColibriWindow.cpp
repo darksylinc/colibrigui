@@ -17,10 +17,7 @@ namespace Colibri
 		m_defaultChildWidget( 0 ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
-		m_childrenNavigationDirty( false ),
-		m_zOrderWindowDirty( false ),
-		m_zOrderHasDirtyChildren( false ),
-		m_zOrder( 0 )
+		m_childrenNavigationDirty( false )
 	{
 		m_childrenClickable = true;
 	}
@@ -228,75 +225,14 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Window::setZOrder( uint8_t z )
+	void Window::reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets )
 	{
-		if( m_parent )
+		Widget::reorderWidgetVec( widgetInListDirty, widgets );
+		//Sort the windows as well as the widgets to keep them in the same order.
+		if( widgetInListDirty )
 		{
-			getParentAsWindow()->m_zOrderWindowDirty = true;
+			std::stable_sort( m_childWindows.begin(), m_childWindows.end(), _compareWidgetZOrder );
 		}
-		m_zOrder = z;
-		notifyZOrderChildWindowIsDirty( true );
-		//The above function sets this to true in the case of recursive calls up the tree.
-		//However from here we know no children should be set as dirty, so set it back to false.
-		m_zOrderHasDirtyChildren = false;
-	}
-	//-------------------------------------------------------------------------
-	void Window::notifyZOrderChildWindowIsDirty( bool firstCall )
-	{
-		m_zOrderHasDirtyChildren = true;
-
-		if( m_parent )
-		{
-			Window *parentWindow = getParentAsWindow();
-			parentWindow->notifyZOrderChildWindowIsDirty( false );
-		}
-		else
-		{
-			m_manager->_setZOrderWindowDirty( firstCall );
-		}
-	}
-	//-------------------------------------------------------------------------
-	bool compareZOrder( const Window* w1, const Window* w2 )
-	{
-		return w1->getZOrder() < w2->getZOrder();
-	}
-	//-------------------------------------------------------------------------
-	bool compareWidgetZOrder( const Widget* w1, const Widget* w2 )
-	{
-		if( !w1->isWindow() || !w2->isWindow() ) return false;
-		return dynamic_cast<const Window*>(w1)->getZOrder() < dynamic_cast<const Window*>(w2)->getZOrder();
-	}
-	//-------------------------------------------------------------------------
-	void Window::reorderWindowVec( bool windowInListDirty, WindowVec& win, WidgetVec* widgetVec )
-	{
-		if( windowInListDirty )
-		{
-			std::stable_sort( win.begin(), win.end(), compareZOrder );
-			if( widgetVec )
-			{
-				std::stable_sort( widgetVec->begin(), widgetVec->end(), compareWidgetZOrder );
-			}
-		}
-
-		WindowVec::iterator itor = win.begin();
-		WindowVec::iterator end  = win.end();
-
-		while( itor != end )
-		{
-			if( (*itor)->getZOrderHasDirtyChildren() )
-			{
-				(*itor)->updateZOrderDirty();
-			}
-			++itor;
-		}
-
-	}
-	//-------------------------------------------------------------------------
-	void Window::updateZOrderDirty()
-	{
-		Window::reorderWindowVec( getZOrderWindowDirty(), m_childWindows, &m_children );
-		m_zOrderWindowDirty = false;
-		m_zOrderHasDirtyChildren = false;
 	}
 	//-------------------------------------------------------------------------
 	void Window::setWidgetNavigationDirty()
