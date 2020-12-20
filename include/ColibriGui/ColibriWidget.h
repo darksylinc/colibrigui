@@ -110,14 +110,6 @@ namespace Colibri
 		/// This is useful for widgets which require some sort of mouse movement to function.
 		bool					m_consumesScroll;
 
-		/// When true the current widget needs to have its children reordered.
-		/// A widget can still have dirty children but not need its list reordered,
-		/// for instance if the dirty widgets are further down the tree.
-		bool		m_zOrderDirty;
-		/// When true this widget has a child at some point in its tree which is dirty.
-		bool		m_zOrderHasDirtyChildren;
-		uint8_t		m_zOrder;
-
 		void notifyZOrderChildWindowIsDirty( bool firstCall );
 
 		/// Perform the re-ordering of widgets based on their z-order.
@@ -187,6 +179,14 @@ namespace Colibri
 		Ogre::Vector2	m_accumMinClipTL;
 		Ogre::Vector2	m_accumMaxClipBR;
 
+		/// When true the current widget needs to have its children reordered.
+		/// A widget can still have dirty children but not need its list reordered,
+		/// for instance if the dirty widgets are further down the tree.
+		bool		m_zOrderDirty;
+		/// When true this widget has a child at some point in its tree which is dirty.
+		bool		m_zOrderHasDirtyChildren;
+		uint16_t	m_zOrder;
+
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool	m_transformOutOfDate;
 		bool	m_destructionStarted;
@@ -226,6 +226,9 @@ namespace Colibri
 		*/
 		virtual void setTransformDirty( uint32_t dirtyReason );
 		void scheduleSetTransformDirty();
+
+		/// Produce a 16 bit zorder internal id from an 8 bit one.
+		uint16_t _wrapZOrderInternalId( uint8_t z ) const;
 
 	public:
 		Widget( ColibriManager *manager );
@@ -317,7 +320,10 @@ namespace Colibri
 		/// Windows with the same z value will be drawn according to their creation order.
 		/// This function triggers a re-order of the windows list.
 		void setZOrder( uint8_t z );
-		uint8_t getZOrder() const { return m_zOrder; }
+		uint8_t getZOrder() const { return static_cast<uint8_t>( m_zOrder ); }
+		/// Get the internal z order of the widget, where the last 8 bits are used for
+		/// designating windows and renderables. This should be used for sorting.
+		uint16_t _getZOrderInternal() const { return m_zOrder; }
 		bool getZOrderDirty() const { return m_zOrderDirty; }
 		bool getZOrderHasDirtyChildren() const { return m_zOrderHasDirtyChildren; }
 
@@ -444,7 +450,7 @@ namespace Colibri
 
 		static bool _compareWidgetZOrder( const Widget* w1, const Widget* w2 )
 		{
-			return w1->getZOrder() < w2->getZOrder();
+			return w1->_getZOrderInternal() < w2->_getZOrderInternal();
 		}
 
 	public:

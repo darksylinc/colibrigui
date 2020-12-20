@@ -47,7 +47,7 @@ namespace Colibri
 		m_accumMaxClipBR( 1.0f ),
 		m_zOrderDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
-		m_zOrder( 0 )
+		m_zOrder( _wrapZOrderInternalId( 0 ) )
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		,
 		m_transformOutOfDate( false ),
@@ -837,11 +837,25 @@ namespace Colibri
 		{
 			getParent()->m_zOrderDirty = true;
 		}
-		m_zOrder = z;
+
+		m_zOrder = _wrapZOrderInternalId( z );
 		notifyZOrderChildWindowIsDirty( true );
 		//The above function sets this to true in the case of recursive calls up the tree.
 		//However from here we know no children should be set as dirty, so set it back to false.
 		m_zOrderHasDirtyChildren = false;
+	}
+	//-------------------------------------------------------------------------
+	uint16_t Widget::_wrapZOrderInternalId( uint8_t z ) const
+	{
+		uint16_t targetOrder = z;
+		// Ensure renderables go after non-renderables
+		if( isRenderable() )
+			targetOrder |= 1u<<14u;
+		// Ensure windows always go last
+		if( isWindow() )
+			targetOrder |= 1u<<15u;
+
+		return targetOrder;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::notifyZOrderChildWindowIsDirty( bool firstCall )
@@ -869,8 +883,17 @@ namespace Colibri
 		WidgetVec::iterator itor = widgets.begin();
 		WidgetVec::iterator end  = widgets.end();
 
+		bool foundWindow = false;
 		while( itor != end )
 		{
+			//Sanity check that windows are placed at the end of the list.
+			if( (*itor)->isWindow() ) foundWindow = true;
+			if( foundWindow )
+			{
+				//From here on everything should be a window.
+				COLIBRI_ASSERT_HIGH( (*itor)->isWindow() );
+			}
+
 			if( (*itor)->getZOrderHasDirtyChildren() )
 			{
 				(*itor)->updateZOrderDirty();
