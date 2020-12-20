@@ -315,10 +315,10 @@ namespace Colibri
 		void callActionListeners( Action::Action action );
 
 		/// Set order in which this widget should be drawn.
-		/// Windows with a higher z order value will be drawn last,
-		/// and therefore above windows with a lower value.
-		/// Windows with the same z value will be drawn according to their creation order.
-		/// This function triggers a re-order of the windows list.
+		/// Widgets with a higher z order value will be drawn last,
+		/// and therefore above widgets with a lower value.
+		/// Widgets with the same z value will be drawn according to their creation order.
+		/// This function triggers a re-order of the widgets and windows list.
 		void setZOrder( uint8_t z );
 		uint8_t getZOrder() const { return static_cast<uint8_t>( m_zOrder ); }
 		/// Get the internal z order of the widget, where the last 8 bits are used for
