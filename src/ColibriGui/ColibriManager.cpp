@@ -45,6 +45,7 @@ namespace Colibri
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_zOrderWidgetDirty( false ),
+		m_zOrderHasDirtyChildren( false ),
 		m_numGlyphsDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
