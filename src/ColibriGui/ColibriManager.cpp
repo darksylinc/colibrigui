@@ -1136,7 +1136,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool compareZOrder( const Window* w1, const Window* w2 )
 	{
-		return w1->getZOrder() < w2->getZOrder();
+		return w1->_getZOrderInternal() < w2->_getZOrderInternal();
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::reorderWindowVec( bool windowInListDirty, WindowVec& windows )
