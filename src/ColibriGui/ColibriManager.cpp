@@ -1167,7 +1167,7 @@ namespace Colibri
 	void ColibriManager::_setZOrderWindowDirty( bool windowInListDirty )
 	{
 		m_zOrderWidgetDirty = true;
-		m_zOrderHasDirtyChildren = windowInListDirty;
+		m_zOrderHasDirtyChildren |= windowInListDirty;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_addDirtyLabel( Label *label )
