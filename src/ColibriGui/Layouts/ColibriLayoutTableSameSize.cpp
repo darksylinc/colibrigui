@@ -23,6 +23,8 @@ namespace Colibri
 		m_cells.push_back( cell );
 	}
 	//-------------------------------------------------------------------------
+	void LayoutTableSameSize::clearCells() { m_cells.clear(); }
+	//-------------------------------------------------------------------------
 	inline Ogre::Vector2 LayoutTableSameSize::getTopLeft( GridLocations::GridLocations gridLoc,
 														  const Ogre::Vector2 &accumOffset,
 														  const Ogre::Vector2 &biggestSize,

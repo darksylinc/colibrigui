@@ -98,6 +98,7 @@ namespace Colibri
 		LayoutTableSameSize( ColibriManager *colibriManager );
 
 		void addCell( LayoutCell *cell );
+		void clearCells();
 
 		/** Moves and resizes all cells to be layed out as either a row or a column.
 		@param isRootLayout

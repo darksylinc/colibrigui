@@ -22,6 +22,8 @@ namespace Colibri
 		m_cells.push_back( cell );
 	}
 	//-------------------------------------------------------------------------
+	void LayoutLine::clearCells() { m_cells.clear(); }
+	//-------------------------------------------------------------------------
 	inline Ogre::Vector2 LayoutLine::getTopLeft( bool bVertical,
 												 GridLocations::GridLocations gridLoc,
 												 float accumOffset, float cellSize,
