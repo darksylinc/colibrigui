@@ -429,6 +429,15 @@ namespace Colibri
 		m_parent->setWidgetNavigationDirty();
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setClickable( bool bClickable )
+	{
+		if( m_clickable != bClickable )
+		{
+			m_clickable = bClickable;
+			setWidgetNavigationDirty();
+		}
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setKeyboardNavigable( bool bNavigable )
 	{
 		if( m_keyboardNavigable != bNavigable )

@@ -311,6 +311,12 @@ namespace Colibri
 		*/
 		virtual void setWidgetNavigationDirty();
 
+		/** See Widget::setKeyboardNavigable
+		@param bClickable
+		*/
+		void setClickable( bool bClickable );
+		bool getClickable() const { return m_clickable; }
+
 		/** When false, this widget cannot be highlighted or pressed via Keyboard.
 			It's similar to being disabled, except it's faster in CPU terms, and disabled objects
 			change their skin; whereas you can explicitly change the state without the user being
