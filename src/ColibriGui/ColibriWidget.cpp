@@ -235,7 +235,7 @@ namespace Colibri
 	{
 		Widget *nextWidget = this;
 
-		while( !nextWidget->m_keyboardNavigable )
+		while( nextWidget->m_parent && !nextWidget->m_keyboardNavigable )
 			nextWidget = nextWidget->m_parent;
 
 		return nextWidget;
