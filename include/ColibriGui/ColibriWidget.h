@@ -312,7 +312,16 @@ namespace Colibri
 		*/
 		void removeActionListener( WidgetActionListener *listener, uint32_t actionMask=~0u );
 
-		void callActionListeners( Action::Action action );
+		/// Don't call this directly. Use m_colibriManager->callActionListeners()
+		///
+		/// This function can be called directly if we're already
+		/// inside ColibriManager::callActionListeners
+		///
+		/// The reason being is that if WidgetActionListener::notifyWidgetAction
+		/// destroys 'this', then we must be out of scope when that happen, and
+		/// ColibriManager should be delaying the destruction long enough
+		/// for that to happen
+		void _callActionListeners( Action::Action action );
 
 		/// Set order in which this widget should be drawn.
 		/// Widgets with a higher z order value will be drawn last,

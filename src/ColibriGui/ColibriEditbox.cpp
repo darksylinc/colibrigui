@@ -314,7 +314,7 @@ namespace Colibri
 			else
 				m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
 			showCaret();
-			callActionListeners( Action::ValueChanged );
+			_callActionListeners( Action::ValueChanged );
 		}
 		else if( direction == Borders::Right )
 		{
@@ -324,7 +324,7 @@ namespace Colibri
 				m_cursorPos = m_label->advanceGlyphToNextCluster( m_cursorPos );
 
 			showCaret();
-			callActionListeners( Action::ValueChanged );
+			_callActionListeners( Action::ValueChanged );
 		}
 	}
 }

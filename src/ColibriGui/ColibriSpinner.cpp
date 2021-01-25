@@ -348,7 +348,7 @@ namespace Colibri
 				else
 					--m_currentValue;
 				updateOptionLabel();
-				callActionListeners( Action::ValueChanged );
+				_callActionListeners( Action::ValueChanged );
 			}
 			else if( widget == m_increment )
 			{
@@ -357,7 +357,7 @@ namespace Colibri
 				else
 					++m_currentValue;
 				updateOptionLabel();
-				callActionListeners( Action::ValueChanged );
+				_callActionListeners( Action::ValueChanged );
 			}
 		}
 	}
@@ -372,7 +372,7 @@ namespace Colibri
 			else
 				--m_currentValue;
 			updateOptionLabel();
-			callActionListeners( Action::ValueChanged );
+			_callActionListeners( Action::ValueChanged );
 		}
 		else if( (direction == Borders::Right && m_horizontal) ||
 				 (direction == Borders::Top && !m_horizontal) )
@@ -382,7 +382,7 @@ namespace Colibri
 			else
 				++m_currentValue;
 			updateOptionLabel();
-			callActionListeners( Action::ValueChanged );
+			_callActionListeners( Action::ValueChanged );
 		}
 	}
 }

@@ -42,6 +42,7 @@ namespace Colibri
 		m_numTextGlyphs( 0u ),
 		m_logListener( &DefaultLogListener ),
 		m_colibriListener( &DefaultColibriListener ),
+		m_delayingDestruction( false ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_numGlyphsDirty( false ),
@@ -346,7 +347,7 @@ namespace Colibri
 				}
 				else
 					m_cursorFocusedPair.widget->setState( States::HighlightedButton, false );
-				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
+				callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 			}
 
 			if( focusedPair.widget && !newFullyFocusedByKey )
@@ -364,7 +365,7 @@ namespace Colibri
 						focusedPair.widget->setState( States::HighlightedCursor );
 					else
 						focusedPair.widget->setState( States::HighlightedButtonAndCursor );
-					focusedPair.widget->callActionListeners( Action::Highlighted );
+					callActionListeners( focusedPair.widget, Action::Highlighted );
 				}
 				else
 				{
@@ -373,7 +374,7 @@ namespace Colibri
 					overrideKeyboardFocusWith( focusedPair );
 
 					focusedPair.widget->setState( States::Pressed );
-					focusedPair.widget->callActionListeners( Action::Hold );
+					callActionListeners( focusedPair.widget, Action::Hold );
 				}
 			}
 		}
@@ -432,12 +433,12 @@ namespace Colibri
 				m_mouseCursorButtonDown = true;
 
 				m_cursorFocusedPair.widget->setState( States::Pressed );
-				m_cursorFocusedPair.widget->callActionListeners( Action::Hold );
+				callActionListeners( m_cursorFocusedPair.widget, Action::Hold );
 			}
 			else
 			{
 				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
-				m_cursorFocusedPair.widget->callActionListeners( Action::Highlighted );
+				callActionListeners( m_cursorFocusedPair.widget, Action::Highlighted );
 			}
 		}
 		else if( m_primaryButtonDown )
@@ -456,10 +457,14 @@ namespace Colibri
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor );
 			if( m_cursorFocusedPair.widget->isPressable() )
-				m_cursorFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+				callActionListeners( m_cursorFocusedPair.widget, Action::PrimaryActionPerform );
 
-			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+			// m_cursorFocusedPair.widget may have been destroyed by callActionListeners
+			if( m_cursorFocusedPair.widget &&
+				m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+			{
 				m_cursorFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
+			}
 		}
 		else if( m_mouseCursorButtonDown )
 		{
@@ -477,12 +482,14 @@ namespace Colibri
 			{
 				m_primaryButtonDown = true;
 				m_keyboardFocusedPair.widget->setState( States::Pressed );
-				m_keyboardFocusedPair.widget->callActionListeners( Action::Hold );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::Hold );
 			}
 
-			overrideCursorFocusWith( m_keyboardFocusedPair );
-
-			scrollToWidget( m_keyboardFocusedPair.widget );
+			if( m_keyboardFocusedPair.widget )
+			{
+				overrideCursorFocusWith( m_keyboardFocusedPair );
+				scrollToWidget( m_keyboardFocusedPair.widget );
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -492,12 +499,16 @@ namespace Colibri
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			if( m_keyboardFocusedPair.widget->isPressable() )
-				m_keyboardFocusedPair.widget->callActionListeners( Action::PrimaryActionPerform );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::PrimaryActionPerform );
 
-			if( m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+			// m_cursorFocusedPair.widget may have been destroyed by callActionListeners
+			if( m_cursorFocusedPair.widget &&
+				m_cursorFocusedPair.widget == m_keyboardFocusedPair.widget )
+			{
 				m_keyboardFocusedPair.widget->setState( States::HighlightedButtonAndCursor );
 
-			scrollToWidget( m_keyboardFocusedPair.widget );
+				scrollToWidget( m_keyboardFocusedPair.widget );
+			}
 		}
 		m_primaryButtonDown = false;
 	}
@@ -518,7 +529,7 @@ namespace Colibri
 		{
 			m_cursorFocusedPair.widget->setState( newCursorState, false );
 			if( !cursorAndKeyboardMatch )
-				m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
+				callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 		}
 		m_mouseCursorButtonDown = false;
 		m_allowingScrollGestureWhileButtonDown = false;
@@ -528,14 +539,14 @@ namespace Colibri
 		{
 			m_keyboardFocusedPair.widget->setState( newKeyboardState, true );
 			if( !cursorAndKeyboardMatch )
-				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 		}
 		m_primaryButtonDown = false;
 
 		//Cursor and keyboard are highlighting the same widget.
 		//Let's make sure we only call the callback once.
 		if( cursorAndKeyboardMatch && m_cursorFocusedPair.widget )
-			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
+			callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateKeyDirection( Borders::Borders direction )
@@ -548,25 +559,35 @@ namespace Colibri
 			if( nextWidget )
 			{
 				m_keyboardFocusedPair.widget->setState( States::Idle );
-				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 
 				if( !m_primaryButtonDown || !m_keyboardFocusedPair.widget->isPressable() )
 				{
 					nextWidget->setState( States::HighlightedButton );
-					nextWidget->callActionListeners( Action::Highlighted );
+					callActionListeners( nextWidget, Action::Highlighted );
+					// Set again in case callActionListeners destroyed nextWidget
+					nextWidget = m_keyboardFocusedPair.widget->m_nextWidget[direction];
 				}
 				else
 				{
 					nextWidget->setState( States::Pressed );
-					nextWidget->callActionListeners( Action::Hold );
+					callActionListeners( nextWidget, Action::Hold );
+					// Set again in case callActionListeners destroyed nextWidget
+					nextWidget = m_keyboardFocusedPair.widget->m_nextWidget[direction];
 				}
 
-				m_keyboardFocusedPair.widget = nextWidget;
-				overrideCursorFocusWith( m_keyboardFocusedPair );
+				if( nextWidget )
+				{
+					m_keyboardFocusedPair.widget = nextWidget;
+					overrideCursorFocusWith( m_keyboardFocusedPair );
+				}
 			}
 			else if( !m_keyboardFocusedPair.widget->m_autoSetNextWidget[direction] )
 			{
+				m_delayingDestruction = true;
 				m_keyboardFocusedPair.widget->_notifyActionKeyMovement( direction );
+				destroyDelayedWidgets();
+				m_delayingDestruction = false;
 			}
 
 			scrollToWidget( m_keyboardFocusedPair.widget );
@@ -699,7 +720,7 @@ namespace Colibri
 			if( m_keyboardFocusedPair.widget )
 			{
 				m_keyboardFocusedPair.widget->setState( States::Idle );
-				m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 			}
 		}
 
@@ -717,6 +738,12 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::destroyWindow( Window *window )
 	{
+		if( m_delayingDestruction )
+		{
+			m_delayedDestruction.push_back( DelayedDestruction( window, true ) );
+			return;
+		}
+
 		if( window == m_cursorFocusedPair.window )
 			m_cursorFocusedPair = FocusPair();
 		if( window == m_keyboardFocusedPair.window )
@@ -743,6 +770,12 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::destroyWidget( Widget *widget )
 	{
+		if( m_delayingDestruction )
+		{
+			m_delayedDestruction.push_back( DelayedDestruction( widget, false ) );
+			return;
+		}
+
 		if( widget == m_cursorFocusedPair.widget )
 			m_cursorFocusedPair.widget = 0;
 		if( widget == m_keyboardFocusedPair.widget )
@@ -779,6 +812,35 @@ namespace Colibri
 			delete widget;
 			--m_numWidgets;
 		}
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::destroyDelayedWidgets()
+	{
+		m_delayingDestruction = false;
+		DelayedDestructionVec::const_iterator itor = m_delayedDestruction.begin();
+		DelayedDestructionVec::const_iterator endt = m_delayedDestruction.end();
+
+		while( itor != endt )
+		{
+			if( itor->windowVariantCalled )
+			{
+				COLIBRI_ASSERT_HIGH( dynamic_cast<Window *>( itor->widget ) );
+				destroyWindow( static_cast<Window *>( itor->widget ) );
+			}
+			else
+				destroyWidget( itor->widget );
+			++itor;
+		}
+
+		m_delayedDestruction.clear();
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::callActionListeners( Widget *widget, Action::Action action )
+	{
+		m_delayingDestruction = true;
+		widget->_callActionListeners( action );
+		destroyDelayedWidgets();
+		m_delayingDestruction = false;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_setAsParentlessWindow( Window *window )
@@ -824,7 +886,7 @@ namespace Colibri
 		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != focusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::Idle );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::Cancel );
+			callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 		}
 		m_keyboardFocusedPair = focusedPair;
 		m_primaryButtonDown = false;
@@ -835,7 +897,7 @@ namespace Colibri
 		if( focusedPair.widget != cursorWidget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton, false );
-			m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
+			callActionListeners( m_keyboardFocusedPair.widget, Action::Highlighted );
 		}
 	}
 	//-----------------------------------------------------------------------------------
@@ -845,7 +907,7 @@ namespace Colibri
 		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget != focusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor, false );
-			m_cursorFocusedPair.widget->callActionListeners( Action::Cancel );
+			callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 		}
 		//m_cursorFocusedPair = focusedPair;
 		m_mouseCursorButtonDown = false;
@@ -1252,8 +1314,9 @@ namespace Colibri
 			if( m_keyboardFocusedPair.widget )
 			{
 				m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
-				m_keyboardFocusedPair.widget->callActionListeners( Action::Highlighted );
-				scrollToWidget( m_keyboardFocusedPair.widget );
+				callActionListeners( m_keyboardFocusedPair.widget, Action::Highlighted );
+				if( m_keyboardFocusedPair.widget )
+					scrollToWidget( m_keyboardFocusedPair.widget );
 			}
 		}
 

@@ -301,7 +301,13 @@ namespace Colibri
 
 		updateSlider();
 
-		callActionListeners( Action::ValueChanged );
+		// This is technically UB if if a listener destroys us, but in practice
+		// it should work ok as it is last function being called and we don't touch
+		// 'this' anymore
+		//
+		// It's also rare that user would destroys upon a manually initiated call
+		// Everything is in the user's control
+		m_manager->callActionListeners( this, Action::ValueChanged );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setAlwaysInside( bool bAlwaysInside )

@@ -84,6 +84,10 @@ namespace Colibri
 		enum Action
 		{
 			/// Any previous action on this widget was cancelled
+			///
+			/// @remark
+			///		Destroying caller widget upon receiving this action is
+			///		invalid and will result in corruption
 			Cancel,
 			/// Widget is highlighted by user (e.g. cursor is on top of a button)
 			Highlighted,

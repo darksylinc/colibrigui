@@ -53,6 +53,20 @@ namespace Colibri
 
 	class ColibriManager
 	{
+		struct DelayedDestruction
+		{
+			Widget *widget;
+			bool    windowVariantCalled;
+
+			DelayedDestruction( Widget *_widget, bool _windowVariantCalled ) :
+				widget( _widget ),
+				windowVariantCalled( _windowVariantCalled )
+			{
+			}
+		};
+
+		typedef std::vector<DelayedDestruction> DelayedDestructionVec;
+
 	public:
 		static const std::string c_defaultTextDatablockNames[States::NumStates];
 
@@ -83,6 +97,9 @@ namespace Colibri
 	protected:
 		LogListener	*m_logListener;
 		ColibriListener	*m_colibriListener;
+
+		DelayedDestructionVec m_delayedDestruction;
+		bool                  m_delayingDestruction;
 
 		bool m_swapRTLControls;
 		bool m_windowNavigationDirty;
@@ -341,6 +358,21 @@ namespace Colibri
 		void destroyWindow( Window *window );
 		void destroyWidget( Widget *widget );
 
+		bool _isDelayingDestruction() const { return m_delayingDestruction; }
+
+		/// Safely calls widget->_callActionListeners( action )
+		///
+		/// By safely, it means that if a listener destroys 'widget',
+		/// such destruction is delayed until it is safe to do so.
+		void callActionListeners( Widget *widget, Action::Action action );
+
+	protected:
+		/// Actually execute destroyWindow/destroyWidget that has been delayed to avoid
+		/// corrupting a widget while it was still in use (e.g. widget being destroyed
+		/// as consequence of Widget::callActionListeners)
+		void destroyDelayedWidgets();
+
+	public:
 		/// For internal use. Do NOT call directly
 		void _setAsParentlessWindow( Window *window );
 		/// You can call this one directly

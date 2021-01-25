@@ -201,7 +201,7 @@ namespace Colibri
 			if( m_currentState != States::Idle )
 			{
 				setState( States::Idle );
-				callActionListeners( Action::Cancel );
+				_callActionListeners( Action::Cancel );
 			}
 
 			if( m_keyboardNavigable )
@@ -408,8 +408,12 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Widget::callActionListeners( Action::Action action )
+	void Widget::_callActionListeners( Action::Action action )
 	{
+		COLIBRI_ASSERT_HIGH(
+			( action == Action::Cancel || m_manager->_isDelayingDestruction() ) &&
+			"If listener->notifyWidgetAction destroys 'this', it will result in corruption" );
+
 		const uint32_t actionMask = 1u << action;
 
 		WidgetActionListenerRecordVec::const_iterator itor = m_actionListeners.begin();

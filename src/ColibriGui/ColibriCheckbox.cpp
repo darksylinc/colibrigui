@@ -210,7 +210,7 @@ namespace Colibri
 				m_currentValue = (m_currentValue + 1u) % (getMaxValue() + 1u);
 				updateTickmark();
 				if( widget != this )
-					callActionListeners( Action::PrimaryActionPerform );
+					_callActionListeners( Action::PrimaryActionPerform );
 			}
 		}
 	}
