@@ -38,8 +38,9 @@ namespace Colibri
 		WindowVec m_childWindows;
 
 		void notifyChildWindowIsDirty();
-		/// Reorder both the widget vec and the m_childWindows vec.
-		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets );
+
+		/// Overloaded to also reorder the m_childWindows vec.
+		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets ) colibri_override;
 
 		Window* getParentAsWindow() const;
 

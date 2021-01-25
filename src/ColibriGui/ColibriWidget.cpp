@@ -859,10 +859,10 @@ namespace Colibri
 		uint16_t targetOrder = z;
 		// Ensure renderables go after non-renderables
 		if( isRenderable() )
-			targetOrder |= 1u<<14u;
+			targetOrder |= 1u << 14u;
 		// Ensure windows always go last
 		if( isWindow() )
-			targetOrder |= 1u<<15u;
+			targetOrder |= 1u << 15u;
 
 		return targetOrder;
 	}
@@ -890,22 +890,23 @@ namespace Colibri
 		}
 
 		WidgetVec::iterator itor = widgets.begin();
-		WidgetVec::iterator end  = widgets.end();
+		WidgetVec::iterator endt = widgets.end();
 
 		bool foundWindow = false;
-		while( itor != end )
+		while( itor != endt )
 		{
-			//Sanity check that windows are placed at the end of the list.
-			if( (*itor)->isWindow() ) foundWindow = true;
+			// Sanity check that windows are placed at the end of the list.
+			if( ( *itor )->isWindow() )
+				foundWindow = true;
 			if( foundWindow )
 			{
-				//From here on everything should be a window.
-				COLIBRI_ASSERT_HIGH( (*itor)->isWindow() );
+				// From here on everything should be a window.
+				COLIBRI_ASSERT_HIGH( ( *itor )->isWindow() );
 			}
 
-			if( (*itor)->getZOrderHasDirtyChildren() )
+			if( ( *itor )->getZOrderHasDirtyChildren() )
 			{
-				(*itor)->updateZOrderDirty();
+				( *itor )->updateZOrderDirty();
 			}
 			++itor;
 		}

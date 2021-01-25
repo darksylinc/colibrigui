@@ -44,9 +44,9 @@ namespace Colibri
 		m_colibriListener( &DefaultColibriListener ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
+		m_numGlyphsDirty( false ),
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
-		m_numGlyphsDirty( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -1140,7 +1140,7 @@ namespace Colibri
 		return w1->_getZOrderInternal() < w2->_getZOrderInternal();
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::reorderWindowVec( bool windowInListDirty, WindowVec& windows )
+	void ColibriManager::reorderWindowVec( bool windowInListDirty, WindowVec &windows )
 	{
 		if( windowInListDirty )
 		{
@@ -1148,13 +1148,13 @@ namespace Colibri
 		}
 
 		WindowVec::iterator itor = windows.begin();
-		WindowVec::iterator end  = windows.end();
+		WindowVec::iterator endt = windows.end();
 
-		while( itor != end )
+		while( itor != endt )
 		{
-			if( (*itor)->getZOrderHasDirtyChildren() )
+			if( ( *itor )->getZOrderHasDirtyChildren() )
 			{
-				(*itor)->updateZOrderDirty();
+				( *itor )->updateZOrderDirty();
 			}
 			++itor;
 		}

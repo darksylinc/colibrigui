@@ -110,12 +110,6 @@ namespace Colibri
 		/// This is useful for widgets which require some sort of mouse movement to function.
 		bool					m_consumesScroll;
 
-		void notifyZOrderChildWindowIsDirty( bool firstCall );
-
-		/// Perform the re-ordering of widgets based on their z-order.
-		/// This will also recursively search for other dirty widgets in the list.
-		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets );
-
 		bool m_culled;
 	public:
 		/// When true, this widgets and its children will be rendered in breadth first
@@ -229,6 +223,12 @@ namespace Colibri
 
 		/// Produce a 16 bit zorder internal id from an 8 bit one.
 		uint16_t _wrapZOrderInternalId( uint8_t z ) const;
+
+		void notifyZOrderChildWindowIsDirty( bool firstCall );
+
+		/// Perform the re-ordering of widgets based on their z-order.
+		/// This will also recursively search for other dirty widgets in the list.
+		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets );
 
 	public:
 		Widget( ColibriManager *manager );

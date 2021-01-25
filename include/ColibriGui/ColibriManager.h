@@ -92,7 +92,6 @@ namespace Colibri
 		bool m_zOrderWidgetDirty;
 		/// Is one of the windows stored by this manager immediately dirty.
 		bool m_zOrderHasDirtyChildren;
-		void reorderWindowVec( bool windowInListDirty, WindowVec& windows );
 
 		Ogre::Root					* colibrigui_nullable m_root;
 		Ogre::VaoManager			* colibrigui_nullable m_vaoManager;
@@ -156,6 +155,8 @@ namespace Colibri
 		bool m_fillBuffersStarted;
 		bool m_renderingStarted;
 #endif
+
+		static void reorderWindowVec( bool windowInListDirty, WindowVec& windows );
 
 		void updateWidgetsFocusedByCursor();
 		void updateAllDerivedTransforms();
@@ -364,9 +365,11 @@ namespace Colibri
 		void autosetNavigation();
 
 		void _setWindowNavigationDirty();
-		/// Notify the manager that a window has its z order dirty.
-		/// @param windowInListDirty should be true if a window this manager directly
-		/// owns is dirty.
+
+		/** Notify the manager that a window has its z order dirty.
+		@param windowInListDirty
+			Should be true if a window this manager directly owns is dirty.
+		*/
 		void _setZOrderWindowDirty( bool windowInListDirty );
 		void _addDirtyLabel( Label *label );
 

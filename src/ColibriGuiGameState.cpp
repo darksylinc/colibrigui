@@ -406,6 +406,7 @@ namespace Demo
 		colibriManager->destroyWidget( orderButtonBack );
 		colibriManager->destroyWidget( orderButtonFront );
 		colibriManager->destroyWindow( mainWindow );
+		colibriManager->destroyWindow( vertWindow );
 		colibriManager->destroyWindow( overlapWindow1 );
 		colibriManager->destroyWindow( overlapWindow2 );
 		delete demoActionListener;
