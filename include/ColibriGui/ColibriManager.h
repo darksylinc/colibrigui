@@ -405,6 +405,9 @@ namespace Colibri
 		void _setZOrderWindowDirty( bool windowInListDirty );
 		void _addDirtyLabel( Label *label );
 
+		/// Cannot be nullptr
+		void _stealKeyboardFocus( Widget *widget );
+
 		void update( float timeSinceLast );
 		void prepareRenderCommands();
 		void render();

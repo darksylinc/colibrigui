@@ -561,7 +561,7 @@ namespace Colibri
 				m_keyboardFocusedPair.widget->setState( States::Idle );
 				callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 
-				if( !m_primaryButtonDown || !m_keyboardFocusedPair.widget->isPressable() )
+				if( !m_primaryButtonDown || !nextWidget->isPressable() )
 				{
 					nextWidget->setState( States::HighlightedButton );
 					callActionListeners( nextWidget, Action::Highlighted );
@@ -1268,6 +1268,42 @@ namespace Colibri
 			if( scrollOffset != Ogre::Vector2::ZERO )
 				parentWindow->setScrollAnimated( currentScroll + scrollOffset, false );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_stealKeyboardFocus( Widget *widget )
+	{
+		COLIBRI_ASSERT_LOW( widget );
+
+		FocusPair focusPair;
+		if( widget->isWindow() )
+		{
+			focusPair.window = widget->getAsWindow();
+		}
+		else
+		{
+			focusPair.window = widget->getFirstParentWindow();
+			focusPair.widget = widget;
+		}
+
+		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget == widget )
+		{
+			m_keyboardFocusedPair.widget->setState( States::Idle );
+			callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
+		}
+
+		if( !m_primaryButtonDown || !widget->isPressable() )
+		{
+			widget->setState( States::HighlightedButton );
+			callActionListeners( widget, Action::Highlighted );
+		}
+		else
+		{
+			widget->setState( States::Pressed );
+			callActionListeners( widget, Action::Hold );
+		}
+
+		m_keyboardFocusedPair = focusPair;
+		overrideCursorFocusWith( m_keyboardFocusedPair );
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::update( float timeSinceLast )

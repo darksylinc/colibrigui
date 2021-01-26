@@ -187,6 +187,11 @@ namespace Colibri
 		setTransformDirty( TransformDirtyPosition | TransformDirtyOrientation );
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setKeyboardFocus()
+	{
+		m_manager->_stealKeyboardFocus( this );
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setPressable( bool pressable )
 	{
 		m_pressable = pressable;

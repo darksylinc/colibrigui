@@ -248,6 +248,13 @@ namespace Colibri
 		/// @see	Renderable::setVisualsEnabled
 		virtual bool isVisualsEnabled() const	{ return false; }
 
+		/** Sets the keyboard to (steal) focus on this widget and its parent window
+		@remarks
+			It is user's responsability that an action listener won't
+			delete 'this' as part of becoming into focus.
+		*/
+		void setKeyboardFocus();
+
 		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
 
