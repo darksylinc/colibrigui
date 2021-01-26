@@ -837,10 +837,17 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::callActionListeners( Widget *widget, Action::Action action )
 	{
+		const bool wasAlreadyDelaying = m_delayingDestruction;
 		m_delayingDestruction = true;
 		widget->_callActionListeners( action );
-		destroyDelayedWidgets();
-		m_delayingDestruction = false;
+		if( !wasAlreadyDelaying )
+		{
+			// Only top-level calls to callActionListeners should destroy everything.
+			// If we end up calling callActionListeners inside callActionListeners,
+			// we must not end up inside this branch.
+			destroyDelayedWidgets();
+			m_delayingDestruction = false;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_setAsParentlessWindow( Window *window )
