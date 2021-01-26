@@ -772,6 +772,7 @@ namespace Colibri
 	{
 		if( m_delayingDestruction )
 		{
+			widget->_setDestructionDelayed();
 			m_delayedDestruction.push_back( DelayedDestruction( widget, false ) );
 			return;
 		}

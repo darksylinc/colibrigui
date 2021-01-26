@@ -197,6 +197,8 @@ namespace Colibri
 		m_pressable = pressable;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::_setDestructionDelayed() { m_hidden = true; }
+	//-------------------------------------------------------------------------
 	void Widget::setHidden( bool hidden )
 	{
 		if( m_hidden != hidden )
@@ -1101,7 +1103,8 @@ namespace Colibri
 		while( itor != end )
 		{
 			Widget *widget = *itor;
-			maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
+			if( !widget->isHidden() )
+				maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
 			++itor;
 		}
 

@@ -260,6 +260,9 @@ namespace Colibri
 
 		bool consumesScroll() const			{ return m_consumesScroll; }
 
+		/// Do not call directly. After this function "isHidden()" will return true
+		void _setDestructionDelayed();
+
 		void setHidden( bool hidden );
 		bool isHidden() const				{ return m_hidden; }
 
