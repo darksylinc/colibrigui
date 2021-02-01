@@ -594,7 +594,7 @@ namespace Colibri
 		SkinInfo const *retVal = 0;
 
 		SkinInfoMap::const_iterator itor;
-		itor = m_skins.find( pack.skinInfo[States::Disabled] );
+		itor = m_skins.find( pack.skinInfo[state] );
 		if( itor == m_skins.end() )
 		{
 			char tmpBuffer[512];
