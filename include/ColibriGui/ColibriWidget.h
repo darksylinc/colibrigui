@@ -184,6 +184,8 @@ namespace Colibri
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool	m_transformOutOfDate;
 		bool	m_destructionStarted;
+
+		std::string m_debugName;
 #endif
 
 		WidgetListenerPairVec::iterator findListener( WidgetListener *listener );
@@ -233,6 +235,14 @@ namespace Colibri
 	public:
 		Widget( ColibriManager *manager );
 		virtual ~Widget();
+
+		/** Sets a user-supplied name for debugging purposes.
+		@remark
+			This function does nothing in release builds!
+			Do not have your in-game logic depend on the contents of this variable
+		*/
+		void setDebugName( const std::string &debugName );
+		const std::string &_getDebugName() const;
 
 		virtual void _initialize();
 		virtual void _destroy();

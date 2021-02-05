@@ -98,6 +98,23 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setDebugName( const std::string &debugName )
+	{
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
+		m_debugName = debugName;
+#endif
+	}
+	//-------------------------------------------------------------------------
+	const std::string &Widget::_getDebugName() const
+	{
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
+		return m_debugName;
+#else
+		static std::string c_blankString = "";
+		return c_blankString;
+#endif
+	}
+	//-------------------------------------------------------------------------
 	void Widget::_initialize()
 	{
 	}
