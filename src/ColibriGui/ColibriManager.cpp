@@ -495,7 +495,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::setKeyboardPrimaryReleased()
 	{
-		if( m_primaryButtonDown && m_keyboardFocusedPair.widget )
+		const bool primaryWasDown = m_primaryButtonDown;
+		m_primaryButtonDown = false;
+		if( primaryWasDown && m_keyboardFocusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			if( m_keyboardFocusedPair.widget->isPressable() )
@@ -510,7 +512,6 @@ namespace Colibri
 				scrollToWidget( m_keyboardFocusedPair.widget );
 			}
 		}
-		m_primaryButtonDown = false;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setCancel()
