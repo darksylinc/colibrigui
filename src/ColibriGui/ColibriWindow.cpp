@@ -21,6 +21,7 @@ namespace Colibri
 		m_childrenNavigationDirty( false )
 	{
 		m_childrenClickable = true;
+		setConsumeCursor( true );
 	}
 	//-------------------------------------------------------------------------
 	Window::~Window()

@@ -140,6 +140,19 @@ namespace Colibri
 		void    setLastPrimaryAction( Widget *colibrigui_nullable widget );
 		Widget *colibrigui_nullable getLastPrimaryAction() const;
 
+		/** When true, clicking on an empty part of the window will consume mouse
+			cursor movements and clicks
+
+			When false, mouse events will "go through" as if the window wasn't there;
+			unless they land on a child widget (or a child window that does consume
+			the cursor)
+
+			The default value is true.
+		@param bConsumeCursor
+		*/
+		void setConsumeCursor( bool bConsumeCursor ) { m_clickable = bConsumeCursor; }
+		bool getConsumeCursor() const { return m_clickable; }
+
 		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
 												  const Matrix2x3 &parentRot ) colibri_override;
 

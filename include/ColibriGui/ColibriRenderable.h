@@ -141,6 +141,10 @@ namespace Colibri
 			as widgets must require at least a root window, and you may not this window to
 			have any visual representation (i.e. you just want to render a few widgets
 			on screen)
+
+			If you're using this on a window, you very likely want to call
+			Window::setConsumeCursor( false ) so that mouse events get through
+			this invisible window.
 		@param bEnabled
 			True to enable rendering this widget (Default).
 			False to disable rendering.

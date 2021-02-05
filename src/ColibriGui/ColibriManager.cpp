@@ -323,9 +323,10 @@ namespace Colibri
 		WindowVec::const_reverse_iterator ritor = m_windows.rbegin();
 		WindowVec::const_reverse_iterator rend  = m_windows.rend();
 
-		while( ritor != rend && !focusedPair.widget )
+		while( ritor != rend && !focusedPair.widget &&
+			   ( !focusedPair.window || !focusedPair.window->getClickable() ) )
 		{
-			focusedPair = (*ritor)->_setIdleCursorMoved( newPosNdc );
+			focusedPair = ( *ritor )->_setIdleCursorMoved( newPosNdc );
 			++ritor;
 		}
 
@@ -379,8 +380,9 @@ namespace Colibri
 			}
 		}
 
-		if(focusedPair.widget){
-			//Notify the widget that the mouse moved.
+		if( focusedPair.widget )
+		{
+			// Notify the widget that the mouse moved.
 			focusedPair.widget->notifyCursorMoved( newPosNdc );
 		}
 

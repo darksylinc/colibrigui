@@ -553,14 +553,14 @@ namespace Colibri
 		WidgetVec::const_reverse_iterator ritor = m_children.rbegin();
 		WidgetVec::const_reverse_iterator rend  = m_children.rbegin() + numWindows;
 
-		while( ritor != rend && !retVal.widget )
+		while( ritor != rend && !retVal.widget && ( !retVal.window || !retVal.window->getClickable() ) )
 		{
-			retVal = (*ritor)->_setIdleCursorMoved( newPosNdc );
+			retVal = ( *ritor )->_setIdleCursorMoved( newPosNdc );
 			++ritor;
 		}
 
 		//One of the child windows is being touched by the cursor. We're done.
-		if( retVal.widget )
+		if( retVal.widget || ( retVal.window && retVal.window->getClickable() ) )
 			return retVal;
 
 		if( !this->intersects( newPosNdc ) )
