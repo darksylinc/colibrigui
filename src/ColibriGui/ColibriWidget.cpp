@@ -432,6 +432,18 @@ namespace Colibri
 				itor->listener->notifyWidgetAction( this, action );
 			++itor;
 		}
+
+		if( action == Action::PrimaryActionPerform )
+		{
+			// Tell the window we were the last one to perform a primary action
+			Widget *firstKeyboardNavigableParent = getFirstKeyboardNavigableParent();
+			if( firstKeyboardNavigableParent )
+			{
+				Window *window = getFirstParentWindow();
+				if( firstKeyboardNavigableParent->getParent() == window )
+					window->setLastPrimaryAction( firstKeyboardNavigableParent );
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_notifyActionKeyMovement( Borders::Borders direction )

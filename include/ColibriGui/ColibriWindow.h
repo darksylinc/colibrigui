@@ -27,6 +27,9 @@ namespace Colibri
 
 		/// In range [0; m_windowsStart)
 		uint16_t	m_defaultChildWidget;
+		/// In range [0; m_windowsStart)
+		/// When uint16_t::max, then we look in m_defaultChildWidget instead
+		uint16_t	m_lastPrimaryAction;
 		/// When true, all of our immediate children widgets are dirty and need to be recalculated
 		bool		m_widgetNavigationDirty;
 		/// When true, all of our immediate children windows are dirty and need to be recalculated
@@ -120,6 +123,22 @@ namespace Colibri
 		/// If widget is not our child or nullptr, the current default is unset
 		void setDefault( Widget * colibrigui_nullable widget );
 		Widget* colibrigui_nullable getDefaultWidget() const;
+
+		/** Used to remember the last widget this window was into, so that user
+			can call:
+
+			@code
+				Widget *rememberedWidget = window->getLastPrimaryAction();
+				if( rememberedWidget )
+					rememberedWidget->setKeyboardFocus();
+			@endcode
+
+			when returning to this window (e.g. because a child window got destroyed)
+		@remarks
+			When there is no remembered widget, getDefaultWidget is returned instead.
+		*/
+		void    setLastPrimaryAction( Widget *colibrigui_nullable widget );
+		Widget *colibrigui_nullable getLastPrimaryAction() const;
 
 		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
 												  const Matrix2x3 &parentRot ) colibri_override;

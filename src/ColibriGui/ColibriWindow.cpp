@@ -14,7 +14,8 @@ namespace Colibri
 		m_currentScroll( Ogre::Vector2::ZERO ),
 		m_nextScroll( Ogre::Vector2::ZERO ),
 		m_scrollableArea( Ogre::Vector2::ZERO ),
-		m_defaultChildWidget( 0 ),
+		m_defaultChildWidget( 0u ),
+		m_lastPrimaryAction( std::numeric_limits<uint16_t>::max() ),
 		m_widgetNavigationDirty( false ),
 		m_windowNavigationDirty( false ),
 		m_childrenNavigationDirty( false )
@@ -207,6 +208,17 @@ namespace Colibri
 		if( m_defaultChildWidget >= idx && m_defaultChildWidget != 0 )
 			--m_defaultChildWidget;
 
+		if( m_lastPrimaryAction > idx && m_lastPrimaryAction != 0u &&
+			m_lastPrimaryAction != std::numeric_limits<uint16_t>::max() )
+		{
+			--m_lastPrimaryAction;
+		}
+		else if( m_lastPrimaryAction == idx )
+		{
+			// Last known button is being removed. Use the default widget instead
+			m_lastPrimaryAction = std::numeric_limits<uint16_t>::max();
+		}
+
 		return idx;
 	}
 	//-------------------------------------------------------------------------
@@ -336,6 +348,26 @@ namespace Colibri
 
 		if( !retVal && m_numWidgets > 0 )
 			retVal = m_children.front();
+
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void Window::setLastPrimaryAction( Widget *widget )
+	{
+		COLIBRI_ASSERT( !widget->isWindow() );
+		WidgetVec::const_iterator itor = std::find( m_children.begin(), m_children.end(), widget );
+		m_lastPrimaryAction = static_cast<uint16_t>( itor - m_children.begin() );
+		COLIBRI_ASSERT( m_lastPrimaryAction < m_numWidgets );
+	}
+	//-------------------------------------------------------------------------
+	Widget *colibrigui_nullable Window::getLastPrimaryAction() const
+	{
+		Widget *retVal = 0;
+
+		if( m_lastPrimaryAction > m_numWidgets || m_children[m_lastPrimaryAction]->isDisabled() )
+			retVal = getDefaultWidget();
+		else
+			retVal = m_children[m_lastPrimaryAction];
 
 		return retVal;
 	}
