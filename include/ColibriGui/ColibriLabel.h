@@ -210,6 +210,30 @@ namespace Colibri
 		/// returns the text from the current state
 		const std::string& getText( States::States state=States::NumStates );
 
+
+		/** Call this to modify rich text. MUST be called after Label::setText
+		@remarks
+			RichTextVec will be validated. Errors may be logged.
+		@param richText
+			When bSwap = false, richText is treated as const
+			When bSwap = true, richText will be modified and its contents may be garbage
+			after this call
+		@param bSwap
+			Use false if you care about preserving the contents of richText after this call
+
+			When true, we will use a swap of the internal vector pointers
+			to avoid a copy
+
+			If state = States::NumStates, then we perform 1 swap, then copy to the other states
+		@param forState
+			Use NumStates to affect all states
+		*/
+		void setRichText( RichTextVec &richText, bool bSwap,
+						  States::States forState = States::NumStates );
+
+		/// Returns a newly constructed RichText filled with default values
+		RichText getDefaultRichText() const;
+
 		/** Returns the number of shapes/glyphs used by the current text from the selected state.
 			Not to be confused with Label::getMaxNumGlyphs, which is used for rendering.
 		@param state

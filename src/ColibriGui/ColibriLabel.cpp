@@ -198,16 +198,8 @@ namespace Colibri
 		const size_t textSize = m_text[state].size();
 		if( m_richText[state].empty() )
 		{
-			RichText rt;
-			rt.ptSize = m_defaultFontSize;
-			rt.rgba32 = m_colour.getAsABGR();
-			rt.noBackground = true;
-			rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
-			rt.font = m_defaultFont;
-			rt.offset = 0;
+			RichText rt = getDefaultRichText();
 			rt.length = static_cast<uint32_t>( textSize );
-			rt.readingDir = HorizReadingDir::Default;
-			rt.glyphStart = rt.glyphEnd = 0;
 			m_richText[state].push_back( rt );
 
 			m_usesBackground = false;
@@ -1286,6 +1278,50 @@ namespace Colibri
 		if( state == States::NumStates )
 			state = m_currentState;
 		return m_text[state];
+	}
+	//-------------------------------------------------------------------------
+	void Label::setRichText( RichTextVec &richText, bool bSwap, States::States forState )
+	{
+		if( forState == States::NumStates )
+		{
+			if( bSwap )
+				m_richText[0].swap( richText );
+			else
+				m_richText[0] = richText;
+
+			flagDirty( static_cast<States::States>( 0u ) );
+
+			for( size_t i = 1u; i < States::NumStates; ++i )
+			{
+				m_richText[i] = m_richText[0];
+				flagDirty( static_cast<States::States>( i ) );
+			}
+		}
+		else
+		{
+			if( bSwap )
+				m_richText[forState].swap( richText );
+			else
+				m_richText[forState] = richText;
+
+			flagDirty( forState );
+		}
+	}
+	//-------------------------------------------------------------------------
+	RichText Label::getDefaultRichText() const
+	{
+		RichText rt;
+		rt.ptSize = m_defaultFontSize;
+		rt.rgba32 = m_colour.getAsABGR();
+		rt.noBackground = true;
+		rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
+		rt.font = m_defaultFont;
+		rt.offset = 0;
+		rt.length = 0u;
+		rt.readingDir = HorizReadingDir::Default;
+		rt.glyphStart = rt.glyphEnd = 0;
+
+		return rt;
 	}
 	//-------------------------------------------------------------------------
 	size_t Label::getGlyphCount( States::States state ) const
