@@ -500,8 +500,8 @@ namespace Colibri
 		return m_childrenClickable;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setNextWidget( Widget * colibrigui_nullable nextWidget,
-								Borders::Borders direction, bool reciprocate )
+	void Widget::setNextWidget( Widget *colibrigui_nullable nextWidget, Borders::Borders direction,
+								bool reciprocate, bool bManualOverride )
 	{
 		if( direction == Borders::NumBorders )
 		{
@@ -510,11 +510,16 @@ namespace Colibri
 				if( m_nextWidget[i] )
 					m_nextWidget[i]->removeListener( this );
 				m_nextWidget[i] = nextWidget;
+				m_autoSetNextWidget[i] = !bManualOverride;
 				if( nextWidget )
 				{
 					nextWidget->addListener( this );
-					if( reciprocate && nextWidget->m_autoSetNextWidget[c_reciprocateBorders[i]] )
-						nextWidget->setNextWidget( this, c_reciprocateBorders[i], false );
+					if( reciprocate &&
+						( bManualOverride || nextWidget->m_autoSetNextWidget[c_reciprocateBorders[i]] ) )
+					{
+						nextWidget->setNextWidget( this, c_reciprocateBorders[i], false,
+												   bManualOverride );
+					}
 				}
 			}
 		}
@@ -523,11 +528,16 @@ namespace Colibri
 			if( m_nextWidget[direction] )
 				m_nextWidget[direction]->removeListener( this );
 			m_nextWidget[direction] = nextWidget;
+			m_autoSetNextWidget[direction] = !bManualOverride;
 			if( nextWidget )
 			{
 				nextWidget->addListener( this );
-				if( reciprocate && nextWidget->m_autoSetNextWidget[c_reciprocateBorders[direction]] )
-					nextWidget->setNextWidget( this, c_reciprocateBorders[direction], false );
+				if( reciprocate && ( bManualOverride ||
+									 nextWidget->m_autoSetNextWidget[c_reciprocateBorders[direction]] ) )
+				{
+					nextWidget->setNextWidget( this, c_reciprocateBorders[direction], false,
+											   bManualOverride );
+				}
 			}
 		}
 	}

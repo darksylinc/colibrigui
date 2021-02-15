@@ -412,9 +412,14 @@ namespace Colibri
 		@param direction
 		@param reciprocate
 			Whether the other widget should also be set to target us in the opposite direction.
+		@param bManualOverride
+			When true, this value is specified as manually set; which means autosetNavigation
+			won't touch it.
+
+			If reciprocate is true, then this affects nextWidget as well.
 		*/
-		void setNextWidget( Widget * colibrigui_nullable nextWidget,
-							Borders::Borders direction, bool reciprocate=true );
+		void setNextWidget( Widget *colibrigui_nullable nextWidget, Borders::Borders direction,
+							bool reciprocate = true, bool bManualOverride = false );
 
 		float getRight() const;
 		float getBottom() const;
