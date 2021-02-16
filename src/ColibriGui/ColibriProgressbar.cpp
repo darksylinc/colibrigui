@@ -381,6 +381,9 @@ namespace Colibri
 
 		if( m_vertical )
 		{
+#ifndef M_PI
+			const float M_PI = 3.14159265358979323846f;
+#endif
 			Ogre::Matrix4 animMat2;
 			animMat2.makeTransform(
 				Ogre::Vector3::ZERO, Ogre::Vector3::UNIT_SCALE,
