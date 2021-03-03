@@ -184,10 +184,14 @@ namespace Colibri
 
 				for( size_t i=0; i<States::NumStates; ++i )
 				{
-					m_defaultTextDatablock[i] = hlms->createDatablock( c_defaultTextDatablockNames[i],
-																	   c_defaultTextDatablockNames[i],
-																	   macroblock, blendblock,
-																	   Ogre::HlmsParamVec() );
+					// check they dont already exist
+					m_defaultTextDatablock[i] = hlms->getDatablock( c_defaultTextDatablockNames[i] );
+					if( m_defaultTextDatablock[i] == nullptr )
+					{
+						m_defaultTextDatablock[i] = hlms->createDatablock(
+							c_defaultTextDatablockNames[i], c_defaultTextDatablockNames[i], macroblock,
+							blendblock, Ogre::HlmsParamVec() );
+					}
 				}
 
 				COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibriDatablock*>(
@@ -1484,6 +1488,10 @@ namespace Colibri
 		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
 		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri*>( hlms ) );
 		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri*>( hlms );
+
+		// Ideally ShapeManagers should be shared between ColibriManagers for maximum
+		// efficiency. But if they're not, we not to bind our own atlas with our glyphs
+		m_shaperManager->prepareToRender();
 
 		apiObjects.lastHlmsCache = &c_dummyCache;
 

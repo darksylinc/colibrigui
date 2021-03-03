@@ -568,6 +568,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void ShaperManager::prepareToRender() { m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer ); }
+	//-------------------------------------------------------------------------
 	const char* ShaperManager::getErrorMessage( FT_Error errorCode )
 	{
 		#undef __FTERRORS_H__
