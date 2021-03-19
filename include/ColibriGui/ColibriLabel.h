@@ -284,6 +284,63 @@ namespace Colibri
 
 		/** Recalculates the size of the widget based on the text contents to fit tightly.
 			It may also reposition the Widget depending on newHorizPos & newVertPos
+
+			Q: Is it necessary to call this function?
+
+			A: It's not necessary in the strict sense, but most likely you want to.
+			The default size of most widgets is 0.
+			Which means by default nothing will show up on screen!
+
+			When you call Label::setText() we will calculate the vertices and render the atlas,
+			texture both necessary to draw text on screen. However the size of the Label
+			determines clipping. A size of 0 means the whole text will be clipped.
+			You still need to call Widget::setSize() to fix that.
+
+			By calling sizeToFit() you ensure we will call setSize() with a rect as tight as
+			possible(*) that displays the whole text.
+
+			Note that the rect set setSize() affects vertical and horizontal alignent.
+			If you want right alignment but you call sizeToFit() on a single-line Label,
+			then nothing will happen, because the text has no room to move left nor right
+
+			(*)As tight as possible is a bit loose here. Font rendering is incredibly complex
+			(thus innaccuracies and bugs appear) and the font in use may include arbitrary
+			blank space because the designer so wanted it, thus you may notice the calculated
+			AABB is not always 100% as tight as possible and could manually be shrunk further.
+			However do not assume you can always shrink by an extra % because that vastly
+			depends on the current string.
+
+			Q: Why do I see samples not calling sizeToFit nor setSize yet
+			text is displayed correctly?
+
+			A: Because they rely on Layouts calling setSize automatically to fill the space.
+			Most typically if the label does:
+
+			@code
+				// Set layout to cover this area. Cells inside will be modified to fit inside.
+				// Note layout->setAdjustableWindow can be used instead, and also allows
+				// for automatic scrolling if the window is not big enough to hold
+				// all the elements
+				layout->setCellSize( 1600, 900 );
+
+				label->m_minSize = Ogre::Vector2( 0, 64 );
+				label->m_expand[0] = true;
+				label->m_proportion[0] = 1u;
+				layout->m_vertical = true;
+				layout->addCell( label );
+				layout->layout();
+			@endcode
+
+			Then at least the width of the label will be automatically set by the layout engine,
+			and the height is already set to a minimum of 64.
+			However if a special font requires a very big glyph (e.g. arabic?) or the
+			font size is enlarged, then that snippet is incorrect and the text will clip unless
+			m_minSize.y is enlarged enough, or sizeToFit is called.
+
+			Watch https://www.youtube.com/watch?v=4c9KD9-asaQ for better understanding
+			of how layouts work and how layouts can be nested to achieve what you want.
+			If video tutorials are too boring for you, adjust the playback speed to 1.5x or 2.0x
+
 		@remarks
 			TBD this function is slow as it requires synchronization with the rendering
 			thread (not implemented yet hence TBD).

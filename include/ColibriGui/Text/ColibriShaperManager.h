@@ -195,6 +195,8 @@ namespace Colibri
 
 		void updateGpuBuffers();
 
+		void prepareToRender();
+
 		static const char* getErrorMessage( FT_Error errorCode );
 	};
 }

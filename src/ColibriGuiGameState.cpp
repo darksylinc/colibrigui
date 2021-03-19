@@ -220,7 +220,30 @@ namespace Demo
 
 			while( itor != end )
 			{
+				// Leave a margin between adjacents cells so they're not too tight each other
 				(*itor)->m_margin = 5.0f;
+				// Expend the width of the widget to cover all of the width that is left
+				// available to us. In this case the layout is vertical, thus each widget
+				// is not competing for horizontal space with other widgets, so it will
+				// expand to cover the whole width of the layout
+				//
+				// Note that if we expand, then m_gridLocation left/center/right settings become
+				// useless
+				//
+				// Watch https://www.youtube.com/watch?v=4c9KD9-asaQ for better understanding
+				// of how layouts work and how layouts can be nested to achieve what you want.
+				// If video tutorials are too boring for you, adjust the playback speed to
+				// 1.5x or 2.0x
+				//
+				// Colibri closely follows wxWidgets' layout models (not 100% exact though)
+				// thus what is done in wxFormBuilder can easily be reproduced in Colibri.
+				// Notice that wxFormBuilder has m_proportion and m_expand flags just like
+				// Colibri, although Colibri extends these flags to both X and Y axes, while
+				// wxWidgets alternates the meaning depending on whether the layout they belong to
+				// is vertical or horizontal (which can be very counterintuitive on grid-like layouts)
+				//
+				// That also means sometimes the settings are ignored. e.g. (*itor)->m_proportion[0]
+				// is ignored in a vertical LineLayout.
 				(*itor)->m_expand[0] = true;
 
 				++itor;
