@@ -314,6 +314,8 @@ namespace Colibri
 		void setKeyDirectionPressed( Borders::Borders direction );
 		void setKeyDirectionReleased( Borders::Borders direction );
 
+		/// Returns the pair of window/widget that is currently
+		/// being focused via keyboard navigation
 		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; };
 
 		/**
