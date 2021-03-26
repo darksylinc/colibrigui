@@ -313,6 +313,9 @@ namespace Colibri
 	public:
 		void setKeyDirectionPressed( Borders::Borders direction );
 		void setKeyDirectionReleased( Borders::Borders direction );
+
+		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; };
+
 		/**
 		@return
 			True if the scroll was consumed by a widget.

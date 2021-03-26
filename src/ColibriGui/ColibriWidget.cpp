@@ -252,7 +252,17 @@ namespace Colibri
 			nextWidget = nextWidget->m_parent;
 
 		COLIBRI_ASSERT_HIGH( dynamic_cast<Window*>( nextWidget ) );
-		return static_cast<Window*>( nextWidget );
+		return static_cast<Window *>( nextWidget );
+	}
+	//-------------------------------------------------------------------------
+	bool Widget::isAncestorOf( const Widget *grandchild ) const
+	{
+		Widget const *nextWidget = grandchild;
+
+		while( nextWidget && nextWidget != this )
+			nextWidget = nextWidget->m_parent;
+
+		return nextWidget == this;
 	}
 	//-------------------------------------------------------------------------
 	Widget * colibrigui_nullable Widget::getFirstKeyboardNavigableParent()

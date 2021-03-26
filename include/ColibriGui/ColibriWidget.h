@@ -286,6 +286,17 @@ namespace Colibri
 		/// return null
 		Window* getFirstParentWindow();
 
+		/** If we are parent, grandparent, great-grandparent, etc of 'grandchild',
+			then we return true
+
+			If we're not part of the ancestry, then we return false.
+
+		@remarks
+			this->isAncestorOf( this ) returns true <br/>
+			this->isAncestorOf( nullptr ) will return false (unless 'this' is also nullptr)
+		*/
+		bool isAncestorOf( const Widget *grandchild ) const;
+
 		/// Will return the first Widget in the hierarchy where m_keyboardNavigable == true
 		/// Note it can return nullptr if no widget matches the criteria.
 		/// Note it can return 'this'
