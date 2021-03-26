@@ -316,7 +316,7 @@ namespace Colibri
 
 		/// Returns the pair of window/widget that is currently
 		/// being focused via keyboard navigation
-		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; };
+		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; }
 
 		/**
 		@return
