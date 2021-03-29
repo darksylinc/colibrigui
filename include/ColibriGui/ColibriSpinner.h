@@ -111,6 +111,9 @@ namespace Colibri
 		*/
 		void setRange( int32_t minValue, int32_t maxValue );
 
+		int32_t getMinValue() const { return m_minValue; }
+		int32_t getMaxValue() const { return m_maxValue; }
+
 		/** Sets the options to cycle through. If the vector is empty, the Spinner goes
 			into list-less mode (numeric mode).
 
