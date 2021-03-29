@@ -246,7 +246,7 @@ namespace Colibri
 				}
 
 				setCurrentValue( static_cast<int32_t>(
-					roundf( ( posX - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) ) );
+					roundf( ( posX - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) + m_minValue ) );
 			}
 			else
 			{
@@ -264,7 +264,7 @@ namespace Colibri
 				}
 
 				setCurrentValue( static_cast<int32_t>(
-					roundf( ( posY - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) ) );
+					roundf( ( posY - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) + m_minValue ) );
 			}
 
 			m_manager->callActionListeners( this, Action::ValueChanged );
