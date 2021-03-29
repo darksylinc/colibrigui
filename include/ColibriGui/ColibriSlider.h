@@ -26,10 +26,11 @@ namespace Colibri
 	protected:
 		Renderable *colibrigui_nullable m_layers[2];
 
-		float m_sliderValue;
-		/// When directional actions (keyboard buttons) are applied,
-		/// this is how much the slider value be increased or decreased.
-		float m_directionChangeAmount;
+		int32_t m_currentValue;
+
+		int32_t m_minValue;
+		int32_t m_maxValue;
+		int32_t m_denominator;
 
 		float         m_cursorOffset;
 		float         m_lineSize;
@@ -78,9 +79,48 @@ namespace Colibri
 		const Ogre::Vector2 &getHandleProportion() const { return m_handleProportion; }
 		float                getLineSize() const { return m_lineSize; }
 
-		// Set the value of the slider. Right now this is between 0 and 1 only.
-		void  setValue( float value );
-		float getValue() const { return m_sliderValue; }
+		/** Sets the current value of the slider. If the value is outside of range,
+			it gets clamped to range [m_minValue; m_maxValue]
+			See Slider::setRange
+		@remarks
+			Calling this function won't trigger the listeners, even if the value gets clamped.
+			You can do that yourself by doing callActionListeners( Action::ValueChanged )
+		*/
+		void setCurrentValue( int32_t currentValue );
+
+		/** Sets the denominator in order to be able to represent fractional values.
+			for example calling:
+			@code
+				slider->setCurrentValue( 5 );
+				slider->setDenominator( 2 );
+			@endcode
+			Will make the Slider::getCurrentValueProcessed return 2.5f since 5 / 2 = 2.5
+		@remarks
+			See Slider::setCurrentValue remarks
+		*/
+		void setDenominator( int32_t denominator );
+
+		/// Returns the current value
+		int32_t getCurrentValueRaw() const { return m_currentValue; }
+		int32_t getDenominator() const { return m_denominator; }
+		/// Returns m_currentValue / m_denominator
+		float getCurrentValueProcessed() const;
+		/// Returns value in range [0.0f; 1.0f]
+		float getCurrentValueUnorm() const;
+
+		/** Sets the minimum & maximum range of integers the slider can go to.
+			If m_currentValue is currently outside the range, it will be clamped
+		@remarks
+			See Slider::setCurrentValue remarks
+		@param minValue
+			Must be minValue < maxValue
+		@param maxValue
+			Must be minValue < maxValue
+		*/
+		void setRange( int32_t minValue, int32_t maxValue );
+
+		int32_t getMinValue() const { return m_minValue; }
+		int32_t getMaxValue() const { return m_maxValue; }
 
 		/// When false, the handle reaches half outside when at 0% and 100%
 		/// When true, the handle is always contained inside the background
@@ -117,9 +157,6 @@ namespace Colibri
 
 		virtual void notifyCursorMoved( const Ogre::Vector2 &posNDC );
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );
-
-		void  setDirectionChangeAmount( float amount ) { m_directionChangeAmount = amount; }
-		float getDirectionChangeAmount() const { return m_directionChangeAmount; }
 	};
 }  // namespace Colibri
 

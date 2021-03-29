@@ -479,7 +479,7 @@ namespace Demo
 		angle += timeSinceLast;*/
 
 		static float prevValue = -1.0f;
-		float currentValue = slider1->getValue();
+		float currentValue = slider1->getCurrentValueUnorm();
 		if( prevValue != currentValue )
 		{
 			sliderLabel->setText( std::to_string(currentValue) );

@@ -9,8 +9,10 @@ namespace Colibri
 	Slider::Slider( ColibriManager *manager ) :
 		Widget( manager ),
 		IdObject( Ogre::Id::generateNewId<Progressbar>() ),
-		m_sliderValue( 0.0f ),
-		m_directionChangeAmount( 0.1f ),
+		m_currentValue( 0 ),
+		m_minValue( 0 ),
+		m_maxValue( 10 ),
+		m_denominator( 1 ),
 		m_cursorOffset( 0.0f ),
 		m_lineSize( 5.0f ),
 		m_handleProportion( 0.8f ),
@@ -157,7 +159,8 @@ namespace Colibri
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
 
-			const float targetSliderValue = rightToLeft ? ( 1.0f - m_sliderValue ) : m_sliderValue;
+			const float sliderValueUnorm = getCurrentValueUnorm();
+			const float targetSliderValue = rightToLeft ? ( 1.0f - sliderValueUnorm ) : sliderValueUnorm;
 
 			Ogre::Vector2 handleTopLeft( frameOrigin.x + ( slideableArea * targetSliderValue ),
 										 lineTop + ( sliderLineHeight - handleSize.y ) * 0.5f );
@@ -190,7 +193,8 @@ namespace Colibri
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
 
-			const float targetSliderValue = 1.0f - m_sliderValue;
+			const float sliderValueUnorm = getCurrentValueUnorm();
+			const float targetSliderValue = 1.0f - sliderValueUnorm;
 			Ogre::Vector2 handleTopLeft( lineLeft + ( sliderLineWidth - handleSize.x ) * 0.5f,
 										 frameOrigin.y + ( slideableArea * targetSliderValue ) );
 			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
@@ -220,6 +224,8 @@ namespace Colibri
 	{
 		if( m_currentState == States::Pressed && this->intersects( pos ) )
 		{
+			const float sliderValueUnorm = getCurrentValueUnorm();
+
 			if( !m_vertical )
 			{
 				const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
@@ -236,10 +242,11 @@ namespace Colibri
 					// The user actually clicked on the handle, rather than part of the line.
 					// If this happens, apply an offset to the mouse movements, so the handle doesn't
 					// jump.
-					m_cursorOffset = posX - m_sliderValue;
+					m_cursorOffset = posX - sliderValueUnorm;
 				}
 
-				setValue( posX - m_cursorOffset );
+				setCurrentValue( static_cast<int32_t>(
+					roundf( ( posX - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) ) );
 			}
 			else
 			{
@@ -253,11 +260,14 @@ namespace Colibri
 					// The user actually clicked on the handle, rather than part of the line.
 					// If this happens, apply an offset to the mouse movements, so the handle doesn't
 					// jump.
-					m_cursorOffset = posY - m_sliderValue;
+					m_cursorOffset = posY - sliderValueUnorm;
 				}
 
-				setValue( posY - m_cursorOffset );
+				setCurrentValue( static_cast<int32_t>(
+					roundf( ( posY - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) ) );
 			}
+
+			m_manager->callActionListeners( this, Action::ValueChanged );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -268,22 +278,23 @@ namespace Colibri
 		if( !m_vertical )
 		{
 			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
-			const float targetDirectionAmount =
-				rightToLeft ? -m_directionChangeAmount : m_directionChangeAmount;
+			const int32_t targetDirectionAmount = rightToLeft ? -1 : 1;
 
 			if( direction == Borders::Left )
-				setValue( m_sliderValue - targetDirectionAmount );
+				setCurrentValue( m_currentValue - targetDirectionAmount );
 			else if( direction == Borders::Right )
-				setValue( m_sliderValue + targetDirectionAmount );
+				setCurrentValue( m_currentValue + targetDirectionAmount );
 		}
 		else
 		{
-			const float targetDirectionAmount = m_directionChangeAmount;
+			const int32_t targetDirectionAmount = 1;
 			if( direction == Borders::Top )
-				setValue( m_sliderValue + targetDirectionAmount );
+				setCurrentValue( m_currentValue + targetDirectionAmount );
 			else if( direction == Borders::Bottom )
-				setValue( m_sliderValue - targetDirectionAmount );
+				setCurrentValue( m_currentValue - targetDirectionAmount );
 		}
+
+		m_manager->callActionListeners( this, Action::ValueChanged );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize )
@@ -293,21 +304,55 @@ namespace Colibri
 		updateSlider();
 	}
 	//-------------------------------------------------------------------------
-	void Slider::setValue( float value )
+	void Slider::setCurrentValue( int32_t currentValue )
 	{
-		value = Ogre::Math::saturate( value );
+		if( m_currentValue != currentValue )
+		{
+			m_currentValue = Ogre::Math::Clamp( currentValue, m_minValue, m_maxValue );
+			updateSlider();
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Slider::setDenominator( int32_t denominator )
+	{
+		if( m_denominator != denominator )
+		{
+			m_denominator = denominator;
+			updateSlider();
+		}
+	}
+	//-------------------------------------------------------------------------
+	float Slider::getCurrentValueProcessed() const
+	{
+		return m_currentValue / static_cast<float>( m_denominator );
+	}
+	//-------------------------------------------------------------------------
+	float Slider::getCurrentValueUnorm() const
+	{
+		if( m_minValue == m_maxValue )
+			return 0.0f;
+		return ( m_currentValue - m_minValue ) / static_cast<float>( m_maxValue - m_minValue );
+	}
+	//-------------------------------------------------------------------------
+	void Slider::setRange( int32_t minValue, int32_t maxValue )
+	{
+		if( minValue < maxValue )
+		{
+			m_minValue = minValue;
+			m_maxValue = maxValue;
+		}
+		else
+		{
+			LogListener *logListener = m_manager->getLogListener();
 
-		m_sliderValue = value;
+			char tmpBuffer[128];
+			Ogre::LwString msg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+			msg.a( "Invalid range for Slider::setRange min = ", minValue, " max = ", maxValue );
+			logListener->log( msg.c_str(), LogSeverity::Warning );
+			COLIBRI_ASSERT_LOW( minValue <= maxValue );
+		}
 
 		updateSlider();
-
-		// This is technically UB if if a listener destroys us, but in practice
-		// it should work ok as it is last function being called and we don't touch
-		// 'this' anymore
-		//
-		// It's also rare that user would destroys upon a manually initiated call
-		// Everything is in the user's control
-		m_manager->callActionListeners( this, Action::ValueChanged );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setAlwaysInside( bool bAlwaysInside )
