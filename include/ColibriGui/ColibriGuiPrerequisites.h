@@ -58,6 +58,7 @@ namespace Colibri
 	struct SkinInfo;
 	class SkinManager;
 	class Slider;
+	class Spinner;
 	class Widget;
 	class Window;
 
