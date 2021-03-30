@@ -98,6 +98,56 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	Widget *colibrigui_nullable
+	Widget::getNextKeyboardNavigableWidget( const Borders::Borders direction )
+	{
+		Widget *colibrigui_nullable nextWidget = this->m_nextWidget[direction];
+
+		while( nextWidget && !nextWidget->isKeyboardNavigable() )
+			nextWidget = nextWidget->m_nextWidget[direction];
+
+		if( !nextWidget && this->m_nextWidget[direction] )
+		{
+			// We couldn't find a next widget because next one is not navigable
+			// Don't give up yet.
+			// Try perpendicular travel from the point of our next disabled widget
+
+			Borders::Borders perpDirection;
+			if( direction == Borders::Bottom || direction == Borders::Top )
+			{
+				if( !m_manager->swapRTLControls() )
+					perpDirection = Borders::Right;
+				else
+					perpDirection = Borders::Left;
+			}
+			else
+				perpDirection = Borders::Top;
+
+			int tries = 0;
+			while( !nextWidget && tries < 2 )
+			{
+				nextWidget = this->m_nextWidget[direction];
+
+				while( nextWidget && !nextWidget->isKeyboardNavigable() )
+					nextWidget = nextWidget->m_nextWidget[perpDirection];
+
+				if( !nextWidget )
+				{
+					// On next and final iteration, try again in the opposite direction
+					if( perpDirection == Borders::Right )
+						perpDirection = Borders::Left;
+					else if( perpDirection == Borders::Left )
+						perpDirection = Borders::Right;
+					else if( perpDirection == Borders::Top )
+						perpDirection = Borders::Bottom;
+				}
+				++tries;
+			}
+		}
+
+		return nextWidget;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setDebugName( const std::string &debugName )
 	{
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM

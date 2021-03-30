@@ -205,6 +205,9 @@ namespace Colibri
 		*/
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
 
+		/// Looks and returns the next non-disabled widget. Nullptr if there is none
+		Widget *colibrigui_nullable getNextKeyboardNavigableWidget( const Borders::Borders direction );
+
 		virtual void stateChanged( States::States newState ) {}
 
 		enum TransformDirtyReason

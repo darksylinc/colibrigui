@@ -560,8 +560,8 @@ namespace Colibri
 	{
 		if( m_keyboardFocusedPair.widget )
 		{
-			Widget * colibrigui_nullable nextWidget =
-					m_keyboardFocusedPair.widget->m_nextWidget[direction];
+			Widget *colibrigui_nullable nextWidget =
+				m_keyboardFocusedPair.widget->getNextKeyboardNavigableWidget( direction );
 
 			if( nextWidget )
 			{
@@ -573,14 +573,16 @@ namespace Colibri
 					nextWidget->setState( States::HighlightedButton );
 					callActionListeners( nextWidget, Action::Highlighted );
 					// Set again in case callActionListeners destroyed nextWidget
-					nextWidget = m_keyboardFocusedPair.widget->m_nextWidget[direction];
+					nextWidget =
+						m_keyboardFocusedPair.widget->getNextKeyboardNavigableWidget( direction );
 				}
 				else
 				{
 					nextWidget->setState( States::Pressed );
 					callActionListeners( nextWidget, Action::Hold );
 					// Set again in case callActionListeners destroyed nextWidget
-					nextWidget = m_keyboardFocusedPair.widget->m_nextWidget[direction];
+					nextWidget =
+						m_keyboardFocusedPair.widget->getNextKeyboardNavigableWidget( direction );
 				}
 
 				if( nextWidget )
