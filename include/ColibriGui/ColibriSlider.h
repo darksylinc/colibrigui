@@ -106,16 +106,20 @@ namespace Colibri
 		/// Returns m_currentValue / m_denominator
 		float getCurrentValueProcessed() const;
 		/// Returns value in range [0.0f; 1.0f]
+		///
+		/// If m_minValue == m_maxValue then it always returns 1.0f
 		float getCurrentValueUnorm() const;
 
 		/** Sets the minimum & maximum range of integers the slider can go to.
 			If m_currentValue is currently outside the range, it will be clamped
 		@remarks
 			See Slider::setCurrentValue remarks
+
+			If m_minValue == m_maxValue then the slider is always shown as set to 'maximum'
 		@param minValue
-			Must be minValue < maxValue
+			Must be minValue <= maxValue
 		@param maxValue
-			Must be minValue < maxValue
+			Must be minValue <= maxValue
 		*/
 		void setRange( int32_t minValue, int32_t maxValue );
 

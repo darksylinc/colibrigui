@@ -330,13 +330,13 @@ namespace Colibri
 	float Slider::getCurrentValueUnorm() const
 	{
 		if( m_minValue == m_maxValue )
-			return 0.0f;
+			return 1.0f;
 		return ( m_currentValue - m_minValue ) / static_cast<float>( m_maxValue - m_minValue );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setRange( int32_t minValue, int32_t maxValue )
 	{
-		if( minValue < maxValue )
+		if( minValue <= maxValue )
 		{
 			m_minValue = minValue;
 			m_maxValue = maxValue;
