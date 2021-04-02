@@ -771,6 +771,14 @@ namespace Colibri
 				m_windows.erase( itor );
 		}
 
+		// Make sure this window is not in the dirtyWidgets list. It may have duplicates
+		WidgetVec::iterator itor = std::find( m_dirtyWidgets.begin(), m_dirtyWidgets.end(), window );
+		while( itor != m_dirtyWidgets.end() )
+		{
+			itor = m_dirtyWidgets.erase( itor );
+			itor = std::find( itor, m_dirtyWidgets.end(), window );
+		}
+
 		window->_destroy();
 		delete window;
 
@@ -796,13 +804,6 @@ namespace Colibri
 		// would read invalid pointers. Calling this here prevents that.
 		_updateDirtyLabels();
 
-		//Make sure this widget is not in the dirtyWidgets list.
-		WidgetVec::iterator itor = std::find( m_dirtyWidgets.begin(), m_dirtyWidgets.end(), widget );
-		if( itor != m_dirtyWidgets.end() )
-		{
-			m_dirtyWidgets.erase( itor );
-		}
-
 		if( widget->isWindow() )
 		{
 			COLIBRI_ASSERT( dynamic_cast<Window*>( widget ) );
@@ -810,6 +811,14 @@ namespace Colibri
 		}
 		else
 		{
+			// Make sure this widget is not in the dirtyWidgets list. It may have duplicates
+			WidgetVec::iterator itor = std::find( m_dirtyWidgets.begin(), m_dirtyWidgets.end(), widget );
+			while( itor != m_dirtyWidgets.end() )
+			{
+				itor = m_dirtyWidgets.erase( itor );
+				itor = std::find( itor, m_dirtyWidgets.end(), widget );
+			}
+
 			if( widget->isLabel() )
 			{
 				//We do not update m_numTextGlyphs since it's pointless to shrink it.
@@ -876,7 +885,11 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::_scheduleSetTransformDirty( Widget *widget )
 	{
-		m_dirtyWidgets.push_back( widget );
+		// We may add m_dirtyWidgets more than once.
+		// This is a cheap operation so we don't care too much about duplicates.
+		// However we can still filter out two consecutive calls in a row
+		if( m_dirtyWidgets.empty() || m_dirtyWidgets.back() != widget )
+			m_dirtyWidgets.push_back( widget );
 	}
 	//-----------------------------------------------------------------------------------
 	void ColibriManager::_addUpdateWidget( Widget *widget )
