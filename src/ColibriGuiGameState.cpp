@@ -168,8 +168,12 @@ namespace Demo
 			options.push_back( "Low" );
 			options.push_back( "Medium" );
 			options.push_back( "High" );
+			//options.push_back( "Double\nLine" );
+			//options.push_back( "Triple\nLine\n3x" );
 			spinner0->setOptions( options );
 		}
+		//spinner0->sizeToFit();
+		//spinner0->setFixedWidth( true, 0 );
 		layout->addCell( spinner0 );
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );

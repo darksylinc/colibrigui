@@ -54,7 +54,9 @@ namespace Colibri
 		std::vector<std::string>	m_options;
 
 		void calculateMaximumWidth();
-		void updateOptionLabel( bool sizeOrAvailableOptionsChanged=false );
+		Ogre::Vector2 calculateMaximumSize();
+		void updateOptionLabel( const bool sizeOrAvailableOptionsChanged = false,
+								const bool bSkipOptionLabelSize = false );
 
 	public:
 		Spinner( ColibriManager *manager );
@@ -160,10 +162,17 @@ namespace Colibri
 		@param fixedWidth
 			When autoCalculateFromMaxWidth is false; this value lets you manually
 			specify the fixed size (in canvas units).
+			When autoCalculateFromMaxWidth is true, this value is ignored
 		*/
 		void setFixedWidth( bool autoCalculateFromMaxWidth, float fixedWidth );
 		bool getCalcFixedSizeFromMaxWidth() const				{ return m_calcFixedSizeFromMaxWidth; }
 		float getFixedWidth() const								{ return m_fixedWidth; }
+
+		/** This version has no params since there are multiple children labels
+			involved.
+		@see Label::sizeToFit
+		*/
+		void sizeToFit();
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 

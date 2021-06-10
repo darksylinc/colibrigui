@@ -74,7 +74,12 @@ namespace Colibri
 	{
 		if( !m_calcFixedSizeFromMaxWidth )
 			return;
-
+		const Ogre::Vector2 maxSize = calculateMaximumSize();
+		m_fixedWidth = maxSize.x;
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Spinner::calculateMaximumSize()
+	{
 		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
 		const float arrowMargin = m_arrowMargin;
 		const Ogre::Vector2 arrowSize( m_arrowSize[!m_horizontal], m_arrowSize[m_horizontal] );
@@ -83,25 +88,26 @@ namespace Colibri
 
 		const std::string oldText = m_optionLabel->getText();
 
-		m_fixedWidth = 0;
+		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
 
 		if( !m_options.empty() )
 		{
 			std::vector<std::string>::const_iterator itor = m_options.begin();
-			std::vector<std::string>::const_iterator end  = m_options.end();
+			std::vector<std::string>::const_iterator end = m_options.end();
 
 			while( itor != end )
 			{
 				m_optionLabel->setText( *itor );
 				m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
-				m_fixedWidth = std::max( m_fixedWidth, m_optionLabel->getSize().x );
+				maxSize.makeCeil( m_optionLabel->getSize() );
 				++itor;
 			}
 		}
 		else
 		{
 			char tmpBuffer[64];
-			Ogre::LwString numberStr( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+			Ogre::LwString numberStr(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
 			if( m_denominator == 1 )
 				numberStr.a( m_minValue );
 			else
@@ -109,7 +115,7 @@ namespace Colibri
 
 			m_optionLabel->setText( numberStr.c_str() );
 			m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
-			m_fixedWidth = std::max( m_fixedWidth, m_optionLabel->getSize().x );
+			maxSize.makeCeil( m_optionLabel->getSize() );
 
 			numberStr.clear();
 			if( m_denominator == 1 )
@@ -119,13 +125,16 @@ namespace Colibri
 
 			m_optionLabel->setText( numberStr.c_str() );
 			m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
-			m_fixedWidth = std::max( m_fixedWidth, m_optionLabel->getSize().x );
+			maxSize.makeCeil( m_optionLabel->getSize() );
 		}
 
 		m_optionLabel->setText( oldText );
+
+		return maxSize;
 	}
 	//-------------------------------------------------------------------------
-	void Spinner::updateOptionLabel( bool sizeOrAvailableOptionsChanged )
+	void Spinner::updateOptionLabel( const bool sizeOrAvailableOptionsChanged,
+									 const bool bSkipOptionLabelSize )
 	{
 		if( !m_optionLabel )
 			return; //_initialize hasn't been called yet
@@ -169,15 +178,20 @@ namespace Colibri
 
 		const float arrowMargin = m_arrowMargin;
 
-		if( !m_calcFixedSizeFromMaxWidth && m_fixedWidth <= 0 )
+		if( !bSkipOptionLabelSize )
 		{
-			const float spaceLeftForOptionLabel = sizeAfterClipping.x - arrowSize.x * 2.0f - arrowMargin;
-			m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
-			m_optionLabel->setSize( Ogre::Vector2( m_optionLabel->getSize().x, sizeAfterClipping.y ) );
-		}
-		else
-		{
-			m_optionLabel->setSize( Ogre::Vector2( m_fixedWidth, sizeAfterClipping.y ) );
+			if( !m_calcFixedSizeFromMaxWidth && m_fixedWidth <= 0 )
+			{
+				const float spaceLeftForOptionLabel =
+					sizeAfterClipping.x - arrowSize.x * 2.0f - arrowMargin;
+				m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
+				m_optionLabel->setSize(
+					Ogre::Vector2( m_optionLabel->getSize().x, sizeAfterClipping.y ) );
+			}
+			else
+			{
+				m_optionLabel->setSize( Ogre::Vector2( m_fixedWidth, sizeAfterClipping.y ) );
+			}
 		}
 
 		const float spaceLeftForTextLabel = sizeAfterClipping.x - arrowMargin * 4.0f -
@@ -321,12 +335,28 @@ namespace Colibri
 	void Spinner::setFixedWidth( bool autoCalculateFromMaxWidth, float fixedWidth )
 	{
 		if( m_calcFixedSizeFromMaxWidth != autoCalculateFromMaxWidth ||
-			(autoCalculateFromMaxWidth == false && m_fixedWidth != fixedWidth) )
+			( autoCalculateFromMaxWidth == false && m_fixedWidth != fixedWidth ) )
 		{
 			m_calcFixedSizeFromMaxWidth = autoCalculateFromMaxWidth;
 			m_fixedWidth = fixedWidth;
 			updateOptionLabel( true );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::sizeToFit()
+	{
+		if( m_label )
+			m_label->sizeToFit();
+		if( m_optionLabel )
+		{
+			const Ogre::Vector2 maxSize = calculateMaximumSize();
+			m_optionLabel->setSize( maxSize );
+		}
+
+		updateOptionLabel( true, true );
+
+		const Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
+		setSize( maxSize );
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::setTransformDirty( uint32_t dirtyReason )
