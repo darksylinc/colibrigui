@@ -383,7 +383,9 @@ namespace Colibri
 		Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
 		// calculateChildrenSize won't account for margin space
 		// (because it wants to tightly fit) so we have to add it back
-		maxSize.x += m_arrowMargin * 4.0f;
+		// It's not exact and doesn't always result in content being
+		// perfectly centered though
+		maxSize.x += m_arrowMargin * 3.0f;
 		setSize( maxSize );
 	}
 	//-------------------------------------------------------------------------
