@@ -93,9 +93,9 @@ namespace Colibri
 		if( !m_options.empty() )
 		{
 			std::vector<std::string>::const_iterator itor = m_options.begin();
-			std::vector<std::string>::const_iterator end = m_options.end();
+			std::vector<std::string>::const_iterator endt = m_options.end();
 
-			while( itor != end )
+			while( itor != endt )
 			{
 				m_optionLabel->setText( *itor );
 				m_optionLabel->sizeToFit( spaceLeftForOptionLabel );
@@ -166,7 +166,7 @@ namespace Colibri
 		}
 
 		if( sizeOrAvailableOptionsChanged )
-			calculateMaximumWidth();
+			calculateMaximumWidth();  // update m_fixedWidth (if it's autocalculated)
 
 		const bool rightToLeft = m_manager->shouldSwapRTL( m_horizDir );
 
@@ -345,17 +345,45 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Spinner::sizeToFit()
 	{
+		m_size.y = 0.0f;
+
 		if( m_label )
 			m_label->sizeToFit();
 		if( m_optionLabel )
 		{
+			// Must be float::max. We must use this value so that
+			// calculateMaximumSize passes a very large value in
+			// spaceLeftForOptionLabel
+			m_size.x = static_cast<Ogre::Real>( std::numeric_limits<float>::max() );
 			const Ogre::Vector2 maxSize = calculateMaximumSize();
-			m_optionLabel->setSize( maxSize );
+
+			if( !m_calcFixedSizeFromMaxWidth && m_fixedWidth <= 0 )
+				m_optionLabel->setSize( maxSize );
+			else
+				m_optionLabel->setSize( Ogre::Vector2( m_fixedWidth, maxSize.y ) );
+		}
+
+		if( m_horizontal )
+		{
+			// Calculate m_size.x so that updateOptionLabel correctly positions
+			// the arrows in updateOptionLabel
+			m_size.x = m_arrowSize[!m_horizontal] * 2.0f + m_arrowMargin * 4.0f;
+			if( m_label )
+				m_size.x += m_label->getSize().x;
+			if( m_optionLabel )
+				m_size.x += m_optionLabel->getSize().x;
+		}
+		else
+		{
+			// TODO
 		}
 
 		updateOptionLabel( true, true );
 
-		const Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
+		Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
+		// calculateChildrenSize won't account for margin space
+		// (because it wants to tightly fit) so we have to add it back
+		maxSize.x += m_arrowMargin * 4.0f;
 		setSize( maxSize );
 	}
 	//-------------------------------------------------------------------------
