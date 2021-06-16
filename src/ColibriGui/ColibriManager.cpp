@@ -46,6 +46,7 @@ namespace Colibri
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_numGlyphsDirty( false ),
+		m_widgetTransformsDirty( false ),
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
 		m_root( 0 ),
@@ -319,6 +320,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateWidgetsFocusedByCursor()
 	{
+		updateAllDerivedTransforms();
+
 		const Ogre::Vector2 newPosNdc = m_mouseCursorPosNdc;
 
 		FocusPair focusedPair;
@@ -619,14 +622,19 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateAllDerivedTransforms()
 	{
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end = m_windows.end();
+		if( !m_widgetTransformsDirty )
+			return;
 
-		while( itor != end )
+		WindowVec::const_iterator itor = m_windows.begin();
+		WindowVec::const_iterator endt = m_windows.end();
+
+		while( itor != endt )
 		{
 			( *itor )->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
 			++itor;
 		}
+
+		m_widgetTransformsDirty = false;
 	}
 	//-------------------------------------------------------------------------
 	bool ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount )
@@ -642,8 +650,7 @@ namespace Colibri
 			}
 			window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
 
-			updateAllDerivedTransforms();
-			//If is possible the button we were highlighting is no longer behind the cursor
+			// If is possible the button we were highlighting is no longer behind the cursor
 			updateWidgetsFocusedByCursor();
 		}
 
@@ -1257,6 +1264,11 @@ namespace Colibri
 		m_windowNavigationDirty = true;
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::_setWidgetTransformsDirty()
+	{
+		m_widgetTransformsDirty = true;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::_setZOrderWindowDirty( bool windowInListDirty )
 	{
 		m_zOrderWidgetDirty = true;
@@ -1429,7 +1441,6 @@ namespace Colibri
 		if( cursorFocusDirty )
 		{
 			//Scroll changed, cursor may now be highlighting a different widget
-			updateAllDerivedTransforms();
 			updateWidgetsFocusedByCursor();
 		}
 

@@ -927,6 +927,8 @@ namespace Colibri
 			(*itor)->setTransformDirty( TransformDirtyParentCaller | dirtyReason );
 			++itor;
 		}
+
+		m_manager->_setWidgetTransformsDirty();
 	}
 	//-------------------------------------------------------------------------
 	void Widget::scheduleSetTransformDirty()

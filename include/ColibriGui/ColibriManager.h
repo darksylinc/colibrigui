@@ -105,6 +105,8 @@ namespace Colibri
 		bool m_windowNavigationDirty;
 		bool m_numGlyphsDirty;
 
+		bool m_widgetTransformsDirty;
+
 		/// Is any widget dirty
 		bool m_zOrderWidgetDirty;
 		/// Is one of the windows stored by this manager immediately dirty.
@@ -402,6 +404,8 @@ namespace Colibri
 		void autosetNavigation();
 
 		void _setWindowNavigationDirty();
+
+		void _setWidgetTransformsDirty();
 
 		/** Notify the manager that a window has its z order dirty.
 		@param windowInListDirty
