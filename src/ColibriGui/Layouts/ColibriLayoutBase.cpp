@@ -31,7 +31,7 @@ namespace Colibri
 		if( m_adjustableWindow )
 		{
 			m_topLeft = m_adjustableWindow->getLocalTopLeft();
-			m_currentSize = m_adjustableWindow->getSize();
+			m_currentSize = m_adjustableWindow->getSizeAfterClipping();
 			m_currentSize.makeCeil( m_minSize );
 			m_currentSize.makeFloor( m_hardMaxSize );
 			m_adjustableWindow->setSize( m_currentSize );
