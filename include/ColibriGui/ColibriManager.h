@@ -407,6 +407,9 @@ namespace Colibri
 
 		void _setWidgetTransformsDirty();
 
+		/// If creating a custom label widget, this must be called on creation.
+		void _notifyLabelCreated( Label* label );
+
 		/** Notify the manager that a window has its z order dirty.
 		@param windowInListDirty
 			Should be true if a window this manager directly owns is dirty.

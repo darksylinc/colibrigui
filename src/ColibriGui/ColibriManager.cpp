@@ -747,9 +747,14 @@ namespace Colibri
 	Label * colibrigui_nonnull ColibriManager::createWidget<Label>( Widget * colibrigui_nonnull parent )
 	{
 		Label *retVal = _createWidget<Label>( parent );
-		m_labels.push_back( retVal );
-		++m_numLabels;
+		_notifyLabelCreated( retVal );
 		return retVal;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_notifyLabelCreated( Label* label )
+	{
+		m_labels.push_back( label );
+		++m_numLabels;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::destroyWindow( Window *window )

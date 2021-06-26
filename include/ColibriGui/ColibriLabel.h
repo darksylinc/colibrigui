@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "ColibriGui/ColibriGuiPrerequisites.h"
 #include "ColibriGui/ColibriRenderable.h"
 #include "ColibriGui/Text/ColibriShaper.h"
 
@@ -15,6 +16,7 @@ namespace Colibri
 	*/
 	class Label : public Renderable
 	{
+	protected:
 		struct Word
 		{
 			size_t offset;
@@ -71,7 +73,7 @@ namespace Colibri
 		@param bPlaceGlyphs
 			When true, we will also call placeGlyphs
 		*/
-		void updateGlyphs( States::States state, bool bPlaceGlyphs=true );
+		colibri_virtual_l1 void updateGlyphs( States::States state, bool bPlaceGlyphs=true );
 
 		/** Places the glyphs obtained from updateGlyphs at the correct position
 			(always assuming TextHorizAlignment::Left) considering word wrap
@@ -101,7 +103,7 @@ namespace Colibri
 		float findLineMaxHeight( ShapedGlyphVec::const_iterator start,
 								 States::States state ) const;
 
-		inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
+		colibri_virtual_l1 inline void addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
 							 Ogre::Vector2 topLeft,
 							 Ogre::Vector2 bottomRight,
 							 uint16_t glyphWidth,
@@ -375,7 +377,7 @@ namespace Colibri
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Matrix2x3 &parentRot ) colibri_final;
+											  const Matrix2x3 &parentRot );
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
