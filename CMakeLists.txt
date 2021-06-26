@@ -59,6 +59,10 @@ if( MSVC90 )
 	include_directories( "./Dependencies/MSVC_Fix" )
 endif()
 
+if( COLIBRIGUI_FLEXIBILITY_LEVEL GREATER 0 )
+	add_compile_definitions(COLIBRI_FLEXIBILITY_LEVEL=${COLIBRIGUI_FLEXIBILITY_LEVEL})
+endif()
+
 if( NOT COLIBRIGUI_LIB_ONLY )
 	#add_recursive( ./src SOURCES )
 	#add_recursive( ./include HEADERS )

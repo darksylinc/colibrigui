@@ -31,6 +31,12 @@
 	#define colibri_final
 #endif
 
+#if COLIBRI_FLEXIBILITY_LEVEL > 1
+	#define colibri_virtual_l1 virtual
+#else
+	#define colibri_virtual_l1
+#endif
+
 #include <stdint.h>
 #include <math.h>
 #include "math_round.h"
