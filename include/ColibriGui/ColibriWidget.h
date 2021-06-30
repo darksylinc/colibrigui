@@ -651,7 +651,7 @@ namespace Colibri
 		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition );
 
 		/// See ColibriManager::setTextInput
-		virtual void _setTextInput( const char *text );
+		virtual void _setTextInput( const char *text, const bool bCallActionListener = true );
 
 		/// See ColibriManager::getImeLocation
 		virtual Ogre::Vector2 _getImeLocation();

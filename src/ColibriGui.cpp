@@ -62,25 +62,25 @@ int mainApp( int argc, const char *argv[] )
 namespace Demo
 {
 	extern Colibri::ColibriManager *colibriManager;
-	class ColibriLogListener : public Colibri::LogListener
+	class ColibriLogListener colibri_final : public Colibri::LogListener
 	{
-		virtual void log( const char *text, Colibri::LogSeverity::LogSeverity severity )
+		void log( const char *text, Colibri::LogSeverity::LogSeverity severity ) colibri_override
 		{
 			Ogre::LogManager::getSingleton().logMessage( text );
 		}
 	};
-	class ColibriListener : public Colibri::ColibriListener
+	class ColibriListener colibri_final : public Colibri::ColibriListener
 	{
-		void setClipboardText( const char *text )
-		{
-			SDL_SetClipboardText( text );
-		}
+		void setClipboardText( const char *text ) colibri_override { SDL_SetClipboardText( text ); }
 
-		virtual bool getClipboardText( char * colibrigui_nonnull * const colibrigui_nullable outText )
+		bool getClipboardText( char *colibrigui_nonnull *const colibrigui_nullable outText )
+			colibri_override
 		{
 			*outText = SDL_GetClipboardText();
 			return *outText != 0;
 		}
+
+		void freeClipboardText( char *colibrigui_nullable text ) colibri_override { free( text ); }
 	};
 	static ColibriLogListener g_colibriLogListener;
 	static ColibriListener g_colibriListener;

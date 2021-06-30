@@ -18,7 +18,9 @@
 cmake_minimum_required( VERSION 3.3 )
 project( ColibriGui )
 
-set( COLIBRIGUI_FLEXIBILITY_LEVEL 0 CACHE STRING "Higher flexibility levels convert some functions to virtual in a tradeoff of flexibility for performance" )
+set( COLIBRIGUI_FLEXIBILITY_LEVEL 0 CACHE STRING
+	"Higher flexibility levels convert some functions to virtual in "
+	"a tradeoff of flexibility for performance" )
 
 if( ${CMAKE_VERSION} VERSION_GREATER 3.9 AND NOT COLIBRIGUI_LIB_ONLY )
 	# We need to do this first, as OGRE.cmake will add another FindDoxygen.cmake file

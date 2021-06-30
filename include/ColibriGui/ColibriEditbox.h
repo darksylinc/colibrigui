@@ -53,7 +53,7 @@ namespace Colibri
 
 		virtual void _setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
 		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition );
-		virtual void _setTextInput( const char *text );
+		virtual void _setTextInput( const char *text, const bool bCallActionListener = true );
 		virtual Ogre::Vector2 _getImeLocation();
 		virtual bool isTextMultiline() const;
 		virtual bool wantsTextInput() const;

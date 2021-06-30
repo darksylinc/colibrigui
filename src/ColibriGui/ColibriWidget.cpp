@@ -1132,9 +1132,7 @@ namespace Colibri
 	{
 	}
 	//-------------------------------------------------------------------------
-	void Widget::_setTextInput( const char *text )
-	{
-	}
+	void Widget::_setTextInput( const char *text, const bool bCallActionListener ) {}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Widget::_getImeLocation()
 	{

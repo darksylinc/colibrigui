@@ -195,6 +195,7 @@ namespace Colibri
 				std::string result;
 				uStr.toUTF8String( result );
 				m_label->setText( result );
+				m_manager->callActionListeners( this, Action::ValueChanged );
 			}
 
 			showCaret();
@@ -239,12 +240,14 @@ namespace Colibri
 			if( colibriListener->getClipboardText( &clipboardText ) )
 			{
 				for( size_t i = 0u; i < repetition; ++i )
-					_setTextInput( clipboardText );
+					_setTextInput( clipboardText, false );
+				colibriListener->freeClipboardText( clipboardText );
+				m_manager->callActionListeners( this, Action::ValueChanged );
 			}
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Editbox::_setTextInput( const char *text )
+	void Editbox::_setTextInput( const char *text, const bool bCallActionListener )
 	{
 		const std::string &oldText = m_label->getText();
 		UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
@@ -274,6 +277,9 @@ namespace Colibri
 		m_cursorPos += newGlyphCount - oldGlyphCount;
 
 		showCaret();
+
+		if( bCallActionListener )
+			m_manager->callActionListeners( this, Action::ValueChanged );
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Editbox::_getImeLocation()

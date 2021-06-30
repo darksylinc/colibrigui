@@ -49,6 +49,17 @@ namespace Colibri
 			*outText = 0;
 			return false;
 		}
+
+		/** Frees/deletes the char* output by getClipboardText.
+			We do the following guarantees:
+
+				1. If getClipboardText returns false, freeClipboardText won't be called
+				2. If getClipboardText never outputs a non-nullptr char*,
+				   freeClipboardText will never receive a nullptr
+		@param outText
+		@return
+		*/
+		virtual void freeClipboardText( char *colibrigui_nullable text ) {}
 	};
 
 	class ColibriManager
