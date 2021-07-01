@@ -381,6 +381,9 @@ namespace Colibri
 
 		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
+		virtual void setState( States::States state, bool smartHighlight = true,
+							   bool broadcastEnable = false );
+
 		virtual void _notifyCanvasChanged();
 	};
 }

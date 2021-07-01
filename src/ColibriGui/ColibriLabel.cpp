@@ -1544,15 +1544,37 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Label::setTransformDirty( uint32_t dirtyReason )
 	{
-		if( (dirtyReason & (TransformDirtyParentCaller|TransformDirtyScale)) == TransformDirtyScale &&
-			!m_glyphsDirty[m_currentState] &&
-			m_glyphsPlaced[m_currentState] )
+		if( ( dirtyReason & ( TransformDirtyParentCaller | TransformDirtyScale ) ) ==
+			TransformDirtyScale )
 		{
-			//Align the glyphs so horizontal & vertical alignment are respected
-			placeGlyphs( m_currentState );
+			// Align the glyphs so horizontal & vertical alignment are respected
+			if( !m_glyphsDirty[m_currentState] && m_glyphsPlaced[m_currentState] )
+				placeGlyphs( m_currentState );
+
+			for( size_t i = 0; i < States::NumStates; ++i )
+			{
+				if( i != m_currentState )
+					m_glyphsPlaced[i] = false;
+			}
 		}
 
 		Renderable::setTransformDirty( dirtyReason );
+	}
+	//-------------------------------------------------------------------------
+	void Label::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	{
+		const States::States oldState = m_currentState;
+		Renderable::setState( state, smartHighlight, broadcastEnable );
+
+		if( oldState != state )
+		{
+			// We must replace the glyphs from the new state since it could be
+			// non-dirty but its placement out of date (e.g. Label was in Idle,
+			// glyphs were placed, then changed to Highlighted state, widget was
+			// resized, and now we're going back to Idle with a different size)
+			if( !m_glyphsDirty[m_currentState] && !m_glyphsPlaced[m_currentState] )
+				placeGlyphs( m_currentState );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::_notifyCanvasChanged()
