@@ -39,6 +39,19 @@ namespace Colibri
 		/// For internal use. Set to true if any of RichText uses background, false otherwise.
 		bool m_usesBackground;
 
+	public:
+		/// When true (default) text will be clipped against the widget's size.
+		///
+		/// When false, the text may be drawn outside of the widget's rect
+		/// (in either x and y direction) potentially overlapping with other
+		/// widgets if you assume widget contents are restricted to their size
+		/// and are tight together
+		///
+		/// PUBLIC VARIABLE. This variable can be altered directly.
+		/// Changes are reflected immediately.
+		bool m_clipTextToWidget;
+
+	protected:
 		bool m_shadowOutline;
 		Ogre::ColourValue m_shadowColour;
 		Ogre::Vector2 m_shadowDisplace;

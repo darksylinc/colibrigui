@@ -23,6 +23,7 @@ namespace Colibri
 	Label::Label( ColibriManager *manager ) :
 		Renderable( manager ),
 		m_usesBackground( false ),
+		m_clipTextToWidget( true ),
 		m_shadowOutline( false ),
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
@@ -1110,6 +1111,11 @@ namespace Colibri
 		parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );
 		m_accumMinClipTL = parentDerivedTL;
 		m_accumMaxClipBR = parentDerivedBR;
+		if( m_clipTextToWidget )
+		{
+			parentDerivedTL.makeCeil( this->m_derivedTopLeft );
+			parentDerivedBR.makeFloor( this->m_derivedBottomRight );
+		}
 
 		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
