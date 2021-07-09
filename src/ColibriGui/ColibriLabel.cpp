@@ -90,12 +90,7 @@ namespace Colibri
 		{
 			m_vertAlignment = vertAlignment;
 			for( size_t i=0; i<States::NumStates; ++i )
-			{
-				m_glyphsPlaced[i] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
-				m_glyphsAligned[i] = false;
-#endif
-			}
+				flagDirty( static_cast<States::States>( i ) );
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -110,12 +105,7 @@ namespace Colibri
 		{
 			m_vertReadingDir = vertReadingDir;
 			for( size_t i=0; i<States::NumStates; ++i )
-			{
-				m_glyphsPlaced[i] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
-				m_glyphsAligned[i] = false;
-#endif
-			}
+				flagDirty( static_cast<States::States>( i ) );
 		}
 	}
 	//-------------------------------------------------------------------------
