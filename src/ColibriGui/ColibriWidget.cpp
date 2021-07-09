@@ -661,9 +661,10 @@ namespace Colibri
 		while( itor != end )
 		{
 			Widget *widget = *itor;
-			if( (widget->m_clickable || widget->m_childrenClickable) &&
-				!widget->isDisabled() &&
-				this->intersectsChild( widget, currentScroll ) &&
+			if( ( widget->m_clickable || widget->m_childrenClickable ) &&  //
+				!widget->isDisabled() &&                                   //
+				!widget->isHidden() &&                                     //
+				this->intersectsChild( widget, currentScroll ) &&          //
 				widget->intersects( newPosNdc ) )
 			{
 				if( widget->m_clickable )
