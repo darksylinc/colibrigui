@@ -256,7 +256,15 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Widget::setKeyboardFocus()
 	{
-		m_manager->_stealKeyboardFocus( this );
+		if( isDisabled() )
+		{
+			LogListener *log = m_manager->getLogListener();
+			log->log( "Widget::setKeyboardFocus on disabled widget. Ignoring", LogSeverity::Warning );
+		}
+		else
+		{
+			m_manager->_stealKeyboardFocus( this );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setPressable( bool pressable )
