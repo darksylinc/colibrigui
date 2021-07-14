@@ -889,12 +889,11 @@ namespace Colibri
 		m_currentState = state;
 
 		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.end();
+		WidgetVec::const_iterator endt = m_children.end();
 
-		while( itor != end )
+		while( itor != endt )
 		{
-			if( !(*itor)->isDisabled() )
-				(*itor)->setState( state, false );
+			( *itor )->setState( state, false );
 			++itor;
 		}
 
