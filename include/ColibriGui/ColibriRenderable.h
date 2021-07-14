@@ -205,8 +205,7 @@ namespace Colibri
 		*/
 		void _setSkinPack( SkinInfo const * colibrigui_nonnull const * colibrigui_nullable skinInfos );
 
-		virtual void setState( States::States state, bool smartHighlight=true,
-							   bool broadcastEnable=false ) colibri_override;
+		virtual void setState( States::States state, bool smartHighlight=true ) colibri_override;
 
 		/** Calls setClipBorders and makes the clipping region to match that of the current skin
 

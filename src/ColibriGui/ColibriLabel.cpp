@@ -1557,10 +1557,10 @@ namespace Colibri
 		Renderable::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
-	void Label::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	void Label::setState( States::States state, bool smartHighlight )
 	{
 		const States::States oldState = m_currentState;
-		Renderable::setState( state, smartHighlight, broadcastEnable );
+		Renderable::setState( state, smartHighlight );
 
 		if( oldState != state )
 		{

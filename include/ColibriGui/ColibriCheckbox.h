@@ -51,11 +51,8 @@ namespace Colibri
 	public:
 		Checkbox( ColibriManager *manager );
 
-		virtual void _initialize();
-		virtual void _destroy();
-
-		virtual void setState( States::States state, bool smartHighlight=true,
-							   bool broadcastEnable=false );
+		void _initialize() colibri_override;
+		void _destroy() colibri_override;
 
 		Button* getButton()								{ return m_button; }
 
@@ -91,9 +88,9 @@ namespace Colibri
 						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
 						States::States baseState=States::NumStates );
 
-		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
-		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
+		void notifyWidgetAction( Widget *widget, Action::Action action ) colibri_override;
 	};
 }
 

@@ -102,9 +102,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Slider::isVisualsEnabled() const { return m_layers[0]->isVisualsEnabled(); }
 	//-------------------------------------------------------------------------
-	void Slider::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	void Slider::setState( States::States state, bool smartHighlight )
 	{
-		Widget::setState( state, smartHighlight, broadcastEnable );
+		Widget::setState( state, smartHighlight );
 
 		if( state == States::Pressed )
 		{
@@ -112,16 +112,6 @@ namespace Colibri
 		}
 		else
 			m_cursorOffset = 0.0f;
-
-		// Widget::setState did not re-enable children we control. Do it manually
-		if( !broadcastEnable )
-		{
-			for( size_t i = 0u; i < 2u; ++i )
-			{
-				if( m_layers[i]->isDisabled() )
-					m_layers[i]->setState( state, smartHighlight, false );
-			}
-		}
 	}
 	//-------------------------------------------------------------------------
 	void Slider::updateSlider()

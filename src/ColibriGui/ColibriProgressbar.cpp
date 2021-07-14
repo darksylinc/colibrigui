@@ -124,21 +124,6 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Progressbar::isVisualsEnabled() const { return m_layers[0]->isVisualsEnabled(); }
 	//-------------------------------------------------------------------------
-	void Progressbar::setState( States::States state, bool smartHighlight, bool broadcastEnable )
-	{
-		Widget::setState( state, smartHighlight, broadcastEnable );
-
-		// Widget::setState did not re-enable children we control. Do it manually
-		if( !broadcastEnable )
-		{
-			for( size_t i = 0u; i < 2u; ++i )
-			{
-				if( m_layers[i]->isDisabled() )
-					m_layers[i]->setState( state, smartHighlight, false );
-			}
-		}
-	}
-	//-------------------------------------------------------------------------
 	void Progressbar::setSkinPack( Ogre::IdString skinPackLayer0Name, Ogre::IdString skinPackLayer1Name )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();

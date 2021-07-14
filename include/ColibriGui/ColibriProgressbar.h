@@ -78,8 +78,8 @@ namespace Colibri
 	public:
 		Progressbar( ColibriManager *manager );
 
-		virtual void _initialize();
-		virtual void _destroy();
+		void _initialize() colibri_override;
+		void _destroy() colibri_override;
 
 		Renderable *getFrameLayer();
 		Renderable *getProgressLayer();
@@ -87,9 +87,6 @@ namespace Colibri
 		/// @copydoc Renderable::setVisualsEnabled
 		void         setVisualsEnabled( bool bEnabled );
 		virtual bool isVisualsEnabled() const colibri_final;
-
-		virtual void setState( States::States state, bool smartHighlight = true,
-							   bool broadcastEnable = false );
 
 		/** See Renderable::setSkinPack.
 			This version sets the skin packs for both layer 0 and layer 1
@@ -119,9 +116,9 @@ namespace Colibri
 		void  setProgress( float progress );
 		float getProgress() const { return m_progress; }
 
-		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
-		virtual void _update( float timeSinceLast );
+		void _update( float timeSinceLast ) colibri_override;
 	};
 }  // namespace Colibri
 

@@ -133,7 +133,7 @@ namespace Colibri
 	public:
 		Label( ColibriManager *manager );
 
-		virtual bool isLabel() const		{ return true; }
+		bool isLabel() const colibri_override { return true; }
 
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)
@@ -384,20 +384,17 @@ namespace Colibri
 									 const Ogre::Vector2 parentDerivedBR,
 									 const bool isHorizontal );
 
-		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS vertexBuffer,
-											  GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS textVertBuffer,
-											  const Ogre::Vector2 &parentPos,
-											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Matrix2x3 &parentRot );
+		void _fillBuffersAndCommands(
+			UiVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS vertexBuffer,
+			GlyphVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS textVertBuffer,
+			const Ogre::Vector2 &parentPos, const Ogre::Vector2 &parentCurrentScrollPos,
+			const Matrix2x3 &parentRot ) colibri_override;
 
-		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
 
-		virtual void setState( States::States state, bool smartHighlight = true,
-							   bool broadcastEnable = false );
+		void setState( States::States state, bool smartHighlight = true ) colibri_override;
 
-		virtual void _notifyCanvasChanged();
+		void _notifyCanvasChanged() colibri_override;
 	};
 }
 

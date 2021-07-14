@@ -166,9 +166,9 @@ namespace Colibri
 		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	void Renderable::setState( States::States state, bool smartHighlight )
 	{
-		Widget::setState( state, smartHighlight, broadcastEnable );
+		Widget::setState( state, smartHighlight );
 
 		if( !m_overrideSkinColour )
 			m_colour = m_stateInformation[m_currentState].defaultColour;

@@ -870,7 +870,7 @@ namespace Colibri
 		return isBreadthFirst;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setState( States::States state, bool smartHighlight, bool broadcastEnable )
+	void Widget::setState( States::States state, bool smartHighlight )
 	{
 		if( isWindow() )
 			return;
@@ -893,7 +893,7 @@ namespace Colibri
 
 		while( itor != end )
 		{
-			if( !(*itor)->isDisabled() || broadcastEnable )
+			if( !(*itor)->isDisabled() )
 				(*itor)->setState( state, false );
 			++itor;
 		}

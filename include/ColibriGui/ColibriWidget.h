@@ -523,12 +523,8 @@ namespace Colibri
 			highlighted by cursor (or viceversa), sets the new state to
 			States::HighlightedButtonAndCursor
 			If false, we just set exactly what was requested.
-		@param broadcastEnable
-			When false, if a child widget is States::Disabled; then we won't take it out of that state
-			When true, we always extend this new state to our children.
 		*/
-		virtual void setState( States::States state, bool smartHighlight=true,
-							   bool broadcastEnable=false );
+		virtual void setState( States::States state, bool smartHighlight=true );
 		States::States getCurrentState() const;
 		const WidgetVec& getChildren() const;
 		/// Note it may be < getChildren().size(), as this value only returns pure widgets.
