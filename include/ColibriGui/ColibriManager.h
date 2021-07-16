@@ -321,6 +321,8 @@ namespace Colibri
 		void setKeyboardPrimaryPressed();
 		void setKeyboardPrimaryReleased();
 		void setCancel();
+
+		void _notifyHighlightedWidgetDisabled( Widget *widget );
 	protected:
 		void updateKeyDirection( Borders::Borders direction );
 	public:

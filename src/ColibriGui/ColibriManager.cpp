@@ -559,6 +559,42 @@ namespace Colibri
 			callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 	}
 	//-------------------------------------------------------------------------
+	/**
+	@brief ColibriManager::_notifyHighlightedWidgetDisabled
+		Called when a widget that was highlighted became disabled; hence we can no longer
+		use it for keyboard navigation
+	@param widget
+	*/
+	void ColibriManager::_notifyHighlightedWidgetDisabled( Widget *widget )
+	{
+		autosetNavigation();
+
+		if( m_cursorFocusedPair.widget == widget )
+			m_cursorFocusedPair.widget = 0;
+
+		if( m_keyboardFocusedPair.widget == widget )
+		{
+			for( size_t i = 0u; i < Borders::NumBorders && m_keyboardFocusedPair.widget == widget; ++i )
+			{
+				updateKeyDirection( static_cast<Borders::Borders>( i ) );
+				if( !m_keyboardFocusedPair.widget )
+					m_keyboardFocusedPair.widget = widget;
+			}
+
+			if( m_keyboardFocusedPair.widget == widget )
+			{
+				m_keyboardFocusedPair.widget = m_keyboardFocusedPair.window->getDefaultWidget();
+				if( m_keyboardFocusedPair.widget )
+				{
+					m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
+					callActionListeners( m_keyboardFocusedPair.widget, Action::Highlighted );
+					if( m_keyboardFocusedPair.widget )
+						scrollToWidget( m_keyboardFocusedPair.widget );
+				}
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::updateKeyDirection( Borders::Borders direction )
 	{
 		if( m_keyboardFocusedPair.widget )
@@ -568,8 +604,15 @@ namespace Colibri
 
 			if( nextWidget )
 			{
-				m_keyboardFocusedPair.widget->setState( States::Idle );
-				callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
+				// Caller may be looking for the closest alternative widget because
+				// the current one got disabled, hence we should not set it to Idle
+				// We should also not set Cancel because this can only happen
+				// if initiated from a callback, so callbacks are aware
+				if( !m_keyboardFocusedPair.widget->isDisabled() )
+				{
+					m_keyboardFocusedPair.widget->setState( States::Idle );
+					callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
+				}
 
 				if( !m_primaryButtonDown || !nextWidget->isPressable() )
 				{

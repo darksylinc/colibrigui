@@ -903,6 +903,16 @@ namespace Colibri
 		{
 			setWidgetNavigationDirty();
 		}
+
+		if( state == States::Disabled &&
+			( oldValue == States::HighlightedCursor || oldValue == States::HighlightedButton ||
+			  oldValue == States::HighlightedButtonAndCursor || oldValue == States::Pressed ) )
+		{
+			// We need to change keyboard navigation and/or the user is clicking
+			// on this button and became disabled while inside the callback
+			// (e.g. "click me to disable me")
+			m_manager->_notifyHighlightedWidgetDisabled( this );
+		}
 	}
 	//-------------------------------------------------------------------------
 	States::States Widget::getCurrentState() const
