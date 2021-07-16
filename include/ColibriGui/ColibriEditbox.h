@@ -14,6 +14,7 @@ namespace Colibri
 	{
 		Label *m_label;
 		Label *m_caret;
+		Label *colibrigui_nullable m_secureLabel;
 		/// It's in glyphs
 		uint32_t m_cursorPos;
 
@@ -32,6 +33,8 @@ namespace Colibri
 		void showCaret();
 		bool requiresActiveUpdate() const;
 
+		void syncSecureLabel();
+
 	public:
 		Editbox( ColibriManager *manager );
 
@@ -46,6 +49,11 @@ namespace Colibri
 		void setText( const char *text );
 
 		void setState( States::States state, bool smartHighlight = true ) colibri_override;
+
+		/// When true, text is rendered as '*' and Clipboard copy
+		/// is forbidden (Clipboard paste is still allowed).
+		void setSecureEntry( const bool bSecureEntry );
+		bool isSecureEntry() const;
 
 		void _update( float timeSinceLast ) colibri_override;
 

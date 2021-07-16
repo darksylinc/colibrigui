@@ -13,6 +13,7 @@ namespace Colibri
 		Renderable( manager ),
 		m_label( 0 ),
 		m_caret( 0 ),
+		m_secureLabel( 0 ),
 		m_cursorPos( 0 ),
 		m_multiline( false ),
 		m_blinkTimer( 0 )
@@ -67,11 +68,29 @@ namespace Colibri
 				m_currentState == States::Pressed;
 	}
 	//-------------------------------------------------------------------------
+	void Editbox::syncSecureLabel()
+	{
+		if( !m_secureLabel )
+			return;
+
+		const size_t numGlyphs = m_label->getGlyphCount();
+		std::string secureText;
+		secureText.resize( numGlyphs, '*' );
+		m_secureLabel->setText( secureText );
+		m_manager->_updateDirtyLabels();
+	}
+	//-------------------------------------------------------------------------
 	void Editbox::setText( const char *text )
 	{
 		m_label->setText( text );
 		//Set the cursor at the end (will later be clamped correctly)
 		m_cursorPos = std::numeric_limits<uint32_t>::max();
+
+		if( m_secureLabel )
+		{
+			m_manager->_updateDirtyLabels();
+			syncSecureLabel();
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::setState( States::States state, bool smartHighlight )
@@ -98,6 +117,35 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Editbox::setSecureEntry( const bool bSecureEntry )
+	{
+		if( bSecureEntry )
+		{
+			if( !m_secureLabel )
+			{
+				m_secureLabel = m_manager->createWidget<Label>( this );
+				m_secureLabel->setSize( getSizeAfterClipping() );
+				m_secureLabel->setTextHorizAlignment( TextHorizAlignment::Natural );
+				m_secureLabel->setTextVertAlignment( TextVertAlignment::Top );
+
+				m_label->setHidden( true );
+
+				syncSecureLabel();
+			}
+		}
+		else
+		{
+			if( m_secureLabel )
+			{
+				m_manager->destroyWidget( m_secureLabel );
+				m_secureLabel = 0;
+				m_label->setHidden( false );
+			}
+		}
+	}
+	//-------------------------------------------------------------------------
+	bool Editbox::isSecureEntry() const { return m_secureLabel != 0; }
+	//-------------------------------------------------------------------------
 	void Editbox::_update( float timeSinceLast )
 	{
 		m_blinkTimer += timeSinceLast;
@@ -110,9 +158,13 @@ namespace Colibri
 
 		m_cursorPos = std::min<uint32_t>( m_cursorPos, (uint32_t)m_label->getGlyphCount() );
 
+		syncSecureLabel();
+
+		const Label *labelForCaret = m_secureLabel ? m_secureLabel : m_label;
+
 		FontSize ptSize;
 		uint16_t font;
-		Ogre::Vector2 pos = m_label->getCaretTopLeft( m_cursorPos, ptSize, font );
+		Ogre::Vector2 pos = labelForCaret->getCaretTopLeft( m_cursorPos, ptSize, font );
 
 		//Subtract the caret's bearing so it appears at the beginning
 		m_caret->setDefaultFontSize( ptSize );
@@ -221,8 +273,11 @@ namespace Colibri
 		}
 		else if( keyCode == 'c' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
 		{
-			ColibriListener *colibriListener = m_manager->getColibriListener();
-			colibriListener->setClipboardText( m_label->getText().c_str() );
+			if( !isSecureEntry() )
+			{
+				ColibriListener *colibriListener = m_manager->getColibriListener();
+				colibriListener->setClipboardText( m_label->getText().c_str() );
+			}
 		}
 		else if( keyCode == 'v' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
 		{
@@ -299,6 +354,8 @@ namespace Colibri
 		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
 		if( m_label && m_label->getSize() != sizeAfterClipping )
 			m_label->setSize( sizeAfterClipping );
+		if( m_secureLabel && m_secureLabel->getSize() != sizeAfterClipping )
+			m_secureLabel->setSize( sizeAfterClipping );
 		Renderable::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
