@@ -29,6 +29,7 @@ namespace Colibri
 		m_keyboardNavigable( false ),
 		m_childrenClickable( false ),
 		m_pressable( true ),
+		m_mouseReleaseTriggersPrimaryAction( true ),
 		m_consumesScroll( false ),
 		m_culled( false ),
 		m_breadthFirst( false ),
@@ -270,6 +271,11 @@ namespace Colibri
 	void Widget::setPressable( bool pressable )
 	{
 		m_pressable = pressable;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setMouseReleaseTriggersPrimaryAction( bool bTriggerPrimaryAction )
+	{
+		m_mouseReleaseTriggersPrimaryAction = bTriggerPrimaryAction;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_setDestructionDelayed() { m_hidden = true; }

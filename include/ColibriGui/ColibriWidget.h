@@ -106,6 +106,13 @@ namespace Colibri
 		/// Whether this widget can go into States::Pressed state via keyboard or mouse cursor.
 		/// (assuming it is either clickable or keyboard navigable, otherwise it would be impossible)
 		bool					m_pressable;
+		/// Whether releasing the mouse cursor button triggers a Action::PrimaryActionPerform
+		/// Animation is not affected by this flag, but callbacks are not triggered.
+		///
+		/// This is useful for Editboxes:
+		///		- Keyboard Enter means "do something" (PrimaryAction)
+		///		- But clicking on it means "I want to write on it"
+		bool					m_mouseReleaseTriggersPrimaryAction;
 		/// If the cursor is interacting with this widget, no scroll can take place if this is true.
 		/// This is useful for widgets which require some sort of mouse movement to function.
 		bool					m_consumesScroll;
@@ -270,6 +277,9 @@ namespace Colibri
 
 		void setPressable( bool pressable );
 		bool isPressable() const			{ return m_pressable; }
+
+		void setMouseReleaseTriggersPrimaryAction( bool bTriggerPrimaryAction );
+		bool mouseReleaseTriggersPrimaryAction() const { return m_mouseReleaseTriggersPrimaryAction; }
 
 		bool consumesScroll() const			{ return m_consumesScroll; }
 

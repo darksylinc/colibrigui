@@ -465,8 +465,11 @@ namespace Colibri
 		if( m_cursorFocusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor );
-			if( m_cursorFocusedPair.widget->isPressable() )
+			if( m_cursorFocusedPair.widget->isPressable() &&
+				m_cursorFocusedPair.widget->mouseReleaseTriggersPrimaryAction() )
+			{
 				callActionListeners( m_cursorFocusedPair.widget, Action::PrimaryActionPerform );
+			}
 
 			// m_cursorFocusedPair.widget may have been destroyed by callActionListeners
 			if( m_cursorFocusedPair.widget &&
