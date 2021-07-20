@@ -241,6 +241,15 @@ namespace Colibri
 				m_label->setText( result );
 				m_manager->callActionListeners( this, Action::ValueChanged );
 			}
+			else if( m_label->getGlyphCount() == 0u && !m_label->getText().empty() )
+			{
+				// TODO: Some non-renderable UTF character got stuck in the text
+				// We can't navigate it because it's not a glyph. Just clear the string
+				// to restore the widget to a working state
+				// It appears 'RTL start' code points can trigger this.
+				m_label->setText( "" );
+				m_manager->callActionListeners( this, Action::ValueChanged );
+			}
 
 			showCaret();
 		}
