@@ -64,7 +64,8 @@ namespace Colibri
 		virtual void _initialize();
 		virtual void _destroy();
 
-		Label* getLabel();
+		Label *_getOptionLabel() const { return m_optionLabel; }
+		Label *getLabel();
 
 		/** Sets the current value of the spinner. If the value is outside of range, it gets clamped
 			See Spinner::setRange, Spinner::setOptions
