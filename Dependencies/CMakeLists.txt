@@ -1,11 +1,16 @@
 cmake_minimum_required( VERSION 3.5 )
 
 if( NOT COLIBRIGUI_LIB_ONLY )
+	set( EXTRA_FOLDER "" )
+	if( ANDROID )
+		set( EXTRA_FOLDER "Android/" )
+	endif()
+
 	# Works on Windows
-	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build_result/lib/${CMAKE_BUILD_TYPE}" CACHE
+	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build_result/${EXTRA_FOLDER}lib/${CMAKE_BUILD_TYPE}" CACHE
 		PATH "Directory where all the .lib files are dumped." FORCE )
 	set( CMAKE_RUNTIME_OUTPUT_DIRECTORY
-		"${CMAKE_CURRENT_SOURCE_DIR}/../bin/${CMAKE_BUILD_TYPE}" CACHE
+		"${CMAKE_CURRENT_SOURCE_DIR}/../bin/${EXTRA_FOLDER}${CMAKE_BUILD_TYPE}" CACHE
 		PATH "Directory where .exe and .dll files are dumped." FORCE )
 endif()
 
