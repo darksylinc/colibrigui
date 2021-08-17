@@ -1,5 +1,5 @@
-Colibri Gui library
-===================
+# Colibri Gui library
+
  * https://bitbucket.org/dark_sylinc/colibrigui/ (mercurial)
  * https://github.com/darksylinc/colibrigui/ (git)
 
@@ -18,9 +18,35 @@ name was already taken by something completely unrelated. To prevent clashing, i
 was thus renamed to Colibri Gui, which doesn't seem to clash with anything at the
 time of the rebrand.
 
+# Cloning
 
-Goals
-=====
+This repo contains subrepos. Thus to clone it you'll need:
+
+```
+git clone --recurse-submodules --shallow-submodules https://github.com/darksylinc/colibrigui/
+```
+
+If you've already cloned then do:
+
+```
+git clone https://github.com/darksylinc/colibrigui/
+git submodule update --init --recursive
+```
+
+If you're using hg-git, then make sure your [hgrc](https://www.mercurial-scm.org/doc/hgrc.5.html) file contains these lines:
+
+```
+[subrepos]
+allowed = True
+git:allowed = True
+```
+
+# Screenshots
+
+![](./Docs/Data/Picture.png)
+
+
+# Goals
 
 1. Be lightweight within reasonable expectations. Except for text rendering.
 1. Text rendering dependencies: Be a library that has no or minimal external dependencies.
@@ -37,8 +63,7 @@ compiled multiple times iteratively until both dependencies are met. We chose to
 for static libs.
 
 
-Missing text features and Limitations
-=====================================
+# Missing text features and Limitations
 
 1. CJK Top to Bottom: We support TTB, but some details like drawing 2-digit numbers at the
 same height instead of two is not yet implemented.
@@ -47,15 +72,13 @@ same height instead of two is not yet implemented.
 1. LinebreakMode::WordWrap assumes space and tabs is what separate words, which is not
 always true for all languages.
 
-Known issues
-============
+# Known issues
 
 1. Mixing multiple font sizes into the same Label, the correct height for the newline
 will not always be correctly calculated and thus be overestimated.
 
 
-How to build docs
-=================
+# How to build docs
 
 You'll need:
 
@@ -64,8 +87,7 @@ You'll need:
 
 Create the CMake script and type: `ninja doxygen`
 
-FAQ
-===
+# FAQ
 
 ### Why did you write this library?
 
