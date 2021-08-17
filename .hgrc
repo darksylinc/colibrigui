@@ -1,0 +1,3 @@
+[subrepos]
+allowed = True
+git:allowed = True
