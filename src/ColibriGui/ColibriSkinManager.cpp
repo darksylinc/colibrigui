@@ -8,7 +8,8 @@
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
 
-#include <fstream>
+#include "sds/sds_fstream.h"
+#include "sds/sds_fstreamApk.h"
 
 namespace Colibri
 {
@@ -618,7 +619,7 @@ namespace Colibri
 		char tmpBuffer[512];
 		Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
 
-		std::ifstream inFile( fullPath, std::ios::in | std::ios::binary );
+		sds::PackageFstream inFile( fullPath, sds::fstream::InputEnd );
 
 		if( !inFile.is_open() )
 		{
@@ -628,16 +629,15 @@ namespace Colibri
 			return;
 		}
 
-		inFile.seekg( 0, std::ios_base::end );
-		const size_t fileSize = static_cast<size_t>( inFile.tellg() );
-		inFile.seekg( 0, std::ios_base::beg );
+		const size_t fileSize = inFile.getFileSize( false );
+		inFile.seek( 0, sds::fstream::beg );
 
 		if( fileSize > 0 )
 		{
 			std::vector<char> fileData;
 			fileData.resize( fileSize + 1u );
-			inFile.read( &fileData[0], static_cast<std::ifstream::streampos>( fileSize ) );
-			fileData[fileSize] = '\0'; //Add null terminator
+			inFile.read( &fileData[0], fileSize );
+			fileData[fileSize] = '\0'; // Add null terminator
 
 			std::string filename = fullPath;
 			std::string::size_type pos = filename.find_last_of( "/\\" );

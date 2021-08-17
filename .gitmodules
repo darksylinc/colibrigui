@@ -1,0 +1,3 @@
+[submodule "Dependencies/sds_library"]
+	path = Dependencies/sds_library
+	url = https://github.com/darksylinc/sds_library.git

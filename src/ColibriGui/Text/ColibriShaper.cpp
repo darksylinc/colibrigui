@@ -14,6 +14,10 @@
 #include "utf16.h"
 #include "uscript.h"
 
+#ifdef __ANDROID__
+#	include "AndroidFreeTypeApk.inc"
+#endif
+
 namespace Colibri
 {
 	/*  See http://www.microsoft.com/typography/otspec/name.htm
@@ -51,8 +55,7 @@ namespace Colibri
 	const hb_feature_t Shaper::CligOff     = { CligTag, 0, 0, std::numeric_limits<unsigned int>::max() };
 	const hb_feature_t Shaper::CligOn      = { CligTag, 1, 0, std::numeric_limits<unsigned int>::max() };
 
-	Shaper::Shaper( hb_script_t script, const char *fontLocation,
-					const std::string &language,
+	Shaper::Shaper( hb_script_t script, const char *fontLocation, const std::string &language,
 					ShaperManager *shaperManager ) :
 		m_script( script ),
 		m_ftFont( 0 ),
@@ -61,9 +64,35 @@ namespace Colibri
 		m_library( shaperManager->getFreeTypeLibrary() ),
 		m_shaperManager( shaperManager ),
 		m_ptSize( 0u ),
-		m_fontIdx( std::max<uint16_t>( shaperManager->getShapers().size(), 1u ) )
+		m_fontIdx(
+			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
 	{
+#ifndef __ANDROID__
 		FT_Error errorCode = FT_New_Face( m_library, fontLocation, 0, &m_ftFont );
+#else
+		m_asset =
+			AAssetManager_open( sds::fstreamApk::ms_assetManager, fontLocation, AASSET_MODE_RANDOM );
+		m_stream = new FT_StreamRec;
+
+		FT_Error errorCode = FT_Err_Cannot_Open_Stream;
+		if( m_asset )
+		{
+			memset( m_stream, 0, sizeof( FT_StreamRec ) );
+			m_stream->base = NULL;
+			m_stream->size = static_cast<unsigned long>( AAsset_getLength( m_asset ) );
+			m_stream->pos = 0;
+			m_stream->descriptor.pointer = m_asset;
+			m_stream->read = FtAndroidStreamRead;
+			m_stream->close = FtAndroidStreamClose;
+
+			FT_Open_Args fargs;
+			memset( &fargs, 0, sizeof( FT_Open_Args ) );
+			fargs.flags = FT_OPEN_STREAM;
+			fargs.stream = m_stream;
+
+			errorCode = FT_Open_Face( m_library, &fargs, 0, &m_ftFont );
+		}
+#endif
 		if( errorCode )
 		{
 			LogListener *log = m_shaperManager->getLogListener();
@@ -103,6 +132,11 @@ namespace Colibri
 						errorCode, " Desc: ", ShaperManager::getErrorMessage( errorCode ) );
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
+
+#ifdef __ANDROID__
+		delete m_stream;
+		m_stream = 0;
+#endif
 	}
 	//-------------------------------------------------------------------------
 	void Shaper::setFeatures( const std::vector<hb_feature_t> &features )

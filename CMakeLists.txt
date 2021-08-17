@@ -110,7 +110,7 @@ else()
 	add_library( ${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} )
+target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} sds_library )
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
 
 if( UNIX )

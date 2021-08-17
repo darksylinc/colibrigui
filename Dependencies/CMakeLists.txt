@@ -57,3 +57,5 @@ set( WITH_PNG OFF )
 set( WITH_HarfBuzz OFF )
 set( SKIP_INSTALL_ALL YES )
 add_subdirectory( freetype2 )
+
+add_subdirectory( sds_library )

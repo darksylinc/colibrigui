@@ -434,6 +434,21 @@ namespace Ogre
 	class ColibriOgreRenderable;
 }
 
+namespace sds
+{
+	class fstream;
+
+#ifdef __ANDROID__
+	class fstreamApk;
+	typedef fstreamApk PackageFstream;
+#elif !defined( TARGET_OS_TV ) || !TARGET_OS_TV
+	typedef fstream PackageFstream;
+#else
+	class fstreamNsud;
+	typedef fstream PackageFstream;
+#endif
+}  // namespace sds
+
 COLIBRIGUI_ASSUME_NONNULL_END
 
 // No checks done at all

@@ -14,6 +14,11 @@ COLIBRIGUI_ASSUME_NONNULL_BEGIN
 typedef struct FT_FaceRec_*  FT_Face;
 typedef struct FT_LibraryRec_  *FT_Library;
 
+#ifdef __ANDROID__
+struct AAsset;
+typedef struct FT_StreamRec_ FT_StreamRec;
+#endif
+
 namespace Colibri
 {
 	struct ShapedGlyph
@@ -47,6 +52,11 @@ namespace Colibri
 
 		FT_Library		m_library;
 		ShaperManager	*m_shaperManager;
+
+#ifdef __ANDROID__
+		AAsset *colibrigui_nullable m_asset;
+		FT_StreamRec *              m_stream;
+#endif
 
 		FontSize	m_ptSize; //Font size in points
 		uint16_t	m_fontIdx;
