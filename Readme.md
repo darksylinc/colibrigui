@@ -89,6 +89,19 @@ Create the CMake script and type: `ninja doxygen`
 
 # FAQ
 
+### Performance on Android is ultra slow
+
+We stream font files from disk (rather than load them directly on memory) because CJK font files are huge.
+However random `AAsset_seek` is very slow for compressed files.
+
+To fix this problem disable compression for font files. In your build.gradle file add:
+
+```
+aaptOptions {
+    noCompress 'ttf'
+}
+```
+
 ### Why did you write this library?
 
 I've always wanted a GUI meant for video games that would fit the following criteria:
