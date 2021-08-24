@@ -286,7 +286,7 @@ namespace Colibri
 		{
 			m_hidden = hidden;
 
-			if( m_currentState != States::Idle )
+			if( m_currentState != States::Idle && m_currentState != States::Disabled )
 			{
 				setState( States::Idle );
 				_callActionListeners( Action::Cancel );
