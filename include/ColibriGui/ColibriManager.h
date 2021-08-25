@@ -318,6 +318,11 @@ namespace Colibri
 		*/
 		void setMouseCursorPressed( bool allowScrollGesture, bool alwaysAllowScroll );
 		void setMouseCursorReleased();
+
+		/// Returns true if the next call to setMouseCursorPressed/setMouseCursorReleased
+		/// will be consumed by the widget currently focusing on a widget
+		bool isMouseCursorFocusedOnWidget() const { return m_cursorFocusedPair.widget != 0; }
+
 		void setKeyboardPrimaryPressed();
 		void setKeyboardPrimaryReleased();
 		void setCancel();
