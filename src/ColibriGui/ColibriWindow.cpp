@@ -341,7 +341,7 @@ namespace Colibri
 		for( size_t i=0; i<numChildren && !retVal; ++i )
 		{
 			Widget *child = m_children[defaultChild];
-			if( child->getCurrentState() != States::Disabled )
+			if( child->isKeyboardNavigable() )
 				retVal = child;
 
 			defaultChild = (defaultChild + 1u) % numChildren;
