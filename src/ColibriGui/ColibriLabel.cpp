@@ -1500,6 +1500,8 @@ namespace Colibri
 
 		Ogre::Vector2 oldSize = m_size;
 		m_size = maxWidthHeight * invWindowRes * canvasSize;
+		m_size.x = std::ceil( m_size.x );
+		m_size.y = std::ceil( m_size.y );
 
 		//Align the glyphs so horizontal & vertical alignment are respected
 		alignGlyphs( baseState );
