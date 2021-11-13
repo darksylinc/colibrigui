@@ -89,7 +89,7 @@ endif()
 if( APPLE )
 	set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
 	set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++" )
-	set( CMAKE_CXX_FLAGS "-x objective-c++" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -x objective-c++" )
 
 	#Set the pluginFolder path in the plugins.cfg file.
 	#Make a copy of the original one so it can be edited.
