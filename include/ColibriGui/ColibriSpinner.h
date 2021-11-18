@@ -29,34 +29,52 @@ namespace Colibri
 	*/
 	class Spinner : public Renderable, public WidgetActionListener
 	{
-		/// Displays the currently selected option
-		Label * colibrigui_nullable m_optionLabel;
+		enum SubWidgets
+		{
+			SW_Label,  // i.e. help description
+			SW_Space,
+			SW_Decrement,
+			SW_OptionLabel,  // i.e. where all options are
+			SW_Increment,
+			SW_NumSubWidgets
+		};
+
 		/// Displays user-driven text. May be null
-		Label * colibrigui_nullable	m_label;
-		Button						*m_decrement;
-		Button						*m_increment;
+		Label *colibrigui_nullable m_label;
+		/// Displays the currently selected option
+		Label *colibrigui_nullable m_optionLabel;
+		Button *                   m_decrement;
+		Button *                   m_increment;
 
-		int32_t	m_currentValue;
+		int32_t m_currentValue;
 
-		int32_t	m_minValue;
-		int32_t	m_maxValue;
-		int32_t	m_denominator;
+		int32_t m_minValue;
+		int32_t m_maxValue;
+		int32_t m_denominator;
 
-		float			m_arrowMargin;
-		/// This size is always for horizontal arrows. The .xy gets swapped as .yx for vertical spinners
-		Ogre::Vector2	m_arrowSize;
+		float         m_arrowMargin;
+		Ogre::Vector2 m_arrowSize;
 
-		bool			m_calcFixedSizeFromMaxWidth;
-		bool			m_horizontal;
-		HorizWidgetDir::HorizWidgetDir	m_horizDir;
+		bool  m_autoCalcSizes;
+		float m_sizeLabel;        /// Filled manually or automatically based on m_autoCalcSizes
+		float m_sizeOptionLabel;  /// Filled manually or automatically based on m_autoCalcSizes
+		HorizWidgetDir::HorizWidgetDir m_horizDir;
 
-		float						m_fixedWidth;
-		std::vector<std::string>	m_options;
+		std::vector<std::string> m_options;
 
-		void calculateMaximumWidth();
-		Ogre::Vector2 calculateMaximumSize();
-		void updateOptionLabel( const bool sizeOrAvailableOptionsChanged = false,
-								const bool bSkipOptionLabelSize = false );
+		/// Outputs already calculated sizes in columns
+		void getSizes( float outSizes[colibrigui_nonnull SW_NumSubWidgets] ) const;
+
+		/// Same as its overload, but does not write to 'this' (except temporarily
+		/// to m_optionLabel to check all options) and also outputs outHeight.
+		///
+		/// Used by sizeToFit
+		void calculateSizes( float &outSizeLabel, float &outSizeOptionLabel, float &outHeight );
+
+		/// Calculates values for m_sizeLabel & m_sizeOptionLabel based on current width
+		void calculateSizes();
+
+		void updateOptionLabel();
 
 	public:
 		Spinner( ColibriManager *manager );
@@ -90,8 +108,8 @@ namespace Colibri
 
 		/// Returns the current value. If m_options is not empty, then the returned value is
 		/// guaranteed to be in range [0; m_options.size())
-		int32_t getCurrentValueRaw() const					{ return m_currentValue; }
-		int32_t getDenominator() const						{ return m_denominator; }
+		int32_t getCurrentValueRaw() const { return m_currentValue; }
+		int32_t getDenominator() const { return m_denominator; }
 		/// Returns m_currentValue / m_denominator
 		float getCurrentValueProcessed() const;
 
@@ -127,8 +145,8 @@ namespace Colibri
 			See Spinner::setCurrentValue remarks
 		@param options
 		*/
-		void setOptions( const std::vector<std::string> &options );
-		const std::vector<std::string>& getOptions() const;
+		void                            setOptions( const std::vector<std::string> &options );
+		const std::vector<std::string> &getOptions() const;
 
 		/** Sets the horizontal direction. Only useful when the spinner is horizontal.
 			See HorizWidgetDir::HorizWidgetDir
@@ -141,33 +159,37 @@ namespace Colibri
 		@param horizWidgetDir
 		*/
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
-		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }
+		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const { return m_horizDir; }
 
-		/** Sets whether the distance between the arrows should remain constant regardless
-			of the option currently being selected.
+		/** Sets whether the distance between the arrows should be set externally
+			or automatically
 
-			When autoCalculateFromMaxWidth == false and fixedWidth <= 0, the distance between
-			the arrows will vary depending on the width of the string of the current option.
+			When bAutoCalculate == true:
+				- labelWidth & optionsLabelWidth are calculated automatically based on current size
+				- sizeToFit() will shrink as much as possible
 
-			Otherwise, the arrows will remain at a fixed distance, thus the arrows will
-			stop moving (and sometimes, the text too) every time an option is changed.
-		@remarks
-			When both autoCalculateFromMaxWidth = false and fixedWidth <= 0,
-			this setting is disabled.
-		@param autoCalculateFromMaxWidth
-			True to autocalculate fixedWidth from all available options,
-			thus fixedWidth argument will be ignored.
+			When bAutoCalculate == false:
+				- labelWidth & optionsLabelWidth are set explicitly
+				- sizeToFit() will may become larger, but won't shrink below what's specifically set
+		@param bAutoCalculate
+			True to autocalculate labelWidth & optionsLabelWidth from all available options,
+			thus the other arguments are ignored.
 
 			Note: If the spinner is in numeric mode and m_denominator != 1,
 			the autocalculation may not be accurate.
-		@param fixedWidth
+		@param labelWidth
 			When autoCalculateFromMaxWidth is false; this value lets you manually
-			specify the fixed size (in canvas units).
+			specify the fixed size of the help label (in canvas units).
+			When autoCalculateFromMaxWidth is true, this value is ignored
+		@param optionsLabelWidth
+			When autoCalculateFromMaxWidth is false; this value lets you manually
+			specify the fixed size of the options (in canvas units).
 			When autoCalculateFromMaxWidth is true, this value is ignored
 		*/
-		void setFixedWidth( bool autoCalculateFromMaxWidth, float fixedWidth );
-		bool getCalcFixedSizeFromMaxWidth() const				{ return m_calcFixedSizeFromMaxWidth; }
-		float getFixedWidth() const								{ return m_fixedWidth; }
+		void setFixedWidths( bool bAutoCalculate, float labelWidth, float optionsLabelWidth );
+
+		float getLabelWidth() const { return m_sizeLabel; }
+		float getOptionsLabelWidth() const { return m_sizeOptionLabel; }
 
 		/** This version has no params since there are multiple children labels
 			involved.
@@ -180,6 +202,6 @@ namespace Colibri
 		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
 		virtual void _notifyActionKeyMovement( Borders::Borders direction );
 	};
-}
+}  // namespace Colibri
 
 COLIBRIGUI_ASSUME_NONNULL_END
