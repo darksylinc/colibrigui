@@ -107,6 +107,8 @@ namespace Colibri
 			m_label->sizeToFit();
 			outSizeLabel = m_label->getSize().x;
 		}
+		else
+			outSizeLabel = 0.0f;
 
 		// Options. We must check them all
 		const std::string oldText = m_optionLabel->getText();
@@ -383,19 +385,28 @@ namespace Colibri
 		float sizeLabel, sizeOptionLabel, height;
 		calculateSizes( sizeLabel, sizeOptionLabel, height );
 
+		if( m_label )
+			height = std::max( height, m_label->getSize().y );
+		height = std::max( height, m_arrowSize.y );
+
 		if( !m_autoCalcSizes )
 		{
 			m_sizeLabel = sizeLabel;
 			m_sizeOptionLabel = sizeOptionLabel;
 		}
 
-		calculateSizes();
-		m_size.y = std::max( height, m_arrowSize.y );  // Needed by updateOptionLabel
-		updateOptionLabel();
+		float columnSizes[SW_NumSubWidgets];
+		getSizes( columnSizes );
 
-		Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
-		maxSize.x += m_arrowMargin * 2.0f;
+		Ogre::Vector2 maxSize( Ogre::Vector2( 0.0f, height ) + getBorderCombined() );
+		for( size_t i = 0u; i < SW_NumSubWidgets; ++i )
+			maxSize.x += columnSizes[i];
 		setSize( maxSize );
+		// We must set m_minSize too, because if m_increment (or m_decrement if RTL) is hidden
+		// then the layouts will shrink the spinner; and then when the spinner changes,
+		// either the arrow is out of bounds or the the user recalculates the layout
+		// and the whole window changes
+		m_minSize = maxSize;
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::setTransformDirty( uint32_t dirtyReason )
