@@ -26,17 +26,16 @@ namespace Colibri
 		{
 			if( data[i] == '\n' || data[i] == '\0' )
 			{
-				outString.reserve( i - idx );
 				for( size_t j = idx; j < i; ++j )
 					outString.push_back( data[j] );
-				return idx + 1u;
+				return i + 1u;
 			}
 		}
 
 		// If we're here we hit EOL, thus treat it as the last newline
 		for( size_t j = idx; j < numData; ++j )
 			outString.push_back( data[j] );
-		return idx + 1u;
+		return numData;
 	}
 	//-------------------------------------------------------------------------
 	BmpFont::BmpFont( const char *fontLocation, ShaperManager *shaperManager ) :
@@ -46,15 +45,29 @@ namespace Colibri
 		// Open FNT file
 		sds::PackageFstream fntFile( fontLocation, sds::fstream::InputEnd );
 
-		const size_t fileSize = fntFile.getFileSize( false );
-		fntFile.seek( 0, sds::fstream::beg );
+		if( fntFile.is_open() )
+		{
+			const size_t fileSize = fntFile.getFileSize( false );
+			fntFile.seek( 0, sds::fstream::beg );
 
-		std::vector<char> fntData;
-		fntData.resize( fileSize + 1u );
-		fntFile.read( &( *fntData.begin() ), fileSize );
-		fntData[fileSize] = '\0';  // Ensure string is null-terminated
+			std::vector<char> fntData;
+			fntData.resize( fileSize + 1u );
+			fntFile.read( &( *fntData.begin() ), fileSize );
+			fntData[fileSize] = '\0';  // Ensure string is null-terminated
 
-		parseFntFile( fntData );
+			parseFntFile( fntData );
+		}
+		else
+		{
+			LogListener *log = shaperManager->getLogListener();
+			char tmpBuffer[512];
+			Ogre::LwString errorMsg(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+
+			errorMsg.clear();
+			errorMsg.a( "Could not open BmpFont ", fontLocation );
+			log->log( errorMsg.c_str(), LogSeverity::Fatal );
+		}
 	}
 	//-------------------------------------------------------------------------
 	BmpFont::~BmpFont() {}
