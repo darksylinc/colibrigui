@@ -10,6 +10,7 @@ COLIBRIGUI_ASSUME_NONNULL_BEGIN
 namespace Colibri
 {
 	typedef std::vector<Label*> LabelVec;
+	typedef std::vector<LabelBmp*> LabelBmpVec;
 
 	/**
 	@class LogListener
@@ -84,11 +85,14 @@ namespace Colibri
 	protected:
 		WindowVec m_windows;
 		LabelVec m_labels;
+		LabelBmpVec m_labelsBmp;
 		/// Tracks total number of live widgets
 		size_t m_numWidgets;
-		size_t m_numLabels;
-		size_t m_numTextGlyphs; /// It's an upper bound. Current max number of glyphs may be lower
+		size_t   m_numLabelsAndBmp;   /// Counts both Labels and LabelBmps
+		size_t   m_numTextGlyphs;     /// It's an upper bound. Current max number of glyphs may be lower
+		size_t   m_numTextGlyphsBmp;  /// It's an upper bound. Current max number of glyphs may be lower
 		LabelVec m_dirtyLabels;
+		LabelBmpVec m_dirtyLabelBmps;
 		WidgetVec m_dirtyWidgets;
 		/// Some widgets require getting called every frame for updates.
 		/// Those widgets are listed here
@@ -115,6 +119,7 @@ namespace Colibri
 		bool m_swapRTLControls;
 		bool m_windowNavigationDirty;
 		bool m_numGlyphsDirty;
+		bool m_numGlyphsBmpDirty;
 
 		bool m_widgetTransformsDirty;
 
@@ -197,6 +202,7 @@ namespace Colibri
 
 	public:
 		void _notifyNumGlyphsIsDirty();
+		void _notifyNumGlyphsBmpIsDirty();
 		void _updateDirtyLabels();
 
 	protected:
@@ -428,12 +434,16 @@ namespace Colibri
 		/// If creating a custom label widget, this must be called on creation.
 		void _notifyLabelCreated( Label* label );
 
+		/// If creating a custom label bmp widget, this must be called on creation.
+		void _notifyLabelBmpCreated( LabelBmp* label );
+
 		/** Notify the manager that a window has its z order dirty.
 		@param windowInListDirty
 			Should be true if a window this manager directly owns is dirty.
 		*/
 		void _setZOrderWindowDirty( bool windowInListDirty );
 		void _addDirtyLabel( Label *label );
+		void _addDirtyLabelBmp( LabelBmp *label );
 
 		/// Cannot be nullptr
 		void _stealKeyboardFocus( Widget *widget );
@@ -487,7 +497,10 @@ namespace Colibri
 	};
 
 	template <>
-	Label * colibrigui_nonnull ColibriManager::createWidget<Label>( Widget * colibrigui_nonnull parent );
+	Label *colibrigui_nonnull ColibriManager::createWidget<Label>( Widget *colibrigui_nonnull parent );
+	template <>
+	LabelBmp *colibrigui_nonnull
+			  ColibriManager::createWidget<LabelBmp>( Widget *colibrigui_nonnull parent );
 }
 
 COLIBRIGUI_ASSUME_NONNULL_END

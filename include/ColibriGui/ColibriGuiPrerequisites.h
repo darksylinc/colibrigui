@@ -54,6 +54,7 @@ namespace Colibri
 	class ColibriManager;
 	class Editbox;
 	class Label;
+	class LabelBmp;
 	class LayoutCell;
 	class LogListener;
 	class Progressbar;

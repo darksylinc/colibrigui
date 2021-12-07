@@ -65,6 +65,7 @@ namespace Colibri
 		friend class ColibriManager;
 		friend class Renderable;
 		friend class Label;
+		friend class LabelBmp;
 
 		struct WidgetActionListenerRecord
 		{
@@ -264,6 +265,7 @@ namespace Colibri
 		virtual bool isRenderable() const	{ return false; }
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
+		virtual bool isLabelBmp() const		{ return false; }
 
 		/// @see	Renderable::setVisualsEnabled
 		virtual bool isVisualsEnabled() const	{ return false; }
