@@ -40,8 +40,6 @@ namespace Colibri
 		Ogre::Image2         m_fontTexture;
 		std::vector<BmpChar> m_chars;
 
-		ShaperManager *m_shaperManager;
-
 		uint16_t m_fontIdx;
 
 		/** Populates m_chars

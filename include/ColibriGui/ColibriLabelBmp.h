@@ -36,8 +36,6 @@ namespace Colibri
 	class LabelBmp : public Renderable
 	{
 	protected:
-		BmpFont *m_font;
-
 		std::string m_text[States::NumStates];
 
 		BmpGlyphVec m_shapes;
@@ -65,7 +63,7 @@ namespace Colibri
 		Ogre::Vector2     m_shadowDisplace;
 
 		FontSize m_fontSize;
-		uint16_t m_fontIdx;
+		uint16_t m_font;
 
 		/** Checks if the string has changed. If so, requests the ShaperManager a new
 			set of glyphs we can use
@@ -94,8 +92,8 @@ namespace Colibri
 		FontSize getFontSize() const { return m_fontSize; }
 
 		/// Sets the font
-		void     setFont( uint16_t defaultFont );
-		uint16_t getFont() const { return m_fontIdx; }
+		void     setFont( uint16_t font );
+		uint16_t getFont() const { return m_font; }
 
 		/** Changes the colour of the current text; and sets
 			the default colour for new text to the input colour

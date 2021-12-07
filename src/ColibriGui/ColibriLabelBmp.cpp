@@ -21,7 +21,7 @@ namespace Colibri
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
 		m_fontSize( m_manager->getDefaultFontSize26d6() ),
-		m_fontIdx( 0 )
+		m_font( 0 )
 	{
 		setVao( m_manager->getVao() );
 
@@ -56,9 +56,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void LabelBmp::setFont( uint16_t font )
 	{
-		if( m_fontIdx != font )
+		if( m_font != font )
 		{
-			m_fontIdx = font;
+			m_font = font;
 			flagDirty();
 		}
 	}
@@ -69,7 +69,9 @@ namespace Colibri
 	{
 		const size_t prevNumGlyphs = m_shapes.size();
 
-		m_font->renderString( m_text[m_currentState], m_shapes );
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		BmpFont *font = shaperManager->getBmpFont( m_font );
+		font->renderString( m_text[m_currentState], m_shapes );
 		m_glyphsDirty = false;
 
 		const size_t currNumGlyphs = m_shapes.size();

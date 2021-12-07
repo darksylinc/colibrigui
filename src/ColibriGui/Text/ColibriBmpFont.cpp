@@ -40,7 +40,6 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	BmpFont::BmpFont( const char *fontLocation, ShaperManager *shaperManager ) :
-		m_shaperManager( shaperManager ),
 		m_fontIdx(
 			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
 	{

@@ -48,6 +48,7 @@ COLIBRIGUI_ASSUME_NONNULL_BEGIN
 /// @defgroup Api_Backend
 namespace Colibri
 {
+	class BmpFont;
 	class Button;
 	struct CachedGlyph;
 	class Checkbox;

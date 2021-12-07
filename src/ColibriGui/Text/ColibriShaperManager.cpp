@@ -1,7 +1,9 @@
 
 #include "ColibriGui/Text/ColibriShaperManager.h"
-#include "ColibriGui/Text/ColibriShaper.h"
+
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/Text/ColibriBmpFont.h"
+#include "ColibriGui/Text/ColibriShaper.h"
 
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 
@@ -62,6 +64,15 @@ namespace Colibri
 			m_shapers.clear();
 		}
 
+		{
+			BmpFontVec::const_iterator itor = m_bmpFonts.begin();
+			BmpFontVec::const_iterator endt = m_bmpFonts.end();
+
+			while( itor != endt )
+				delete *itor++;
+			m_bmpFonts.clear();
+		}
+
 		if( m_glyphAtlas )
 		{
 			free( m_glyphAtlas );
@@ -120,6 +131,12 @@ namespace Colibri
 		case HorizReadingDir::RTL:		m_defaultDirection = UBIDI_RTL;			break;
 		}
 		m_useVerticalLayoutWhenAvailable = useVerticalLayoutWhenAvailable;
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::addBmpFont( const char *fontPath )
+	{
+		BmpFont *bmpFont = new BmpFont( fontPath, this );
+		m_bmpFonts.push_back( bmpFont );
 	}
 	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
