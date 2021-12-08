@@ -192,8 +192,10 @@ namespace Colibri
 					addQuad( vertexBuffer,                      //
 							 topLeft + shadowDisplacement,      //
 							 bottomRight + shadowDisplacement,  //
-							 Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
-											bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ) *
+							 ( Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
+											  bmpGlyph.bmpChar->x + bmpGlyph.bmpChar->width,
+											  bmpGlyph.bmpChar->y + bmpGlyph.bmpChar->height ) +
+							   0.5f ) *
 								 texInvResolution,
 							 shadowColour, parentDerivedTL, parentDerivedBR, invSize,  //
 							 canvasAr, invCanvasAr, derivedRot );
@@ -202,8 +204,10 @@ namespace Colibri
 				}
 
 				addQuad( vertexBuffer, topLeft, bottomRight,  //
-						 Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
-										bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ) *
+						 ( Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
+										  bmpGlyph.bmpChar->x + bmpGlyph.bmpChar->width,
+										  bmpGlyph.bmpChar->y + bmpGlyph.bmpChar->height ) +
+						   0.5f ) *
 							 texInvResolution,
 						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
 						 canvasAr, invCanvasAr, derivedRot );

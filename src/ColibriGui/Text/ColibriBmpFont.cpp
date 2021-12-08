@@ -180,10 +180,10 @@ namespace Colibri
 
 		icu::StringCharacterIterator itor( uStr );
 
-		while( itor.hasNext() )
+		for( uint32_t codepoint = static_cast<uint32_t>( itor.first32() );  //
+			 itor.hasNext();                                                //
+			 codepoint = static_cast<uint32_t>( itor.next32() ) )
 		{
-			const uint32_t codepoint = static_cast<uint32_t>( itor.next32() );
-
 			std::vector<BmpChar>::const_iterator itBmp =
 				std::lower_bound( m_chars.begin(), m_chars.end(), codepoint, OrderByCodepoint() );
 
