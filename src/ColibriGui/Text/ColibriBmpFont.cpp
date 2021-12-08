@@ -4,7 +4,12 @@
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/Text/ColibriShaperManager.h"
 
+#include "ColibriGui/Ogre/OgreHlmsColibri.h"
+#include "ColibriGui/Ogre/OgreHlmsColibriDatablock.h"
+
 #include "OgreLwString.h"
+#include "OgreResourceGroupManager.h"
+#include "OgreTextureGpuManager.h"
 
 #include "unicode/schriter.h"
 #include "unicode/unistr.h"
@@ -39,6 +44,8 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	BmpFont::BmpFont( const char *fontLocation, ShaperManager *shaperManager ) :
+		m_fontTexture( 0 ),
+		m_datablock( 0 ),
 		m_fontIdx(
 			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
 	{
@@ -90,9 +97,15 @@ namespace Colibri
 		{
 			currPos = getNextNewLine( fntData, currPos, newline );
 
-			if( newline.find( "char " ) != std::string::npos )
+			if( newline.find( "file=" ) != std::string::npos )
 			{
-				std::vector<std::string> values = sds::stringSplit( newline, ' ' );
+				const std::vector<std::string> values = sds::stringSplit( newline, ' ' );
+				std::map<std::string, std::string> settings = sds::stringMap( values, '=' );
+				m_textureName = settings["file"];
+			}
+			else if( newline.find( "char " ) != std::string::npos )
+			{
+				const std::vector<std::string> values = sds::stringSplit( newline, ' ' );
 				std::map<std::string, std::string> settings = sds::stringMap( values, '=' );
 
 				BmpChar bmpChar;
@@ -119,6 +132,27 @@ namespace Colibri
 			m_emptyChar.height = m_chars.back().yoffset + m_chars.back().height;
 			m_emptyChar.xadvance = m_chars.back().xadvance;
 		}
+	}
+	//-------------------------------------------------------------------------
+	void BmpFont::setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager )
+	{
+		m_fontTexture = textureManager->createOrRetrieveTexture(
+			m_textureName, Ogre::GpuPageOutStrategy::Discard, Ogre::CommonTextureTypes::Diffuse,
+			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+
+		Ogre::HlmsMacroblock macroblock;
+		Ogre::HlmsBlendblock blendblock;
+
+		macroblock.mDepthCheck = false;
+		macroblock.mDepthWrite = false;
+		blendblock.setBlendType( Ogre::SBT_TRANSPARENT_ALPHA );
+
+		const std::string datablockName = "BmpFont/" + m_textureName;
+		m_datablock = hlms->createDatablock( datablockName, datablockName, macroblock, blendblock,
+											 Ogre::HlmsParamVec(), false );
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibriDatablock *>( m_datablock ) );
+		Ogre::HlmsColibriDatablock *datablock = static_cast<Ogre::HlmsColibriDatablock *>( m_datablock );
+		datablock->setTexture( 0u, m_fontTexture );
 	}
 	//-------------------------------------------------------------------------
 	struct OrderByCodepoint
@@ -155,5 +189,16 @@ namespace Colibri
 		}
 
 		localShapes.swap( outShapes );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector4 BmpFont::getInvResolution() const
+	{
+		if( m_fontTexture->isDataReady() )
+		{
+			return 1.0f / Ogre::Vector4( m_fontTexture->getWidth(), m_fontTexture->getHeight(),
+										 m_fontTexture->getWidth(), m_fontTexture->getHeight() );
+		}
+
+		return Ogre::Vector4::ZERO;
 	}
 }  // namespace Colibri

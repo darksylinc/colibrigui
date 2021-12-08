@@ -204,6 +204,9 @@ namespace Colibri
 
 		void prepareToRender();
 
+		Ogre::HlmsColibri *colibrigui_nullable getOgreHlms() { return m_hlms; }
+		Ogre::VaoManager *colibrigui_nullable getOgreVaoManager() { return m_vaoManager; }
+
 		static const char* getErrorMessage( FT_Error errorCode );
 	};
 }

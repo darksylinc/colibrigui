@@ -101,6 +101,16 @@ namespace Colibri
 
 		m_hlms = hlms;
 		m_vaoManager = vaoManager;
+
+		Ogre::TextureGpuManager *textureManager=hlms->getRenderSystem()->getTextureGpuManager();
+		BmpFontVec::const_iterator itor = m_bmpFonts.begin();
+		BmpFontVec::const_iterator endt = m_bmpFonts.end();
+
+		while( itor != endt )
+		{
+			(*itor)->setOgre( hlms, textureManager );
+			++itor;
+		}
 	}
 	//-------------------------------------------------------------------------
 	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,

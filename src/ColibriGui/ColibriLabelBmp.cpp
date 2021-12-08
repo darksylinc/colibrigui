@@ -29,17 +29,17 @@ namespace Colibri
 #if COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned = true;
 #endif
-
 		m_numVertices = 0;
 
 		TODO_DATABLock;
 		for( size_t i = 0; i < States::NumStates; ++i )
 			m_stateInformation[i].materialName = ColibriManager::c_defaultTextDatablockNames[i];
 
-		Ogre::HlmsDatablock *datablock = manager->getDefaultTextDatablock()[States::Idle];
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		Ogre::HlmsDatablock *datablock = shaperManager->getBmpFont( m_font )->getDatablock();
 		COLIBRI_ASSERT_MEDIUM(
 			datablock &&
-			"getDefaultTextDatablock returned false. Please call setOgre first, and ensure the "
+			"getBmpFont returned no datablock. Please call setOgre first, and ensure the "
 			"ShaperManager (fonts) has already been properly initialized" );
 		setDatablock( datablock );
 	}
@@ -59,6 +59,12 @@ namespace Colibri
 		if( m_font != font )
 		{
 			m_font = font;
+
+			ShaperManager *shaperManager = m_manager->getShaperManager();
+			Ogre::HlmsDatablock *datablock = shaperManager->getBmpFont( m_font )->getDatablock();
+			COLIBRI_ASSERT_LOW( datablock );
+			setDatablock( datablock );
+
 			flagDirty();
 		}
 	}
@@ -148,8 +154,11 @@ namespace Colibri
 		const float canvasAr = m_manager->getCanvasAspectRatio();
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
-		const float fontScale = m_fontSize.asFloat();
+		const float fontScale = m_fontSize.asFloat() * 0.01f;
 		Ogre::Vector2 currentTopLeft;
+
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		const Ogre::Vector4 texInvResolution( shaperManager->getBmpFont( m_font )->getInvResolution() );
 
 		BmpGlyphVec::const_iterator itor = m_shapes.begin();
 		BmpGlyphVec::const_iterator endt = m_shapes.end();
@@ -184,7 +193,8 @@ namespace Colibri
 							 topLeft + shadowDisplacement,      //
 							 bottomRight + shadowDisplacement,  //
 							 Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
-											bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ),
+											bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ) *
+								 texInvResolution,
 							 shadowColour, parentDerivedTL, parentDerivedBR, invSize,  //
 							 canvasAr, invCanvasAr, derivedRot );
 					vertexBuffer += 6u;
@@ -193,7 +203,8 @@ namespace Colibri
 
 				addQuad( vertexBuffer, topLeft, bottomRight,  //
 						 Ogre::Vector4( bmpGlyph.bmpChar->x, bmpGlyph.bmpChar->y,
-										bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ),
+										bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height ) *
+							 texInvResolution,
 						 rgbaColour, parentDerivedTL, parentDerivedBR, invSize,  //
 						 canvasAr, invCanvasAr, derivedRot );
 				vertexBuffer += 6u;

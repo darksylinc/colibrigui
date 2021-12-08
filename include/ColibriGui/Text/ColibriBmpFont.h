@@ -8,6 +8,11 @@
 
 COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
+namespace Ogre
+{
+	class HlmsColibri;
+}
+
 namespace Colibri
 {
 	struct BmpChar
@@ -36,7 +41,10 @@ namespace Colibri
 	class BmpFont
 	{
 	protected:
-		Ogre::Image2         m_fontTexture;
+		std::string       m_textureName;
+		Ogre::TextureGpu *colibrigui_nullable m_fontTexture;
+		Ogre::HlmsDatablock *colibrigui_nullable m_datablock;
+
 		std::vector<BmpChar> m_chars;
 
 		BmpChar m_emptyChar;
@@ -54,7 +62,14 @@ namespace Colibri
 		BmpFont( const char *fontLocation, ShaperManager *shaperManager );
 		~BmpFont();
 
+		void setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager );
+
 		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes );
+
+		Ogre::Vector4 getInvResolution() const;
+
+		/// This pointer can be casted to HlmsColibriDatablock
+		Ogre::HlmsDatablock *colibrigui_nullable getDatablock() const { return m_datablock; }
 	};
 }  // namespace Colibri
 
