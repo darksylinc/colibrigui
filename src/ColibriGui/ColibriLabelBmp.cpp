@@ -154,11 +154,13 @@ namespace Colibri
 		const float canvasAr = m_manager->getCanvasAspectRatio();
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
-		const float fontScale = m_fontSize.asFloat() * 0.04f;
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		const BmpFont *bmpFont = shaperManager->getBmpFont( m_font );
+
+		const float fontScale = m_fontSize.asFloat() / bmpFont->getBakedFontSize().asFloat();
 		Ogre::Vector2 currentTopLeft;
 
-		ShaperManager *shaperManager = m_manager->getShaperManager();
-		const Ogre::Vector4 texInvResolution( shaperManager->getBmpFont( m_font )->getInvResolution() );
+		const Ogre::Vector4 texInvResolution( bmpFont->getInvResolution() );
 
 		BmpGlyphVec::const_iterator itor = m_shapes.begin();
 		BmpGlyphVec::const_iterator endt = m_shapes.end();
@@ -353,6 +355,12 @@ namespace Colibri
 		maxSize.x = std::max( maxSize.x, currentWidth );
 		maxSize.y = ( m_shapes.back().bmpChar->yoffset + m_shapes.back().bmpChar->height ) *
 					static_cast<Ogre::Real>( numLines );
+
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+		const BmpFont *bmpFont = shaperManager->getBmpFont( m_font );
+		const float fontScale = m_fontSize.asFloat() / bmpFont->getBakedFontSize().asFloat();
+
+		maxSize *= fontScale;
 
 		// Set new dimensions
 		const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();

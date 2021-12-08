@@ -45,6 +45,8 @@ namespace Colibri
 		Ogre::TextureGpu *colibrigui_nullable m_fontTexture;
 		Ogre::HlmsDatablock *colibrigui_nullable m_datablock;
 
+		FontSize m_fontSize;
+
 		std::vector<BmpChar> m_chars;
 
 		BmpChar m_emptyChar;
@@ -67,6 +69,8 @@ namespace Colibri
 		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes );
 
 		Ogre::Vector4 getInvResolution() const;
+
+		FontSize getBakedFontSize() const { return m_fontSize; }
 
 		/// This pointer can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock *colibrigui_nullable getDatablock() const { return m_datablock; }

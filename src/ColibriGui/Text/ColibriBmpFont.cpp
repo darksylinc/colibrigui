@@ -112,6 +112,13 @@ namespace Colibri
 						m_textureName.erase( m_textureName.begin() );
 				}
 			}
+			if( newline.find( "base=" ) != std::string::npos )
+			{
+				const std::vector<std::string> values = sds::stringSplit( newline, ' ' );
+				std::map<std::string, std::string> settings = sds::stringMap( values, '=' );
+
+				m_fontSize = sds::toU32withDefault( settings["base"] ) << 6u;
+			}
 			else if( newline.find( "char " ) != std::string::npos )
 			{
 				const std::vector<std::string> values = sds::stringSplit( newline, ' ' );
