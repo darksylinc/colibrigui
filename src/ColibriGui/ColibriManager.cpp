@@ -1047,12 +1047,14 @@ namespace Colibri
 		}
 
 		{
-			//Vertex buffer for most widgets
-			const Ogre::uint32 requiredVertexCount =
-					static_cast<Ogre::uint32>( (m_numWidgets - m_numLabelsAndBmp) * (6u * 9u) );
+			// Vertex buffer for most widgets
+			const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>(
+				( m_numWidgets - m_numLabelsAndBmp ) * ( 6u * 9u ) +  // Regular widgets
+				( m_numTextGlyphsBmp * 6u )                           // BmpLabel
+			);
 
 			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
-			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+			const uint32_t currVertexCount = static_cast<uint32_t>( vertexBuffer->getNumElements() );
 			if( requiredVertexCount > currVertexCount )
 			{
 				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,

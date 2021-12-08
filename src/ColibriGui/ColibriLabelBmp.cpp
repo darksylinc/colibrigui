@@ -306,7 +306,7 @@ namespace Colibri
 
 		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
 
-		float currentWidth;
+		float currentWidth = 0.0f;
 		uint32_t numLines = 1u;
 		uint32_t numColumns = 0u;
 		BmpGlyphVec::const_iterator itor = m_shapes.begin();
