@@ -102,6 +102,15 @@ namespace Colibri
 				const std::vector<std::string> values = sds::stringSplit( newline, ' ' );
 				std::map<std::string, std::string> settings = sds::stringMap( values, '=' );
 				m_textureName = settings["file"];
+
+				if( m_textureName.size() >= 2u )
+				{
+					// Remove quotations around filename
+					if( m_textureName.back() == '"' )
+						m_textureName.pop_back();
+					if( m_textureName.front() == '"' )
+						m_textureName.erase( m_textureName.begin() );
+				}
 			}
 			else if( newline.find( "char " ) != std::string::npos )
 			{

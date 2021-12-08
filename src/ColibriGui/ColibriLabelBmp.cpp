@@ -154,7 +154,7 @@ namespace Colibri
 		const float canvasAr = m_manager->getCanvasAspectRatio();
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
-		const float fontScale = m_fontSize.asFloat() * 0.01f;
+		const float fontScale = m_fontSize.asFloat() * 0.04f;
 		Ogre::Vector2 currentTopLeft;
 
 		ShaperManager *shaperManager = m_manager->getShaperManager();
