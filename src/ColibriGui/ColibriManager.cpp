@@ -1,9 +1,10 @@
 
 #include "ColibriGui/ColibriManager.h"
 
-#include "ColibriGui/ColibriWindow.h"
-#include "ColibriGui/ColibriSkinManager.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriLabelBmp.h"
+#include "ColibriGui/ColibriSkinManager.h"
+#include "ColibriGui/ColibriWindow.h"
 
 #include "ColibriGui/Text/ColibriShaperManager.h"
 
@@ -38,14 +39,16 @@ namespace Colibri
 
 	ColibriManager::ColibriManager( LogListener *logListener, ColibriListener *colibriListener ) :
 		m_numWidgets( 0 ),
-		m_numLabels( 0 ),
+		m_numLabelsAndBmp( 0u ),
 		m_numTextGlyphs( 0u ),
+		m_numTextGlyphsBmp( 0u ),
 		m_logListener( &DefaultLogListener ),
 		m_colibriListener( &DefaultColibriListener ),
 		m_delayingDestruction( false ),
 		m_swapRTLControls( false ),
 		m_windowNavigationDirty( false ),
 		m_numGlyphsDirty( false ),
+		m_numGlyphsBmpDirty( false ),
 		m_widgetTransformsDirty( false ),
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
@@ -797,10 +800,25 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
+	template <>
+	LabelBmp *colibrigui_nonnull
+	ColibriManager::createWidget<LabelBmp>( Widget *colibrigui_nonnull parent )
+	{
+		LabelBmp *retVal = _createWidget<LabelBmp>( parent );
+		_notifyLabelBmpCreated( retVal );
+		return retVal;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::_notifyLabelCreated( Label* label )
 	{
 		m_labels.push_back( label );
-		++m_numLabels;
+		++m_numLabelsAndBmp;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_notifyLabelBmpCreated( LabelBmp* label )
+	{
+		m_labelsBmp.push_back( label );
+		++m_numLabelsAndBmp;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::destroyWindow( Window *window )
@@ -883,8 +901,17 @@ namespace Colibri
 				//It will eventually be recalculated anyway
 				LabelVec::iterator itor = std::find( m_labels.begin(), m_labels.end(), widget );
 				Ogre::efficientVectorRemove( m_labels, itor );
-				--m_numLabels;
+				--m_numLabelsAndBmp;
 			}
+			else if( widget->isLabelBmp() )
+			{
+				//We do not update m_numTextGlyphsBmp since it's pointless to shrink it.
+				//It will eventually be recalculated anyway
+				LabelBmpVec::iterator itor = std::find( m_labelsBmp.begin(), m_labelsBmp.end(), widget );
+				Ogre::efficientVectorRemove( m_labelsBmp, itor );
+				--m_numLabelsAndBmp;
+			}
+
 			widget->_destroy();
 			delete widget;
 			--m_numWidgets;
@@ -1004,6 +1031,7 @@ namespace Colibri
 	void ColibriManager::checkVertexBufferCapacity()
 	{
 		COLIBRI_ASSERT_LOW( m_dirtyLabels.empty() && "updateDirtyLabels has not been called!" );
+		COLIBRI_ASSERT_LOW( m_dirtyLabelBmps.empty() && "updateDirtyLabels has not been called!" );
 
 		bool anyVaoChanged = false;
 
@@ -1019,12 +1047,14 @@ namespace Colibri
 		}
 
 		{
-			//Vertex buffer for most widgets
-			const Ogre::uint32 requiredVertexCount =
-					static_cast<Ogre::uint32>( (m_numWidgets - m_numLabels) * (6u * 9u) );
+			// Vertex buffer for most widgets
+			const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>(
+				( m_numWidgets - m_numLabelsAndBmp ) * ( 6u * 9u ) +  // Regular widgets
+				( m_numTextGlyphsBmp * 6u )                           // BmpLabel
+			);
 
 			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
-			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+			const uint32_t currVertexCount = static_cast<uint32_t>( vertexBuffer->getNumElements() );
 			if( requiredVertexCount > currVertexCount )
 			{
 				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
@@ -1225,35 +1255,70 @@ namespace Colibri
 		m_numGlyphsDirty = true;
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::_notifyNumGlyphsBmpIsDirty()
+	{
+		m_numGlyphsBmpDirty = true;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::_updateDirtyLabels()
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_fillBuffersStarted );
 		COLIBRI_ASSERT_MEDIUM( !m_renderingStarted );
 
-		LabelVec::const_iterator itor = m_dirtyLabels.begin();
-		LabelVec::const_iterator end  = m_dirtyLabels.end();
-
-		while( itor != end )
 		{
-			(*itor)->_updateDirtyGlyphs();
-			++itor;
-		}
+			LabelVec::const_iterator itor = m_dirtyLabels.begin();
+			LabelVec::const_iterator endt = m_dirtyLabels.end();
 
-		m_dirtyLabels.clear();
-
-		if( m_numGlyphsDirty )
-		{
-			m_numTextGlyphs = 0;
-			itor = m_labels.begin();
-			end  = m_labels.end();
-
-			while( itor != end )
+			while( itor != endt )
 			{
-				m_numTextGlyphs += (*itor)->getMaxNumGlyphs();
+				( *itor )->_updateDirtyGlyphs();
 				++itor;
 			}
 
-			m_numGlyphsDirty = false;
+			m_dirtyLabels.clear();
+
+			if( m_numGlyphsDirty )
+			{
+				m_numTextGlyphs = 0;
+				itor = m_labels.begin();
+				endt = m_labels.end();
+
+				while( itor != endt )
+				{
+					m_numTextGlyphs += ( *itor )->getMaxNumGlyphs();
+					++itor;
+				}
+
+				m_numGlyphsDirty = false;
+			}
+		}
+
+		{
+			LabelBmpVec::const_iterator itor = m_dirtyLabelBmps.begin();
+			LabelBmpVec::const_iterator endt = m_dirtyLabelBmps.end();
+
+			while( itor != endt )
+			{
+				( *itor )->_updateDirtyGlyphs();
+				++itor;
+			}
+
+			m_dirtyLabelBmps.clear();
+
+			if( m_numGlyphsBmpDirty )
+			{
+				m_numTextGlyphsBmp = 0;
+				itor = m_labelsBmp.begin();
+				endt = m_labelsBmp.end();
+
+				while( itor != endt )
+				{
+					m_numTextGlyphsBmp += ( *itor )->getMaxNumGlyphs();
+					++itor;
+				}
+
+				m_numGlyphsBmpDirty = false;
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -1330,6 +1395,8 @@ namespace Colibri
 	{
 		m_dirtyLabels.push_back( label );
 	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_addDirtyLabelBmp( LabelBmp *label ) { m_dirtyLabelBmps.push_back( label ); }
 	//-------------------------------------------------------------------------
 	void ColibriManager::scrollToWidget( Widget *widget )
 	{

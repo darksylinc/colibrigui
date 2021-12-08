@@ -51,7 +51,8 @@ namespace Colibri
 	class ShaperManager
 	{
 	public:
-		typedef std::vector<Shaper*> ShaperVec;
+		typedef std::vector<Shaper *>  ShaperVec;
+		typedef std::vector<BmpFont *> BmpFontVec;
 
 	protected:
 		struct Range
@@ -106,7 +107,9 @@ namespace Colibri
 		bool		m_useVerticalLayoutWhenAvailable;
 
 		/// m_shapers[0] is the default and not a strong reference
-		ShaperVec	m_shapers;
+		ShaperVec  m_shapers;
+		/// Unlike m_shapers, m_bmpFonts[0] is not repeated and is a strong ref
+		BmpFontVec m_bmpFonts;
 
 		Ogre::TexBufferPacked * colibrigui_nullable m_glyphAtlasBuffer;
 		Ogre::HlmsColibri	* colibrigui_nullable m_hlms;
@@ -133,6 +136,10 @@ namespace Colibri
 		/// @remark m_shapers[0] contains the default font, which
 		///			means it will appear twice in the array
 		const ShaperVec& getShapers() const			{ return m_shapers; }
+
+		void addBmpFont( const char *fontPath );
+
+		BmpFont *getBmpFont( size_t idx ) { return m_bmpFonts[idx]; }
 
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
 		LogListener* getLogListener() const;
@@ -196,6 +203,9 @@ namespace Colibri
 		void updateGpuBuffers();
 
 		void prepareToRender();
+
+		Ogre::HlmsColibri *colibrigui_nullable getOgreHlms() { return m_hlms; }
+		Ogre::VaoManager *colibrigui_nullable getOgreVaoManager() { return m_vaoManager; }
 
 		static const char* getErrorMessage( FT_Error errorCode );
 	};
