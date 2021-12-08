@@ -155,7 +155,7 @@ namespace Colibri
 		const BmpFont *bmpFont = shaperManager->getBmpFont( m_font );
 
 		const float fontScale = m_fontSize.asFloat() / bmpFont->getBakedFontSize().asFloat();
-		Ogre::Vector2 currentTopLeft;
+		Ogre::Vector2 currentTopLeft( Ogre::Vector2::ZERO );
 
 		const Ogre::Vector4 texInvResolution( bmpFont->getInvResolution() );
 
