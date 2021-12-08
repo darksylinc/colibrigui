@@ -79,7 +79,21 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	BmpFont::~BmpFont() {}
+	BmpFont::~BmpFont()
+	{
+		if( m_datablock )
+		{
+			m_datablock->getCreator()->destroyDatablock( m_datablock->getName() );
+			m_datablock = 0;
+		}
+
+		if( m_fontTexture )
+		{
+			Ogre::TextureGpuManager *textureManager = m_fontTexture->getTextureManager();
+			textureManager->destroyTexture( m_fontTexture );
+			m_fontTexture = 0;
+		}
+	}
 	//-------------------------------------------------------------------------
 	void BmpFont::parseFntFile( std::vector<char> &inFntData )
 	{
