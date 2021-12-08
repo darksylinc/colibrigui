@@ -41,9 +41,6 @@ namespace Colibri
 		BmpGlyphVec m_shapes;
 
 		bool m_glyphsDirty;
-#if COLIBRIGUI_DEBUG_MEDIUM
-		bool m_glyphsAligned;
-#endif
 
 	public:
 		/// When true (default) text will be clipped against the widget's size.

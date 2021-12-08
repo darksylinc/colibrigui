@@ -26,9 +26,6 @@ namespace Colibri
 		setVao( m_manager->getVao() );
 
 		m_glyphsDirty = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
-		m_glyphsAligned = true;
-#endif
 		m_numVertices = 0;
 
 		TODO_DATABLock;
@@ -264,9 +261,6 @@ namespace Colibri
 		if( !isLabelBmpDirty() )
 			m_manager->_addDirtyLabelBmp( this );
 		m_glyphsDirty = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
-		m_glyphsAligned = false;
-#endif
 	}
 	//-------------------------------------------------------------------------
 	size_t LabelBmp::getMaxNumGlyphs() const
