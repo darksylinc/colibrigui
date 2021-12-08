@@ -42,6 +42,8 @@ namespace Colibri
 		m_fontIdx(
 			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
 	{
+		memset( &m_emptyChar, 0, sizeof( m_emptyChar ) );
+
 		// Open FNT file
 		sds::PackageFstream fntFile( fontLocation, sds::fstream::InputEnd );
 
@@ -111,6 +113,12 @@ namespace Colibri
 
 		if( !bIsSorted )
 			std::sort( m_chars.begin(), m_chars.end() );
+
+		if( !m_chars.empty() )
+		{
+			m_emptyChar.height = m_chars.back().yoffset + m_chars.back().height;
+			m_emptyChar.xadvance = m_chars.back().xadvance;
+		}
 	}
 	//-------------------------------------------------------------------------
 	struct OrderByCodepoint
@@ -136,14 +144,14 @@ namespace Colibri
 			std::vector<BmpChar>::const_iterator itBmp =
 				std::lower_bound( m_chars.begin(), m_chars.end(), codepoint, OrderByCodepoint() );
 
+			BmpGlyph bmpGlyph;
+			bmpGlyph.isNewline = codepoint == U'\n';
+			bmpGlyph.isTab = codepoint == U'\t';
 			if( itBmp != m_chars.end() && itBmp->id == codepoint )
-			{
-				BmpGlyph bmpGlyph;
-				bmpGlyph.topLeft = Ogre::Vector2::ZERO;
-				bmpGlyph.isNewline = codepoint == U'\n';
-				bmpGlyph.isTab = codepoint == U'\t';
-				localShapes.push_back( bmpGlyph );
-			}
+				bmpGlyph.bmpChar = &( *itBmp );
+			else
+				bmpGlyph.bmpChar = &m_emptyChar;
+			localShapes.push_back( bmpGlyph );
 		}
 
 		localShapes.swap( outShapes );

@@ -26,10 +26,9 @@ namespace Colibri
 
 	struct BmpGlyph
 	{
-		Ogre::Vector2 topLeft;
-		bool          isNewline;
-		bool          isTab;
-		BmpChar *     bmpChar;
+		bool           isNewline;
+		bool           isTab;
+		BmpChar const *bmpChar;
 	};
 
 	typedef std::vector<BmpGlyph> BmpGlyphVec;
@@ -39,6 +38,8 @@ namespace Colibri
 	protected:
 		Ogre::Image2         m_fontTexture;
 		std::vector<BmpChar> m_chars;
+
+		BmpChar m_emptyChar;
 
 		uint16_t m_fontIdx;
 
