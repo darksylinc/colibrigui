@@ -1366,6 +1366,11 @@ namespace Colibri
 			ptSize = shapedGlyph.glyph->ptSize;
 			outFontIdx = shapedGlyph.glyph->font;
 		}
+		else
+		{
+			ptSize = m_defaultFontSize;
+			outFontIdx = m_defaultFont;
+		}
 
 		return localTopLeft;
 	}
