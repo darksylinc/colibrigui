@@ -266,6 +266,7 @@ namespace Colibri
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 		virtual bool isLabelBmp() const		{ return false; }
+		virtual bool isEditbox() const		{ return false; }
 
 		/// @see	Renderable::setVisualsEnabled
 		virtual bool isVisualsEnabled() const	{ return false; }

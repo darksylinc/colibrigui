@@ -31,6 +31,7 @@ namespace Colibri
 
 #if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
 		InputType::InputType m_inputType;
+		std::string          m_textHint;
 #endif
 
 	public:
@@ -58,6 +59,8 @@ namespace Colibri
 
 		Label *getLabel();
 
+		bool isEditbox() const colibri_override { return true; }
+
 		/// When changing the text programatically, prefer using this function over directly
 		/// modifying the Label (via getLabel) because this function will update the caret
 		/// cursor position the way the user would expect.
@@ -72,7 +75,7 @@ namespace Colibri
 
 		/// Sets the input type for Android and iOS platforms. This allows backends
 		/// to pass on hints for the soft keyboards.
-		void setInputType( InputType::InputType inputType );
+		void setInputType( InputType::InputType inputType, const std::string &textHint );
 
 		/// Returns what was set on setInputType. Note: On some platforms what was set
 		/// in setInputType is ignored
@@ -80,6 +83,10 @@ namespace Colibri
 		/// If setSecureEntry( true ) was called, it has higher priority and getInputType
 		/// will return InputType::Password
 		InputType::InputType getInputType() const;
+
+		/// Gets the text hint in setInputType.
+		/// On most platforms the hint is discarded and always returns ""
+		std::string getTextHint() const;
 
 		void _update( float timeSinceLast ) colibri_override;
 

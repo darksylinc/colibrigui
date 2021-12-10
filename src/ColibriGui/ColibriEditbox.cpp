@@ -146,6 +146,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Editbox::isSecureEntry() const { return m_secureLabel != 0; }
 	//-------------------------------------------------------------------------
+	void Editbox::setInputType( InputType::InputType inputType, const std::string &textHint )
+	{
+#if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
+		m_inputType = inputType;
+		m_textHint = textHint;
+#endif
+	}
+	//-------------------------------------------------------------------------
 	InputType::InputType Editbox::getInputType() const
 	{
 		if( isSecureEntry() )
@@ -156,6 +164,15 @@ namespace Colibri
 		return m_inputType;
 #else
 		return InputType::Text;
+#endif
+	}
+	//-------------------------------------------------------------------------
+	std::string Editbox::getTextHint() const
+	{
+#if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
+		return m_textHint;
+#else
+		return "";
 #endif
 	}
 	//-------------------------------------------------------------------------
