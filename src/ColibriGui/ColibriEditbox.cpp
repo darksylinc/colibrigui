@@ -1,7 +1,7 @@
 
 #include "ColibriGui/ColibriEditbox.h"
-#include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriManager.h"
 
 #include "unicode/unistr.h"
 
@@ -52,7 +52,7 @@ namespace Colibri
 
 		Renderable::_destroy();
 
-		//m_label is a child of us, so it will be destroyed by our super class
+		// m_label is a child of us, so it will be destroyed by our super class
 		m_label = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -64,9 +64,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Editbox::requiresActiveUpdate() const
 	{
-		return	m_currentState == States::HighlightedButton ||
-				m_currentState == States::HighlightedButtonAndCursor ||
-				m_currentState == States::Pressed;
+		return m_currentState == States::HighlightedButton ||
+			   m_currentState == States::HighlightedButtonAndCursor || m_currentState == States::Pressed;
 	}
 	//-------------------------------------------------------------------------
 	void Editbox::syncSecureLabel()
@@ -84,7 +83,7 @@ namespace Colibri
 	void Editbox::setText( const char *text )
 	{
 		m_label->setText( text );
-		//Set the cursor at the end (will later be clamped correctly)
+		// Set the cursor at the end (will later be clamped correctly)
 		m_cursorPos = std::numeric_limits<uint32_t>::max();
 
 		if( m_secureLabel )
@@ -147,6 +146,19 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Editbox::isSecureEntry() const { return m_secureLabel != 0; }
 	//-------------------------------------------------------------------------
+	InputType::InputType Editbox::getInputType() const
+	{
+		if( isSecureEntry() )
+			return InputType::Password;
+		else if( isTextMultiline() )
+			return InputType::Multiline;
+#if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
+		return m_inputType;
+#else
+		return InputType::Text;
+#endif
+	}
+	//-------------------------------------------------------------------------
 	void Editbox::_update( float timeSinceLast )
 	{
 		m_blinkTimer += timeSinceLast;
@@ -167,7 +179,7 @@ namespace Colibri
 		uint16_t font;
 		Ogre::Vector2 pos = labelForCaret->getCaretTopLeft( m_cursorPos, ptSize, font );
 
-		//Subtract the caret's bearing so it appears at the beginning
+		// Subtract the caret's bearing so it appears at the beginning
 		m_caret->setDefaultFontSize( ptSize );
 		m_caret->setDefaultFont( font );
 		if( m_caret->isAnyStateDirty() )
@@ -195,8 +207,8 @@ namespace Colibri
 
 		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
 		{
-			bool isAtLimit = (keyCode == KeyCode::Backspace && m_cursorPos == 0) ||
-							 (keyCode == KeyCode::Delete && m_cursorPos >= m_label->getGlyphCount());
+			bool isAtLimit = ( keyCode == KeyCode::Backspace && m_cursorPos == 0 ) ||
+							 ( keyCode == KeyCode::Delete && m_cursorPos >= m_label->getGlyphCount() );
 
 			if( !isAtLimit )
 			{
@@ -235,7 +247,7 @@ namespace Colibri
 								 static_cast<int32_t>( glyphLength ) );
 				}
 
-				//Convert back to UTF8
+				// Convert back to UTF8
 				std::string result;
 				uStr.toUTF8String( result );
 				m_label->setText( result );
@@ -281,7 +293,7 @@ namespace Colibri
 			inBuffer[maxRepetition] = '\0';
 			_setTextInput( inBuffer );
 		}
-		else if( keyCode == 'c' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
+		else if( keyCode == 'c' && ( keyMod & ( KeyMod::LCtrl | KeyMod::RCtrl ) ) )
 		{
 			if( !isSecureEntry() )
 			{
@@ -289,7 +301,7 @@ namespace Colibri
 				colibriListener->setClipboardText( m_label->getText().c_str() );
 			}
 		}
-		else if( keyCode == 'v' && (keyMod & (KeyMod::LCtrl|KeyMod::RCtrl)) )
+		else if( keyCode == 'v' && ( keyMod & ( KeyMod::LCtrl | KeyMod::RCtrl ) ) )
 		{
 			ColibriListener *colibriListener = m_manager->getColibriListener();
 			char *clipboardText = 0;
@@ -311,25 +323,25 @@ namespace Colibri
 
 		const size_t oldGlyphCount = m_label->getGlyphCount();
 
-		//Convert m_cursorPos from glyph to code units
+		// Convert m_cursorPos from glyph to code units
 		size_t glyphStart;
 		size_t glyphLength;
 		m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
 
-		//Append the text
+		// Append the text
 		uStr.insert( glyphStart, appendText );
 
-		//Convert back to UTF8
+		// Convert back to UTF8
 		std::string result;
 		uStr.toUTF8String( result );
 		m_label->setText( result );
 
-		//We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
+		// We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
 		m_manager->_updateDirtyLabels();
 
 		const size_t newGlyphCount = m_label->getGlyphCount();
 
-		//Advance the cursor
+		// Advance the cursor
 		m_cursorPos += newGlyphCount - oldGlyphCount;
 
 		showCaret();
@@ -344,20 +356,11 @@ namespace Colibri
 		return m_caret->getDerivedBottomRight();
 	}
 	//-------------------------------------------------------------------------
-	bool Editbox::isTextMultiline() const
-	{
-		return m_multiline;
-	}
+	bool Editbox::isTextMultiline() const { return m_multiline; }
 	//-------------------------------------------------------------------------
-	bool Editbox::wantsTextInput() const
-	{
-		return true;
-	}
+	bool Editbox::wantsTextInput() const { return true; }
 	//-------------------------------------------------------------------------
-	Label* Editbox::getLabel()
-	{
-		return m_label;
-	}
+	Label *Editbox::getLabel() { return m_label; }
 	//-------------------------------------------------------------------------
 	void Editbox::setTransformDirty( uint32_t dirtyReason )
 	{
@@ -391,4 +394,4 @@ namespace Colibri
 			_callActionListeners( Action::ValueChanged );
 		}
 	}
-}
+}  // namespace Colibri

@@ -7,6 +7,17 @@ COLIBRIGUI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
+	namespace InputType
+	{
+		enum InputType
+		{
+			Text,
+			Multiline,
+			Password,
+			Email
+		};
+	}
+
 	/** @ingroup Controls
 	@class Editbox
 	*/
@@ -17,6 +28,10 @@ namespace Colibri
 		Label *colibrigui_nullable m_secureLabel;
 		/// It's in glyphs
 		uint32_t m_cursorPos;
+
+#if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
+		InputType::InputType m_inputType;
+#endif
 
 	public:
 		/// When true, multiline prevents Enter key from being
@@ -54,6 +69,17 @@ namespace Colibri
 		/// is forbidden (Clipboard paste is still allowed).
 		void setSecureEntry( const bool bSecureEntry );
 		bool isSecureEntry() const;
+
+		/// Sets the input type for Android and iOS platforms. This allows backends
+		/// to pass on hints for the soft keyboards.
+		void setInputType( InputType::InputType inputType );
+
+		/// Returns what was set on setInputType. Note: On some platforms what was set
+		/// in setInputType is ignored
+		///
+		/// If setSecureEntry( true ) was called, it has higher priority and getInputType
+		/// will return InputType::Password
+		InputType::InputType getInputType() const;
 
 		void _update( float timeSinceLast ) colibri_override;
 
