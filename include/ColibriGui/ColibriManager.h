@@ -385,6 +385,10 @@ namespace Colibri
 
 		/** Sets the text to the currently selected Editbox (if supports editing)
 			This is meant for IMEs (input method editor) and Android/iOS keyboards
+		@remarks
+			WARNING: Call this function before ColibriManager::update.
+			If you call this between ColibriManager::update and ColibriManager::prepareRenderCommands
+			asserts could trigger and/or crashes happen
 		@param text
 			Input to text to add/replace
 		@param bReplaceContents
