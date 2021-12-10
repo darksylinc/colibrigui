@@ -59,12 +59,13 @@ namespace Colibri
 
 		Label *getLabel();
 
-		bool isEditbox() const colibri_override { return true; }
-
 		/// When changing the text programatically, prefer using this function over directly
 		/// modifying the Label (via getLabel) because this function will update the caret
 		/// cursor position the way the user would expect.
 		void setText( const char *text );
+
+		/// Same as doing this->getLabel()->getText()
+		const std::string &getText() const;
 
 		void setState( States::States state, bool smartHighlight = true ) colibri_override;
 
@@ -93,7 +94,8 @@ namespace Colibri
 		void _setTextEdit( const char *text, int32_t selectStart,
 						   int32_t selectLength ) colibri_override;
 		void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition ) colibri_override;
-		void _setTextInput( const char *text, const bool bCallActionListener = true ) colibri_override;
+		void _setTextInput( const char *text, const bool bReplaceContents,
+							const bool bCallActionListener = true ) colibri_override;
 
 		Ogre::Vector2 _getImeLocation() colibri_override;
 

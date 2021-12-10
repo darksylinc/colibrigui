@@ -266,7 +266,6 @@ namespace Colibri
 		virtual bool isWindow() const		{ return false; }
 		virtual bool isLabel() const		{ return false; }
 		virtual bool isLabelBmp() const		{ return false; }
-		virtual bool isEditbox() const		{ return false; }
 
 		/// @see	Renderable::setVisualsEnabled
 		virtual bool isVisualsEnabled() const	{ return false; }
@@ -659,8 +658,17 @@ namespace Colibri
 		*/
 		virtual void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition );
 
-		/// See ColibriManager::setTextInput
-		virtual void _setTextInput( const char *text, const bool bCallActionListener = true );
+		/** See ColibriManager::setTextInput
+		@param text
+			Input to text to add/replace
+		@param bReplaceContents
+			When false, the contents are appended
+			When true, the contents replace current ones
+		@param bCallActionListener
+			True if action listeners should be triggered
+		*/
+		virtual void _setTextInput( const char *text, const bool bReplaceContents,
+									const bool bCallActionListener = true );
 
 		/// See ColibriManager::getImeLocation
 		virtual Ogre::Vector2 _getImeLocation();

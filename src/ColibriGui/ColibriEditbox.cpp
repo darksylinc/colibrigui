@@ -15,6 +15,9 @@ namespace Colibri
 		m_caret( 0 ),
 		m_secureLabel( 0 ),
 		m_cursorPos( 0 ),
+#if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
+		m_inputType( InputType::Text ),
+#endif
 		m_multiline( false ),
 		m_blinkTimer( 0 )
 	{
@@ -93,9 +96,17 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	const std::string &Editbox::getText() const { return m_label->getText(); }
+	//-------------------------------------------------------------------------
 	void Editbox::setState( States::States state, bool smartHighlight )
 	{
 		const bool wasActive = requiresActiveUpdate();
+
+		if( m_currentState != state && state == States::Pressed )
+		{
+			ColibriListener *colibriListener = m_manager->getColibriListener();
+			colibriListener->showTextInput( this );
+		}
 
 		Renderable::setState( state, smartHighlight );
 
@@ -308,7 +319,7 @@ namespace Colibri
 					inBuffer[i] = '\n';
 			}
 			inBuffer[maxRepetition] = '\0';
-			_setTextInput( inBuffer );
+			_setTextInput( inBuffer, false );
 		}
 		else if( keyCode == 'c' && ( keyMod & ( KeyMod::LCtrl | KeyMod::RCtrl ) ) )
 		{
@@ -332,26 +343,36 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Editbox::_setTextInput( const char *text, const bool bCallActionListener )
+	void Editbox::_setTextInput( const char *text, const bool bReplaceContents,
+								 const bool bCallActionListener )
 	{
-		const std::string &oldText = m_label->getText();
-		UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
-		UnicodeString appendText( UnicodeString::fromUTF8( text ) );
+		size_t oldGlyphCount = 0u;
 
-		const size_t oldGlyphCount = m_label->getGlyphCount();
+		if( !bReplaceContents )
+		{
+			const std::string &oldText = m_label->getText();
+			UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
+			UnicodeString appendText( UnicodeString::fromUTF8( text ) );
 
-		// Convert m_cursorPos from glyph to code units
-		size_t glyphStart;
-		size_t glyphLength;
-		m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
+			oldGlyphCount = m_label->getGlyphCount();
 
-		// Append the text
-		uStr.insert( glyphStart, appendText );
+			// Convert m_cursorPos from glyph to code units
+			size_t glyphStart;
+			size_t glyphLength;
+			m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
 
-		// Convert back to UTF8
-		std::string result;
-		uStr.toUTF8String( result );
-		m_label->setText( result );
+			// Append the text
+			uStr.insert( glyphStart, appendText );
+
+			// Convert back to UTF8
+			std::string result;
+			uStr.toUTF8String( result );
+			m_label->setText( result );
+		}
+		else
+		{
+			m_label->setText( text );
+		}
 
 		// We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
 		m_manager->_updateDirtyLabels();

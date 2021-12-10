@@ -729,10 +729,10 @@ namespace Colibri
 		m_keyModInputDown = 0;
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setTextInput( const char *text )
+	void ColibriManager::setTextInput( const char *text, const bool bReplaceContents )
 	{
 		if( m_keyboardFocusedPair.widget )
-			m_keyboardFocusedPair.widget->_setTextInput( text );
+			m_keyboardFocusedPair.widget->_setTextInput( text, bReplaceContents );
 	}
 	//-------------------------------------------------------------------------
 	bool ColibriManager::isTextMultiline() const

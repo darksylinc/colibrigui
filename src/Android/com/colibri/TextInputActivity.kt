@@ -26,8 +26,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 
 
-
-
 enum class ColibriInputType {
     Text,
     Multiline,
@@ -46,10 +44,15 @@ val ColibriToAndroidMappings = intArrayOf(
     android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
 )
 
-class TextInputDialog(context: Activity, hintText: String, inputType: ColibriInputType) :
+class TextInputDialog(
+    context: Activity,
+    currentText: String,
+    hintText: String,
+    inputType: ColibriInputType,
+) :
     Dialog(context) {
 
-    val editText : EditText
+    val editText: EditText
 
     init {
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -61,6 +64,7 @@ class TextInputDialog(context: Activity, hintText: String, inputType: ColibriInp
         editText.textSize = 24f
         editText.layoutParams = layoutParams
         editText.setTextIsSelectable(true)
+        editText.setText(currentText)
         editText.hint = "Enter " + hintText + ":"
         editText.inputType = ColibriToAndroidMappings[inputType.ordinal]
 

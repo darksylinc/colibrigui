@@ -61,6 +61,25 @@ namespace Colibri
 		@return
 		*/
 		virtual void freeClipboardText( char *colibrigui_nullable text ) {}
+
+		/**	When called, an Editbox was pressed and thus on Android and iOS a virtual
+			keyboard or an input handler should be brought up.
+
+			This is different from ColibriManager::focusedWantsTextInput because that's
+			meant for IMEs that can stay on top all the time without interrupting user
+			flow (i.e. seamless integration).
+
+			This function instead is for Android & iOS that are best handled using an
+			instrusive native UI element: they're brought up when the user selects the editbox,
+			they're dismissed when the user hits Enter or taps outside
+
+			These native UI elements are much better at handling the details (soft keyboards,
+			copy/paste, passwords, Unicode, etc)
+
+		@param editbox
+			Editbox requesting the text input UI element
+		*/
+		virtual void showTextInput( Colibri::Editbox * /*editbox*/ ) {}
 	};
 
 	class ColibriManager
@@ -364,7 +383,15 @@ namespace Colibri
 		/// @see ColibriManager::setTextSpecialKeyPressed
 		void setTextSpecialKeyReleased( uint32_t keyCode, uint16_t keyMod );
 
-		void setTextInput( const char *text );
+		/** Sets the text to the currently selected Editbox (if supports editing)
+			This is meant for IMEs (input method editor) and Android/iOS keyboards
+		@param text
+			Input to text to add/replace
+		@param bReplaceContents
+			When false, the contents are appended
+			When true, the contents replace current ones
+		*/
+		void setTextInput( const char *text, const bool bReplaceContents );
 		/// Returns true if the widget the keyboard is currently focused on supports multiple
 		/// lines. This means the app should not forward Enter presses as calls to
 		/// setKeyboardPrimaryPressed/setKeyboardPrimaryReleased but rather as

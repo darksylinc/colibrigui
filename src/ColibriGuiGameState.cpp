@@ -541,7 +541,7 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::textInput( const SDL_TextInputEvent &arg )
 	{
-		colibriManager->setTextInput( arg.text );
+		colibriManager->setTextInput( arg.text, false );
 	}
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::keyPressed( const SDL_KeyboardEvent &arg )
