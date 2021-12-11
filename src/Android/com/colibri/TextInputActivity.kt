@@ -21,7 +21,12 @@ package com.colibri
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 
@@ -58,7 +63,7 @@ class TextInputDialog(
         val layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT)
 
-        this.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         val editText = EditText(context)
         editText.textSize = 24f
@@ -77,5 +82,16 @@ class TextInputDialog(
         lp.width = context.resources.displayMetrics.widthPixels * 7 / 8
 
         this.window?.attributes = lp
+
+        // If we don't add a delay, the keyboard won't go up.
+        // If somebody knows the exact listener where we can safely
+        // bring the keyboard up, please submit a Pull Request
+        Handler(Looper.myLooper()!!).postDelayed({
+            editText.requestFocus()
+            editText.requestFocusFromTouch()
+
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(editText, 0)
+        }, 50)
     }
 }
