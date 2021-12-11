@@ -17,6 +17,11 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 // THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+//
+// For documentation on how to integrate with Android
+// see Docs/AndroidIntegration.md
+//
+
 package com.colibri
 
 import android.app.Activity

@@ -102,6 +102,10 @@ aaptOptions {
 }
 ```
 
+### Editboxes are not working on Android
+
+See [Android Integration](Docs/AndroidIntegration) page
+
 ### Why did you write this library?
 
 I've always wanted a GUI meant for video games that would fit the following criteria:
