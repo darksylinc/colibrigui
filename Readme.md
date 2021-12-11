@@ -104,7 +104,7 @@ aaptOptions {
 
 ### Editboxes are not working on Android
 
-See [Android Integration](Docs/AndroidIntegration) page
+See [Android Integration](Docs/AndroidIntegration.md) page
 
 ### Why did you write this library?
 
