@@ -686,7 +686,7 @@ namespace Colibri
 		m_widgetTransformsDirty = false;
 	}
 	//-------------------------------------------------------------------------
-	bool ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount )
+	bool ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount, bool animated )
 	{
 		Window *window = m_cursorFocusedPair.window;
 		if( window )
@@ -697,7 +697,15 @@ namespace Colibri
 				updateWidgetsFocusedByCursor();
 				return true;
 			}
-			window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
+
+			if( animated )
+			{
+				window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
+			}
+			else
+			{
+				window->setScrollImmediate( window->getNextScroll() + scrollAmount);
+			}
 
 			// If is possible the button we were highlighting is no longer behind the cursor
 			updateWidgetsFocusedByCursor();
