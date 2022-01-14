@@ -364,11 +364,13 @@ namespace Colibri
 		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; }
 
 		/**
+		@param animated
+			If true the scroll will be animated.
 		@return
 			True if the scroll was consumed by a widget.
 			False otherwise
 		*/
-		bool setScroll( const Ogre::Vector2 &scrollAmount );
+		bool setScroll( const Ogre::Vector2 &scrollAmount, bool animated = true );
 
 		/// For understanding these params, see SDL_TextEditingEvent
 		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
