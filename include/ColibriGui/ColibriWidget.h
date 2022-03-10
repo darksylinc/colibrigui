@@ -235,6 +235,9 @@ namespace Colibri
 		void scheduleSetTransformDirty();
 
 		/// Produce a 16 bit zorder internal id from an 8 bit one.
+		/// WARNING: It relies on virtual calls. Hence base class
+		/// Widget::Widget won't properly set it. And derived
+		/// classes must call this function again.
 		uint16_t _wrapZOrderInternalId( uint8_t z ) const;
 
 		void notifyZOrderChildWindowIsDirty( bool firstCall );

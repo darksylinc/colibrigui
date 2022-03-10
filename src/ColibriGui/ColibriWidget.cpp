@@ -48,7 +48,7 @@ namespace Colibri
 		m_accumMaxClipBR( 1.0f ),
 		m_zOrderDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
-		m_zOrder( _wrapZOrderInternalId( 0 ) )
+		m_zOrder( _wrapZOrderInternalId( 0 ) )  // WARNING: Relies on virtual calls (won't work right)
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		,
 		m_transformOutOfDate( false ),

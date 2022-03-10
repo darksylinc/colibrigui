@@ -21,6 +21,7 @@ namespace Colibri
 		m_childrenNavigationDirty( false )
 	{
 		m_childrenClickable = true;
+		m_zOrder = _wrapZOrderInternalId( 0 );
 		setConsumeCursor( true );
 	}
 	//-------------------------------------------------------------------------

@@ -35,6 +35,7 @@ namespace Colibri
 		m_currVertexBufferOffset( 0 ),
 		m_visualsEnabled( true )
 	{
+		m_zOrder = _wrapZOrderInternalId( 0 );
 		memset( m_stateInformation, 0, sizeof( m_stateInformation ) );
 		for( size_t i = 0u; i < States::NumStates; ++i )
 			m_stateInformation[i].defaultColour = Ogre::ColourValue::White;
