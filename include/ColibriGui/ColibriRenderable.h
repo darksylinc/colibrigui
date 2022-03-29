@@ -78,7 +78,7 @@ namespace Colibri
 		int							baseInstanceAndIndirectBuffers;
 		Ogre::CbDrawCallStrip		* colibrigui_nullable drawCmd;
 		Ogre::CbDrawStrip			* colibrigui_nullable drawCountPtr;
-		uint16_t primCount;
+		uint32_t primCount;
 		uint32_t basePrimCount[2]; //[0] = regular widgets, [1] = text
 		uint32_t nextFirstVertex;
 	};
