@@ -23,9 +23,10 @@ namespace Colibri
 	*/
 	class Editbox : public Renderable
 	{
-		Label *m_label;
-		Label *m_caret;
+		Label                     *m_label;
+		Label                     *m_caret;
 		Label *colibrigui_nullable m_secureLabel;
+		Label *colibrigui_nullable m_placeholder;
 		/// It's in glyphs
 		uint32_t m_cursorPos;
 
@@ -59,6 +60,8 @@ namespace Colibri
 
 		Label *getLabel();
 
+		Label *colibrigui_nullable getPlaceholderLabel();
+
 		/// When changing the text programatically, prefer using this function over directly
 		/// modifying the Label (via getLabel) because this function will update the caret
 		/// cursor position the way the user would expect.
@@ -66,6 +69,15 @@ namespace Colibri
 
 		/// Same as doing this->getLabel()->getText()
 		const std::string &getText() const;
+
+		/** Sets placeholder text that is only shown while the main text is empty.
+		@param text
+			Text to use. Can be empty or nullptr to disable the placeholder.
+		*/
+		void setPlaceholder( const char *colibrigui_nullable text );
+
+		/// Returns the text from the placeholder. Can be nullptr or empty if there is none
+		const std::string *colibrigui_nullable getPlaceholder() const;
 
 		void setState( States::States state, bool smartHighlight = true ) colibri_override;
 

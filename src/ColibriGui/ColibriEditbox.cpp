@@ -14,6 +14,7 @@ namespace Colibri
 		m_label( 0 ),
 		m_caret( 0 ),
 		m_secureLabel( 0 ),
+		m_placeholder( 0 ),
 		m_cursorPos( 0 ),
 #if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
 		m_inputType( InputType::Text ),
@@ -86,6 +87,10 @@ namespace Colibri
 	void Editbox::setText( const char *text )
 	{
 		m_label->setText( text );
+
+		if( m_placeholder )
+			m_placeholder->setVisualsEnabled( getText().empty() );
+
 		// Set the cursor at the end (will later be clamped correctly)
 		m_cursorPos = std::numeric_limits<uint32_t>::max();
 
@@ -97,6 +102,43 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	const std::string &Editbox::getText() const { return m_label->getText(); }
+	//-------------------------------------------------------------------------
+	void Editbox::setPlaceholder( const char *colibrigui_nullable text )
+	{
+		if( !text )
+		{
+			if( m_placeholder )
+			{
+				m_manager->destroyWidget( m_placeholder );
+				m_placeholder = 0;
+			}
+		}
+		else
+		{
+			if( !m_placeholder )
+			{
+				m_placeholder = m_manager->createWidget<Label>( this );
+				m_placeholder->setSize( getSizeAfterClipping() );
+				m_placeholder->setTextHorizAlignment( TextHorizAlignment::Natural );
+				m_placeholder->setTextVertAlignment( TextVertAlignment::Top );
+
+				m_placeholder->setTextColour( Ogre::ColourValue( 0.8f, 0.8f, 0.8f, 0.6f ) );
+			}
+
+			m_placeholder->setText( text );
+
+			if( !getText().empty() )
+				m_placeholder->setVisualsEnabled( false );
+		}
+	}
+	//-------------------------------------------------------------------------
+	const std::string *colibrigui_nullable Editbox::getPlaceholder() const
+	{
+		if( m_placeholder )
+			return &m_placeholder->getText();
+		else
+			return 0;
+	}
 	//-------------------------------------------------------------------------
 	void Editbox::setState( States::States state, bool smartHighlight )
 	{
@@ -279,6 +321,8 @@ namespace Colibri
 				std::string result;
 				uStr.toUTF8String( result );
 				m_label->setText( result );
+				if( m_placeholder )
+					m_placeholder->setVisualsEnabled( result.empty() );
 				m_manager->callActionListeners( this, Action::ValueChanged );
 			}
 			else if( m_label->getGlyphCount() == 0u && !m_label->getText().empty() )
@@ -288,6 +332,8 @@ namespace Colibri
 				// to restore the widget to a working state
 				// It appears 'RTL start' code points can trigger this.
 				m_label->setText( "" );
+				if( m_placeholder )
+					m_placeholder->setVisualsEnabled( true );
 				m_manager->callActionListeners( this, Action::ValueChanged );
 			}
 
@@ -368,10 +414,14 @@ namespace Colibri
 			std::string result;
 			uStr.toUTF8String( result );
 			m_label->setText( result );
+			if( m_placeholder )
+				m_placeholder->setVisualsEnabled( result.empty() );
 		}
 		else
 		{
 			m_label->setText( text );
+			if( m_placeholder )
+				m_placeholder->setVisualsEnabled( getText().empty() );
 		}
 
 		// We must update now, otherwise if _setTextInput gets called, getGlyphStartUtf16 will be wrong
@@ -400,11 +450,15 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	Label *Editbox::getLabel() { return m_label; }
 	//-------------------------------------------------------------------------
+	Label *colibrigui_nullable Editbox::getPlaceholderLabel() { return m_placeholder; }
+	//-------------------------------------------------------------------------
 	void Editbox::setTransformDirty( uint32_t dirtyReason )
 	{
 		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
 		if( m_label && m_label->getSize() != sizeAfterClipping )
 			m_label->setSize( sizeAfterClipping );
+		if( m_placeholder && m_placeholder->getSize() != sizeAfterClipping )
+			m_placeholder->setSize( sizeAfterClipping );
 		if( m_secureLabel && m_secureLabel->getSize() != sizeAfterClipping )
 			m_secureLabel->setSize( sizeAfterClipping );
 		Renderable::setTransformDirty( dirtyReason );

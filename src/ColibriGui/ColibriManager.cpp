@@ -203,7 +203,7 @@ namespace Colibri
 				Ogre::HlmsColibriDatablock *datablock = static_cast<Ogre::HlmsColibriDatablock*>(
 															m_defaultTextDatablock[States::Disabled] );
 				datablock->setUseColour( true );
-				datablock->setColour( Ogre::ColourValue( 0.8f, 0.8f, 0.8f, 0.2f ) );
+				datablock->setColour( Ogre::ColourValue( 0.8f, 0.8f, 0.8f, 0.6f ) );
 			}
 			m_shaperManager->setOgre( hlmsColibri, vaoManager );
 		}

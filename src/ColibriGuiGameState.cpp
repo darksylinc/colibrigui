@@ -193,6 +193,7 @@ namespace Demo
 		editbox0 = colibriManager->createWidget<Colibri::Editbox>( mainWindow );
 		editbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		editbox0->setText( "You can edit this text" );
+		editbox0->setPlaceholder( "Tooltip visible when empty" );
 		editbox0->m_expand[0] = true;
 		layout->addCell( editbox0 );
 

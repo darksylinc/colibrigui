@@ -36,9 +36,9 @@
 											  uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
 												   floor(inPs.uvText.x)) ) );
 	@property( syntax == metal )
-		diffuseCol.w = midf_c( unpack_unorm4x8_to_float( glyphCol ).x );
+		diffuseCol.w *= midf_c( unpack_unorm4x8_to_float( glyphCol ).x );
 	@else
-		diffuseCol.w = midf_c( glyphCol );
+		diffuseCol.w *= midf_c( glyphCol );
 	@end
 
 	@property( ogre_version < 2003000 )
