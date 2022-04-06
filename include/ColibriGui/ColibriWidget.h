@@ -430,6 +430,9 @@ namespace Colibri
 		bool isKeyboardNavigable() const;
 
 		/// @copydoc m_childrenClickable
+		void setClickableChildren( bool clickableChildren );
+
+		/// @copydoc m_childrenClickable
 		bool hasClickableChildren() const;
 
 		/** Sets the next widget to go to. For example if calling
