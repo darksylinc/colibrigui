@@ -36,6 +36,7 @@ namespace Colibri
 		m_vertAlignment( TextVertAlignment::Natural ),
 		m_vertReadingDir( VertReadingDir::Disabled )
 	{
+		m_overrideSkinColour = true;
 		setVao( m_manager->getTextVao() );
 
 		ShaperManager *shaperManager = m_manager->getShaperManager();
