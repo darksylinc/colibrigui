@@ -319,7 +319,6 @@ namespace Colibri
 
 		float currentWidth = 0.0f;
 		uint32_t numLines = 1u;
-		uint32_t numColumns = 0u;
 		BmpGlyphVec::const_iterator itor = m_shapes.begin();
 		BmpGlyphVec::const_iterator endt = m_shapes.end();
 
@@ -329,7 +328,6 @@ namespace Colibri
 			{
 				maxSize.x = std::max( maxSize.x, currentWidth );
 				currentWidth = 0.0f;
-				numColumns = 0u;
 				++numLines;
 			}
 			else if( itor->isTab )

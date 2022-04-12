@@ -270,6 +270,17 @@ namespace Colibri
 		GridLocations::GridLocations getSwappedGridLocation(
 					GridLocations::GridLocations gridLoc ) const;
 
+		/** Sets a new default font size.
+			This takes effect for new Labels created and Labels that are
+			modified in a way they end up requerying ColibriManager::getDefaultFontSize26d6
+
+			Therefore it's advised to call this function as early as possible,
+			or recreate the entire UI when changed (i.e. typically in Options)
+		@param defaultFontSize
+			New default font size. Value is in 26d6 format i.e. use FontSize( 18.0f ).value26d6
+		*/
+		void setDefaultFontSize26d6( uint32_t defaultFontSize ) { m_defaultFontSize = defaultFontSize; }
+
 		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
 
 		/**	Sets the default skins to be used when creating a new widget.
