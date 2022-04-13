@@ -100,12 +100,8 @@ namespace Colibri
 		void addCell( LayoutCell *cell );
 		void clearCells();
 
-		/** Moves and resizes all cells to be layed out as either a row or a column.
-		@param isRootLayout
-			When true, this is the root layout and needs to apply its own margins
-			into its children because no one else will
-		*/
-		void layout( bool isRootLayout=false );
+		/// Moves and resizes all cells to be layed out as either a row or a column.
+		void layout();
 
 		virtual void notifyLayoutUpdated() colibri_override;
 
