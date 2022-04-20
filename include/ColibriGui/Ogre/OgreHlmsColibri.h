@@ -30,6 +30,10 @@ THE SOFTWARE.
 
 #include "OgreHlmsUnlit.h"
 
+#ifndef OGRE_MAKE_VERSION
+#	define OGRE_MAKE_VERSION( maj, min, patch ) ( ( maj << 16 ) | ( min << 8 ) | patch )
+#endif
+
 namespace Ogre
 {
 	class HlmsColibriDatablock;
@@ -58,7 +62,7 @@ namespace Ogre
 	protected:
 		TexBufferPacked *mGlyphAtlasBuffer;
 
-#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 		virtual void setupRootLayout( RootLayout &rootLayout );
 #endif
 

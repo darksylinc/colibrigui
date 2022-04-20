@@ -40,8 +40,8 @@ THE SOFTWARE.
 #include "OgreCamera.h"
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
-#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
-#include "OgreRootLayout.h"
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#	include "OgreRootLayout.h"
 #endif
 
 #include "OgreDescriptorSetTexture.h"
@@ -86,7 +86,7 @@ namespace Ogre
 	HlmsColibri::~HlmsColibri()
 	{
 	}
-#if OGRE_VERSION_MAJOR == 2 && OGRE_VERSION_MINOR >= 3
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	//-----------------------------------------------------------------------------------
 	void HlmsColibri::setupRootLayout( RootLayout &rootLayout )
 	{
