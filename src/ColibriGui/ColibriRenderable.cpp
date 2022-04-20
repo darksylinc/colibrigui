@@ -258,6 +258,12 @@ namespace Colibri
 								   apiObject.indirectBuffer->_getFinalBufferStart() +
 								   (apiObject.indirectDraw - apiObject.startIndirectDraw) );
 
+				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
+				{
+					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
+					--apiObject.drawCmd->numDraws;
+				}
+
 				CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
 				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers,
 											 vao, offset );
@@ -275,6 +281,12 @@ namespace Colibri
 			}
 			else if( bIsLabel && apiObject.lastDatablock != mHlmsDatablock )
 			{
+				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
+				{
+					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
+					--apiObject.drawCmd->numDraws;
+				}
+
 				//Text has arbitrary number of of vertices, thus we can't properly calculate the drawId
 				//and therefore the material ID unless we issue a start a new draw.
 				CbDrawCallStrip *drawCall = static_cast<CbDrawCallStrip*>( apiObject.drawCmd );
@@ -291,6 +303,12 @@ namespace Colibri
 			}
 			else if( apiObject.nextFirstVertex != firstVertex )
 			{
+				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
+				{
+					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
+					--apiObject.drawCmd->numDraws;
+				}
+
 				//If we're here, we're most likely rendering using breadth first.
 				//Unfortunately, breadth first breaks ordering, thus firstVertex jumped.
 				//Add a new draw without creating a new command

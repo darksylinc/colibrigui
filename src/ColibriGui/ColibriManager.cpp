@@ -1691,6 +1691,12 @@ namespace Colibri
 			++itor;
 		}
 
+		if( apiObjects.drawCountPtr && apiObjects.drawCountPtr->primCount == 0u )
+		{
+			// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
+			--apiObjects.drawCmd->numDraws;
+		}
+
 		if( m_vaoManager->supportsIndirectBuffers() )
 			m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
 
