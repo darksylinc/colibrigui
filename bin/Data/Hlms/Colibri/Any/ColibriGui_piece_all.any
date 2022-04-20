@@ -2,9 +2,19 @@
 
 @property( colibri_text )
 	@piece( custom_VStoPS )
-		float2 uvText @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
-		NO_INTERPOLATION_PREFIX uint glyphOffsetStart	NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
-		NO_INTERPOLATION_PREFIX uint pixelsPerRow		NO_INTERPOLATION_SUFFIX @property( syntax == hlsl ): TEXCOORD@counter(texcoord)@end ;
+		@property( hlms_pso_clip_distances < 4 )
+			INTERPOLANT( float4 emulatedClipDistance, @counter(texcoord) );
+		@end
+
+		INTERPOLANT( float2 uvText, @counter(texcoord) );
+		FLAT_INTERPOLANT( uint glyphOffsetStart, @counter(texcoord) );
+		FLAT_INTERPOLANT( uint pixelsPerRow, @counter(texcoord) );
+	@end
+@else
+	@property( hlms_pso_clip_distances < 4 )
+		@piece( custom_VStoPS )
+			INTERPOLANT( float4 emulatedClipDistance, @counter(texcoord) );
+		@end
 	@end
 @end
 

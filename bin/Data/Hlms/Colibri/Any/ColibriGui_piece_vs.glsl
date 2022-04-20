@@ -22,10 +22,14 @@
 
 	#define worldViewProj 1.0f
 
-	gl_ClipDistance[0] = normal.x;
-	gl_ClipDistance[1] = normal.y;
-	gl_ClipDistance[2] = normal.z;
-	gl_ClipDistance[3] = normal.w;
+	@property( hlms_pso_clip_distances >= 4 )
+		gl_ClipDistance[0] = normal.x;
+		gl_ClipDistance[1] = normal.y;
+		gl_ClipDistance[2] = normal.z;
+		gl_ClipDistance[3] = normal.w;
+	@else
+		outVs.emulatedClipDistance = normal;
+	@end
 
 	@property( colibri_text )
 		uint vertId = (uint(inVs_vertexId) - worldMaterialIdx[inVs_drawId].w) % 6u;

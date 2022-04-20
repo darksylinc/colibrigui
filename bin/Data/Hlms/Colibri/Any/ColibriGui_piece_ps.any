@@ -1,3 +1,15 @@
+@property( colibri_gui )
+	@piece( custom_ps_posMaterialLoad )
+		@property( hlms_pso_clip_distances < 4 )
+			if( inPs.emulatedClipDistance.x < 0 || inPs.emulatedClipDistance.y < 0 ||
+				inPs.emulatedClipDistance.z < 0 || inPs.emulatedClipDistance.w < 0 )
+			{
+				discard;
+			}
+		@end
+	@end
+@end
+
 @property( colibri_gui && colibri_text )
 
 @piece( custom_ps_uniformDeclaration )
