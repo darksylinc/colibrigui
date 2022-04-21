@@ -30,7 +30,7 @@ namespace Colibri
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
-		m_defaultBmpFontForRaster( 0 ),
+		m_defaultBmpFontForRaster( std::numeric_limits<uint16_t>::max() ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
 		m_vaoManager( 0 )
@@ -153,14 +153,15 @@ namespace Colibri
 		m_bmpFonts.push_back( bmpFont );
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::setDefaultBmpFontForRaster( BmpFont *colibrigui_nullable rasterFont )
-	{
-		m_defaultBmpFontForRaster = rasterFont;
-	}
+	void ShaperManager::setDefaultBmpFontForRaster( uint16_t font ) { m_defaultBmpFontForRaster = font; }
+	//-------------------------------------------------------------------------
+	uint16_t ShaperManager::getDefaultBmpFontForRasterIdx() const { return m_defaultBmpFontForRaster; }
 	//-------------------------------------------------------------------------
 	const BmpFont *ShaperManager::getDefaultBmpFontForRaster() const
 	{
-		return m_defaultBmpFontForRaster;
+		if( m_defaultBmpFontForRaster < m_bmpFonts.size() )
+			return m_bmpFonts[m_defaultBmpFontForRaster];
+		return nullptr;
 	}
 	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
@@ -285,8 +286,8 @@ namespace Colibri
 		newGlyph.ptSize		= ptSize;
 		newGlyph.bearingX	= static_cast<float>( slot->bitmap_left );
 		newGlyph.bearingY	= static_cast<float>( slot->bitmap_top );
-		newGlyph.width		= bDummy ? 0u : static_cast<uint16_t>( ftBitmap.width );
-		newGlyph.height		= bDummy ? 0u : static_cast<uint16_t>( ftBitmap.rows );
+		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
+		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
 		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
 		newGlyph.newlineSize= font->size->metrics.height / 64.0f;
 		newGlyph.regionUp = (float)font->size->metrics.ascender / (font->size->metrics.ascender -
@@ -627,7 +628,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	size_t CachedGlyph::getSizeBytes() const
 	{
+		if( isCodepointInPrivateArea() )
+			return 0u;
 		return this->width * this->height;
+	}
+	//-------------------------------------------------------------------------
+	bool CachedGlyph::isCodepointInPrivateArea() const
+	{
+		return codepoint >= 0xE000 && codepoint <= 0xF8FF;
 	}
 	/*bool CachedGlyph::operator < ( const CachedGlyph &other ) const
 	{

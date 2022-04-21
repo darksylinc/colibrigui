@@ -41,6 +41,8 @@ namespace Colibri
 
 		size_t getSizeBytes() const;
 
+		bool isCodepointInPrivateArea() const;
+
 		/*bool operator < ( const CachedGlyph &other ) const;
 		friend bool operator < ( const CachedGlyph &a, const uint64_t &codePointSize );
 		friend bool operator < ( const uint64_t &codePointSize, const CachedGlyph &b );*/
@@ -111,7 +113,7 @@ namespace Colibri
 		/// Unlike m_shapers, m_bmpFonts[0] is not repeated and is a strong ref
 		BmpFontVec m_bmpFonts;
 
-		BmpFont *m_defaultBmpFontForRaster;
+		uint16_t m_defaultBmpFontForRaster;
 
 		Ogre::TexBufferPacked * colibrigui_nullable m_glyphAtlasBuffer;
 		Ogre::HlmsColibri	* colibrigui_nullable m_hlms;
@@ -144,7 +146,9 @@ namespace Colibri
 
 		BmpFont *getBmpFont( size_t idx ) { return m_bmpFonts[idx]; }
 
-		void setDefaultBmpFontForRaster( BmpFont *colibrigui_nullable rasterFont );
+		void setDefaultBmpFontForRaster( uint16_t font );
+
+		uint16_t getDefaultBmpFontForRasterIdx() const;
 
 		const BmpFont *colibrigui_nullable getDefaultBmpFontForRaster() const;
 

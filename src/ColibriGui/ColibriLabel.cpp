@@ -85,8 +85,12 @@ namespace Colibri
 		if( itor != m_rasterHelper.end() )
 			return &itor->second;
 
+		ShaperManager *shaperManager = m_manager->getShaperManager();
+
 		RasterHelper helper;
 		helper.raster = m_manager->createWidget<LabelBmp>( this );
+		helper.raster->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
+		helper.raster->setFontSize( shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
 		helper.raster->m_rawMode = true;
 		helper.raster->setSize( m_size );
 		m_rasterHelper[state] = helper;
@@ -363,10 +367,11 @@ namespace Colibri
 					{
 						if( it->isPrivateArea )
 						{
-							font->renderCodepoint( it->glyph->codepoint, rasterHelper->raster->m_shapes );
+							font->renderCodepoint( it->glyph->codepoint,
+												   rasterHelper->raster->m_shapes );
 							BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes.back();
 
-							const uint32_t glyphIdx = uint32_t(it - m_shapes[state].begin());
+							const uint32_t glyphIdx = uint32_t( it - m_shapes[state].begin() );
 							const uint32_t rasterGlyphIdx =
 								uint32_t( rasterHelper->raster->m_shapes.size() - 1u );
 
@@ -375,13 +380,13 @@ namespace Colibri
 							if( float( it->glyph->width ) / float( it->glyph->height ) <=
 								float( bmpGlyph.width ) / float( bmpGlyph.height ) )
 							{
-								const float prop = float( bmpGlyph.width ) / float( it->glyph->width );
+								const float prop = float( it->glyph->width ) / float( bmpGlyph.width );
 								bmpGlyph.width = it->glyph->width;
 								bmpGlyph.height = uint16_t( std::round( bmpGlyph.height * prop ) );
 							}
 							else
 							{
-								const float prop = float( bmpGlyph.height ) / float( it->glyph->height );
+								const float prop = float( it->glyph->height ) / float( bmpGlyph.height );
 								bmpGlyph.height = it->glyph->height;
 								bmpGlyph.width = uint16_t( std::round( bmpGlyph.width * prop ) );
 							}
@@ -563,6 +568,14 @@ namespace Colibri
 			}
 		}
 
+		m_glyphsPlaced[state] = true;
+#if COLIBRIGUI_DEBUG_MEDIUM
+		m_glyphsAligned[state] = false;
+#endif
+
+		if( performAlignment )
+			alignGlyphs( state );
+
 		Label::RasterHelper *rasterHelper = getRasterHelper( state );
 		if( rasterHelper )
 		{
@@ -589,14 +602,6 @@ namespace Colibri
 				++itor;
 			}
 		}
-
-		m_glyphsPlaced[state] = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
-		m_glyphsAligned[state] = false;
-#endif
-
-		if( performAlignment )
-			alignGlyphs( state );
 	}
 	//-------------------------------------------------------------------------
 	void Label::alignGlyphs( States::States state )

@@ -171,8 +171,7 @@ namespace Colibri
 			{
 				Ogre::Vector2 topLeft =
 					currentTopLeft + Ogre::Vector2( bmpGlyph.xoffset, bmpGlyph.yoffset );
-				Ogre::Vector2 bottomRight =
-					topLeft + Ogre::Vector2( bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height );
+				Ogre::Vector2 bottomRight = topLeft + Ogre::Vector2( bmpGlyph.width, bmpGlyph.height );
 
 				topLeft *= fontScale;
 				bottomRight *= fontScale;
