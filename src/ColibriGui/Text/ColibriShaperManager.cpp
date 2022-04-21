@@ -24,12 +24,13 @@ namespace Colibri
 		m_ftLibrary( 0 ),
 		m_colibriManager( colibriManager ),
 		m_glyphAtlas( 0 ),
-		m_offsetPtr( 1 ), //The 1st byte is taken. See ShaperManager::updateGpuBuffers
+		m_offsetPtr( 1 ),  // The 1st byte is taken. See ShaperManager::updateGpuBuffers
 		m_atlasCapacity( 0 ),
 		m_preferredVertReadingDir( VertReadingDir::Disabled ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
+		m_defaultBmpFontForRaster( 0 ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
 		m_vaoManager( 0 )
@@ -152,6 +153,16 @@ namespace Colibri
 		m_bmpFonts.push_back( bmpFont );
 	}
 	//-------------------------------------------------------------------------
+	void ShaperManager::setDefaultBmpFontForRaster( BmpFont *colibrigui_nullable rasterFont )
+	{
+		m_defaultBmpFontForRaster = rasterFont;
+	}
+	//-------------------------------------------------------------------------
+	const BmpFont *ShaperManager::getDefaultBmpFontForRaster() const
+	{
+		return m_defaultBmpFontForRaster;
+	}
+	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
 	{
 		return m_colibriManager->getLogListener();
@@ -245,10 +256,10 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint,
-											 uint32_t ptSize, uint16_t fontIdx )
+	CachedGlyph *ShaperManager::createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+											 uint16_t fontIdx, bool bDummy )
 	{
-		FT_Error errorCode = FT_Load_Glyph( font, codepoint, FT_LOAD_DEFAULT );
+		FT_Error errorCode = FT_Load_Glyph( font, bDummy ? 0u : codepoint, FT_LOAD_DEFAULT );
 		if( colibrigui_unlikely( errorCode ) )
 		{
 			LogListener *log = getLogListener();
@@ -274,8 +285,8 @@ namespace Colibri
 		newGlyph.ptSize		= ptSize;
 		newGlyph.bearingX	= static_cast<float>( slot->bitmap_left );
 		newGlyph.bearingY	= static_cast<float>( slot->bitmap_top );
-		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
-		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
+		newGlyph.width		= bDummy ? 0u : static_cast<uint16_t>( ftBitmap.width );
+		newGlyph.height		= bDummy ? 0u : static_cast<uint16_t>( ftBitmap.rows );
 		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
 		newGlyph.newlineSize= font->size->metrics.height / 64.0f;
 		newGlyph.regionUp = (float)font->size->metrics.ascender / (font->size->metrics.ascender -
@@ -371,8 +382,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	const CachedGlyph* ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint,
-													uint32_t ptSize, uint16_t fontIdx )
+	const CachedGlyph *ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+													uint16_t fontIdx, bool bDummy )
 	{
 		CachedGlyph *retVal = 0;
 
@@ -382,7 +393,7 @@ namespace Colibri
 		if( itor != m_glyphCache.end() )
 			retVal = &itor->second;
 		else
-			retVal = createGlyph( font, codepoint, ptSize, fontIdx );
+			retVal = createGlyph( font, codepoint, ptSize, fontIdx, bDummy );
 
 		++retVal->refCount;
 
@@ -449,8 +460,10 @@ namespace Colibri
 	TextHorizAlignment::TextHorizAlignment ShaperManager::renderString(
 			const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
 			VertReadingDir::VertReadingDir vertReadingDir,
-			ShapedGlyphVec &outShapes )
+			ShapedGlyphVec &outShapes, bool &bOutHasPrivateUse )
 	{
+		bOutHasPrivateUse = false;
+
 		UBiDiDirection retVal = UBIDI_NEUTRAL;
 
 		UnicodeString uStr( utf8Str, (int32_t)richText.length );
@@ -531,7 +544,7 @@ namespace Colibri
 #endif
 			shaper->setFontSize( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx,
-								  logicalStart, outShapes, true );
+								  logicalStart, outShapes, bOutHasPrivateUse, true );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;

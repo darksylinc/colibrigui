@@ -33,6 +33,10 @@ namespace Colibri
 	{
 		bool           isNewline;
 		bool           isTab;
+		uint16_t       xoffset;
+		uint16_t       yoffset;
+		uint16_t       width;
+		uint16_t       height;
 		BmpChar const *bmpChar;
 	};
 
@@ -41,8 +45,8 @@ namespace Colibri
 	class BmpFont
 	{
 	protected:
-		std::string       m_textureName;
-		Ogre::TextureGpu *colibrigui_nullable m_fontTexture;
+		std::string                              m_textureName;
+		Ogre::TextureGpu *colibrigui_nullable    m_fontTexture;
 		Ogre::HlmsDatablock *colibrigui_nullable m_datablock;
 
 		FontSize m_fontSize;
@@ -66,7 +70,8 @@ namespace Colibri
 
 		void setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager );
 
-		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes );
+		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes ) const;
+		void renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const;
 
 		Ogre::Vector4 getInvResolution() const;
 

@@ -1,7 +1,9 @@
 
 #include "ColibriGui/ColibriLabel.h"
-#include "ColibriGui/Text/ColibriShaperManager.h"
 
+#include "ColibriGui/ColibriLabelBmp.h"
+#include "ColibriGui/Text/ColibriBmpFont.h"
+#include "ColibriGui/Text/ColibriShaperManager.h"
 #include "ColibriRenderable.inl"
 
 #include "OgreLwString.h"
@@ -10,14 +12,13 @@
 
 namespace Colibri
 {
-	inline void getCorners( const ShapedGlyph &shapedGlyph,
-							Ogre::Vector2 &topLeft, Ogre::Vector2 &bottomRight )
+	inline void getCorners( const ShapedGlyph &shapedGlyph, Ogre::Vector2 &topLeft,
+							Ogre::Vector2 &bottomRight )
 	{
 		topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
-								Ogre::Vector2( shapedGlyph.glyph->bearingX,
-											   -shapedGlyph.glyph->bearingY );
-		bottomRight = Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width,
-									 topLeft.y + shapedGlyph.glyph->height );
+				  Ogre::Vector2( shapedGlyph.glyph->bearingX, -shapedGlyph.glyph->bearingY );
+		bottomRight =
+			Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width, topLeft.y + shapedGlyph.glyph->height );
 	}
 
 	Label::Label( ColibriManager *manager ) :
@@ -40,13 +41,13 @@ namespace Colibri
 		setVao( m_manager->getTextVao() );
 
 		ShaperManager *shaperManager = m_manager->getShaperManager();
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 		{
 			m_actualHorizAlignment[i] = shaperManager->getDefaultTextDirection();
 			m_actualVertReadingDir[i] = VertReadingDir::Disabled;
 		}
 
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 		{
 			m_glyphsDirty[i] = false;
 			m_glyphsPlaced[i] = true;
@@ -59,7 +60,7 @@ namespace Colibri
 
 		setCustomParameter( 6373, Ogre::Vector4( 1.0f ) );
 
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 			m_stateInformation[i].materialName = ColibriManager::c_defaultTextDatablockNames[i];
 
 		Ogre::HlmsDatablock *datablock = manager->getDefaultTextDatablock()[States::Idle];
@@ -70,12 +71,43 @@ namespace Colibri
 		setDatablock( datablock );
 	}
 	//-------------------------------------------------------------------------
+	void Label::_destroy()
+	{
+		Renderable::_destroy();
+
+		// Rasters are children of us, so it will be destroyed by our super class
+		m_rasterHelper.clear();
+	}
+	//-------------------------------------------------------------------------
+	Label::RasterHelper *Label::createRasterHelper( States::States state )
+	{
+		std::map<States::States, RasterHelper>::iterator itor = m_rasterHelper.find( state );
+		if( itor != m_rasterHelper.end() )
+			return &itor->second;
+
+		RasterHelper helper;
+		helper.raster = m_manager->createWidget<LabelBmp>( this );
+		helper.raster->m_rawMode = true;
+		helper.raster->setSize( m_size );
+		m_rasterHelper[state] = helper;
+		auto insertedIt = m_rasterHelper.insert( { state, helper } );
+		return &insertedIt.first->second;
+	}
+	//-------------------------------------------------------------------------
+	Label::RasterHelper *Label::getRasterHelper( States::States state )
+	{
+		std::map<States::States, RasterHelper>::iterator itor = m_rasterHelper.find( state );
+		if( itor != m_rasterHelper.end() )
+			return &itor->second;
+		return nullptr;
+	}
+	//-------------------------------------------------------------------------
 	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
 	{
 		if( m_horizAlignment != horizAlignment )
 		{
 			m_horizAlignment = horizAlignment;
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				m_glyphsPlaced[i] = false;
 #if COLIBRIGUI_DEBUG_MEDIUM
@@ -90,7 +122,7 @@ namespace Colibri
 		if( m_vertAlignment != vertAlignment )
 		{
 			m_vertAlignment = vertAlignment;
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 				flagDirty( static_cast<States::States>( i ) );
 		}
 	}
@@ -105,15 +137,12 @@ namespace Colibri
 		if( m_vertReadingDir != vertReadingDir )
 		{
 			m_vertReadingDir = vertReadingDir;
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 				flagDirty( static_cast<States::States>( i ) );
 		}
 	}
 	//-------------------------------------------------------------------------
-	VertReadingDir::VertReadingDir Label::getVertReadingDir() const
-	{
-		return m_vertReadingDir;
-	}
+	VertReadingDir::VertReadingDir Label::getVertReadingDir() const { return m_vertReadingDir; }
 	//-------------------------------------------------------------------------
 	void Label::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
 								  const Ogre::Vector2 &shadowDisplace )
@@ -129,7 +158,7 @@ namespace Colibri
 		{
 			m_defaultFontSize = defaultFontSize;
 
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				if( m_richText[i].size() == 1u )
 				{
@@ -145,7 +174,7 @@ namespace Colibri
 		if( m_defaultFont != defaultFont )
 		{
 			m_defaultFont = defaultFont;
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				if( m_richText[i].size() == 1u )
 				{
@@ -200,7 +229,7 @@ namespace Colibri
 		{
 			bool invalidRtDetected = false;
 			RichTextVec::iterator itor = m_richText[state].begin();
-			RichTextVec::iterator end  = m_richText[state].end();
+			RichTextVec::iterator end = m_richText[state].end();
 
 			while( itor != end )
 			{
@@ -224,13 +253,15 @@ namespace Colibri
 			{
 				LogListener *log = m_manager->getLogListener();
 				char tmpBuffer[512];
-				Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer,
-																		   sizeof(tmpBuffer) ) );
+				Ogre::LwString errorMsg(
+					Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
 
 				errorMsg.clear();
-				errorMsg.a( "[Label::validateRichText] Rich Edit goes out of bounds. "
-							"We've corrected the situation. Text may not be drawn as expected."
-							" String: ", m_text[state].c_str() );
+				errorMsg.a(
+					"[Label::validateRichText] Rich Edit goes out of bounds. "
+					"We've corrected the situation. Text may not be drawn as expected."
+					" String: ",
+					m_text[state].c_str() );
 				log->log( errorMsg.c_str(), LogSeverity::Warning );
 			}
 		}
@@ -244,7 +275,7 @@ namespace Colibri
 
 		{
 			ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
-			ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
+			ShapedGlyphVec::const_iterator end = m_shapes[state].end();
 
 			while( itor != end )
 			{
@@ -257,10 +288,10 @@ namespace Colibri
 
 		validateRichText( state );
 
-		//See if we can reuse the results from another state. If so,
-		//we just need to copy them and increase the ref counts.
+		// See if we can reuse the results from another state. If so,
+		// we just need to copy them and increase the ref counts.
 		bool reusableFound = false;
-		for( size_t i=0; i<States::NumStates && !reusableFound; ++i )
+		for( size_t i = 0; i < States::NumStates && !reusableFound; ++i )
 		{
 			if( i != state && !m_glyphsDirty[i] )
 			{
@@ -275,7 +306,7 @@ namespace Colibri
 					m_actualVertReadingDir[state] = m_actualVertReadingDir[i];
 
 					ShapedGlyphVec::const_iterator itor = m_shapes[state].begin();
-					ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
+					ShapedGlyphVec::const_iterator end = m_shapes[state].end();
 
 					while( itor != end )
 					{
@@ -284,7 +315,7 @@ namespace Colibri
 					}
 
 					const size_t numRichText = m_richText[state].size();
-					for( size_t j=0; j<numRichText; ++j )
+					for( size_t j = 0; j < numRichText; ++j )
 					{
 						m_richText[state][j].glyphStart = m_richText[i][j].glyphStart;
 						m_richText[state][j].glyphEnd = m_richText[i][j].glyphEnd;
@@ -297,20 +328,67 @@ namespace Colibri
 
 		if( !reusableFound )
 		{
+			RasterHelper *rasterHelper = getRasterHelper( state );
+			if( rasterHelper )
+			{
+				rasterHelper->raster->m_shapes.clear();
+				rasterHelper->glyphToRasterGlyphIdx.clear();
+			}
+
 			bool alignmentUnknown = true;
 			TextHorizAlignment::TextHorizAlignment actualHorizAlignment = TextHorizAlignment::Mixed;
 
 			RichTextVec::iterator itor = m_richText[state].begin();
-			RichTextVec::iterator end  = m_richText[state].end();
+			RichTextVec::iterator end = m_richText[state].end();
 			while( itor != end )
 			{
 				RichText &richText = *itor;
 				richText.glyphStart = static_cast<uint32_t>( m_shapes[state].size() );
 				const char *utf8Str = m_text[state].c_str() + richText.offset;
+				bool bOutHasPrivateUse = false;
 				TextHorizAlignment::TextHorizAlignment actualDir = shaperManager->renderString(
 					utf8Str, richText, static_cast<uint32_t>( itor - m_richText[state].begin() ),
-					m_vertReadingDir, m_shapes[state] );
+					m_vertReadingDir, m_shapes[state], bOutHasPrivateUse );
 				richText.glyphEnd = static_cast<uint32_t>( m_shapes[state].size() );
+
+				if( bOutHasPrivateUse && shaperManager->getDefaultBmpFontForRaster() )
+				{
+					const BmpFont *font = shaperManager->getDefaultBmpFontForRaster();
+					rasterHelper = createRasterHelper( state );
+
+					ShapedGlyphVec::const_iterator it = m_shapes[state].begin() + richText.glyphStart;
+					ShapedGlyphVec::const_iterator en = m_shapes[state].begin() + richText.glyphEnd;
+
+					while( it != en )
+					{
+						if( it->isPrivateArea )
+						{
+							font->renderCodepoint( it->glyph->codepoint, rasterHelper->raster->m_shapes );
+							BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes.back();
+
+							const uint32_t glyphIdx = uint32_t(it - m_shapes[state].begin());
+							const uint32_t rasterGlyphIdx =
+								uint32_t( rasterHelper->raster->m_shapes.size() - 1u );
+
+							rasterHelper->glyphToRasterGlyphIdx.insert( { glyphIdx, rasterGlyphIdx } );
+
+							if( float( it->glyph->width ) / float( it->glyph->height ) <=
+								float( bmpGlyph.width ) / float( bmpGlyph.height ) )
+							{
+								const float prop = float( bmpGlyph.width ) / float( it->glyph->width );
+								bmpGlyph.width = it->glyph->width;
+								bmpGlyph.height = uint16_t( std::round( bmpGlyph.height * prop ) );
+							}
+							else
+							{
+								const float prop = float( bmpGlyph.height ) / float( it->glyph->height );
+								bmpGlyph.height = it->glyph->height;
+								bmpGlyph.width = uint16_t( std::round( bmpGlyph.width * prop ) );
+							}
+						}
+						++it;
+					}
+				}
 
 				if( alignmentUnknown )
 				{
@@ -363,14 +441,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Label::placeGlyphs( States::States state, bool performAlignment )
 	{
-		const Ogre::Vector2 bottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
-													m_manager->getCanvasSize());
+		const Ogre::Vector2 bottomRight =
+			m_size * ( 2.0f * m_manager->getHalfWindowResolution() / m_manager->getCanvasSize() );
 
 		Word nextWord;
-		memset( &nextWord, 0, sizeof(Word) );
+		memset( &nextWord, 0, sizeof( Word ) );
 
 		const float vertReadDirSign =
-				m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ? -1.0f : 1.0f;
+			m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ? -1.0f : 1.0f;
 
 		float largestHeight = findLineMaxHeight( m_shapes[state].begin(), state );
 		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
@@ -386,47 +464,47 @@ namespace Colibri
 			{
 				if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 				{
-					float caretAtEndOfWord = nextWord.endCaretPos.x - nextWord.lastAdvance.x +
-											 nextWord.lastCharWidth;
+					float caretAtEndOfWord =
+						nextWord.endCaretPos.x - nextWord.lastAdvance.x + nextWord.lastCharWidth;
 					float distBetweenWords = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
 					if( caretAtEndOfWord > bottomRight.x &&
-						(distBetweenWords <= bottomRight.x || multipleWordsInLine) &&
+						( distBetweenWords <= bottomRight.x || multipleWordsInLine ) &&
 						!m_shapes[state][nextWord.offset].isNewline )
 					{
 						float caretReturn = nextWord.startCaretPos.x;
 						float wordLength = nextWord.endCaretPos.x - nextWord.startCaretPos.x;
 
-						//Return to left.
+						// Return to left.
 						nextWord.startCaretPos.x -= caretReturn;
-						nextWord.endCaretPos.x	 -= caretReturn;
-						//Calculate alignment
-						nextWord.startCaretPos.x	= 0.0f;
-						nextWord.startCaretPos.y	+= largestHeight;
-						nextWord.endCaretPos.x		= nextWord.startCaretPos.x + wordLength;
-						nextWord.endCaretPos.y		= nextWord.startCaretPos.y;
+						nextWord.endCaretPos.x -= caretReturn;
+						// Calculate alignment
+						nextWord.startCaretPos.x = 0.0f;
+						nextWord.startCaretPos.y += largestHeight;
+						nextWord.endCaretPos.x = nextWord.startCaretPos.x + wordLength;
+						nextWord.endCaretPos.y = nextWord.startCaretPos.y;
 						multipleWordsInLine = false;
 					}
 				}
 				else
 				{
-					float caretAtEndOfWord = nextWord.endCaretPos.y - nextWord.lastAdvance.y +
-											 nextWord.lastCharWidth;
+					float caretAtEndOfWord =
+						nextWord.endCaretPos.y - nextWord.lastAdvance.y + nextWord.lastCharWidth;
 					float distBetweenWords = nextWord.endCaretPos.y - nextWord.startCaretPos.y;
 					if( caretAtEndOfWord > bottomRight.y &&
-						(distBetweenWords <= bottomRight.y || multipleWordsInLine) &&
+						( distBetweenWords <= bottomRight.y || multipleWordsInLine ) &&
 						!m_shapes[state][nextWord.offset].isNewline )
 					{
 						float caretReturn = nextWord.startCaretPos.y;
 						float wordLength = nextWord.endCaretPos.y - nextWord.startCaretPos.y;
 
-						//Return to top.
+						// Return to top.
 						nextWord.startCaretPos.y -= caretReturn;
-						nextWord.endCaretPos.y	 -= caretReturn;
-						//Calculate alignment
+						nextWord.endCaretPos.y -= caretReturn;
+						// Calculate alignment
 						nextWord.startCaretPos.x += largestHeight * vertReadDirSign;
-						nextWord.startCaretPos.y	= 0.0f;
-						nextWord.endCaretPos.x		= nextWord.startCaretPos.x;
-						nextWord.endCaretPos.y		= nextWord.startCaretPos.y + wordLength;
+						nextWord.startCaretPos.y = 0.0f;
+						nextWord.endCaretPos.x = nextWord.startCaretPos.x;
+						nextWord.endCaretPos.y = nextWord.startCaretPos.y + wordLength;
 						multipleWordsInLine = false;
 					}
 				}
@@ -437,7 +515,7 @@ namespace Colibri
 			Ogre::Vector2 caretPos = nextWord.startCaretPos;
 
 			ShapedGlyphVec::iterator itor = m_shapes[state].begin() + ptrdiff_t( nextWord.offset );
-			ShapedGlyphVec::iterator end  = itor + ptrdiff_t( nextWord.length );
+			ShapedGlyphVec::iterator end = itor + ptrdiff_t( nextWord.length );
 
 			while( itor != end )
 			{
@@ -454,33 +532,60 @@ namespace Colibri
 					shapedGlyph.caretPos = caretPos;
 					caretPos += shapedGlyph.advance;
 				}
-				else/* if( shapedGlyph.isNewline )*/
+				else /* if( shapedGlyph.isNewline )*/
 				{
 					shapedGlyph.caretPos = caretPos;
 					largestHeight = findLineMaxHeight( itor + 1u, state );
 
 					if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 					{
-						//Return to left. Newlines are zero width.
+						// Return to left. Newlines are zero width.
 						nextWord.startCaretPos.x = 0.0f;
-						nextWord.endCaretPos.x	 = 0.0f;
-						//Calculate alignment
-						nextWord.startCaretPos.x	= 0.0f;
-						nextWord.startCaretPos.y	+= largestHeight;
+						nextWord.endCaretPos.x = 0.0f;
+						// Calculate alignment
+						nextWord.startCaretPos.x = 0.0f;
+						nextWord.startCaretPos.y += largestHeight;
 					}
 					else
 					{
-						//Return to top. Newlines are zero width.
+						// Return to top. Newlines are zero width.
 						nextWord.startCaretPos.y = 0.0f;
-						nextWord.endCaretPos.y	 = 0.0f;
-						//Calculate alignment
-						nextWord.startCaretPos.x	+= largestHeight * vertReadDirSign;
-						nextWord.startCaretPos.y	= 0.0f;
+						nextWord.endCaretPos.y = 0.0f;
+						// Calculate alignment
+						nextWord.startCaretPos.x += largestHeight * vertReadDirSign;
+						nextWord.startCaretPos.y = 0.0f;
 					}
-					nextWord.endCaretPos		= nextWord.startCaretPos;
+					nextWord.endCaretPos = nextWord.startCaretPos;
 					multipleWordsInLine = false;
 				}
 
+				++itor;
+			}
+		}
+
+		Label::RasterHelper *rasterHelper = getRasterHelper( state );
+		if( rasterHelper )
+		{
+			std::map<uint32_t, uint32_t>::const_iterator itor =
+				rasterHelper->glyphToRasterGlyphIdx.begin();
+			std::map<uint32_t, uint32_t>::const_iterator endt =
+				rasterHelper->glyphToRasterGlyphIdx.end();
+
+			while( itor != endt )
+			{
+				const ShapedGlyph &shapedGlyph = m_shapes[state][itor->first];
+
+				Ogre::Vector2 topLeft, bottomRight;
+				getCorners( shapedGlyph, topLeft, bottomRight );
+				BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes[itor->second];
+
+				// Because the BMP glyph may have different dimensions than the surrogate glyph
+				// from freetype, ensure it is centered.
+				topLeft =
+					( ( topLeft + bottomRight ) - Ogre::Vector2( bmpGlyph.width, bmpGlyph.height ) ) *
+					0.5f;
+				bmpGlyph.xoffset = static_cast<uint16_t>( topLeft.x );
+				bmpGlyph.yoffset = static_cast<uint16_t>( topLeft.y );
 				++itor;
 			}
 		}
@@ -506,44 +611,44 @@ namespace Colibri
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
 							   "Calling alignGlyphs twice! updateGlyphs not called?" );
-		COLIBRI_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
+		COLIBRI_ASSERT_LOW( ( m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
+							  m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
+							  m_actualHorizAlignment[state] == TextHorizAlignment::Center ) &&
 							"m_actualHorizAlignment not set! updateGlyphs not called?" );
 		COLIBRI_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
 
 		if( m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
 			m_vertAlignment == TextVertAlignment::Top )
 		{
-			//Nothing to align
+			// Nothing to align
 			return;
 		}
 
 		float lineWidth = 0;
 		float prevCaretY = 0;
 
-		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
-														  m_manager->getCanvasSize());
+		const Ogre::Vector2 widgetBottomRight =
+			m_size * ( 2.0f * m_manager->getHalfWindowResolution() / m_manager->getCanvasSize() );
 
-		//To gather width & height
+		// To gather width & height
 		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
 		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
 		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
-		ShapedGlyphVec::iterator end  = m_shapes[state].end();
+		ShapedGlyphVec::iterator endt = m_shapes[state].end();
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
 			getCorners( shapedGlyph, topLeft, bottomRight );
 
-			if( (shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y) &&
+			if( ( shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y ) &&
 				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 			{
-				//Displace horizontally, the line we just were in
+				// Displace horizontally, the line we just were in
 				float newLeft = widgetBottomRight.x - lineWidth;
 				if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
 					newLeft *= 0.5f;
@@ -554,8 +659,8 @@ namespace Colibri
 					++lineBegin;
 				}
 
-				prevCaretY	= shapedGlyph.caretPos.y;
-				lineWidth	= 0;
+				prevCaretY = shapedGlyph.caretPos.y;
+				lineWidth = 0;
 			}
 
 			lineWidth = std::max( lineWidth, bottomRight.x );
@@ -570,19 +675,19 @@ namespace Colibri
 		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
 		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
 
-		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
-		//that there is equal distance from m_position to the first glyph, and the last glyph to
-		//m_position + m_size
+		// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		// that there is equal distance from m_position to the first glyph, and the last glyph to
+		// m_position + m_size
 		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 		{
-			//Displace horizontally, last line
+			// Displace horizontally, last line
 			float newLeft = widgetBottomRight.x - lineWidth;
 			if( m_actualHorizAlignment[state] == TextHorizAlignment::Center )
 				newLeft *= 0.5f;
 
-			while( lineBegin != end )
+			while( lineBegin != endt )
 			{
 				lineBegin->caretPos.x += newLeft;
 				++lineBegin;
@@ -591,13 +696,13 @@ namespace Colibri
 
 		if( m_vertAlignment != TextVertAlignment::Top && m_vertAlignment != TextVertAlignment::Natural )
 		{
-			//Iterate again, to vertically displace the entire string
+			// Iterate again, to vertically displace the entire string
 			float newTop = widgetBottomRight.y - maxWidthHeight.y;
 			if( m_vertAlignment == TextVertAlignment::Center )
 				newTop *= 0.5f;
 
 			itor = m_shapes[state].begin();
-			while( itor != end )
+			while( itor != endt )
 			{
 				itor->caretPos.y += newTop;
 				++itor;
@@ -613,12 +718,12 @@ namespace Colibri
 	{
 		COLIBRI_ASSERT_MEDIUM( !m_glyphsAligned[state] &&
 							   "Calling alignGlyphs twice! updateGlyphs not called?" );
-		COLIBRI_ASSERT_LOW( (m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
-							 m_actualHorizAlignment[state] == TextHorizAlignment::Center) &&
+		COLIBRI_ASSERT_LOW( ( m_actualHorizAlignment[state] == TextHorizAlignment::Left ||
+							  m_actualHorizAlignment[state] == TextHorizAlignment::Right ||
+							  m_actualHorizAlignment[state] == TextHorizAlignment::Center ) &&
 							"m_actualHorizAlignment not set! updateGlyphs not called?" );
-		COLIBRI_ASSERT_LOW( (m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ||
-							 m_actualVertReadingDir[state] == VertReadingDir::ForceTTBLTR) &&
+		COLIBRI_ASSERT_LOW( ( m_actualVertReadingDir[state] == VertReadingDir::ForceTTB ||
+							  m_actualVertReadingDir[state] == VertReadingDir::ForceTTBLTR ) &&
 							"m_actualVertReadingDir not set! updateGlyphs not called?" );
 		COLIBRI_ASSERT_LOW( m_glyphsPlaced[state] && "Did you call placeGlyphs?" );
 
@@ -626,35 +731,35 @@ namespace Colibri
 			m_actualHorizAlignment[state] == TextHorizAlignment::Left &&
 			m_actualVertReadingDir[state] == VertReadingDir::ForceTTBLTR )
 		{
-			//Nothing to align
+			// Nothing to align
 			return;
 		}
 
 		float lineWidth = 0;
 		float prevCaretX = 0;
 
-		const Ogre::Vector2 widgetBottomRight = m_size * (2.0f * m_manager->getHalfWindowResolution() /
-														  m_manager->getCanvasSize());
+		const Ogre::Vector2 widgetBottomRight =
+			m_size * ( 2.0f * m_manager->getHalfWindowResolution() / m_manager->getCanvasSize() );
 
-		//To gather width & height
+		// To gather width & height
 		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
 		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator lineBegin = m_shapes[state].begin();
 		ShapedGlyphVec::iterator itor = m_shapes[state].begin();
-		ShapedGlyphVec::iterator end  = m_shapes[state].end();
+		ShapedGlyphVec::iterator endt = m_shapes[state].end();
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
 			getCorners( shapedGlyph, topLeft, bottomRight );
 
-			if( (shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x) &&
+			if( ( shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x ) &&
 				m_vertAlignment > TextVertAlignment::Top )
 			{
-				//Displace vertically, the line we just were in
+				// Displace vertically, the line we just were in
 				float newTop = widgetBottomRight.y - lineWidth;
 				if( m_vertAlignment == TextVertAlignment::Center )
 					newTop *= 0.5f;
@@ -665,8 +770,8 @@ namespace Colibri
 					++lineBegin;
 				}
 
-				prevCaretX	= shapedGlyph.caretPos.x;
-				lineWidth	= 0;
+				prevCaretX = shapedGlyph.caretPos.x;
+				lineWidth = 0;
 			}
 
 			lineWidth = std::max( lineWidth, bottomRight.y );
@@ -678,12 +783,12 @@ namespace Colibri
 
 		if( m_vertAlignment > TextVertAlignment::Top )
 		{
-			//Displace vertically, last line
+			// Displace vertically, last line
 			float newTop = widgetBottomRight.y - lineWidth;
 			if( m_vertAlignment == TextVertAlignment::Center )
 				newTop *= 0.5f;
 
-			while( lineBegin != end )
+			while( lineBegin != endt )
 			{
 				lineBegin->caretPos.y += newTop;
 				++lineBegin;
@@ -695,27 +800,30 @@ namespace Colibri
 		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
 		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
 
-		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
-		//that there is equal distance from m_position to the first glyph, and the last glyph to
-		//m_position + m_size
+		// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		// that there is equal distance from m_position to the first glyph, and the last glyph to
+		// m_position + m_size
 		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left ||
 			m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
 		{
-			//Iterate again, to horizontally displace the entire string
+			// Iterate again, to horizontally displace the entire string
 			float newLeft = widgetBottomRight.x - maxWidthHeight.x;
 			if( m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
 			{
 				switch( m_actualHorizAlignment[state] )
 				{
 				case TextHorizAlignment::Left:
-					newLeft = maxWidthHeight.x; break;
+					newLeft = maxWidthHeight.x;
+					break;
 				case TextHorizAlignment::Center:
-					newLeft = (widgetBottomRight.x + maxWidthHeight.x) * 0.5f; break;
+					newLeft = ( widgetBottomRight.x + maxWidthHeight.x ) * 0.5f;
+					break;
 				case TextHorizAlignment::Natural:
 				case TextHorizAlignment::Right:
-					newLeft = widgetBottomRight.x; break;
+					newLeft = widgetBottomRight.x;
+					break;
 				}
 			}
 			else
@@ -724,16 +832,19 @@ namespace Colibri
 				{
 				case TextHorizAlignment::Natural:
 				case TextHorizAlignment::Left:
-					newLeft = 0.0f; break;
+					newLeft = 0.0f;
+					break;
 				case TextHorizAlignment::Center:
-					newLeft = (widgetBottomRight.x - maxWidthHeight.x) * 0.5f; break;
+					newLeft = ( widgetBottomRight.x - maxWidthHeight.x ) * 0.5f;
+					break;
 				case TextHorizAlignment::Right:
-					newLeft = widgetBottomRight.x - maxWidthHeight.x; break;
+					newLeft = widgetBottomRight.x - maxWidthHeight.x;
+					break;
 				}
 			}
 
 			itor = m_shapes[state].begin();
-			while( itor != end )
+			while( itor != endt )
 			{
 				itor->caretPos.x += newLeft;
 				++itor;
@@ -745,82 +856,66 @@ namespace Colibri
 #endif
 	}
 	//-------------------------------------------------------------------------
-	inline void Label::addQuad( GlyphVertex * RESTRICT_ALIAS vertexBuffer,
-								Ogre::Vector2 topLeft,
-								Ogre::Vector2 bottomRight,
-								uint16_t glyphWidth,
-								uint16_t glyphHeight,
-								uint32_t rgbaColour,
-								Ogre::Vector2 parentDerivedTL,
-								Ogre::Vector2 parentDerivedBR,
-								Ogre::Vector2 invSize,
-								uint32_t offset,
-								float canvasAspectRatio,
-								float invCanvasAspectRatio,
+	inline void Label::addQuad( GlyphVertex *RESTRICT_ALIAS vertexBuffer, Ogre::Vector2 topLeft,
+								Ogre::Vector2 bottomRight, uint16_t glyphWidth, uint16_t glyphHeight,
+								uint32_t rgbaColour, Ogre::Vector2 parentDerivedTL,
+								Ogre::Vector2 parentDerivedBR, Ogre::Vector2 invSize, uint32_t offset,
+								float canvasAspectRatio, float invCanvasAspectRatio,
 								Matrix2x3 derivedRot )
 	{
 		TODO_this_is_a_workaround_neg_y;
 		Ogre::Vector2 tmp2d;
 
-		#define COLIBRI_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, \
-									clipDistanceRight, clipDistanceBottom ) \
-			tmp2d = Widget::mul( derivedRot, _x, _y * invCanvasAspectRatio ); \
-			tmp2d.y *= canvasAspectRatio; \
-			vertexBuffer->x = tmp2d.x; \
-			vertexBuffer->y = -tmp2d.y; \
-			vertexBuffer->width = glyphWidth; \
-			vertexBuffer->height = glyphHeight; \
-			vertexBuffer->offset = offset;\
-			vertexBuffer->rgbaColour = rgbaColour; \
-			vertexBuffer->clipDistance[Borders::Top]	= clipDistanceTop; \
-			vertexBuffer->clipDistance[Borders::Left]	= clipDistanceLeft; \
-			vertexBuffer->clipDistance[Borders::Right]	= clipDistanceRight; \
-			vertexBuffer->clipDistance[Borders::Bottom]	= clipDistanceBottom; \
-			++vertexBuffer
+#define COLIBRI_ADD_VERTEX( _x, _y, _u, _v, clipDistanceTop, clipDistanceLeft, clipDistanceRight, \
+							clipDistanceBottom ) \
+	tmp2d = Widget::mul( derivedRot, _x, _y * invCanvasAspectRatio ); \
+	tmp2d.y *= canvasAspectRatio; \
+	vertexBuffer->x = tmp2d.x; \
+	vertexBuffer->y = -tmp2d.y; \
+	vertexBuffer->width = glyphWidth; \
+	vertexBuffer->height = glyphHeight; \
+	vertexBuffer->offset = offset; \
+	vertexBuffer->rgbaColour = rgbaColour; \
+	vertexBuffer->clipDistance[Borders::Top] = clipDistanceTop; \
+	vertexBuffer->clipDistance[Borders::Left] = clipDistanceLeft; \
+	vertexBuffer->clipDistance[Borders::Right] = clipDistanceRight; \
+	vertexBuffer->clipDistance[Borders::Bottom] = clipDistanceBottom; \
+	++vertexBuffer
 
-		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y,
-							0u, 0u,
-							(topLeft.y - parentDerivedTL.y) * invSize.y,
-							(topLeft.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - topLeft.x) * invSize.x,
-							(parentDerivedBR.y - topLeft.y) * invSize.y );
+		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y, 0u, 0u, ( topLeft.y - parentDerivedTL.y ) * invSize.y,
+							( topLeft.x - parentDerivedTL.x ) * invSize.x,
+							( parentDerivedBR.x - topLeft.x ) * invSize.x,
+							( parentDerivedBR.y - topLeft.y ) * invSize.y );
 
-		COLIBRI_ADD_VERTEX( topLeft.x, bottomRight.y,
-							0u, glyphHeight,
-							(bottomRight.y - parentDerivedTL.y) * invSize.y,
-							(topLeft.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - topLeft.x) * invSize.x,
-							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+		COLIBRI_ADD_VERTEX(
+			topLeft.x, bottomRight.y, 0u, glyphHeight, ( bottomRight.y - parentDerivedTL.y ) * invSize.y,
+			( topLeft.x - parentDerivedTL.x ) * invSize.x, ( parentDerivedBR.x - topLeft.x ) * invSize.x,
+			( parentDerivedBR.y - bottomRight.y ) * invSize.y );
 
-		COLIBRI_ADD_VERTEX( bottomRight.x, bottomRight.y,
-							glyphWidth, glyphHeight,
-							(bottomRight.y - parentDerivedTL.y) * invSize.y,
-							(bottomRight.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - bottomRight.x) * invSize.x,
-							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+		COLIBRI_ADD_VERTEX( bottomRight.x, bottomRight.y, glyphWidth, glyphHeight,
+							( bottomRight.y - parentDerivedTL.y ) * invSize.y,
+							( bottomRight.x - parentDerivedTL.x ) * invSize.x,
+							( parentDerivedBR.x - bottomRight.x ) * invSize.x,
+							( parentDerivedBR.y - bottomRight.y ) * invSize.y );
 
-		COLIBRI_ADD_VERTEX( bottomRight.x, bottomRight.y,
-							glyphWidth, glyphHeight,
-							(bottomRight.y - parentDerivedTL.y) * invSize.y,
-							(bottomRight.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - bottomRight.x) * invSize.x,
-							(parentDerivedBR.y - bottomRight.y) * invSize.y );
+		COLIBRI_ADD_VERTEX( bottomRight.x, bottomRight.y, glyphWidth, glyphHeight,
+							( bottomRight.y - parentDerivedTL.y ) * invSize.y,
+							( bottomRight.x - parentDerivedTL.x ) * invSize.x,
+							( parentDerivedBR.x - bottomRight.x ) * invSize.x,
+							( parentDerivedBR.y - bottomRight.y ) * invSize.y );
 
-		COLIBRI_ADD_VERTEX( bottomRight.x, topLeft.y,
-							glyphWidth, 0u,
-							(topLeft.y - parentDerivedTL.y) * invSize.y,
-							(bottomRight.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - bottomRight.x) * invSize.x,
-							(parentDerivedBR.y - topLeft.y) * invSize.y );
+		COLIBRI_ADD_VERTEX( bottomRight.x, topLeft.y, glyphWidth, 0u,
+							( topLeft.y - parentDerivedTL.y ) * invSize.y,
+							( bottomRight.x - parentDerivedTL.x ) * invSize.x,
+							( parentDerivedBR.x - bottomRight.x ) * invSize.x,
+							( parentDerivedBR.y - topLeft.y ) * invSize.y );
 
-		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y,
-							0u, 0u,
-							(topLeft.y - parentDerivedTL.y) * invSize.y,
-							(topLeft.x - parentDerivedTL.x) * invSize.x,
-							(parentDerivedBR.x - topLeft.x) * invSize.x,
-							(parentDerivedBR.y - topLeft.y) * invSize.y );
+		COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y, 0u, 0u, ( topLeft.y - parentDerivedTL.y ) * invSize.y,
+							( topLeft.x - parentDerivedTL.x ) * invSize.x,
+							( parentDerivedBR.x - topLeft.x ) * invSize.x,
+							( parentDerivedBR.y - topLeft.y ) * invSize.y );
 
-		#undef COLIBRI_ADD_VERTEX
+#undef COLIBRI_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
 	bool Label::findNextWord( Word &inOutWord, States::States state ) const
@@ -833,40 +928,40 @@ namespace Colibri
 		if( word.offset == m_shapes[state].size() ||
 			word.offset + word.length == m_shapes[state].size() )
 		{
-			word.length			= 0;
-			word.lastAdvance	= 0;
-			word.lastCharWidth	= 0;
-			//word.endCaretPos		= Ogre::Vector2::ZERO;
+			word.length = 0;
+			word.lastAdvance = 0;
+			word.lastCharWidth = 0;
+			// word.endCaretPos		= Ogre::Vector2::ZERO;
 			return false;
 		}
 
 		word.offset = word.offset + word.length;
 
 		ShapedGlyphVec::const_iterator itor = m_shapes[state].begin() + ptrdiff_t( word.offset );
-		ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
+		ShapedGlyphVec::const_iterator endt = m_shapes[state].end();
 
 		ShapedGlyph firstGlyph = *itor;
-		word.startCaretPos	= word.endCaretPos;
-		word.endCaretPos	+= firstGlyph.advance;
-		word.lastAdvance	= firstGlyph.advance;
+		word.startCaretPos = word.endCaretPos;
+		word.endCaretPos += firstGlyph.advance;
+		word.lastAdvance = firstGlyph.advance;
 		if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
-			word.lastCharWidth	= firstGlyph.glyph->width;
+			word.lastCharWidth = firstGlyph.glyph->width;
 		else
-			word.lastCharWidth	= firstGlyph.glyph->height;
-		const bool isRtl	= firstGlyph.isRtl;
+			word.lastCharWidth = firstGlyph.glyph->height;
+		const bool isRtl = firstGlyph.isRtl;
 		++itor;
 
 		if( !firstGlyph.isNewline && !firstGlyph.isWordBreaker )
 		{
-			while( itor != end && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
+			while( itor != endt && !itor->isNewline && !itor->isWordBreaker && itor->isRtl == isRtl )
 			{
 				const ShapedGlyph &shapedGlyph = *itor;
-				word.endCaretPos	+= shapedGlyph.advance;
-				word.lastAdvance	= shapedGlyph.advance;
+				word.endCaretPos += shapedGlyph.advance;
+				word.lastAdvance = shapedGlyph.advance;
 				if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
-					word.lastCharWidth	= shapedGlyph.glyph->width;
+					word.lastCharWidth = shapedGlyph.glyph->width;
 				else
-					word.lastCharWidth	= shapedGlyph.glyph->height;
+					word.lastCharWidth = shapedGlyph.glyph->height;
 				++itor;
 			}
 		}
@@ -874,17 +969,15 @@ namespace Colibri
 		{
 			if( m_actualVertReadingDir[state] == VertReadingDir::Disabled )
 			{
-				word.endCaretPos.x = ceilf( (word.startCaretPos.x +
-											 firstGlyph.advance.x * 0.25f) /
-											(firstGlyph.advance.x * 2.0f) ) *
-									 (firstGlyph.advance.x * 2.0f);
+				word.endCaretPos.x = ceilf( ( word.startCaretPos.x + firstGlyph.advance.x * 0.25f ) /
+											( firstGlyph.advance.x * 2.0f ) ) *
+									 ( firstGlyph.advance.x * 2.0f );
 			}
 			else
 			{
-				word.endCaretPos.y = ceilf( (word.startCaretPos.y +
-											 firstGlyph.advance.y * 0.25f) /
-											(firstGlyph.advance.y * 4.0f) ) *
-									 (firstGlyph.advance.y * 4.0f);
+				word.endCaretPos.y = ceilf( ( word.startCaretPos.y + firstGlyph.advance.y * 0.25f ) /
+											( firstGlyph.advance.y * 4.0f ) ) *
+									 ( firstGlyph.advance.y * 4.0f );
 			}
 		}
 
@@ -896,41 +989,38 @@ namespace Colibri
 		return word.length != 0;
 	}
 	//-------------------------------------------------------------------------
-	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start,
-									States::States state ) const
+	float Label::findLineMaxHeight( ShapedGlyphVec::const_iterator start, States::States state ) const
 	{
-		COLIBRI_ASSERT_LOW( start >= m_shapes[state].begin() &&
-							start <= m_shapes[state].end() );
+		COLIBRI_ASSERT_LOW( start >= m_shapes[state].begin() && start <= m_shapes[state].end() );
 
 		float largestHeight = 0;
 
 		ShapedGlyphVec::const_iterator itor = start;
-		ShapedGlyphVec::const_iterator end  = m_shapes[state].end();
-		while( itor != end && !itor->isNewline )
+		ShapedGlyphVec::const_iterator endt = m_shapes[state].end();
+		while( itor != endt && !itor->isNewline )
 		{
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 			++itor;
 		}
 
-		//The newline itself has its own height, make sure it's considered
-		if( itor != end )
+		// The newline itself has its own height, make sure it's considered
+		if( itor != endt )
 			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
 
 		return largestHeight;
 	}
 	//-------------------------------------------------------------------------
-	GlyphVertex* Label::fillBackground( GlyphVertex * RESTRICT_ALIAS textVertBuffer,
+	GlyphVertex *Label::fillBackground( GlyphVertex *RESTRICT_ALIAS textVertBuffer,
 										const Ogre::Vector2 halfWindowRes,
 										const Ogre::Vector2 invWindowRes,
 										const Ogre::Vector2 parentDerivedTL,
-										const Ogre::Vector2 parentDerivedBR,
-										const bool isHorizontal )
+										const Ogre::Vector2 parentDerivedBR, const bool isHorizontal )
 	{
-		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
+		const Ogre::Vector2 invSize = 1.0f / ( parentDerivedBR - parentDerivedTL );
 
 		// Snap position to pixels
 		Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
-		derivedTopLeft = (derivedTopLeft + 1.0f) * halfWindowRes;
+		derivedTopLeft = ( derivedTopLeft + 1.0f ) * halfWindowRes;
 		derivedTopLeft.x = roundf( derivedTopLeft.x );
 		derivedTopLeft.y = roundf( derivedTopLeft.y );
 		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
@@ -952,15 +1042,15 @@ namespace Colibri
 				const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundSize;
 
 				float lineHeight = 0;
-				float mostTop	= std::numeric_limits<float>::max();
-				float mostLeft	= std::numeric_limits<float>::max();
-				float mostRight	= -std::numeric_limits<float>::max();
-				float mostBottom= -std::numeric_limits<float>::max();
+				float mostTop = std::numeric_limits<float>::max();
+				float mostLeft = std::numeric_limits<float>::max();
+				float mostRight = -std::numeric_limits<float>::max();
+				float mostBottom = -std::numeric_limits<float>::max();
 
-				ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() +
-													  itRichText->glyphStart;
-				ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].begin() +
-													  itRichText->glyphEnd;
+				ShapedGlyphVec::const_iterator itor =
+					m_shapes[m_currentState].begin() + itRichText->glyphStart;
+				ShapedGlyphVec::const_iterator end =
+					m_shapes[m_currentState].begin() + itRichText->glyphEnd;
 
 				if( itor != end )
 				{
@@ -975,8 +1065,8 @@ namespace Colibri
 					const ShapedGlyph &shapedGlyph = *itor;
 
 					const bool changesLine = shapedGlyph.isNewline ||
-											 (prevCaretY != shapedGlyph.caretPos.y && isHorizontal) ||
-											 (prevCaretY != shapedGlyph.caretPos.x && !isHorizontal);
+											 ( prevCaretY != shapedGlyph.caretPos.y && isHorizontal ) ||
+											 ( prevCaretY != shapedGlyph.caretPos.x && !isHorizontal );
 
 					if( !shapedGlyph.isNewline && !changesLine )
 					{
@@ -985,20 +1075,18 @@ namespace Colibri
 						mostBottom = std::max( mostBottom, shapedGlyph.caretPos.y );
 						if( isHorizontal )
 						{
-							mostLeft = std::min( mostLeft, shapedGlyph.caretPos.x +
-												 shapedGlyph.offset.x +
-												 shapedGlyph.glyph->bearingX );
-							mostRight = std::max( mostRight, shapedGlyph.caretPos.x +
-												  shapedGlyph.offset.x +
-												  shapedGlyph.glyph->bearingX +
-												  shapedGlyph.glyph->width );
+							mostLeft =
+								std::min( mostLeft, shapedGlyph.caretPos.x + shapedGlyph.offset.x +
+														shapedGlyph.glyph->bearingX );
+							mostRight = std::max(
+								mostRight, shapedGlyph.caretPos.x + shapedGlyph.offset.x +
+											   shapedGlyph.glyph->bearingX + shapedGlyph.glyph->width );
 						}
 						else
 						{
-							mostLeft = std::min( mostLeft, shapedGlyph.caretPos.x -
-												 lineHeight * 0.5f );
-							mostRight = std::max( mostRight, shapedGlyph.caretPos.x +
-												  lineHeight * 0.5f );
+							mostLeft = std::min( mostLeft, shapedGlyph.caretPos.x - lineHeight * 0.5f );
+							mostRight =
+								std::max( mostRight, shapedGlyph.caretPos.x + lineHeight * 0.5f );
 						}
 					}
 
@@ -1006,21 +1094,21 @@ namespace Colibri
 					{
 						const float regionUp = isHorizontal ? shapedGlyph.glyph->regionUp : 0.0f;
 
-						//New line found. Render the background and reset the counters
+						// New line found. Render the background and reset the counters
 						Ogre::Vector2 topLeft =
-								Ogre::Vector2( mostLeft, mostTop - lineHeight * regionUp );
+							Ogre::Vector2( mostLeft, mostTop - lineHeight * regionUp );
 						Ogre::Vector2 bottomRight =
-								Ogre::Vector2( mostRight, mostBottom + lineHeight * (1.0f - regionUp) );
+							Ogre::Vector2( mostRight, mostBottom + lineHeight * ( 1.0f - regionUp ) );
 
 						const Ogre::Vector2 glyphSize = bottomRight - topLeft;
 
-						//Snap each glyph to pixels too
+						// Snap each glyph to pixels too
 						topLeft.x = roundf( topLeft.x );
 						topLeft.y = roundf( topLeft.y );
 						bottomRight = topLeft + glyphSize;
 
-						topLeft		= derivedTopLeft + topLeft * invWindowRes;
-						bottomRight	= derivedTopLeft + bottomRight * invWindowRes;
+						topLeft = derivedTopLeft + topLeft * invWindowRes;
+						bottomRight = derivedTopLeft + bottomRight * invWindowRes;
 
 						addQuad( textVertBuffer,                                               //
 								 topLeft - backgroundDisplacement,                             //
@@ -1034,20 +1122,20 @@ namespace Colibri
 
 						Ogre::Vector2 nextCaret = shapedGlyph.caretPos;
 						if( shapedGlyph.isNewline && itor + 1u != end )
-							nextCaret = (itor + 1u)->caretPos;
+							nextCaret = ( itor + 1u )->caretPos;
 
 						if( !isHorizontal )
-							prevCaretY	= nextCaret.x;
+							prevCaretY = nextCaret.x;
 						else
-							prevCaretY	= nextCaret.y;
+							prevCaretY = nextCaret.y;
 						lineHeight = 0;
-						mostTop		= std::numeric_limits<float>::max();
-						mostLeft	= std::numeric_limits<float>::max();
-						mostRight	= -std::numeric_limits<float>::max();
-						mostBottom	= -std::numeric_limits<float>::max();
+						mostTop = std::numeric_limits<float>::max();
+						mostLeft = std::numeric_limits<float>::max();
+						mostRight = -std::numeric_limits<float>::max();
+						mostBottom = -std::numeric_limits<float>::max();
 
-						//Step backwards and reprocess this glyph again,
-						//as part of the new line and not the current one.
+						// Step backwards and reprocess this glyph again,
+						// as part of the new line and not the current one.
 						if( !shapedGlyph.isNewline && changesLine )
 							--itor;
 					}
@@ -1062,13 +1150,13 @@ namespace Colibri
 		return textVertBuffer;
 	}
 	//-------------------------------------------------------------------------
-	void Label::_fillBuffersAndCommands( UiVertex ** RESTRICT_ALIAS vertexBuffer,
-										 GlyphVertex ** RESTRICT_ALIAS _textVertBuffer,
+	void Label::_fillBuffersAndCommands( UiVertex **RESTRICT_ALIAS vertexBuffer,
+										 GlyphVertex **RESTRICT_ALIAS _textVertBuffer,
 										 const Ogre::Vector2 &parentPos,
 										 const Ogre::Vector2 &parentCurrentScrollPos,
 										 const Matrix2x3 &parentRot )
 	{
-		GlyphVertex * RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
+		GlyphVertex *RESTRICT_ALIAS textVertBuffer = *_textVertBuffer;
 
 		updateDerivedTransform( parentPos, parentRot );
 
@@ -1094,10 +1182,10 @@ namespace Colibri
 		const Ogre::Vector2 shadowDisplacement = invWindowRes * m_shadowDisplace;
 
 		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
-		Ogre::Vector2 parentDerivedTL = m_parent->m_derivedTopLeft +
-										m_parent->m_clipBorderTL * invCanvasSize2x;
-		Ogre::Vector2 parentDerivedBR = m_parent->m_derivedBottomRight -
-										m_parent->m_clipBorderBR * invCanvasSize2x;
+		Ogre::Vector2 parentDerivedTL =
+			m_parent->m_derivedTopLeft + m_parent->m_clipBorderTL * invCanvasSize2x;
+		Ogre::Vector2 parentDerivedBR =
+			m_parent->m_derivedBottomRight - m_parent->m_clipBorderBR * invCanvasSize2x;
 		parentDerivedTL.makeCeil( m_parent->m_accumMinClipTL );
 		parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );
 		m_accumMinClipTL = parentDerivedTL;
@@ -1108,7 +1196,7 @@ namespace Colibri
 			parentDerivedBR.makeFloor( this->m_derivedBottomRight );
 		}
 
-		const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
+		const Ogre::Vector2 invSize = 1.0f / ( parentDerivedBR - parentDerivedTL );
 
 		if( m_usesBackground )
 		{
@@ -1117,9 +1205,9 @@ namespace Colibri
 											 parentDerivedTL, parentDerivedBR, isHoriz );
 		}
 
-		//Snap position to pixels
+		// Snap position to pixels
 		Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
-		derivedTopLeft = (derivedTopLeft + 1.0f) * halfWindowRes;
+		derivedTopLeft = ( derivedTopLeft + 1.0f ) * halfWindowRes;
 		derivedTopLeft.x = roundf( derivedTopLeft.x );
 		derivedTopLeft.y = roundf( derivedTopLeft.y );
 		derivedTopLeft = derivedTopLeft * invWindowRes - 1.0f;
@@ -1129,26 +1217,26 @@ namespace Colibri
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
-		ShapedGlyphVec::const_iterator end  = m_shapes[m_currentState].end();
+		ShapedGlyphVec::const_iterator endt = m_shapes[m_currentState].end();
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			const ShapedGlyph &shapedGlyph = *itor;
 
-			if( !shapedGlyph.isNewline && !shapedGlyph.isTab )
+			if( !shapedGlyph.isNewline && !shapedGlyph.isTab && !shapedGlyph.isPrivateArea )
 			{
 				Ogre::Vector2 topLeft, bottomRight;
 				getCorners( shapedGlyph, topLeft, bottomRight );
 
 				const Ogre::Vector2 glyphSize = bottomRight - topLeft;
 
-				//Snap each glyph to pixels too
+				// Snap each glyph to pixels too
 				topLeft.x = roundf( topLeft.x );
 				topLeft.y = roundf( topLeft.y );
 				bottomRight = topLeft + glyphSize;
 
-				topLeft		= derivedTopLeft + topLeft * invWindowRes;
-				bottomRight	= derivedTopLeft + bottomRight * invWindowRes;
+				topLeft = derivedTopLeft + topLeft * invWindowRes;
+				bottomRight = derivedTopLeft + bottomRight * invWindowRes;
 
 				if( m_shadowOutline )
 				{
@@ -1182,23 +1270,23 @@ namespace Colibri
 
 		const Ogre::Vector2 outerTopLeft = this->m_derivedTopLeft;
 		const Matrix2x3 &finalRot = this->m_derivedOrientation;
-		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft +
-													   m_clipBorderTL * invCanvasSize2x;
+		const Ogre::Vector2 outerTopLeftWithClipping = outerTopLeft + m_clipBorderTL * invCanvasSize2x;
 
 		WidgetVec::const_iterator itChild = m_children.begin();
-		WidgetVec::const_iterator enChild  = m_children.end();
+		WidgetVec::const_iterator enChild = m_children.end();
 
 		while( itChild != enChild )
 		{
-			(*itChild)->_fillBuffersAndCommands( vertexBuffer, _textVertBuffer, outerTopLeftWithClipping,
-												 Ogre::Vector2::ZERO, finalRot );
+			( *itChild )
+				->_fillBuffersAndCommands( vertexBuffer, _textVertBuffer, outerTopLeftWithClipping,
+										   Ogre::Vector2::ZERO, finalRot );
 			++itChild;
 		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::_updateDirtyGlyphs()
 	{
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 		{
 			if( m_glyphsDirty[i] )
 				updateGlyphs( static_cast<States::States>( i ) );
@@ -1211,7 +1299,7 @@ namespace Colibri
 	bool Label::isAnyStateDirty() const
 	{
 		bool retVal = false;
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 			retVal |= m_glyphsDirty[i];
 
 		return retVal;
@@ -1232,7 +1320,7 @@ namespace Colibri
 	size_t Label::getMaxNumGlyphs() const
 	{
 		size_t retVal = 0;
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 			retVal = std::max( m_shapes[i].size(), retVal );
 
 		const size_t maxGlyphs = retVal;
@@ -1249,7 +1337,7 @@ namespace Colibri
 	{
 		if( forState == States::NumStates )
 		{
-			for( size_t i=0; i<States::NumStates; ++i )
+			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				if( m_text[i] != text )
 				{
@@ -1270,7 +1358,7 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	const std::string& Label::getText( States::States state )
+	const std::string &Label::getText( States::States state )
 	{
 		if( state == States::NumStates )
 			state = m_currentState;
@@ -1407,21 +1495,20 @@ namespace Colibri
 		if( wasOutOfBounds )
 			glyphIdx = glyphCount - 1u;
 
-		//We're counting on the fact that when prevIdx == 0 or glyphIdx == 0;
-		//decrementing it will underflow and thus prevIdx < glyphCount is not true.
+		// We're counting on the fact that when prevIdx == 0 or glyphIdx == 0;
+		// decrementing it will underflow and thus prevIdx < glyphCount is not true.
 		const size_t currCluster = m_shapes[m_currentState][glyphIdx].clusterStart;
 
 		size_t prevIdx = glyphIdx - 1u;
 
-		while( prevIdx < glyphCount &&
-			   currCluster == m_shapes[m_currentState][prevIdx].clusterStart )
+		while( prevIdx < glyphCount && currCluster == m_shapes[m_currentState][prevIdx].clusterStart )
 		{
 			--prevIdx;
 		}
 
 		if( wasOutOfBounds )
 		{
-			//We need to position behind the last letter, not behind the second to last letter
+			// We need to position behind the last letter, not behind the second to last letter
 			++prevIdx;
 		}
 
@@ -1438,8 +1525,8 @@ namespace Colibri
 		if( glyphIdx < m_shapes[m_currentState].size() )
 		{
 			const ShapedGlyph &shapedGlyph = m_shapes[m_currentState][glyphIdx];
-			glyphStart	= shapedGlyph.clusterStart;
-			outLength	= shapedGlyph.clusterLength;
+			glyphStart = shapedGlyph.clusterStart;
+			outLength = shapedGlyph.clusterLength;
 		}
 		else
 		{
@@ -1451,10 +1538,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Label::sizeToFit( float maxAllowedWidth,
-						   TextHorizAlignment::TextHorizAlignment newHorizPos,
-						   TextVertAlignment::TextVertAlignment newVertPos,
-						   States::States baseState )
+	void Label::sizeToFit( float maxAllowedWidth, TextHorizAlignment::TextHorizAlignment newHorizPos,
+						   TextVertAlignment::TextVertAlignment newVertPos, States::States baseState )
 	{
 		if( baseState == States::NumStates )
 			baseState = m_currentState;
@@ -1465,18 +1550,18 @@ namespace Colibri
 		if( m_shapes[baseState].empty() )
 			return;
 
-		//Replace the glyphs forced to the Top-Left so we can gather the width & height
+		// Replace the glyphs forced to the Top-Left so we can gather the width & height
 		const float oldWidth = m_size.x;
 		m_size.x = maxAllowedWidth;
 		placeGlyphs( baseState, false );
 		m_size.x = oldWidth;
 
-		//Gather width & height
+		// Gather width & height
 		Ogre::Vector2 maxBottomRight( -std::numeric_limits<float>::max() );
 		Ogre::Vector2 minTopLeft( std::numeric_limits<float>::max() );
 
 		ShapedGlyphVec::iterator itor = m_shapes[baseState].begin();
-		ShapedGlyphVec::iterator end  = m_shapes[baseState].end();
+		ShapedGlyphVec::iterator end = m_shapes[baseState].end();
 
 		while( itor != end )
 		{
@@ -1492,15 +1577,15 @@ namespace Colibri
 		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
 		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
 
-		//We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
-		//that there is equal distance from m_position to the first glyph, and the last glyph to
-		//m_position + m_size
+		// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
+		// that there is equal distance from m_position to the first glyph, and the last glyph to
+		// m_position + m_size
 		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
 
 		if( maxWidthHeight.x < 0 || maxWidthHeight.y < 0 )
 			return;
 
-		//Set new dimensions
+		// Set new dimensions
 		const Ogre::Vector2 canvasSize = m_manager->getCanvasSize();
 		const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
 
@@ -1509,10 +1594,10 @@ namespace Colibri
 		m_size.x = std::ceil( m_size.x );
 		m_size.y = std::ceil( m_size.y );
 
-		//Align the glyphs so horizontal & vertical alignment are respected
+		// Align the glyphs so horizontal & vertical alignment are respected
 		alignGlyphs( baseState );
 
-		//Now reposition the widget based on input newHorizPos & newVertPos
+		// Now reposition the widget based on input newHorizPos & newVertPos
 		if( newHorizPos == TextHorizAlignment::Natural )
 			newHorizPos = m_actualHorizAlignment[baseState];
 		if( newVertPos == TextVertAlignment::Natural )
@@ -1524,7 +1609,7 @@ namespace Colibri
 		case TextHorizAlignment::Left:
 			break;
 		case TextHorizAlignment::Center:
-			m_position.x = (m_position.x + oldSize.x - m_size.x) * 0.5f;
+			m_position.x = ( m_position.x + oldSize.x - m_size.x ) * 0.5f;
 			break;
 		case TextHorizAlignment::Right:
 			m_position.x = m_position.x + oldSize.x - m_size.x;
@@ -1536,7 +1621,7 @@ namespace Colibri
 		case TextVertAlignment::Top:
 			break;
 		case TextVertAlignment::Center:
-			m_position.y = (m_position.y + oldSize.y - m_size.y) * 0.5f;
+			m_position.y = ( m_position.y + oldSize.y - m_size.y ) * 0.5f;
 			break;
 		case TextVertAlignment::Bottom:
 			m_position.y = m_position.y + oldSize.y - m_size.y;
@@ -1562,6 +1647,18 @@ namespace Colibri
 			}
 		}
 
+		if( dirtyReason & TransformDirtyScale )
+		{
+			std::map<States::States, RasterHelper>::const_iterator itor = m_rasterHelper.begin();
+			std::map<States::States, RasterHelper>::const_iterator endt = m_rasterHelper.end();
+
+			while( itor != endt )
+			{
+				itor->second.raster->setSize( m_size );
+				++itor;
+			}
+		}
+
 		Renderable::setTransformDirty( dirtyReason );
 	}
 	//-------------------------------------------------------------------------
@@ -1583,21 +1680,19 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Label::_notifyCanvasChanged()
 	{
-		for( size_t i=0; i<States::NumStates; ++i )
+		for( size_t i = 0; i < States::NumStates; ++i )
 			flagDirty( static_cast<States::States>( i ) );
-//		_updateDirtyGlyphs();
+		//		_updateDirtyGlyphs();
 
 		Renderable::_notifyCanvasChanged();
 	}
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
 	//-------------------------------------------------------------------------
-	bool RichText::operator == ( const RichText &other ) const
+	bool RichText::operator==( const RichText &other ) const
 	{
-		return	this->ptSize == other.ptSize &&
-				this->offset == other.offset &&
-				this->length == other.length &&
-				this->readingDir == other.readingDir &&
-				this->font == other.font;
+		return this->ptSize == other.ptSize && this->offset == other.offset &&
+			   this->length == other.length && this->readingDir == other.readingDir &&
+			   this->font == other.font;
 	}
-}
+}  // namespace Colibri

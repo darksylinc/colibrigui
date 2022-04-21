@@ -27,6 +27,12 @@ namespace Colibri
 			float lastCharWidth;
 		};
 
+		struct RasterHelper
+		{
+			LabelBmp                    *raster;
+			std::map<uint32_t, uint32_t> glyphToRasterGlyphIdx;
+		};
+
 		std::string		m_text[States::NumStates];
 		RichTextVec		m_richText[States::NumStates];
 		ShapedGlyphVec	m_shapes[States::NumStates];
@@ -69,7 +75,8 @@ namespace Colibri
 		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
 		VertReadingDir::VertReadingDir			m_actualVertReadingDir[States::NumStates];
 
-		//Renderable	*m_background;
+		/// In case we have special symbols handled by a BMP font
+		std::map<States::States, RasterHelper> m_rasterHelper;
 
 		/** Checks RichText doesn't go out of bounds, and patches it if it does.
 			If m_richText[state] is empty we'll create a default one for the whole string.
@@ -133,7 +140,15 @@ namespace Colibri
 	public:
 		Label( ColibriManager *manager );
 
+		void _destroy() colibri_override;
+
 		bool isLabel() const colibri_override { return true; }
+
+		/// Returns a RasterHelper for the given state. Creates one if it doesn't exist.
+		RasterHelper *createRasterHelper( States::States state );
+
+		/// Returns a RasterHelper for the given state. Nullptr if it doesn't exist.
+		RasterHelper *colibrigui_nullable getRasterHelper( States::States state );
 
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)

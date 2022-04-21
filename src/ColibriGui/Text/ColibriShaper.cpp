@@ -186,7 +186,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	size_t Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 											 hb_direction_t dir, uint32_t richTextIdx,
-											 uint32_t clusterOffset, ShapedGlyphVec &outShapes )
+											 uint32_t clusterOffset, ShapedGlyphVec &outShapes,
+											 bool &bOutHasPrivateUse )
 	{
 		size_t currentSize = outShapes.size();
 		size_t numWrittenCodepoints = 0;
@@ -202,9 +203,9 @@ namespace Colibri
 			{
 				Shaper *otherShaper = *itor;
 				otherShaper->setFontSize( m_ptSize );
-				numWrittenCodepoints = otherShaper->renderString( utf16Str, stringLength, dir,
-																  richTextIdx, clusterOffset,
-																  outShapes, false );
+				numWrittenCodepoints =
+					otherShaper->renderString( utf16Str, stringLength, dir, richTextIdx, clusterOffset,
+											   outShapes, bOutHasPrivateUse, false );
 			}
 
 			++itor;
@@ -213,9 +214,9 @@ namespace Colibri
 		return numWrittenCodepoints;
 	}
 	//-------------------------------------------------------------------------
-	size_t Shaper::renderString( const uint16_t *utf16Str, size_t stringLength,
-								 hb_direction_t dir, uint32_t richTextIdx, uint32_t clusterOffset,
-								 ShapedGlyphVec &outShapes, bool substituteIfNotFound )
+	size_t Shaper::renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
+								 uint32_t richTextIdx, uint32_t clusterOffset, ShapedGlyphVec &outShapes,
+								 bool &bOutHasPrivateUse, bool substituteIfNotFound )
 	{
 		size_t numWrittenCodepoints = stringLength;
 
@@ -279,10 +280,9 @@ namespace Colibri
 						clusterLength = stringLength - glyphInfo[i+numUnknownGlyphs-1u].cluster;
 				}
 
-				size_t replacedCodepoints = renderWithSubstituteFont( &utf16Str[firstCluster],
-																	  clusterLength, dir, richTextIdx,
-																	  clusterOffset + firstCluster,
-																	  shapesVec );
+				size_t replacedCodepoints = renderWithSubstituteFont(
+					&utf16Str[firstCluster], clusterLength, dir, richTextIdx,
+					clusterOffset + firstCluster, shapesVec, bOutHasPrivateUse );
 
 				if( replacedCodepoints == clusterLength )
 					i += numUnknownGlyphs;
@@ -322,12 +322,18 @@ namespace Colibri
 			// if( i < glyphCount && glyphInfo[i].codepoint != 0 )
 			if( i < glyphCount )
 			{
-				const CachedGlyph *glyph = m_shaperManager->acquireGlyph( m_ftFont,
-																		  glyphInfo[i].codepoint,
-																		  m_ptSize.value26d6,
-																		  m_fontIdx );
+				const size_t cluster = glyphInfo[i].cluster;
+				const bool bIsPrivateArea =
+					utf16Str[cluster] >= L'\uE000' && utf16Str[cluster] <= L'\uF8FF';
+				uint32_t codepoint = glyphInfo[i].codepoint;
+				if( bIsPrivateArea )
+				{
+					codepoint = utf16Str[cluster];
+					bOutHasPrivateUse = true;
+				}
 
-				size_t cluster = glyphInfo[i].cluster;
+				const CachedGlyph *glyph = m_shaperManager->acquireGlyph(
+					m_ftFont, codepoint, m_ptSize.value26d6, m_fontIdx, bIsPrivateArea );
 
 				ShapedGlyph shapedGlyph;
 				shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
@@ -388,6 +394,7 @@ namespace Colibri
 				}
 				shapedGlyph.isTab = utf16Str[cluster] == L'\t';
 				shapedGlyph.isRtl = dir == HB_DIRECTION_RTL;
+				shapedGlyph.isPrivateArea = bIsPrivateArea;
 				shapedGlyph.richTextIdx = richTextIdx;
 				shapedGlyph.glyph = glyph;
 				shapesVec.push_back( shapedGlyph );

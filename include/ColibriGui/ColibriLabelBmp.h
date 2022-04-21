@@ -35,12 +35,17 @@ namespace Colibri
 	*/
 	class LabelBmp : public Renderable
 	{
+		friend class Label;
+
 	protected:
 		std::string m_text[States::NumStates];
 
 		BmpGlyphVec m_shapes;
 
 		bool m_glyphsDirty;
+		/// Caret is not updated. Used exclusively by Label to draw
+		/// glyphs at arbitrary locations.
+		bool m_rawMode;
 
 	public:
 		/// When true (default) text will be clipped against the widget's size.
