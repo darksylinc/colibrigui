@@ -6,11 +6,12 @@
 
 #include "ColibriRenderable.inl"
 
+#include "OgreHlmsDatablock.h"
 #include "OgreLwString.h"
 
 #include "unicode/unistr.h"
 
-#define TODO_DATABLock
+#define TODO_allowMultipleDatablocksForEachState
 
 namespace Colibri
 {
@@ -29,10 +30,6 @@ namespace Colibri
 
 		m_numVertices = 0;
 
-		TODO_DATABLock;
-		for( size_t i = 0; i < States::NumStates; ++i )
-			m_stateInformation[i].materialName = ColibriManager::c_defaultTextDatablockNames[i];
-
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		Ogre::HlmsDatablock *datablock = shaperManager->getBmpFont( m_font )->getDatablock();
 		COLIBRI_ASSERT_MEDIUM(
@@ -40,6 +37,13 @@ namespace Colibri
 			"getBmpFont returned no datablock. Please call setOgre first, and ensure the "
 			"ShaperManager (fonts) has already been properly initialized" );
 		setDatablock( datablock );
+
+		TODO_allowMultipleDatablocksForEachState;
+
+		const Ogre::String *datablockName = datablock->getNameStr();
+		COLIBRI_ASSERT_LOW( datablockName );
+		for( size_t i = 0; i < States::NumStates; ++i )
+			m_stateInformation[i].materialName = *datablockName;
 	}
 	//-------------------------------------------------------------------------
 	void LabelBmp::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,

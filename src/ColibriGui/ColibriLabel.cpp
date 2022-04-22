@@ -325,6 +325,26 @@ namespace Colibri
 						m_richText[state][j].glyphEnd = m_richText[i][j].glyphEnd;
 					}
 
+					RasterHelper *rasterHelperBase = getRasterHelper( static_cast<States::States>( i ) );
+					if( rasterHelperBase )
+					{
+						RasterHelper *rasterHelper = createRasterHelper( state );
+
+						rasterHelper->raster->m_shapes = rasterHelperBase->raster->m_shapes;
+						rasterHelper->glyphToRasterGlyphIdx = rasterHelperBase->glyphToRasterGlyphIdx;
+						rasterHelper->raster->setHidden( state != m_currentState );
+					}
+					else
+					{
+						RasterHelper *rasterHelper = getRasterHelper( state );
+						if( rasterHelper )
+						{
+							rasterHelper->raster->m_shapes.clear();
+							rasterHelper->glyphToRasterGlyphIdx.clear();
+							rasterHelper->raster->setHidden( state != m_currentState );
+						}
+					}
+
 					reusableFound = true;
 				}
 			}
@@ -343,8 +363,8 @@ namespace Colibri
 			TextHorizAlignment::TextHorizAlignment actualHorizAlignment = TextHorizAlignment::Mixed;
 
 			RichTextVec::iterator itor = m_richText[state].begin();
-			RichTextVec::iterator end = m_richText[state].end();
-			while( itor != end )
+			RichTextVec::iterator endt = m_richText[state].end();
+			while( itor != endt )
 			{
 				RichText &richText = *itor;
 				richText.glyphStart = static_cast<uint32_t>( m_shapes[state].size() );
@@ -1663,12 +1683,24 @@ namespace Colibri
 
 		if( oldState != state )
 		{
+			{
+				RasterHelper *rasterHelper = getRasterHelper( oldState );
+				if( rasterHelper )
+					rasterHelper->raster->setHidden( true );
+			}
+
 			// We must replace the glyphs from the new state since it could be
 			// non-dirty but its placement out of date (e.g. Label was in Idle,
 			// glyphs were placed, then changed to Highlighted state, widget was
 			// resized, and now we're going back to Idle with a different size)
 			if( !m_glyphsDirty[m_currentState] && !m_glyphsPlaced[m_currentState] )
 				placeGlyphs( m_currentState );
+
+			{
+				RasterHelper *rasterHelper = getRasterHelper( state );
+				if( rasterHelper )
+					rasterHelper->raster->setHidden( false );
+			}
 		}
 	}
 	//-------------------------------------------------------------------------
