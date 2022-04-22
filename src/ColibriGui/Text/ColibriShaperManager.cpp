@@ -315,6 +315,42 @@ namespace Colibri
 		return &pair.first->second;
 	}
 	//-------------------------------------------------------------------------
+	CachedGlyph *ShaperManager::createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+												   uint16_t fontIdx )
+	{
+		// We need to know the bearing of most characters and hope it aligns well
+		const CachedGlyph *dummyCodepoint = acquireGlyph( font,0u,ptSize,fontIdx,false );
+
+		const BmpFont *bmpFont = getDefaultBmpFontForRaster();
+		COLIBRI_ASSERT_MEDIUM( bmpFont );
+
+		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
+
+		const float fontScale = FontSize( ptSize ).asFloat() / bmpFont->getBakedFontSize().asFloat();
+
+		//Create a cache entry
+		CachedGlyph newGlyph;
+		newGlyph.codepoint	= codepoint;
+		newGlyph.ptSize		= ptSize;
+		newGlyph.width		= uint16_t( std::round( bmpGlyph.width * fontScale ) );
+		newGlyph.height		= uint16_t( std::round( bmpGlyph.height * fontScale ) );
+		newGlyph.bearingX	= 0.0f;
+		newGlyph.bearingY = newGlyph.height * float( dummyCodepoint->bearingY ) / dummyCodepoint->height;
+		newGlyph.offsetStart = 0u;
+		newGlyph.newlineSize= newGlyph.height;
+		newGlyph.regionUp	= 1.0f;  // Is this correct?
+		newGlyph.font		= fontIdx;
+		newGlyph.refCount	= 0;
+
+		releaseGlyph( dummyCodepoint );
+
+		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
+		std::pair<CachedGlyphMap::iterator, bool> pair =
+				m_glyphCache.insert( std::pair<GlyphKey, CachedGlyph>( glyphKey, newGlyph ) );
+
+		return &pair.first->second;
+	}
+	//-------------------------------------------------------------------------
 	void ShaperManager::destroyGlyph( CachedGlyphMap::iterator glyphIt )
 	{
 		CachedGlyph &glyph = glyphIt->second;
@@ -392,9 +428,16 @@ namespace Colibri
 		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
 
 		if( itor != m_glyphCache.end() )
+		{
 			retVal = &itor->second;
+		}
 		else
-			retVal = createGlyph( font, codepoint, ptSize, fontIdx, bDummy );
+		{
+			if( !bDummy || !getDefaultBmpFontForRaster() )
+				retVal = createGlyph( font, codepoint, ptSize, fontIdx, bDummy );
+			else
+				retVal = createRasterGlyph( font, codepoint, ptSize, fontIdx );
+		}
 
 		++retVal->refCount;
 

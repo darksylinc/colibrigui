@@ -225,7 +225,7 @@ namespace Colibri
 		localShapes.swap( outShapes );
 	}
 	//-------------------------------------------------------------------------
-	void BmpFont::renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const
+	BmpGlyph BmpFont::renderCodepoint( const uint32_t codepoint ) const
 	{
 		std::vector<BmpChar>::const_iterator itBmp =
 			std::lower_bound( m_chars.begin(), m_chars.end(), codepoint, OrderByCodepoint() );
@@ -241,7 +241,13 @@ namespace Colibri
 		bmpGlyph.yoffset = bmpGlyph.bmpChar->yoffset;
 		bmpGlyph.width = bmpGlyph.bmpChar->width;
 		bmpGlyph.height = bmpGlyph.bmpChar->height;
-		outShapes.push_back( bmpGlyph );
+
+		return bmpGlyph;
+	}
+	//-------------------------------------------------------------------------
+	void BmpFont::renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const
+	{
+		outShapes.push_back( renderCodepoint( codepoint ) );
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector4 BmpFont::getInvResolution() const

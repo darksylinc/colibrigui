@@ -13,6 +13,15 @@ namespace Colibri
 
 	/** @ingroup Controls
 	@class Label
+		Private use area: When ShaperManager::getDefaultBmpFontForRaster returns
+		a valid pointer; the characters in "Private Use Area (plane 0)" aka
+		Unicode range [0xE000; 0xF8FF] will not be rendered using vector fonts
+		and will fallback to BmpLabel (see Label::m_rasterHelper)
+
+		Although we support emojis via vector fonts:
+
+			- Currently our use via FreeType is limited to greyscale fonts (no colour)
+			- Font editor Software is very limited, making this much more convenient
 	*/
 	class Label : public Renderable
 	{
@@ -75,7 +84,7 @@ namespace Colibri
 		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
 		VertReadingDir::VertReadingDir			m_actualVertReadingDir[States::NumStates];
 
-		/// In case we have special symbols handled by a BMP font
+		/// In case we have special symbols (Private Use Area) handled by a BMP font
 		std::map<States::States, RasterHelper> m_rasterHelper;
 
 		/** Checks RichText doesn't go out of bounds, and patches it if it does.

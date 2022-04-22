@@ -371,25 +371,14 @@ namespace Colibri
 												   rasterHelper->raster->m_shapes );
 							BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes.back();
 
+							bmpGlyph.width = it->glyph->width;
+							bmpGlyph.height = it->glyph->height;
+
 							const uint32_t glyphIdx = uint32_t( it - m_shapes[state].begin() );
 							const uint32_t rasterGlyphIdx =
 								uint32_t( rasterHelper->raster->m_shapes.size() - 1u );
 
 							rasterHelper->glyphToRasterGlyphIdx.insert( { glyphIdx, rasterGlyphIdx } );
-
-							if( float( it->glyph->width ) / float( it->glyph->height ) <=
-								float( bmpGlyph.width ) / float( bmpGlyph.height ) )
-							{
-								const float prop = float( it->glyph->width ) / float( bmpGlyph.width );
-								bmpGlyph.width = it->glyph->width;
-								bmpGlyph.height = uint16_t( std::round( bmpGlyph.height * prop ) );
-							}
-							else
-							{
-								const float prop = float( it->glyph->height ) / float( bmpGlyph.height );
-								bmpGlyph.height = it->glyph->height;
-								bmpGlyph.width = uint16_t( std::round( bmpGlyph.width * prop ) );
-							}
 						}
 						++it;
 					}

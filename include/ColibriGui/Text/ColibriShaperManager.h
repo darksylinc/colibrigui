@@ -123,6 +123,9 @@ namespace Colibri
 		size_t getAtlasOffset( size_t sizeBytes );
 		CachedGlyph *createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx,
 								  bool bDummy );
+		/// Used only for private areas
+		CachedGlyph *createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+										uint16_t fontIdx );
 		void         destroyGlyph( CachedGlyphMap::iterator glyphIt );
 		void mergeContiguousBlocks( RangeVec::iterator blockToMerge, RangeVec &blocks );
 
@@ -146,10 +149,14 @@ namespace Colibri
 
 		BmpFont *getBmpFont( size_t idx ) { return m_bmpFonts[idx]; }
 
+		/// Sets a BmpFont when Label wants to use a character in the Private Use Area (Plane 0)
 		void setDefaultBmpFontForRaster( uint16_t font );
 
+		/// Returns the value set by setDefaultBmpFontForRaster
 		uint16_t getDefaultBmpFontForRasterIdx() const;
 
+		/// Returns the font as a pointer set by setDefaultBmpFontForRaster
+		/// Can be nullptr if none is set
 		const BmpFont *colibrigui_nullable getDefaultBmpFontForRaster() const;
 
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
@@ -204,6 +211,7 @@ namespace Colibri
 		@param bOutHasPrivateUse
 			If true, there are glyph in outShapes we inserted that
 			are in Unicode's private use.
+			See Label.
 		@return
 			If string is fully LTR, returns Left
 			If string is fully RTL, returns Right

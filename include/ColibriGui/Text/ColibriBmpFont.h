@@ -73,6 +73,8 @@ namespace Colibri
 		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes ) const;
 		void renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const;
 
+		BmpGlyph renderCodepoint( const uint32_t codepoint ) const;
+
 		Ogre::Vector4 getInvResolution() const;
 
 		FontSize getBakedFontSize() const { return m_fontSize; }

@@ -3,6 +3,7 @@
 #include "ColibriGui/Text/ColibriShaperManager.h"
 
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/Text/ColibriBmpFont.h"
 
 #include "OgreLwString.h"
 
@@ -220,6 +221,8 @@ namespace Colibri
 	{
 		size_t numWrittenCodepoints = stringLength;
 
+		const bool bHasPrivateAreaBmpFont = m_shaperManager->getDefaultBmpFontForRaster() != nullptr;
+
 		ShapedGlyphVec shapesVec;
 		shapesVec.swap( outShapes );
 
@@ -323,8 +326,9 @@ namespace Colibri
 			if( i < glyphCount )
 			{
 				const size_t cluster = glyphInfo[i].cluster;
-				const bool bIsPrivateArea =
-					utf16Str[cluster] >= L'\uE000' && utf16Str[cluster] <= L'\uF8FF';
+				const bool bIsPrivateArea = bHasPrivateAreaBmpFont &&  //
+											utf16Str[cluster] >= L'\uE000' &&
+											utf16Str[cluster] <= L'\uF8FF';
 				uint32_t codepoint = glyphInfo[i].codepoint;
 				if( bIsPrivateArea )
 				{
@@ -336,10 +340,18 @@ namespace Colibri
 					m_ftFont, codepoint, m_ptSize.value26d6, m_fontIdx, bIsPrivateArea );
 
 				ShapedGlyph shapedGlyph;
-				shapedGlyph.advance = Ogre::Vector2( glyphPos[i].x_advance,
-													 -glyphPos[i].y_advance ) / 64.0f;
-				shapedGlyph.offset = Ogre::Vector2( glyphPos[i].x_offset,
-													-glyphPos[i].y_offset ) / 64.0f;
+				if( !bIsPrivateArea )
+				{
+					shapedGlyph.advance =
+						Ogre::Vector2( glyphPos[i].x_advance, -glyphPos[i].y_advance ) / 64.0f;
+					shapedGlyph.offset =
+						Ogre::Vector2( glyphPos[i].x_offset, -glyphPos[i].y_offset ) / 64.0f;
+				}
+				else
+				{
+					shapedGlyph.advance = Ogre::Vector2( shapedGlyph.glyph->width, 0.0f );
+					shapedGlyph.offset = Ogre::Vector2::ZERO;
+				}
 				shapedGlyph.caretPos = Ogre::Vector2::ZERO;
 				shapedGlyph.clusterStart = glyphInfo[i].cluster + clusterOffset;
 
