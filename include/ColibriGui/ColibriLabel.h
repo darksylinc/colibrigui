@@ -36,11 +36,7 @@ namespace Colibri
 			float lastCharWidth;
 		};
 
-		struct RasterHelper
-		{
-			LabelBmp                    *raster;
-			std::map<uint32_t, uint32_t> glyphToRasterGlyphIdx;
-		};
+		typedef std::vector<uint32_t> PrivateAreaGlyphsVec;
 
 		std::string		m_text[States::NumStates];
 		RichTextVec		m_richText[States::NumStates];
@@ -86,11 +82,19 @@ namespace Colibri
 
 		/// In case we have special symbols (Private Use Area) handled by a BMP font
 		///
-		/// Maps m_shapes[state][m_rasterGlyphIndices[state]->first] and
-		/// m_rasterHelper->m_shapes[state][m_rasterGlyphIndices[state]->second] and
-		std::map<States::States, GlyphToRasterGlyphIdxMap> m_rasterGlyphIndices;
+		/// All glyphs in m_shapes[state][m_privateAreaGlyphs[state][i]]
+		/// are Private Use Area
+		std::map<States::States, PrivateAreaGlyphsVec> m_privateAreaGlyphs;
 		/// In case we have special symbols (Private Use Area) handled by a BMP font
-		LabelBmp *colibrigui_nullable m_rasterHelper;
+		LabelBmp *colibrigui_nullable m_rasterPrivateArea;
+
+		/// Returns a RasterHelper for the given state. Creates one if it doesn't exist.
+		PrivateAreaGlyphsVec *createPrivateAreaGlyphs( States::States state );
+
+		/// Returns a RasterHelper for the given state. Nullptr if it doesn't exist.
+		PrivateAreaGlyphsVec *colibrigui_nullable getPrivateAreaGlyphs( States::States state );
+
+		void populateRasterPrivateArea();
 
 		/** Checks RichText doesn't go out of bounds, and patches it if it does.
 			If m_richText[state] is empty we'll create a default one for the whole string.
@@ -157,12 +161,6 @@ namespace Colibri
 		void _destroy() colibri_override;
 
 		bool isLabel() const colibri_override { return true; }
-
-		/// Returns a RasterHelper for the given state. Creates one if it doesn't exist.
-		RasterHelper *createRasterHelper( States::States state );
-
-		/// Returns a RasterHelper for the given state. Nullptr if it doesn't exist.
-		RasterHelper *colibrigui_nullable getRasterHelper( States::States state );
 
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)

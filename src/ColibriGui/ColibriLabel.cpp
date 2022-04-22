@@ -35,7 +35,8 @@ namespace Colibri
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
-		m_vertReadingDir( VertReadingDir::Disabled )
+		m_vertReadingDir( VertReadingDir::Disabled ),
+		m_rasterPrivateArea( 0 )
 	{
 		m_overrideSkinColour = true;
 		setVao( m_manager->getTextVao() );
@@ -76,34 +77,84 @@ namespace Colibri
 		Renderable::_destroy();
 
 		// Rasters are children of us, so it will be destroyed by our super class
-		m_rasterHelper.clear();
+		m_rasterPrivateArea = 0;
 	}
 	//-------------------------------------------------------------------------
-	Label::RasterHelper *Label::createRasterHelper( States::States state )
+	Label::PrivateAreaGlyphsVec *Label::createPrivateAreaGlyphs( States::States state )
 	{
-		std::map<States::States, RasterHelper>::iterator itor = m_rasterHelper.find( state );
-		if( itor != m_rasterHelper.end() )
+		std::map<States::States, PrivateAreaGlyphsVec>::iterator itor =
+			m_privateAreaGlyphs.find( state );
+		if( itor != m_privateAreaGlyphs.end() )
 			return &itor->second;
 
-		ShaperManager *shaperManager = m_manager->getShaperManager();
+		if( !m_rasterPrivateArea )
+		{
+			ShaperManager *shaperManager = m_manager->getShaperManager();
+			m_rasterPrivateArea = m_manager->createWidget<LabelBmp>( this );
+			m_rasterPrivateArea->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
+			m_rasterPrivateArea->setFontSize(
+				shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
+			m_rasterPrivateArea->m_rawMode = true;
+			m_rasterPrivateArea->setSize( m_size );
+		}
 
-		RasterHelper helper;
-		helper.raster = m_manager->createWidget<LabelBmp>( this );
-		helper.raster->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
-		helper.raster->setFontSize( shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
-		helper.raster->m_rawMode = true;
-		helper.raster->setSize( m_size );
-		m_rasterHelper[state] = helper;
-		auto insertedIt = m_rasterHelper.insert( { state, helper } );
+		auto insertedIt = m_privateAreaGlyphs.insert( { state, PrivateAreaGlyphsVec() } );
 		return &insertedIt.first->second;
 	}
 	//-------------------------------------------------------------------------
-	Label::RasterHelper *Label::getRasterHelper( States::States state )
+	Label::PrivateAreaGlyphsVec *Label::getPrivateAreaGlyphs( States::States state )
 	{
-		std::map<States::States, RasterHelper>::iterator itor = m_rasterHelper.find( state );
-		if( itor != m_rasterHelper.end() )
+		std::map<States::States, PrivateAreaGlyphsVec>::iterator itor =
+			m_privateAreaGlyphs.find( state );
+		if( itor != m_privateAreaGlyphs.end() )
 			return &itor->second;
 		return nullptr;
+	}
+	//-------------------------------------------------------------------------
+	void Label::populateRasterPrivateArea()
+	{
+		PrivateAreaGlyphsVec *privateAreaGlyphs = getPrivateAreaGlyphs( m_currentState );
+
+		if( !privateAreaGlyphs )
+		{
+			if( m_rasterPrivateArea )
+				m_rasterPrivateArea->setHidden( true );
+		}
+		else
+		{
+			m_rasterPrivateArea->setHidden( privateAreaGlyphs->empty() );
+			m_rasterPrivateArea->m_shapes.clear();
+
+			const States::States currentState = m_currentState;
+
+			ShaperManager *shaperManager = m_manager->getShaperManager();
+			const BmpFont *font = shaperManager->getDefaultBmpFontForRaster();
+
+			PrivateAreaGlyphsVec::const_iterator itor = privateAreaGlyphs->begin();
+			PrivateAreaGlyphsVec::const_iterator endt = privateAreaGlyphs->end();
+
+			while( itor != endt )
+			{
+				const ShapedGlyph &shapedGlyph = m_shapes[currentState][*itor];
+				Ogre::Vector2 topLeft, bottomRight;
+				getCorners( shapedGlyph, topLeft, bottomRight );
+
+				font->renderCodepoint( shapedGlyph.glyph->codepoint, m_rasterPrivateArea->m_shapes );
+				BmpGlyph &bmpGlyph = m_rasterPrivateArea->m_shapes.back();
+
+				bmpGlyph.width = shapedGlyph.glyph->width;
+				bmpGlyph.height = shapedGlyph.glyph->height;
+
+				// Because the BMP glyph may have different dimensions than the surrogate glyph
+				// from freetype, we ensure it is centered.
+				topLeft =
+					( ( topLeft + bottomRight ) - Ogre::Vector2( bmpGlyph.width, bmpGlyph.height ) ) *
+					0.5f;
+				bmpGlyph.xoffset = static_cast<uint16_t>( topLeft.x );
+				bmpGlyph.yoffset = static_cast<uint16_t>( topLeft.y );
+				++itor;
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
@@ -325,24 +376,18 @@ namespace Colibri
 						m_richText[state][j].glyphEnd = m_richText[i][j].glyphEnd;
 					}
 
-					RasterHelper *rasterHelperBase = getRasterHelper( static_cast<States::States>( i ) );
-					if( rasterHelperBase )
+					PrivateAreaGlyphsVec *privateAreaGlyphsBase =
+						getPrivateAreaGlyphs( static_cast<States::States>( i ) );
+					if( privateAreaGlyphsBase )
 					{
-						RasterHelper *rasterHelper = createRasterHelper( state );
-
-						rasterHelper->raster->m_shapes = rasterHelperBase->raster->m_shapes;
-						rasterHelper->glyphToRasterGlyphIdx = rasterHelperBase->glyphToRasterGlyphIdx;
-						rasterHelper->raster->setHidden( state != m_currentState );
+						PrivateAreaGlyphsVec *privateAreaGlyphs = createPrivateAreaGlyphs( state );
+						*privateAreaGlyphs = *privateAreaGlyphsBase;
 					}
 					else
 					{
-						RasterHelper *rasterHelper = getRasterHelper( state );
-						if( rasterHelper )
-						{
-							rasterHelper->raster->m_shapes.clear();
-							rasterHelper->glyphToRasterGlyphIdx.clear();
-							rasterHelper->raster->setHidden( state != m_currentState );
-						}
+						PrivateAreaGlyphsVec *privateAreaGlyphs = getPrivateAreaGlyphs( state );
+						if( privateAreaGlyphs )
+							privateAreaGlyphs->clear();
 					}
 
 					reusableFound = true;
@@ -352,13 +397,9 @@ namespace Colibri
 
 		if( !reusableFound )
 		{
-			RasterHelper *rasterHelper = getRasterHelper( state );
-			if( rasterHelper )
-			{
-				rasterHelper->raster->m_shapes.clear();
-				rasterHelper->glyphToRasterGlyphIdx.clear();
-				rasterHelper->raster->setHidden( state != m_currentState );
-			}
+			PrivateAreaGlyphsVec *privateAreaGlyphs = getPrivateAreaGlyphs( state );
+			if( privateAreaGlyphs )
+				privateAreaGlyphs->clear();
 
 			bool alignmentUnknown = true;
 			TextHorizAlignment::TextHorizAlignment actualHorizAlignment = TextHorizAlignment::Mixed;
@@ -378,8 +419,8 @@ namespace Colibri
 
 				if( bOutHasPrivateUse && shaperManager->getDefaultBmpFontForRaster() )
 				{
-					const BmpFont *font = shaperManager->getDefaultBmpFontForRaster();
-					rasterHelper = createRasterHelper( state );
+					// Collect private area glyphs so we can later populate m_rasterPrivateArea
+					privateAreaGlyphs = createPrivateAreaGlyphs( state );
 
 					ShapedGlyphVec::const_iterator it = m_shapes[state].begin() + richText.glyphStart;
 					ShapedGlyphVec::const_iterator en = m_shapes[state].begin() + richText.glyphEnd;
@@ -388,18 +429,8 @@ namespace Colibri
 					{
 						if( it->isPrivateArea )
 						{
-							font->renderCodepoint( it->glyph->codepoint,
-												   rasterHelper->raster->m_shapes );
-							BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes.back();
-
-							bmpGlyph.width = it->glyph->width;
-							bmpGlyph.height = it->glyph->height;
-
 							const uint32_t glyphIdx = uint32_t( it - m_shapes[state].begin() );
-							const uint32_t rasterGlyphIdx =
-								uint32_t( rasterHelper->raster->m_shapes.size() - 1u );
-
-							rasterHelper->glyphToRasterGlyphIdx.insert( { glyphIdx, rasterGlyphIdx } );
+							privateAreaGlyphs->push_back( glyphIdx );
 						}
 						++it;
 					}
@@ -586,32 +617,8 @@ namespace Colibri
 		if( performAlignment )
 			alignGlyphs( state );
 
-		Label::RasterHelper *rasterHelper = getRasterHelper( state );
-		if( rasterHelper )
-		{
-			std::map<uint32_t, uint32_t>::const_iterator itor =
-				rasterHelper->glyphToRasterGlyphIdx.begin();
-			std::map<uint32_t, uint32_t>::const_iterator endt =
-				rasterHelper->glyphToRasterGlyphIdx.end();
-
-			while( itor != endt )
-			{
-				const ShapedGlyph &shapedGlyph = m_shapes[state][itor->first];
-
-				Ogre::Vector2 topLeft, bottomRight;
-				getCorners( shapedGlyph, topLeft, bottomRight );
-				BmpGlyph &bmpGlyph = rasterHelper->raster->m_shapes[itor->second];
-
-				// Because the BMP glyph may have different dimensions than the surrogate glyph
-				// from freetype, ensure it is centered.
-				topLeft =
-					( ( topLeft + bottomRight ) - Ogre::Vector2( bmpGlyph.width, bmpGlyph.height ) ) *
-					0.5f;
-				bmpGlyph.xoffset = static_cast<uint16_t>( topLeft.x );
-				bmpGlyph.yoffset = static_cast<uint16_t>( topLeft.y );
-				++itor;
-			}
-		}
+		if( state == m_currentState )
+			populateRasterPrivateArea();
 	}
 	//-------------------------------------------------------------------------
 	void Label::alignGlyphs( States::States state )
@@ -1664,14 +1671,8 @@ namespace Colibri
 
 		if( dirtyReason & TransformDirtyScale )
 		{
-			std::map<States::States, RasterHelper>::const_iterator itor = m_rasterHelper.begin();
-			std::map<States::States, RasterHelper>::const_iterator endt = m_rasterHelper.end();
-
-			while( itor != endt )
-			{
-				itor->second.raster->setSize( m_size );
-				++itor;
-			}
+			if( m_rasterPrivateArea )
+				m_rasterPrivateArea->setSize( m_size );
 		}
 
 		Renderable::setTransformDirty( dirtyReason );
@@ -1684,23 +1685,19 @@ namespace Colibri
 
 		if( oldState != state )
 		{
-			{
-				RasterHelper *rasterHelper = getRasterHelper( oldState );
-				if( rasterHelper )
-					rasterHelper->raster->setHidden( true );
-			}
-
 			// We must replace the glyphs from the new state since it could be
 			// non-dirty but its placement out of date (e.g. Label was in Idle,
 			// glyphs were placed, then changed to Highlighted state, widget was
 			// resized, and now we're going back to Idle with a different size)
 			if( !m_glyphsDirty[m_currentState] && !m_glyphsPlaced[m_currentState] )
-				placeGlyphs( m_currentState );
-
 			{
-				RasterHelper *rasterHelper = getRasterHelper( state );
-				if( rasterHelper )
-					rasterHelper->raster->setHidden( false );
+				placeGlyphs( m_currentState );
+			}
+			else
+			{
+				// placeGlyphs will call populateRasterPrivateArea for us.
+				// But otherwise we must do it ourselves.
+				populateRasterPrivateArea();
 			}
 		}
 	}
