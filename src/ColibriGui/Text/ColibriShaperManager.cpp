@@ -319,7 +319,7 @@ namespace Colibri
 												   uint16_t fontIdx )
 	{
 		// We need to know the bearing of most characters and hope it aligns well
-		const CachedGlyph *dummyCodepoint = acquireGlyph( font,0u,ptSize,fontIdx,false );
+		const CachedGlyph *dummyCodepoint = acquireGlyph( font, 0u, ptSize, fontIdx, false );
 
 		const BmpFont *bmpFont = getDefaultBmpFontForRaster();
 		COLIBRI_ASSERT_MEDIUM( bmpFont );

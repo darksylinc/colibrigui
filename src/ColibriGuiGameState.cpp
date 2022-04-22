@@ -46,6 +46,7 @@ namespace Demo
 	Colibri::ColibriManager *colibriManager = 0;
 	Colibri::Window *mainWindow = 0;
 	Colibri::Window *vertWindow = 0;
+	Colibri::Window *fullWindow = 0;
 	Colibri::Button *button0 = 0;
 	Colibri::Button *button1 = 0;
 	Colibri::Spinner *spinner0 = 0;
@@ -113,6 +114,7 @@ namespace Demo
 		colibriManager->loadSkins( (mGraphicsSystem->getResourcePath() +
 								   "Materials/ColibriGui/Skins/DarkGloss/Skins.colibri.json").c_str() );
 
+		fullWindow = colibriManager->createWindow( 0 );
 		mainWindow = colibriManager->createWindow( 0 );
 		//mainWindow->setVisualsEnabled( false );
 		vertWindow = colibriManager->createWindow( 0 );
@@ -130,12 +132,25 @@ namespace Demo
 		mainWindow->m_breadthFirst = true;
 		vertWindow->m_breadthFirst = true;
 
+		{
+			fullWindow->setSize( colibriManager->getCanvasSize() );
+			fullWindow->setSkin( "EmptyBg" );
+			fullWindow->setVisualsEnabled( false );
+			Colibri::Label *emojiText = colibriManager->createWidget<Colibri::Label>( fullWindow );
+			emojiText->setText(
+				"By defining a BMP font you can easily use the private area\n"
+				"to draw emoji-like icons. Big Coffe cup: \uE000 Pizza: \uE001\n"
+				"This is a new line after emojis." );
+			emojiText->sizeToFit();
+			emojiText->setTopLeft( fullWindow->getSize() - emojiText->getSize() );
+		}
+
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->m_minSize = Ogre::Vector2( 350, 64 );
-		button0->getLabel()->setText( "This is a button" );
+		button0->getLabel()->setText( "This \uE001 is a button" );
 		button0->sizeToFit();
 		layout->addCell( button0 );
 

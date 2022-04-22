@@ -349,7 +349,7 @@ namespace Colibri
 				}
 				else
 				{
-					shapedGlyph.advance = Ogre::Vector2( shapedGlyph.glyph->width, 0.0f );
+					shapedGlyph.advance = Ogre::Vector2( glyph->width, 0.0f );
 					shapedGlyph.offset = Ogre::Vector2::ZERO;
 				}
 				shapedGlyph.caretPos = Ogre::Vector2::ZERO;

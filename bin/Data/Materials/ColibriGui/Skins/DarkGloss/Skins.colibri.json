@@ -61,6 +61,19 @@
                 "top" : [20, 20]
             }
         },
+        "EmptyBg" :
+        {
+            "material" : "EmptyBg",
+            "tex_resolution" : [1, 1],
+            "grid_uv" :
+            {
+                "all" : [[0, 0, 1, 1], [0, 0]]
+            },
+            "borders" :
+            {
+                "all" : [0, 0]
+            }
+        },
 
         "SpinnerBtnDecrement_idle" :
         {

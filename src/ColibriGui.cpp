@@ -258,6 +258,9 @@ namespace Demo
 											 shaperSettings[defaultFont].horizReadingDir,
 											 shaperSettings[defaultFont].allowsVerticalLayout );
 
+			shaperManager->addBmpFont( ( dataPath + "Fonts/ExampleBmpFont.fnt" ).c_str() );
+			shaperManager->setDefaultBmpFontForRaster( 0u );
+
 			if( defaultFont == 1 )
 				colibriManager->setSwapRTLControls( true );
 
