@@ -41,6 +41,8 @@ namespace Colibri
 
 		size_t getSizeBytes() const;
 
+		bool isCodepointInPrivateArea() const;
+
 		/*bool operator < ( const CachedGlyph &other ) const;
 		friend bool operator < ( const CachedGlyph &a, const uint64_t &codePointSize );
 		friend bool operator < ( const uint64_t &codePointSize, const CachedGlyph &b );*/
@@ -111,14 +113,20 @@ namespace Colibri
 		/// Unlike m_shapers, m_bmpFonts[0] is not repeated and is a strong ref
 		BmpFontVec m_bmpFonts;
 
+		uint16_t m_defaultBmpFontForRaster;
+
 		Ogre::TexBufferPacked * colibrigui_nullable m_glyphAtlasBuffer;
 		Ogre::HlmsColibri	* colibrigui_nullable m_hlms;
 		Ogre::VaoManager	* colibrigui_nullable m_vaoManager;
 
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );
-		CachedGlyph* createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx );
-		void destroyGlyph( CachedGlyphMap::iterator glyphIt );
+		CachedGlyph *createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize, uint16_t fontIdx,
+								  bool bDummy );
+		/// Used only for private areas
+		CachedGlyph *createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+										uint16_t fontIdx );
+		void         destroyGlyph( CachedGlyphMap::iterator glyphIt );
 		void mergeContiguousBlocks( RangeVec::iterator blockToMerge, RangeVec &blocks );
 
 	public:
@@ -141,6 +149,16 @@ namespace Colibri
 
 		BmpFont *getBmpFont( size_t idx ) { return m_bmpFonts[idx]; }
 
+		/// Sets a BmpFont when Label wants to use a character in the Private Use Area (Plane 0)
+		void setDefaultBmpFontForRaster( uint16_t font );
+
+		/// Returns the value set by setDefaultBmpFontForRaster
+		uint16_t getDefaultBmpFontForRasterIdx() const;
+
+		/// Returns the font as a pointer set by setDefaultBmpFontForRaster
+		/// Can be nullptr if none is set
+		const BmpFont *colibrigui_nullable getDefaultBmpFontForRaster() const;
+
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
 		LogListener* getLogListener() const;
 
@@ -157,11 +175,15 @@ namespace Colibri
 			Codepoint (UTF-32)
 		@param ptSize
 			Size in points.
+		@param bDummy
+			When true, we will use codepoint 0's glyph data
+			Useful when Label needs to rely on LabelBmp to draw glyphs from
+			private use area.
 		@return
 			Cached glyph
 		*/
-		const CachedGlyph* acquireGlyph( FT_Face font, uint32_t codepoint,
-										 uint32_t ptSize, uint16_t fontIdx );
+		const CachedGlyph *acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+										 uint16_t fontIdx, bool bDummy );
 		/// WARNING: const_casts cachedGlyph, which means it's not thread safe
 		void addRefCount( const CachedGlyph *cachedGlyph );
 		/** Decreases the reference count of a glyph, for when it's not needed anymore
@@ -186,6 +208,10 @@ namespace Colibri
 		@param richTextIdx
 		@param vertReadingDir
 		@param outShapes
+		@param bOutHasPrivateUse
+			If true, there are glyph in outShapes we inserted that
+			are in Unicode's private use.
+			See Label.
 		@return
 			If string is fully LTR, returns Left
 			If string is fully RTL, returns Right
@@ -193,9 +219,9 @@ namespace Colibri
 			If string is empty or couldn't be analyzed, it returns Mixed
 		*/
 		TextHorizAlignment::TextHorizAlignment renderString(
-				const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
-				VertReadingDir::VertReadingDir vertReadingDir,
-				ShapedGlyphVec &outShapes );
+			const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
+			VertReadingDir::VertReadingDir vertReadingDir, ShapedGlyphVec &outShapes,
+			bool &bOutHasPrivateUse );
 
 		TextHorizAlignment::TextHorizAlignment getDefaultTextDirection() const;
 		VertReadingDir::VertReadingDir getPreferredVertReadingDir() const;

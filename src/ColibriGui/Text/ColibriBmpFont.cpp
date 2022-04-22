@@ -191,7 +191,7 @@ namespace Colibri
 		bool operator()( const BmpChar &a, uint32_t b ) const { return a.id < b; }
 	};
 
-	void BmpFont::renderString( const std::string &utf8Str, BmpGlyphVec &outShapes )
+	void BmpFont::renderString( const std::string &utf8Str, BmpGlyphVec &outShapes ) const
 	{
 		icu::UnicodeString uStr( icu::UnicodeString::fromUTF8( utf8Str ) );
 
@@ -215,18 +215,49 @@ namespace Colibri
 				bmpGlyph.bmpChar = &( *itBmp );
 			else
 				bmpGlyph.bmpChar = &m_emptyChar;
+			bmpGlyph.xoffset = bmpGlyph.bmpChar->xoffset;
+			bmpGlyph.yoffset = bmpGlyph.bmpChar->yoffset;
+			bmpGlyph.width = bmpGlyph.bmpChar->width;
+			bmpGlyph.height = bmpGlyph.bmpChar->height;
 			localShapes.push_back( bmpGlyph );
 		}
 
 		localShapes.swap( outShapes );
 	}
 	//-------------------------------------------------------------------------
+	BmpGlyph BmpFont::renderCodepoint( const uint32_t codepoint ) const
+	{
+		std::vector<BmpChar>::const_iterator itBmp =
+			std::lower_bound( m_chars.begin(), m_chars.end(), codepoint, OrderByCodepoint() );
+
+		BmpGlyph bmpGlyph;
+		bmpGlyph.isNewline = codepoint == U'\n';
+		bmpGlyph.isTab = codepoint == U'\t';
+		if( itBmp != m_chars.end() && itBmp->id == codepoint )
+			bmpGlyph.bmpChar = &( *itBmp );
+		else
+			bmpGlyph.bmpChar = &m_emptyChar;
+		bmpGlyph.xoffset = bmpGlyph.bmpChar->xoffset;
+		bmpGlyph.yoffset = bmpGlyph.bmpChar->yoffset;
+		bmpGlyph.width = bmpGlyph.bmpChar->width;
+		bmpGlyph.height = bmpGlyph.bmpChar->height;
+
+		return bmpGlyph;
+	}
+	//-------------------------------------------------------------------------
+	void BmpFont::renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const
+	{
+		outShapes.push_back( renderCodepoint( codepoint ) );
+	}
+	//-------------------------------------------------------------------------
 	Ogre::Vector4 BmpFont::getInvResolution() const
 	{
 		if( m_fontTexture->isDataReady() )
 		{
-			return 1.0f / Ogre::Vector4( m_fontTexture->getWidth(), m_fontTexture->getHeight(),
-										 m_fontTexture->getWidth(), m_fontTexture->getHeight() );
+			return 1.0f / Ogre::Vector4( static_cast<float>( m_fontTexture->getWidth() ),
+										 static_cast<float>( m_fontTexture->getHeight() ),
+										 static_cast<float>( m_fontTexture->getWidth() ),
+										 static_cast<float>( m_fontTexture->getHeight() ) );
 		}
 
 		return Ogre::Vector4::ZERO;

@@ -6,16 +6,19 @@
 
 #include "ColibriRenderable.inl"
 
+#include "OgreHlmsDatablock.h"
 #include "OgreLwString.h"
 
 #include "unicode/unistr.h"
 
-#define TODO_DATABLock
+#define TODO_allowMultipleDatablocksForEachState
 
 namespace Colibri
 {
 	LabelBmp::LabelBmp( ColibriManager *manager ) :
 		Renderable( manager ),
+		m_glyphsDirty( false ),
+		m_rawMode( false ),
 		m_clipTextToWidget( true ),
 		m_shadowOutline( false ),
 		m_shadowColour( Ogre::ColourValue::Black ),
@@ -25,12 +28,7 @@ namespace Colibri
 	{
 		setVao( m_manager->getVao() );
 
-		m_glyphsDirty = false;
 		m_numVertices = 0;
-
-		TODO_DATABLock;
-		for( size_t i = 0; i < States::NumStates; ++i )
-			m_stateInformation[i].materialName = ColibriManager::c_defaultTextDatablockNames[i];
 
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		Ogre::HlmsDatablock *datablock = shaperManager->getBmpFont( m_font )->getDatablock();
@@ -39,6 +37,13 @@ namespace Colibri
 			"getBmpFont returned no datablock. Please call setOgre first, and ensure the "
 			"ShaperManager (fonts) has already been properly initialized" );
 		setDatablock( datablock );
+
+		TODO_allowMultipleDatablocksForEachState;
+
+		const Ogre::String *datablockName = datablock->getNameStr();
+		COLIBRI_ASSERT_LOW( datablockName );
+		for( size_t i = 0; i < States::NumStates; ++i )
+			m_stateInformation[i].materialName = *datablockName;
 	}
 	//-------------------------------------------------------------------------
 	void LabelBmp::setShadowOutline( bool enable, Ogre::ColourValue shadowColour,
@@ -168,10 +173,9 @@ namespace Colibri
 
 			if( !bmpGlyph.isNewline && !bmpGlyph.isTab )
 			{
-				Ogre::Vector2 topLeft = currentTopLeft + Ogre::Vector2( bmpGlyph.bmpChar->xoffset,
-																		bmpGlyph.bmpChar->yoffset );
-				Ogre::Vector2 bottomRight =
-					topLeft + Ogre::Vector2( bmpGlyph.bmpChar->width, bmpGlyph.bmpChar->height );
+				Ogre::Vector2 topLeft =
+					currentTopLeft + Ogre::Vector2( bmpGlyph.xoffset, bmpGlyph.yoffset );
+				Ogre::Vector2 bottomRight = topLeft + Ogre::Vector2( bmpGlyph.width, bmpGlyph.height );
 
 				topLeft *= fontScale;
 				bottomRight *= fontScale;
@@ -215,20 +219,23 @@ namespace Colibri
 				m_numVertices += 6u;
 			}
 
-			if( itor->isNewline )
+			if( !m_rawMode )
 			{
-				currentTopLeft.x = 0.0f;
-				currentTopLeft.y += itor->bmpChar->yoffset + itor->bmpChar->height;
-			}
-			else if( itor->isTab )
-			{
-				currentTopLeft.x = ceilf( ( currentTopLeft.x + itor->bmpChar->xadvance * 0.25f ) /
-										  ( itor->bmpChar->xadvance * 2.0f ) ) *
-								   ( itor->bmpChar->xadvance * 2.0f );
-			}
-			else
-			{
-				currentTopLeft.x += itor->bmpChar->xadvance;
+				if( itor->isNewline )
+				{
+					currentTopLeft.x = 0.0f;
+					currentTopLeft.y += itor->bmpChar->yoffset + itor->bmpChar->height;
+				}
+				else if( itor->isTab )
+				{
+					currentTopLeft.x = ceilf( ( currentTopLeft.x + itor->bmpChar->xadvance * 0.25f ) /
+											  ( itor->bmpChar->xadvance * 2.0f ) ) *
+									   ( itor->bmpChar->xadvance * 2.0f );
+				}
+				else
+				{
+					currentTopLeft.x += itor->bmpChar->xadvance;
+				}
 			}
 
 			++itor;

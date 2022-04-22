@@ -30,7 +30,8 @@ namespace Colibri
 		Ogre::Vector2 caretPos;
 		bool isNewline;
 		bool isWordBreaker;
-		bool isRtl;
+		bool isRtl : 1;
+		bool isPrivateArea : 1;
 		bool isTab;
 		uint32_t richTextIdx;
 		uint32_t clusterStart;
@@ -63,7 +64,8 @@ namespace Colibri
 
 		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 										 hb_direction_t dir, uint32_t richTextIdx,
-										 uint32_t clusterOffset, ShapedGlyphVec &outShapes );
+										 uint32_t clusterOffset, ShapedGlyphVec &outShapes,
+										 bool &bOutHasPrivateUse );
 
 	public:
 		Shaper( hb_script_t script, const char *fontLocation,
@@ -79,7 +81,7 @@ namespace Colibri
 
 		size_t renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
 							 uint32_t richTextIdx, uint32_t clusterOffset, ShapedGlyphVec &outShapes,
-							 bool substituteIfNotFound );
+							 bool &bOutHasPrivateUse, bool substituteIfNotFound );
 
 		bool operator < ( const Shaper &other ) const;
 

@@ -24,12 +24,13 @@ namespace Colibri
 		m_ftLibrary( 0 ),
 		m_colibriManager( colibriManager ),
 		m_glyphAtlas( 0 ),
-		m_offsetPtr( 1 ), //The 1st byte is taken. See ShaperManager::updateGpuBuffers
+		m_offsetPtr( 1 ),  // The 1st byte is taken. See ShaperManager::updateGpuBuffers
 		m_atlasCapacity( 0 ),
 		m_preferredVertReadingDir( VertReadingDir::Disabled ),
 		m_bidi( 0 ),
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
+		m_defaultBmpFontForRaster( std::numeric_limits<uint16_t>::max() ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
 		m_vaoManager( 0 )
@@ -152,6 +153,17 @@ namespace Colibri
 		m_bmpFonts.push_back( bmpFont );
 	}
 	//-------------------------------------------------------------------------
+	void ShaperManager::setDefaultBmpFontForRaster( uint16_t font ) { m_defaultBmpFontForRaster = font; }
+	//-------------------------------------------------------------------------
+	uint16_t ShaperManager::getDefaultBmpFontForRasterIdx() const { return m_defaultBmpFontForRaster; }
+	//-------------------------------------------------------------------------
+	const BmpFont *ShaperManager::getDefaultBmpFontForRaster() const
+	{
+		if( m_defaultBmpFontForRaster < m_bmpFonts.size() )
+			return m_bmpFonts[m_defaultBmpFontForRaster];
+		return nullptr;
+	}
+	//-------------------------------------------------------------------------
 	LogListener* ShaperManager::getLogListener() const
 	{
 		return m_colibriManager->getLogListener();
@@ -245,10 +257,10 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	CachedGlyph* ShaperManager::createGlyph( FT_Face font, uint32_t codepoint,
-											 uint32_t ptSize, uint16_t fontIdx )
+	CachedGlyph *ShaperManager::createGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+											 uint16_t fontIdx, bool bDummy )
 	{
-		FT_Error errorCode = FT_Load_Glyph( font, codepoint, FT_LOAD_DEFAULT );
+		FT_Error errorCode = FT_Load_Glyph( font, bDummy ? 0u : codepoint, FT_LOAD_DEFAULT );
 		if( colibrigui_unlikely( errorCode ) )
 		{
 			LogListener *log = getLogListener();
@@ -299,6 +311,42 @@ namespace Colibri
 				m_dirtyRanges.push_back( dirtyRange );
 			}
 		}
+
+		return &pair.first->second;
+	}
+	//-------------------------------------------------------------------------
+	CachedGlyph *ShaperManager::createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+												   uint16_t fontIdx )
+	{
+		// We need to know the bearing of most characters and hope it aligns well
+		const CachedGlyph *dummyCodepoint = acquireGlyph( font,0u,ptSize,fontIdx,false );
+
+		const BmpFont *bmpFont = getDefaultBmpFontForRaster();
+		COLIBRI_ASSERT_MEDIUM( bmpFont );
+
+		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
+
+		const float fontScale = FontSize( ptSize ).asFloat() / bmpFont->getBakedFontSize().asFloat();
+
+		//Create a cache entry
+		CachedGlyph newGlyph;
+		newGlyph.codepoint	= codepoint;
+		newGlyph.ptSize		= ptSize;
+		newGlyph.width		= uint16_t( std::round( bmpGlyph.width * fontScale ) );
+		newGlyph.height		= uint16_t( std::round( bmpGlyph.height * fontScale ) );
+		newGlyph.bearingX	= 0.0f;
+		newGlyph.bearingY = newGlyph.height * float( dummyCodepoint->bearingY ) / dummyCodepoint->height;
+		newGlyph.offsetStart = 0u;
+		newGlyph.newlineSize= newGlyph.height;
+		newGlyph.regionUp	= 1.0f;  // Is this correct?
+		newGlyph.font		= fontIdx;
+		newGlyph.refCount	= 0;
+
+		releaseGlyph( dummyCodepoint );
+
+		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
+		std::pair<CachedGlyphMap::iterator, bool> pair =
+				m_glyphCache.insert( std::pair<GlyphKey, CachedGlyph>( glyphKey, newGlyph ) );
 
 		return &pair.first->second;
 	}
@@ -371,8 +419,8 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	const CachedGlyph* ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint,
-													uint32_t ptSize, uint16_t fontIdx )
+	const CachedGlyph *ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
+													uint16_t fontIdx, bool bDummy )
 	{
 		CachedGlyph *retVal = 0;
 
@@ -380,9 +428,16 @@ namespace Colibri
 		CachedGlyphMap::iterator itor = m_glyphCache.find( glyphKey );
 
 		if( itor != m_glyphCache.end() )
+		{
 			retVal = &itor->second;
+		}
 		else
-			retVal = createGlyph( font, codepoint, ptSize, fontIdx );
+		{
+			if( !bDummy || !getDefaultBmpFontForRaster() )
+				retVal = createGlyph( font, codepoint, ptSize, fontIdx, bDummy );
+			else
+				retVal = createRasterGlyph( font, codepoint, ptSize, fontIdx );
+		}
 
 		++retVal->refCount;
 
@@ -449,8 +504,10 @@ namespace Colibri
 	TextHorizAlignment::TextHorizAlignment ShaperManager::renderString(
 			const char *utf8Str, const RichText &richText, uint32_t richTextIdx,
 			VertReadingDir::VertReadingDir vertReadingDir,
-			ShapedGlyphVec &outShapes )
+			ShapedGlyphVec &outShapes, bool &bOutHasPrivateUse )
 	{
+		bOutHasPrivateUse = false;
+
 		UBiDiDirection retVal = UBIDI_NEUTRAL;
 
 		UnicodeString uStr( utf8Str, (int32_t)richText.length );
@@ -531,7 +588,7 @@ namespace Colibri
 #endif
 			shaper->setFontSize( richText.ptSize );
 			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx,
-								  logicalStart, outShapes, true );
+								  logicalStart, outShapes, bOutHasPrivateUse, true );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;
@@ -614,7 +671,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	size_t CachedGlyph::getSizeBytes() const
 	{
+		if( isCodepointInPrivateArea() )
+			return 0u;
 		return this->width * this->height;
+	}
+	//-------------------------------------------------------------------------
+	bool CachedGlyph::isCodepointInPrivateArea() const
+	{
+		return codepoint >= 0xE000 && codepoint <= 0xF8FF;
 	}
 	/*bool CachedGlyph::operator < ( const CachedGlyph &other ) const
 	{

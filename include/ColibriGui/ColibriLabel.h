@@ -13,6 +13,15 @@ namespace Colibri
 
 	/** @ingroup Controls
 	@class Label
+		Private use area: When ShaperManager::getDefaultBmpFontForRaster returns
+		a valid pointer; the characters in "Private Use Area (plane 0)" aka
+		Unicode range [0xE000; 0xF8FF] will not be rendered using vector fonts
+		and will fallback to BmpLabel (see Label::m_rasterHelper)
+
+		Although we support emojis via vector fonts:
+
+			- Currently our use via FreeType is limited to greyscale fonts (no colour)
+			- Font editor Software is very limited, making this much more convenient
 	*/
 	class Label : public Renderable
 	{
@@ -26,6 +35,8 @@ namespace Colibri
 			Ogre::Vector2 lastAdvance;
 			float lastCharWidth;
 		};
+
+		typedef std::vector<uint32_t> PrivateAreaGlyphsVec;
 
 		std::string		m_text[States::NumStates];
 		RichTextVec		m_richText[States::NumStates];
@@ -69,7 +80,21 @@ namespace Colibri
 		TextHorizAlignment::TextHorizAlignment	m_actualHorizAlignment[States::NumStates];
 		VertReadingDir::VertReadingDir			m_actualVertReadingDir[States::NumStates];
 
-		//Renderable	*m_background;
+		/// In case we have special symbols (Private Use Area) handled by a BMP font
+		///
+		/// All glyphs in m_shapes[state][m_privateAreaGlyphs[state][i]]
+		/// are Private Use Area
+		std::map<States::States, PrivateAreaGlyphsVec> m_privateAreaGlyphs;
+		/// In case we have special symbols (Private Use Area) handled by a BMP font
+		LabelBmp *colibrigui_nullable m_rasterPrivateArea;
+
+		/// Returns a RasterHelper for the given state. Creates one if it doesn't exist.
+		PrivateAreaGlyphsVec *createPrivateAreaGlyphs( States::States state );
+
+		/// Returns a RasterHelper for the given state. Nullptr if it doesn't exist.
+		PrivateAreaGlyphsVec *colibrigui_nullable getPrivateAreaGlyphs( States::States state );
+
+		void populateRasterPrivateArea();
 
 		/** Checks RichText doesn't go out of bounds, and patches it if it does.
 			If m_richText[state] is empty we'll create a default one for the whole string.
@@ -132,6 +157,8 @@ namespace Colibri
 
 	public:
 		Label( ColibriManager *manager );
+
+		void _destroy() colibri_override;
 
 		bool isLabel() const colibri_override { return true; }
 
