@@ -357,6 +357,7 @@ namespace Colibri
 			{
 				rasterHelper->raster->m_shapes.clear();
 				rasterHelper->glyphToRasterGlyphIdx.clear();
+				rasterHelper->raster->setHidden( state != m_currentState );
 			}
 
 			bool alignmentUnknown = true;

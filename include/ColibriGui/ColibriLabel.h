@@ -85,7 +85,12 @@ namespace Colibri
 		VertReadingDir::VertReadingDir			m_actualVertReadingDir[States::NumStates];
 
 		/// In case we have special symbols (Private Use Area) handled by a BMP font
-		std::map<States::States, RasterHelper> m_rasterHelper;
+		///
+		/// Maps m_shapes[state][m_rasterGlyphIndices[state]->first] and
+		/// m_rasterHelper->m_shapes[state][m_rasterGlyphIndices[state]->second] and
+		std::map<States::States, GlyphToRasterGlyphIdxMap> m_rasterGlyphIndices;
+		/// In case we have special symbols (Private Use Area) handled by a BMP font
+		LabelBmp *colibrigui_nullable m_rasterHelper;
 
 		/** Checks RichText doesn't go out of bounds, and patches it if it does.
 			If m_richText[state] is empty we'll create a default one for the whole string.
