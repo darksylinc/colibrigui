@@ -262,11 +262,14 @@ namespace Colibri
 				{
 					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
 					--apiObject.drawCmd->numDraws;
+					// Since we only emit CbDrawStrip we can assume the previous cmd
+					// issued a CbDrawStrip, so take it back. Otherwise we'd have to
+					// save what our last cmd was.
+					apiObject.indirectDraw -= sizeof( CbDrawStrip );
 				}
 
 				CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
-				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers,
-											 vao, offset );
+				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers, vao, offset );
 				drawCall->numDraws = 1u;
 				apiObject.drawCmd = drawCall;
 				apiObject.primCount = 0;
@@ -285,6 +288,10 @@ namespace Colibri
 				{
 					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
 					--apiObject.drawCmd->numDraws;
+					// Since we only emit CbDrawStrip we can assume the previous cmd
+					// issued a CbDrawStrip, so take it back. Otherwise we'd have to
+					// save what our last cmd was.
+					apiObject.indirectDraw -= sizeof( CbDrawStrip );
 				}
 
 				//Text has arbitrary number of of vertices, thus we can't properly calculate the drawId
@@ -307,6 +314,10 @@ namespace Colibri
 				{
 					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
 					--apiObject.drawCmd->numDraws;
+					// Since we only emit CbDrawStrip we can assume the previous cmd
+					// issued a CbDrawStrip, so take it back. Otherwise we'd have to
+					// save what our last cmd was.
+					apiObject.indirectDraw -= sizeof( CbDrawStrip );
 				}
 
 				//If we're here, we're most likely rendering using breadth first.

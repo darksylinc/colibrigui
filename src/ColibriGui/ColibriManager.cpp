@@ -1695,6 +1695,10 @@ namespace Colibri
 		{
 			// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
 			--apiObjects.drawCmd->numDraws;
+			// Since we only emit CbDrawStrip we can assume the previous cmd
+			// issued a CbDrawStrip, so take it back. Otherwise we'd have to
+			// save what our last cmd was.
+			apiObjects.indirectDraw -= sizeof( Ogre::CbDrawStrip );
 		}
 
 		if( m_vaoManager->supportsIndirectBuffers() )
