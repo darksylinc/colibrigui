@@ -195,11 +195,13 @@ include_directories( "${OGRE_BINARIES}/include" )
 include_directories( "${OGRE_SOURCE}/Components/Hlms/Common/include" )
 include_directories( "${OGRE_SOURCE}/Components/Hlms/Unlit/include" )
 include_directories( "${OGRE_SOURCE}/Components/Hlms/Pbs/include" )
+include_directories( "${OGRE_SOURCE}/Components/Atmosphere/include" )
 include_directories( "${OGRE_SOURCE}/Components/Overlay/include" )
 
 # Parse OgreBuildSettings.h to see if it's a static build
 set( OGRE_DEPENDENCY_LIBS "" )
 file( READ "${OGRE_BINARIES}/include/OgreBuildSettings.h" OGRE_BUILD_SETTINGS_STR )
+string( FIND "${OGRE_BUILD_SETTINGS_STR}" "#define OGRE_BUILD_COMPONENT_ATMOSPHERE" OGRE_BUILD_COMPONENT_ATMOSPHERE )
 string( FIND "${OGRE_BUILD_SETTINGS_STR}" "#define OGRE_STATIC_LIB" OGRE_STATIC )
 if( NOT OGRE_STATIC EQUAL -1 )
 	message( STATUS "Detected static build of Ogre" )
@@ -253,6 +255,14 @@ if( OGRE_STATIC )
 			optimized RenderSystem_Metal${OGRE_STATIC} )
 		include_directories( "${OGRE_SOURCE}/RenderSystems/Metal/include" )
 	endif()
+endif()
+
+if( OGRE_BUILD_COMPONENT_ATMOSPHERE )
+	message( STATUS "Detected Atmosphere Component. Linking against it." )
+	set( OGRE_LIBRARIES
+		${OGRE_LIBRARIES}
+		debug OgreAtmosphere${OGRE_STATIC}${OGRE_DEBUG_SUFFIX}
+		optimized OgreAtmosphere${OGRE_STATIC} )
 endif()
 
 set( OGRE_LIBRARIES_OUT ${OGRE_LIBRARIES} )
