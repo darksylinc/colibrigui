@@ -257,7 +257,7 @@ if( OGRE_STATIC )
 	endif()
 endif()
 
-if( OGRE_BUILD_COMPONENT_ATMOSPHERE )
+if( OGRE_BUILD_COMPONENT_ATMOSPHERE GREATER_EQUAL 0 )
 	message( STATUS "Detected Atmosphere Component. Linking against it." )
 	set( OGRE_LIBRARIES
 		${OGRE_LIBRARIES}
