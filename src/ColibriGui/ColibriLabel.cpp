@@ -91,10 +91,10 @@ namespace Colibri
 		{
 			ShaperManager *shaperManager = m_manager->getShaperManager();
 			m_rasterPrivateArea = m_manager->createWidget<LabelBmp>( this );
+			m_rasterPrivateArea->m_rawMode = true;
 			m_rasterPrivateArea->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
 			m_rasterPrivateArea->setFontSize(
 				shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
-			m_rasterPrivateArea->m_rawMode = true;
 			m_rasterPrivateArea->setSize( m_size );
 		}
 
@@ -388,6 +388,13 @@ namespace Colibri
 						PrivateAreaGlyphsVec *privateAreaGlyphs = getPrivateAreaGlyphs( state );
 						if( privateAreaGlyphs )
 							privateAreaGlyphs->clear();
+					}
+
+					if( m_currentState == state && m_glyphsPlaced[state] )
+					{
+						// placeGlyphs will call populateRasterPrivateArea for us.
+						// But otherwise we must do it ourselves.
+						populateRasterPrivateArea();
 					}
 
 					reusableFound = true;
