@@ -247,6 +247,16 @@ namespace Colibri
 			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
 				apiObject.lastVaoName != vao->getVaoName() )
 			{
+				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
+				{
+					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
+					--apiObject.drawCmd->numDraws;
+					// Since we only emit CbDrawStrip we can assume the previous cmd
+					// issued a CbDrawStrip, so take it back. Otherwise we'd have to
+					// save what our last cmd was.
+					apiObject.indirectDraw -= sizeof( CbDrawStrip );
+				}
+
 				{
 					*commandBuffer->addCommand<CbVao>() = CbVao( vao );
 					*commandBuffer->addCommand<CbIndirectBuffer>() =
@@ -257,16 +267,6 @@ namespace Colibri
 				void *offset = reinterpret_cast<void*>(
 								   apiObject.indirectBuffer->_getFinalBufferStart() +
 								   (apiObject.indirectDraw - apiObject.startIndirectDraw) );
-
-				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
-				{
-					// Adreno 618 will GPU crash if we send an indirect cmd with vertex_count = 0
-					--apiObject.drawCmd->numDraws;
-					// Since we only emit CbDrawStrip we can assume the previous cmd
-					// issued a CbDrawStrip, so take it back. Otherwise we'd have to
-					// save what our last cmd was.
-					apiObject.indirectDraw -= sizeof( CbDrawStrip );
-				}
 
 				CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
 				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers, vao, offset );
