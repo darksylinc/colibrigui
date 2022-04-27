@@ -93,6 +93,13 @@ namespace Colibri
 			m_nextScroll.makeFloor( maxScroll );
 			m_nextScroll.makeCeil( Ogre::Vector2::ZERO );
 		}
+		else
+		{
+			if( !hasScrollX() )
+				m_nextScroll.x = 0.0f;
+			if( !hasScrollY() )
+				m_nextScroll.x = 0.0f;
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Window::setScrollImmediate( const Ogre::Vector2 &scroll )
@@ -133,6 +140,20 @@ namespace Colibri
 		const Ogre::Vector2 maxScroll = getMaxScroll();
 		const Ogre::Vector2 &pixelSize = m_manager->getPixelSize();
 		return maxScroll.x >= pixelSize.x * 0.05f || maxScroll.y >= pixelSize.y * 0.05f;
+	}
+	//-------------------------------------------------------------------------
+	bool Window::hasScrollX() const
+	{
+		const Ogre::Vector2 maxScroll = getMaxScroll();
+		const Ogre::Vector2 &pixelSize = m_manager->getPixelSize();
+		return maxScroll.x >= pixelSize.x * 0.05f;
+	}
+	//-------------------------------------------------------------------------
+	bool Window::hasScrollY() const
+	{
+		const Ogre::Vector2 maxScroll = getMaxScroll();
+		const Ogre::Vector2 &pixelSize = m_manager->getPixelSize();
+		return maxScroll.y >= pixelSize.y * 0.05f;
 	}
 	//-------------------------------------------------------------------------
 	void Window::sizeScrollToFit()

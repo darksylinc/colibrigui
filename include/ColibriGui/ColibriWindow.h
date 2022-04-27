@@ -91,6 +91,12 @@ namespace Colibri
 		/// Returns true if getMaxScroll() is non-zero in any direction.
 		bool hasScroll() const;
 
+		/// Returns true if getMaxScroll().x is non-zero
+		bool hasScrollX() const;
+
+		/// Returns true if getMaxScroll().x is non-zero
+		bool hasScrollY() const;
+
 		/// Calculates & sets the required scrollable area based on the current size of all child
 		/// widgets & windows; and our current size.
 		/// This function will not call sizeToFit on children. You'll likely want to call this last.

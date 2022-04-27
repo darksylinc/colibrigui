@@ -173,6 +173,7 @@ namespace Colibri
 		bool			m_allowingScrollAlways;
 		bool			m_allowingScrollGestureWhileButtonDown;
 		bool			m_mouseCursorButtonDown;
+		Ogre::Vector2	m_scrollHappened;
 		Ogre::Vector2	m_mouseCursorPosNdc; ///NDC = Normalized Device Coordinates
 		bool			m_primaryButtonDown;
 		Borders::Borders m_keyDirDown;

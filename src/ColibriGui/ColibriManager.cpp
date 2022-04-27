@@ -62,6 +62,7 @@ namespace Colibri
 		m_allowingScrollAlways( false ),
 		m_allowingScrollGestureWhileButtonDown( false ),
 		m_mouseCursorButtonDown( false ),
+		m_scrollHappened( Ogre::Vector2::ZERO ),
 		m_mouseCursorPosNdc( Ogre::Vector2( -2.0f, -2.0f ) ),
 		m_primaryButtonDown( false ),
 		m_keyDirDown( Borders::NumBorders ),
@@ -461,11 +462,16 @@ namespace Colibri
 
 		m_allowingScrollGestureWhileButtonDown = allowScrollGesture;
 		m_allowingScrollAlways = alwaysAllowScroll;
+		m_scrollHappened = Ogre::Vector2::ZERO;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setMouseCursorReleased()
 	{
-		if( m_cursorFocusedPair.widget )
+		// Use a threshold because fingers in touch devices can cause a small accidental scroll
+		const Ogre::Vector2 scrollThreshold = m_canvasSize * 0.03f;
+
+		if( m_cursorFocusedPair.widget &&
+			m_scrollHappened.squaredLength() <= scrollThreshold.squaredLength() )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor );
 			if( m_cursorFocusedPair.widget->isPressable() &&
@@ -487,6 +493,7 @@ namespace Colibri
 		}
 		m_mouseCursorButtonDown = false;
 		m_allowingScrollGestureWhileButtonDown = false;
+		m_scrollHappened = Ogre::Vector2::ZERO;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setKeyboardPrimaryPressed()
@@ -698,13 +705,26 @@ namespace Colibri
 				return true;
 			}
 
+			const Ogre::Vector2 oldNextScroll = window->getNextScroll();
+
 			if( animated )
 			{
-				window->setScrollAnimated( window->getNextScroll() + scrollAmount, true );
+				window->setScrollAnimated( oldNextScroll + scrollAmount, true );
 			}
 			else
 			{
-				window->setScrollImmediate( window->getNextScroll() + scrollAmount);
+				window->setScrollImmediate( oldNextScroll + scrollAmount );
+			}
+
+			if( window->hasScroll() )
+			{
+				Ogre::Vector2 nextScroll = window->getNextScroll();
+				const Ogre::Vector2 maxScroll = window->getMaxScroll();
+				nextScroll.makeFloor( maxScroll );
+				nextScroll.makeCeil( Ogre::Vector2::ZERO );
+
+				m_scrollHappened.x += std::abs( nextScroll.x - oldNextScroll.x );
+				m_scrollHappened.y += std::abs( nextScroll.y - oldNextScroll.y );
 			}
 
 			// If is possible the button we were highlighting is no longer behind the cursor
