@@ -72,11 +72,6 @@ namespace Colibri
 			for( size_t i = 0; i < States::NumStates; ++i )
 				m_stateInformation[i].materialName = *datablockName;
 
-			const Ogre::String *datablockName = datablock->getNameStr();
-			COLIBRI_ASSERT_LOW( datablockName );
-			for( size_t i = 0; i < States::NumStates; ++i )
-				m_stateInformation[i].materialName = *datablockName;
-
 			if( !m_rawMode )
 				flagDirty();
 		}
