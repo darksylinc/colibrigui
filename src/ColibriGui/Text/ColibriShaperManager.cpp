@@ -643,11 +643,22 @@ namespace Colibri
 		else
 		{
 			RangeVec::const_iterator itor = m_dirtyRanges.begin();
-			RangeVec::const_iterator end  = m_dirtyRanges.end();
+			RangeVec::const_iterator endt = m_dirtyRanges.end();
 
-			while( itor != end )
+			while( itor != endt )
 			{
-				m_glyphAtlasBuffer->upload( m_glyphAtlas + itor->offset, itor->offset, itor->size );
+				size_t offset = itor->offset;
+				size_t size = itor->size;
+#ifdef OGRE_VK_WORKAROUND_PVR_ALIGNMENT
+				if( Ogre::Workarounds::mPowerVRAlignment && offset > 0u )
+				{
+					const size_t newOffset =
+						Ogre::alignToPreviousMult( offset, Ogre::Workarounds::mPowerVRAlignment );
+					size += offset - newOffset;
+					offset = newOffset;
+				}
+#endif
+				m_glyphAtlasBuffer->upload( m_glyphAtlas + offset, offset, size );
 				++itor;
 			}
 
