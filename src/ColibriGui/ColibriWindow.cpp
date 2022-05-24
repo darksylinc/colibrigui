@@ -98,7 +98,7 @@ namespace Colibri
 			if( !hasScrollX() )
 				m_nextScroll.x = 0.0f;
 			if( !hasScrollY() )
-				m_nextScroll.x = 0.0f;
+				m_nextScroll.y = 0.0f;
 		}
 	}
 	//-------------------------------------------------------------------------
