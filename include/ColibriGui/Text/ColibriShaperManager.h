@@ -3,6 +3,8 @@
 
 #include "ColibriGui/ColibriGuiPrerequisites.h"
 
+#include "OgrePrerequisites.h"
+
 #include <vector>
 #include <map>
 #include <string>
@@ -18,10 +20,14 @@ typedef uint8_t UBiDiLevel;
 
 namespace Ogre
 {
+	class BufferPacked;
 	class HlmsColibri;
-	class TexBufferPacked;
 	class VaoManager;
 }
+
+#ifndef OGRE_MAKE_VERSION
+#	define OGRE_MAKE_VERSION( maj, min, patch ) ( ( maj << 16 ) | ( min << 8 ) | patch )
+#endif
 
 namespace Colibri
 {
@@ -115,9 +121,9 @@ namespace Colibri
 
 		uint16_t m_defaultBmpFontForRaster;
 
-		Ogre::TexBufferPacked * colibrigui_nullable m_glyphAtlasBuffer;
-		Ogre::HlmsColibri	* colibrigui_nullable m_hlms;
-		Ogre::VaoManager	* colibrigui_nullable m_vaoManager;
+		Ogre::BufferPacked *colibrigui_nullable m_glyphAtlasBuffer;
+		Ogre::HlmsColibri *colibrigui_nullable  m_hlms;
+		Ogre::VaoManager *colibrigui_nullable   m_vaoManager;
 
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );

@@ -60,7 +60,9 @@ namespace Ogre
 	class HlmsColibri : public HlmsUnlit
     {
 	protected:
-		TexBufferPacked *mGlyphAtlasBuffer;
+		// It's ReadOnlyBufferPacked on Mali
+		// It's TexBufferPacked everywhere else
+		BufferPacked *mGlyphAtlasBuffer;
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 		virtual void setupRootLayout( RootLayout &rootLayout );
@@ -84,7 +86,12 @@ namespace Ogre
 					 HlmsTypes type, const String &typeName );
 		virtual ~HlmsColibri();
 
-		void setGlyphAtlasBuffer( TexBufferPacked *texBuffer );
+		void setGlyphAtlasBuffer( BufferPacked *texBuffer );
+
+		/// Returns true if the GPU supports TexBufferPacked sizes so small
+		/// that we need a ReadOnlyBuffer instead.
+		static bool needsReadOnlyBuffer( const RenderSystemCapabilities *caps,
+										 const VaoManager               *vaoManager );
 
 		uint32 fillBuffersForColibri( const HlmsCache *cache,
 									  const QueuedRenderable &queuedRenderable,

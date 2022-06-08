@@ -13,17 +13,22 @@
 @property( colibri_gui && colibri_text )
 
 @piece( custom_ps_uniformDeclaration )
-	@property( syntax == glsl || syntax == glslvk )
-		@property( ogre_version < 2003000 )
-			#define vulkan_layout(x)
+	@property( !use_read_only_buffer )
+		@property( syntax == glsl || syntax == glslvk )
+			@property( ogre_version < 2003000 )
+				#define vulkan_layout(x)
+			@end
+			vulkan_layout( ogre_T2 ) uniform samplerBuffer glyphAtlas;
 		@end
-		vulkan_layout( ogre_T2 ) uniform samplerBuffer glyphAtlas;
-	@end
-	@property( syntax == hlsl )
-		Buffer<unorm float> glyphAtlas : register(t2);
-	@end
-	@property( syntax == metal )
-		, device const uchar *glyphAtlas [[buffer(TEX_SLOT_START+2)]]
+		@property( syntax == hlsl )
+			Buffer<unorm float> glyphAtlas : register(t2);
+		@end
+		@property( syntax == metal )
+			, device const uchar *glyphAtlas [[buffer(TEX_SLOT_START+2)]]
+		@end
+	@else
+		// Vulkan-only because there's only 1 GPU that needs this path (ARM Mali)
+		ReadOnlyBufferU( 2, uint, glyphAtlas );
 	@end
 @end
 
@@ -44,9 +49,20 @@
 		#define midf_c float
 	@end
 
-	glyphCol = bufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
-											  uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
-												   floor(inPs.uvText.x)) ) );
+	@property( !use_read_only_buffer )
+		glyphCol = bufferFetch1( glyphAtlas, int( inPs.glyphOffsetStart +
+												  uint(floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
+													   floor(inPs.uvText.x)) ) );
+	@else
+		uint glyphIdxDiv4 = inPs.glyphOffsetStart +
+							uint( floor(inPs.uvText.y) * float(inPs.pixelsPerRow) +
+								  floor(inPs.uvText.x) );
+		const uint glyphSubIdx = glyphIdxDiv4 & 0x3u;
+		glyphIdxDiv4 = glyphIdxDiv4 >> 2u;
+		const uint glyphColTmp = readOnlyFetch1( glyphAtlas, glyphIdxDiv4 );
+		glyphCol = unpackUnorm4x8(glyphColTmp)[glyphSubIdx];
+	@end
+
 	@property( syntax == metal )
 		diffuseCol.w *= midf_c( unpack_unorm4x8_to_float( glyphCol ).x );
 	@else

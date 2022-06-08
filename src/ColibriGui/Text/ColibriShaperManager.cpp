@@ -7,6 +7,9 @@
 
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#	include "Vao/OgreReadOnlyBufferPacked.h"
+#endif
 #include "Vao/OgreTexBufferPacked.h"
 #include "Vao/OgreVaoManager.h"
 
@@ -96,7 +99,18 @@ namespace Colibri
 			m_hlms->setGlyphAtlasBuffer( 0 );
 		if( m_vaoManager && m_glyphAtlasBuffer )
 		{
-			m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+			if( m_glyphAtlasBuffer->getBufferPackedType() != Ogre::BP_TYPE_TEX )
+			{
+				m_vaoManager->destroyReadOnlyBuffer(
+					static_cast<Ogre::ReadOnlyBufferPacked *>( m_glyphAtlasBuffer ) );
+			}
+			else
+#endif
+			{
+				m_vaoManager->destroyTexBuffer(
+					static_cast<Ogre::TexBufferPacked *>( m_glyphAtlasBuffer ) );
+			}
 			m_glyphAtlasBuffer = 0;
 		}
 
@@ -622,14 +636,39 @@ namespace Colibri
 	{
 		if( (!m_glyphAtlasBuffer ||
 			 m_atlasCapacity !=
-			 m_glyphAtlasBuffer->getNumElements() * m_glyphAtlasBuffer->getBytesPerElement()) &&
+			 m_glyphAtlasBuffer->getTotalSizeBytes()) &&
 			m_atlasCapacity > 0u )
 		{
-			//Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
+			// Local buffer has changed (i.e. growAtlas was called). Realloc the GPU buffer.
 			if( m_glyphAtlasBuffer )
-				m_vaoManager->destroyTexBuffer( m_glyphAtlasBuffer );
-			m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PFG_R8_UNORM, m_atlasCapacity,
-																Ogre::BT_DEFAULT, 0, false );
+			{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+				if( m_glyphAtlasBuffer->getBufferPackedType() != Ogre::BP_TYPE_TEX )
+				{
+					m_vaoManager->destroyReadOnlyBuffer(
+						static_cast<Ogre::ReadOnlyBufferPacked *>( m_glyphAtlasBuffer ) );
+				}
+				else
+#endif
+				{
+					m_vaoManager->destroyTexBuffer(
+						static_cast<Ogre::TexBufferPacked *>( m_glyphAtlasBuffer ) );
+				}
+			}
+
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+			if( Ogre::HlmsColibri::needsReadOnlyBuffer( m_hlms->getRenderSystem()->getCapabilities(),
+														m_vaoManager ) )
+			{
+				m_glyphAtlasBuffer = m_vaoManager->createReadOnlyBuffer(
+					Ogre::PFG_R8_UNORM, m_atlasCapacity, Ogre::BT_DEFAULT, 0, false );
+			}
+			else
+#endif
+			{
+				m_glyphAtlasBuffer = m_vaoManager->createTexBuffer( Ogre::PFG_R8_UNORM, m_atlasCapacity,
+																	Ogre::BT_DEFAULT, 0, false );
+			}
 			m_hlms->setGlyphAtlasBuffer( m_glyphAtlasBuffer );
 
 			// The 1st byte is taken. We use this byte to render arbitrary fixed-colour

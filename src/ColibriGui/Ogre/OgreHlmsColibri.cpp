@@ -41,6 +41,7 @@ THE SOFTWARE.
 #include "OgreHighLevelGpuProgramManager.h"
 #include "OgreHighLevelGpuProgram.h"
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#	include "Vao/OgreReadOnlyBufferPacked.h"
 #	include "OgreRootLayout.h"
 #endif
 
@@ -61,6 +62,8 @@ THE SOFTWARE.
 #include "CommandBuffer/OgreCommandBuffer.h"
 #include "CommandBuffer/OgreCbTexture.h"
 #include "CommandBuffer/OgreCbShaderBuffer.h"
+
+#include "OgreWorkarounds.h"
 
 namespace Ogre
 {
@@ -95,8 +98,16 @@ namespace Ogre
 		if( getProperty( "colibri_text" ) )
 		{
 			DescBindingRange *descBindingRanges = rootLayout.mDescBindingRanges[0];
-			descBindingRanges[DescBindingTypes::TexBuffer].start = 2u;
-			descBindingRanges[DescBindingTypes::TexBuffer].end = 3u;
+
+			if( getProperty( "use_read_only_buffer" ) )
+			{
+				descBindingRanges[DescBindingTypes::ReadOnlyBuffer].end = 3u;
+			}
+			else
+			{
+				descBindingRanges[DescBindingTypes::TexBuffer].start = 2u;
+				descBindingRanges[DescBindingTypes::TexBuffer].end = 3u;
+			}
 		}
 	}
 #endif
@@ -147,12 +158,36 @@ namespace Ogre
 
 			setProperty( "ogre_version", ( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 +
 										   OGRE_VERSION_PATCH ) );
+
+			if( needsReadOnlyBuffer( mRenderSystem->getCapabilities(), mRenderSystem->getVaoManager() ) )
+				setProperty( "use_read_only_buffer", 1 );
 		}
 	}
 	//-----------------------------------------------------------------------------------
-	void HlmsColibri::setGlyphAtlasBuffer( TexBufferPacked *texBuffer )
+	void HlmsColibri::setGlyphAtlasBuffer( BufferPacked *texBuffer )
 	{
 		mGlyphAtlasBuffer = texBuffer;
+	}
+	//-----------------------------------------------------------------------------------
+	bool HlmsColibri::needsReadOnlyBuffer( const RenderSystemCapabilities *caps,
+										   const VaoManager *vaoManager )
+	{
+		// For Qualcomm, see OGRE_VK_WORKAROUND_ADRENO_5XX_6XX_MINCAPS
+		//
+		// PowerVR 8000 also seems to have the same problem with VERY early drivers
+		// but we couldn't test what happens if we force it.
+		// Their PVR 6000 family also seem to report this. Untested.
+		//
+		// Mali GPUs are confirmed to actually need this path.
+#ifdef OGRE_VK_WORKAROUND_ADRENO_5XX_6XX_MINCAPS
+		if( !Workarounds::mAdreno5xx6xxMinCaps )
+#endif
+		{
+			if( vaoManager->getTexBufferMaxSize() < 16 * 1024 * 1024 )
+				return true;
+		}
+
+		return false;
 	}
 	//-----------------------------------------------------------------------------------
 	uint32 HlmsColibri::fillBuffersForColibri( const HlmsCache *cache,
@@ -201,8 +236,20 @@ namespace Ogre
 			//layout(binding = 3) uniform samplerBuffer glyphAtlas
 			if( mGlyphAtlasBuffer )
 			{
-				*commandBuffer->addCommand<CbShaderBuffer>() =
-						CbShaderBuffer( PixelShader, 2, mGlyphAtlasBuffer, 0, 0 );
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+				if( mGlyphAtlasBuffer->getBufferPackedType() != Ogre::BP_TYPE_TEX )
+				{
+					*commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer(
+						PixelShader, 2, static_cast<Ogre::ReadOnlyBufferPacked *>( mGlyphAtlasBuffer ),
+						0, 0 );
+				}
+				else
+#endif
+				{
+					*commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer(
+						PixelShader, 2, static_cast<Ogre::TexBufferPacked *>( mGlyphAtlasBuffer ), 0,
+						0 );
+				}
 			}
 
             rebindTexBuffer( commandBuffer );
