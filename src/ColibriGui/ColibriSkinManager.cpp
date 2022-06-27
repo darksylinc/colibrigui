@@ -244,6 +244,16 @@ namespace Colibri
 
 						skinInfo.stateInfo.centerAspectRatio = uvTopLeftWidthHeight.z /
 															   uvTopLeftWidthHeight.w;
+
+						if( std::isnan( skinInfo.stateInfo.centerAspectRatio ) )
+						{
+							errorMsg.clear();
+							errorMsg.a( "[SkinManager::loadSkins]: Invalid aspect ratio for ",
+										itor->name.GetString(), " in ", filename );
+							log->log( errorMsg.c_str(), LogSeverity::Warning );
+						}
+
+						COLIBRI_ASSERT_LOW( !std::isnan( skinInfo.stateInfo.centerAspectRatio ) );
 					}
 
 					itTmp = gridValue.FindMember( "enclosing" );
@@ -299,6 +309,17 @@ namespace Colibri
 							{
 								skinInfo.stateInfo.centerAspectRatio = uvTopLeftWidthHeight.z /
 																	   uvTopLeftWidthHeight.w;
+
+								if( std::isnan( skinInfo.stateInfo.centerAspectRatio ) )
+								{
+									errorMsg.clear();
+									errorMsg.a( "[SkinManager::loadSkins]: Invalid aspect ratio for ",
+												itor->name.GetString(), " in ", filename );
+									log->log( errorMsg.c_str(), LogSeverity::Warning );
+								}
+
+								COLIBRI_ASSERT_LOW(
+									!std::isnan( skinInfo.stateInfo.centerAspectRatio ) );
 							}
 						}
 					}

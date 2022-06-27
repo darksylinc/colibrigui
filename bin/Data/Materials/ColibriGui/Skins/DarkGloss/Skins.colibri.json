@@ -67,7 +67,7 @@
             "tex_resolution" : [1, 1],
             "grid_uv" :
             {
-                "all" : [[0, 0, 1, 1], [0, 0]]
+                "all" :[0, 0, 1, 1]
             },
             "borders" :
             {
