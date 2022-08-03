@@ -47,7 +47,8 @@ namespace Colibri
 		m_fontTexture( 0 ),
 		m_datablock( 0 ),
 		m_fontIdx(
-			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
+			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) ),
+		m_bilinearFilter( true )
 	{
 		memset( &m_emptyChar, 0, sizeof( m_emptyChar ) );
 
@@ -164,6 +165,25 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void BmpFont::setBilinearFilter( bool bBilinearFilter )
+	{
+		if( m_bilinearFilter == bBilinearFilter )
+			return;
+
+		m_bilinearFilter = bBilinearFilter;
+
+		if( m_datablock )
+		{
+			COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibriDatablock *>( m_datablock ) );
+			Ogre::HlmsColibriDatablock *datablock =
+				static_cast<Ogre::HlmsColibriDatablock *>( m_datablock );
+			Ogre::HlmsSamplerblock samplerblock;
+			if( !m_bilinearFilter )
+				samplerblock.setFiltering( Ogre::TFO_NONE );
+			datablock->setSamplerblock( 0u, samplerblock );
+		}
+	}
+	//-------------------------------------------------------------------------
 	void BmpFont::setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager )
 	{
 		m_fontTexture = textureManager->createOrRetrieveTexture(
@@ -182,6 +202,12 @@ namespace Colibri
 											 Ogre::HlmsParamVec(), false );
 		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibriDatablock *>( m_datablock ) );
 		Ogre::HlmsColibriDatablock *datablock = static_cast<Ogre::HlmsColibriDatablock *>( m_datablock );
+		if( !m_bilinearFilter )
+		{
+			Ogre::HlmsSamplerblock samplerblock;
+			samplerblock.setFiltering( Ogre::TFO_NONE );
+			datablock->setSamplerblock( 0u, samplerblock );
+		}
 		datablock->setTexture( 0u, m_fontTexture );
 	}
 	//-------------------------------------------------------------------------

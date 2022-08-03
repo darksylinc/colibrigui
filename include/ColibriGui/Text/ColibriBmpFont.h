@@ -57,6 +57,8 @@ namespace Colibri
 
 		uint16_t m_fontIdx;
 
+		bool m_bilinearFilter;
+
 		/** Populates m_chars
 		@param inFntDat
 			Font file string. It's actually const, but we temporarily swap
@@ -67,6 +69,14 @@ namespace Colibri
 	public:
 		BmpFont( const char *fontLocation, ShaperManager *shaperManager );
 		~BmpFont();
+
+		/**
+		@brief setBilinearFilter
+			Whether to use bilinear or point filtering
+		@param bBilinearFilter
+			True to use bilinear (default)
+		*/
+		void setBilinearFilter( bool bBilinearFilter );
 
 		void setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager );
 

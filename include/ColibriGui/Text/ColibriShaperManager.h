@@ -151,7 +151,7 @@ namespace Colibri
 		///			means it will appear twice in the array
 		const ShaperVec& getShapers() const			{ return m_shapers; }
 
-		void addBmpFont( const char *fontPath );
+		void addBmpFont( const char *fontPath, bool bBilinearFilter = true );
 
 		BmpFont *getBmpFont( size_t idx ) { return m_bmpFonts[idx]; }
 

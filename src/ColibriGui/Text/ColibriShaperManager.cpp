@@ -161,9 +161,10 @@ namespace Colibri
 		m_useVerticalLayoutWhenAvailable = useVerticalLayoutWhenAvailable;
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::addBmpFont( const char *fontPath )
+	void ShaperManager::addBmpFont( const char *fontPath, bool bBilinearFilter )
 	{
 		BmpFont *bmpFont = new BmpFont( fontPath, this );
+		bmpFont->setBilinearFilter( bBilinearFilter );
 		m_bmpFonts.push_back( bmpFont );
 	}
 	//-------------------------------------------------------------------------
