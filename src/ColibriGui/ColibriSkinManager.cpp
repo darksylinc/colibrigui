@@ -435,6 +435,7 @@ namespace Colibri
 				skinPack.sliderHandleProportion[1] = 0.8f;
 				skinPack.sliderPositionTopLeftProportion = 0.5f;
 				skinPack.sliderAlwaysInside = false;
+				skinPack.sliderExcludeBorders = false;
 
 				skinPack.name = itor->name.GetString();
 				const rapidjson::Value &skinValue = itor->value;
@@ -507,6 +508,10 @@ namespace Colibri
 				itTmp = skinValue.FindMember( "slider_always_inside" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsBool() )
 					skinPack.sliderAlwaysInside = itTmp->value.GetBool();
+
+				itTmp = skinValue.FindMember( "slider_exclude_borders" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsBool() )
+					skinPack.sliderExcludeBorders = itTmp->value.GetBool();
 
 				const char *states[States::NumStates] =
 				{

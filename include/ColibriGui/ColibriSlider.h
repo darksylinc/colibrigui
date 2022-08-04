@@ -38,6 +38,9 @@ namespace Colibri
 		float         m_handleTopLeftProportion;
 		bool          m_vertical;
 		bool          m_alwaysInside;
+		/// When true, the handle cannot get inside the borders of the slider
+		/// When this is true, usually m_alwaysInside will be true
+		bool m_excludeBorders;
 
 	protected:
 		void updateSlider();

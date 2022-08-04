@@ -18,7 +18,8 @@ namespace Colibri
 		m_handleProportion( 0.8f ),
 		m_handleTopLeftProportion( 0.5f ),
 		m_vertical( false ),
-		m_alwaysInside( false )
+		m_alwaysInside( false ),
+		m_excludeBorders( false )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
@@ -49,6 +50,7 @@ namespace Colibri
 		m_handleProportion[1] = defaultSkinPack->sliderHandleProportion[1];
 		m_handleTopLeftProportion = defaultSkinPack->sliderPositionTopLeftProportion;
 		m_alwaysInside = defaultSkinPack->sliderAlwaysInside;
+		m_excludeBorders = defaultSkinPack->sliderExcludeBorders;
 
 		getSliderLine()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderLine ) );
 		getSliderHandle()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderHandle ) );
@@ -85,6 +87,7 @@ namespace Colibri
 			m_handleProportion[1] = linePack->sliderHandleProportion[1];
 			m_handleTopLeftProportion = linePack->sliderPositionTopLeftProportion;
 			m_alwaysInside = linePack->sliderAlwaysInside;
+			m_excludeBorders = linePack->sliderExcludeBorders;
 
 			getSliderLine()->setSkinPack( linePackName );
 		}
@@ -122,32 +125,33 @@ namespace Colibri
 		if( !m_layers[0] )
 			return;  //_initialize hasn't been called yet
 
-		const Ogre::Vector2 frameSize = getSize();
+		const Ogre::Vector2 fullSize = getSize();
+		const Ogre::Vector2 frameSize =
+			fullSize - ( m_excludeBorders ? m_layers[0]->getBorderCombined() : Ogre::Vector2::ZERO );
 
-		// const Ogre::Vector2 frameOrigin = getLocalTopLeft();
-		const Ogre::Vector2 frameOrigin = Ogre::Vector2::ZERO;
+		const Ogre::Vector2 frameOrigin =
+			m_excludeBorders ? m_layers[0]->getBorderTopLeft() : Ogre::Vector2::ZERO;
 
 		if( !m_vertical )
 		{
 			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
 
 			const float sliderLineHeight = m_lineSize;
-			const Ogre::Vector2 handleSize = m_handleProportion * frameSize.y;
+			const Ogre::Vector2 handleSize = m_handleProportion * fullSize.y;
 			const float handlePadding = m_alwaysInside ? 0.0f : handleSize.x;
 
-			// Slider line
-			const float lineTop = frameOrigin.y + ( frameSize.y - sliderLineHeight ) * 0.5f;
+			// Slider line (centered)
+			const float lineTop = ( frameSize.y - sliderLineHeight ) * 0.5f;
 
 			// Horizontally: Half a handle is added to the line on each side as padding.
 			// Vertically: Center the line
-			m_layers[0]->setTopLeft( Ogre::Vector2( frameOrigin.x + handlePadding * 0.5f, lineTop ) );
+			m_layers[0]->setTopLeft( Ogre::Vector2( handlePadding * 0.5f, lineTop ) );
 
 			// Other than the padding, the width is used to its full, but the height is always constant.
-			const float reducedLineWidth = frameSize.x - handlePadding;
+			const float reducedLineWidth = fullSize.x - handlePadding;
 			m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
 
-			const float slideableArea =
-				m_alwaysInside ? ( frameSize.x - handleSize.x ) : reducedLineWidth;
+			const float slideableArea = frameSize.x - handleSize.x;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
@@ -171,22 +175,21 @@ namespace Colibri
 		else
 		{
 			const float sliderLineWidth = m_lineSize;
-			const Ogre::Vector2 handleSize = m_handleProportion * frameSize.x;
+			const Ogre::Vector2 handleSize = m_handleProportion * fullSize.x;
 			const float handlePadding = m_alwaysInside ? 0.0f : handleSize.y;
 
-			// Slider line
-			const float lineLeft = frameOrigin.x + ( frameSize.x - sliderLineWidth ) * 0.5f;
+			// Slider line (centered)
+			const float lineLeft = ( frameSize.x - sliderLineWidth ) * 0.5f;
 
 			// Vertically: Half a handle is added to the line on each side as padding.
 			// Horizontally: Center the line
-			m_layers[0]->setTopLeft( Ogre::Vector2( lineLeft, frameOrigin.y + handlePadding * 0.5f ) );
+			m_layers[0]->setTopLeft( Ogre::Vector2( lineLeft, handlePadding * 0.5f ) );
 
 			// Other than the padding, the width is used to its full, but the height is always constant.
-			const float reducedLineHeight = frameSize.y - handlePadding;
+			const float reducedLineHeight = fullSize.y - handlePadding;
 			m_layers[0]->setSize( Ogre::Vector2( sliderLineWidth, reducedLineHeight ) );
 
-			const float slideableArea =
-				m_alwaysInside ? ( frameSize.y - handleSize.y ) : reducedLineHeight;
+			const float slideableArea = frameSize.y - handleSize.y;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );

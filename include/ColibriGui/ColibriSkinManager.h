@@ -41,6 +41,7 @@ namespace Colibri
 		float sliderHandleProportion[2];
 		float sliderPositionTopLeftProportion;
 		bool  sliderAlwaysInside;
+		bool  sliderExcludeBorders;
 	};
 
 	typedef std::map<Ogre::IdString, SkinInfo> SkinInfoMap;
