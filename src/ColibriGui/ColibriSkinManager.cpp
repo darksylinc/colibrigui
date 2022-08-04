@@ -433,6 +433,7 @@ namespace Colibri
 				skinPack.sliderLineSize = 5.0f;
 				skinPack.sliderHandleProportion[0] = 0.8f;
 				skinPack.sliderHandleProportion[1] = 0.8f;
+				skinPack.sliderPositionTopLeftProportion = 0.5f;
 				skinPack.sliderAlwaysInside = false;
 
 				skinPack.name = itor->name.GetString();
