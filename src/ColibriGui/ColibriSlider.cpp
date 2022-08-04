@@ -19,7 +19,8 @@ namespace Colibri
 		m_handleTopLeftProportion( 0.5f ),
 		m_vertical( false ),
 		m_alwaysInside( false ),
-		m_excludeBorders( false )
+		m_excludeBorders( false ),
+		m_handleBorderIsHalo( false )
 	{
 		memset( m_layers, 0, sizeof( m_layers ) );
 
@@ -51,6 +52,7 @@ namespace Colibri
 		m_handleTopLeftProportion = defaultSkinPack->sliderPositionTopLeftProportion;
 		m_alwaysInside = defaultSkinPack->sliderAlwaysInside;
 		m_excludeBorders = defaultSkinPack->sliderExcludeBorders;
+		m_handleBorderIsHalo = defaultSkinPack->sliderHandleBorderIsHalo;
 
 		getSliderLine()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderLine ) );
 		getSliderHandle()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderHandle ) );
@@ -88,6 +90,7 @@ namespace Colibri
 			m_handleTopLeftProportion = linePack->sliderPositionTopLeftProportion;
 			m_alwaysInside = linePack->sliderAlwaysInside;
 			m_excludeBorders = linePack->sliderExcludeBorders;
+			m_handleBorderIsHalo = linePack->sliderHandleBorderIsHalo;
 
 			getSliderLine()->setSkinPack( linePackName );
 		}
@@ -132,6 +135,11 @@ namespace Colibri
 		const Ogre::Vector2 frameOrigin =
 			m_excludeBorders ? m_layers[0]->getBorderTopLeft() : Ogre::Vector2::ZERO;
 
+		const Ogre::Vector2 handleTopLeftBorder =
+			m_handleBorderIsHalo ? m_layers[1]->getBorderTopLeft() : Ogre::Vector2::ZERO;
+		const Ogre::Vector2 handleCombinedBorder =
+			m_handleBorderIsHalo ? m_layers[1]->getBorderCombined() : Ogre::Vector2::ZERO;
+
 		if( !m_vertical )
 		{
 			const bool rightToLeft = m_manager->shouldSwapRTL( HorizWidgetDir::AutoLTR );
@@ -151,7 +159,7 @@ namespace Colibri
 			const float reducedLineWidth = fullSize.x - handlePadding;
 			m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
 
-			const float slideableArea = frameSize.x - handleSize.x;
+			const float slideableArea = frameSize.x - handleSize.x + handleCombinedBorder.x;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
@@ -163,7 +171,7 @@ namespace Colibri
 			const float targetSliderValue = rightToLeft ? ( 1.0f - sliderValueUnorm ) : sliderValueUnorm;
 
 			Ogre::Vector2 handleTopLeft(
-				frameOrigin.x + ( slideableArea * targetSliderValue ),
+				frameOrigin.x + ( slideableArea * targetSliderValue ) - handleTopLeftBorder.x,
 				Ogre::Math::lerp( mostTopCenter, mostBottomCenter, m_handleTopLeftProportion ) -
 					handleSize.y * 0.5f );
 			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
@@ -189,7 +197,7 @@ namespace Colibri
 			const float reducedLineHeight = fullSize.y - handlePadding;
 			m_layers[0]->setSize( Ogre::Vector2( sliderLineWidth, reducedLineHeight ) );
 
-			const float slideableArea = frameSize.y - handleSize.y;
+			const float slideableArea = frameSize.y - handleSize.y + handleCombinedBorder.y;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
@@ -202,7 +210,7 @@ namespace Colibri
 			Ogre::Vector2 handleTopLeft(
 				Ogre::Math::lerp( mostLeftCenter, mostRightCenter, m_handleTopLeftProportion ) -
 					handleSize.x * 0.5f,
-				frameOrigin.y + ( slideableArea * targetSliderValue ) );
+				frameOrigin.y + ( slideableArea * targetSliderValue ) - handleTopLeftBorder.y );
 			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
 			// However it still does a very good job at preventing the handle from "wobbling" as
 			// the user moves it

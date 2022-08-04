@@ -41,6 +41,12 @@ namespace Colibri
 		/// When true, the handle cannot get inside the borders of the slider
 		/// When this is true, usually m_alwaysInside will be true
 		bool m_excludeBorders;
+		/// When true, the handle borders will get "outside" the slider.
+		///
+		/// This can happen if the handle contains a "halo" or "glow" around
+		/// it and therefore only the handle's main body needs to be constrained
+		/// within the slider's body
+		bool m_handleBorderIsHalo;
 
 	protected:
 		void updateSlider();

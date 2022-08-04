@@ -212,7 +212,8 @@
             "slider_handle_proportion" : [0.8, 0.8],
             "slider_handle_position_top_left_proportion" : 0.5,
             "slider_always_inside" : false,
-            "slider_exclude_borders" : true
+            "slider_exclude_borders" : false,
+            "slider_handle_border_is_halo" : false
         }
     },
 
