@@ -39,6 +39,7 @@ namespace Colibri
 
 		float sliderLineSize;
 		float sliderHandleProportion[2];
+		float sliderPositionTopLeftProportion;
 		bool  sliderAlwaysInside;
 	};
 

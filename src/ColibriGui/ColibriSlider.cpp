@@ -16,6 +16,7 @@ namespace Colibri
 		m_cursorOffset( 0.0f ),
 		m_lineSize( 5.0f ),
 		m_handleProportion( 0.8f ),
+		m_handleTopLeftProportion( 0.5f ),
 		m_vertical( false ),
 		m_alwaysInside( false )
 	{
@@ -46,6 +47,7 @@ namespace Colibri
 		m_lineSize = defaultSkinPack->sliderLineSize;
 		m_handleProportion[0] = defaultSkinPack->sliderHandleProportion[0];
 		m_handleProportion[1] = defaultSkinPack->sliderHandleProportion[1];
+		m_handleTopLeftProportion = defaultSkinPack->sliderPositionTopLeftProportion;
 		m_alwaysInside = defaultSkinPack->sliderAlwaysInside;
 
 		getSliderLine()->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::SliderLine ) );
@@ -81,6 +83,7 @@ namespace Colibri
 			m_lineSize = linePack->sliderLineSize;
 			m_handleProportion[0] = linePack->sliderHandleProportion[0];
 			m_handleProportion[1] = linePack->sliderHandleProportion[1];
+			m_handleTopLeftProportion = linePack->sliderPositionTopLeftProportion;
 			m_alwaysInside = linePack->sliderAlwaysInside;
 
 			getSliderLine()->setSkinPack( linePackName );
@@ -149,11 +152,16 @@ namespace Colibri
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
 
+			const float mostTopCenter = lineTop - handleSize.y * 0.5f;
+			const float mostBottomCenter = lineTop + sliderLineHeight + handleSize.y * 0.5f;
+
 			const float sliderValueUnorm = getCurrentValueUnorm();
 			const float targetSliderValue = rightToLeft ? ( 1.0f - sliderValueUnorm ) : sliderValueUnorm;
 
-			Ogre::Vector2 handleTopLeft( frameOrigin.x + ( slideableArea * targetSliderValue ),
-										 lineTop + ( sliderLineHeight - handleSize.y ) * 0.5f );
+			Ogre::Vector2 handleTopLeft(
+				frameOrigin.x + ( slideableArea * targetSliderValue ),
+				Ogre::Math::lerp( mostTopCenter, mostBottomCenter, m_handleTopLeftProportion ) -
+					handleSize.y * 0.5f );
 			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
 			// However it still does a very good job at preventing the handle from "wobbling" as
 			// the user moves it
@@ -183,10 +191,15 @@ namespace Colibri
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
 
+			const float mostLeftCenter = lineLeft - handleSize.x * 0.5f;
+			const float mostRightCenter = lineLeft + sliderLineWidth + handleSize.x * 0.5f;
+
 			const float sliderValueUnorm = getCurrentValueUnorm();
 			const float targetSliderValue = 1.0f - sliderValueUnorm;
-			Ogre::Vector2 handleTopLeft( lineLeft + ( sliderLineWidth - handleSize.x ) * 0.5f,
-										 frameOrigin.y + ( slideableArea * targetSliderValue ) );
+			Ogre::Vector2 handleTopLeft(
+				Ogre::Math::lerp( mostLeftCenter, mostRightCenter, m_handleTopLeftProportion ) -
+					handleSize.x * 0.5f,
+				frameOrigin.y + ( slideableArea * targetSliderValue ) );
 			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
 			// However it still does a very good job at preventing the handle from "wobbling" as
 			// the user moves it
@@ -287,10 +300,12 @@ namespace Colibri
 		m_manager->callActionListeners( this, Action::ValueChanged );
 	}
 	//-------------------------------------------------------------------------
-	void Slider::setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize )
+	void Slider::setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize,
+								  const float handleTopLeftProportion )
 	{
 		m_handleProportion = handleProportion;
 		m_lineSize = lineSize;
+		m_handleTopLeftProportion = handleTopLeftProportion;
 		updateSlider();
 	}
 	//-------------------------------------------------------------------------

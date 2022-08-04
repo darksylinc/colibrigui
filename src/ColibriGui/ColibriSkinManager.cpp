@@ -496,6 +496,13 @@ namespace Colibri
 					}
 				}
 
+				itTmp = skinValue.FindMember( "slider_handle_position_top_left_proportion" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+				{
+					skinPack.sliderPositionTopLeftProportion =
+						static_cast<float>( itTmp->value.GetDouble() );
+				}
+
 				itTmp = skinValue.FindMember( "slider_always_inside" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsBool() )
 					skinPack.sliderAlwaysInside = itTmp->value.GetBool();

@@ -35,6 +35,7 @@ namespace Colibri
 		float         m_cursorOffset;
 		float         m_lineSize;
 		Ogre::Vector2 m_handleProportion;
+		float         m_handleTopLeftProportion;
 		bool          m_vertical;
 		bool          m_alwaysInside;
 
@@ -73,9 +74,22 @@ namespace Colibri
 		@param lineSize
 			Should be in range [0; inf)
 			In virtual canvas units
+		@param handleTopLeftProportion
+			Specifies the positioning of the handle as a proportion of the Slider's size
+
+			Acts as top-bottom proportion when horizontal
+			Acts as left-right proportion when vertical
+
+			In range (-inf; inf) but typical range is [0; 1]
+			where 0 means most-left of the slider line and 1 means most-right of it
+			And 0.5 means the center.
+
+			This value is not affected by ColibriManager::swapRTLControls
 		*/
-		void setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize );
+		void setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize,
+							  const float handleTopLeftProportion );
 		const Ogre::Vector2 &getHandleProportion() const { return m_handleProportion; }
+		float                getHandleTopLeftProportion() const { return m_handleTopLeftProportion; }
 		float                getLineSize() const { return m_lineSize; }
 
 		/** Sets the current value of the slider. If the value is outside of range,
