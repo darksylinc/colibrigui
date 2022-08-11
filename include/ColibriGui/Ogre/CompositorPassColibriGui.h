@@ -23,16 +23,16 @@ namespace Ogre
 	class CompositorPassColibriGui : public CompositorPass
 	{
 	protected:
-		SceneManager    *mSceneManager;
+		SceneManager            *mSceneManager;
+		Camera                  *mCamera;
 		Colibri::ColibriManager *m_colibriManager;
 
 		void setResolutionToColibri( uint32 width, uint32 height );
 
 	public:
-		CompositorPassColibriGui( const CompositorPassColibriGuiDef *definition,
-								  SceneManager *sceneManager,
-								  const RenderTargetViewDef *rtv, CompositorNode *parentNode,
-								  Colibri::ColibriManager *colibriManager );
+		CompositorPassColibriGui( const CompositorPassColibriGuiDef *definition, Camera *defaultCamera,
+								  SceneManager *sceneManager, const RenderTargetViewDef *rtv,
+								  CompositorNode *parentNode, Colibri::ColibriManager *colibriManager );
 
 		virtual void execute( const Camera *lodCamera );
 

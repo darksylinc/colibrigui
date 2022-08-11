@@ -6,6 +6,7 @@
 #include "Compositor/OgreCompositorNode.h"
 #include "Compositor/OgreCompositorWorkspace.h"
 #include "Compositor/OgreCompositorWorkspaceListener.h"
+#include "OgreCamera.h"
 
 #include "OgrePixelFormatGpuUtils.h"
 #include "OgreRenderSystem.h"
@@ -14,12 +15,14 @@
 namespace Ogre
 {
 	CompositorPassColibriGui::CompositorPassColibriGui( const CompositorPassColibriGuiDef *definition,
+														Camera *defaultCamera,
 														SceneManager *sceneManager,
 														const RenderTargetViewDef *rtv,
 														CompositorNode *parentNode,
 														Colibri::ColibriManager *colibriManager ) :
 		CompositorPass( definition, parentNode ),
 		mSceneManager( sceneManager ),
+		mCamera( 0 ),
 		m_colibriManager( colibriManager ),
 		mDefinition( definition )
 	{
@@ -27,6 +30,7 @@ namespace Ogre
 		if( !definition->mSkipLoadStoreSemantics )
 			initialize( rtv );
 #endif
+		mCamera = defaultCamera;
 
 		TextureGpu *texture = mParentNode->getDefinedTexture( rtv->colourAttachments[0].textureName );
 		setResolutionToColibri( texture->getWidth(), texture->getHeight() );
@@ -52,11 +56,17 @@ namespace Ogre
 		setRenderPassDescToCurrent();
 #endif
 
+		SceneManager *sceneManager = mCamera->getSceneManager();
+		sceneManager->_setCamerasInProgress( CamerasInProgress( mCamera ) );
+		sceneManager->_setCurrentCompositorPass( this );
+
 		//Fire the listener in case it wants to change anything
 		notifyPassPreExecuteListeners();
 
 		m_colibriManager->prepareRenderCommands();
 		m_colibriManager->render();
+
+		sceneManager->_setCurrentCompositorPass( 0 );
 
 		notifyPassPosExecuteListeners();
 

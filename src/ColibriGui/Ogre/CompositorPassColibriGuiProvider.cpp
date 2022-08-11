@@ -34,8 +34,8 @@ namespace Ogre
 		COLIBRI_ASSERT( dynamic_cast<const CompositorPassColibriGuiDef *>( definition ) );
 		const CompositorPassColibriGuiDef *colibriGuiDef =
 			static_cast<const CompositorPassColibriGuiDef *>( definition );
-		return OGRE_NEW CompositorPassColibriGui( colibriGuiDef, sceneManager, rtvDef, parentNode,
-												  m_colibriManager );
+		return OGRE_NEW CompositorPassColibriGui( colibriGuiDef, defaultCamera, sceneManager, rtvDef,
+												  parentNode, m_colibriManager );
 	}
 	//-------------------------------------------------------------------------
 	static bool ScriptTranslatorGetBoolean( const AbstractNodePtr &node, bool *result )
