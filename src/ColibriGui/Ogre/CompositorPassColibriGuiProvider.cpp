@@ -5,6 +5,7 @@
 #include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
 
 #include "OgreLogManager.h"
+#include "OgreScriptTranslator.h"
 #include "OgreStringConverter.h"
 
 namespace Ogre
@@ -51,11 +52,13 @@ namespace Ogre
 		return false;
 	}
 	//-------------------------------------------------------------------------
-	void CompositorPassColibriGuiProvider::translateCustomPass( const AbstractNodePtr &node,
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
+	void CompositorPassColibriGuiProvider::translateCustomPass( ScriptCompiler *compiler,
+																const AbstractNodePtr &node,
+																IdString customId,
 																CompositorPassDef *customPassDef )
 	{
-#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
-		if( !dynamic_cast<const CompositorPassColibriGuiDef *>( customPassDef ) )
+		if( customId != "colibri_gui" )
 			return;  // Custom pass not created by us
 
 		CompositorPassColibriGuiDef *colibriGuiDef =
@@ -63,12 +66,29 @@ namespace Ogre
 
 		ObjectAbstractNode *obj = reinterpret_cast<ObjectAbstractNode *>( node.get() );
 
+		obj->context = Any( static_cast<CompositorPassDef *>( colibriGuiDef ) );
+
 		AbstractNodeList::const_iterator itor = obj->children.begin();
 		AbstractNodeList::const_iterator endt = obj->children.end();
 
 		while( itor != endt )
 		{
-			if( ( *itor )->type == ANT_PROPERTY )
+			if( ( *itor )->type == ANT_OBJECT )
+			{
+				ObjectAbstractNode *childObj = reinterpret_cast<ObjectAbstractNode *>( itor->get() );
+
+				if( childObj->id == ID_LOAD )
+				{
+					CompositorLoadActionTranslator compositorLoadActionTranslator;
+					compositorLoadActionTranslator.translate( compiler, *itor );
+				}
+				else if( childObj->id == ID_STORE )
+				{
+					CompositorStoreActionTranslator compositorStoreActionTranslator;
+					compositorStoreActionTranslator.translate( compiler, *itor );
+				}
+			}
+			else if( ( *itor )->type == ANT_PROPERTY )
 			{
 				const PropertyAbstractNode *prop =
 					reinterpret_cast<const PropertyAbstractNode *>( itor->get() );

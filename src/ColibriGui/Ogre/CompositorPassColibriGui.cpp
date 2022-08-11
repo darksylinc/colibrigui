@@ -26,7 +26,7 @@ namespace Ogre
 		m_colibriManager( colibriManager ),
 		mDefinition( definition )
 	{
-#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
 		if( !definition->mSkipLoadStoreSemantics )
 			initialize( rtv );
 #endif
@@ -50,7 +50,7 @@ namespace Ogre
 
 		notifyPassEarlyPreExecuteListeners();
 
-#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
 		analyzeBarriers();
 		executeResourceTransitions();
 		setRenderPassDescToCurrent();

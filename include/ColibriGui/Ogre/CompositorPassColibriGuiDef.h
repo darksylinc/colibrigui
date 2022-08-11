@@ -40,7 +40,7 @@ namespace Ogre
 		{
 			mProfilingId = "Colibri Gui";
 
-#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
 			// Default behavior is different from most passes
 			mSkipLoadStoreSemantics = true;
 #endif

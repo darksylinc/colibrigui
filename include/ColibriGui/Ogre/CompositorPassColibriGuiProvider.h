@@ -2,7 +2,9 @@
 #pragma once
 
 #include "ColibriGui/ColibriGuiPrerequisites.h"
+
 #include "OgrePrerequisites.h"
+
 #include "Compositor/Pass/OgreCompositorPassProvider.h"
 
 namespace Ogre
@@ -20,7 +22,7 @@ namespace Ogre
 	*/
 	class CompositorPassColibriGuiProvider : public CompositorPassProvider
 	{
-		Colibri::ColibriManager	*m_colibriManager;
+		Colibri::ColibriManager *m_colibriManager;
 
 	public:
 		CompositorPassColibriGuiProvider( Colibri::ColibriManager *colibriManager );
@@ -34,20 +36,21 @@ namespace Ogre
 		@param parentNodeDef
 		@return
 		*/
-		virtual CompositorPassDef* addPassDef( CompositorPassType passType,
-											   IdString customId,
-											   CompositorTargetDef *parentTargetDef,
-											   CompositorNodeDef *parentNodeDef );
+		CompositorPassDef *addPassDef( CompositorPassType passType, IdString customId,
+									   CompositorTargetDef *parentTargetDef,
+									   CompositorNodeDef   *parentNodeDef ) override;
 
 		/** Creates a CompositorPass from a CompositorPassDef for Compositor Pass of type 'custom'
 		@remarks    If you have multiple custom pass types then you will need to use dynamic_cast<>()
 					on the CompositorPassDef to determine what custom pass it is.
 		*/
-		virtual CompositorPass* addPass( const CompositorPassDef *definition, Camera *defaultCamera,
-										 CompositorNode *parentNode, const RenderTargetViewDef *rtvDef,
-										 SceneManager *sceneManager );
+		CompositorPass *addPass( const CompositorPassDef *definition, Camera *defaultCamera,
+								 CompositorNode *parentNode, const RenderTargetViewDef *rtvDef,
+								 SceneManager *sceneManager ) override;
 
-		virtual void translateCustomPass( const AbstractNodePtr &node,
-										  CompositorPassDef     *customPassDef );
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
+		void translateCustomPass( ScriptCompiler *compiler, const AbstractNodePtr &node,
+								  IdString customId, CompositorPassDef *customPassDef ) override;
+#endif
 	};
-}
+}  // namespace Ogre
