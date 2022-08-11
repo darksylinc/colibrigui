@@ -39,6 +39,11 @@ namespace Ogre
 			mAspectRatioMode( ArNone )
 		{
 			mProfilingId = "Colibri Gui";
+
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+			// Default behavior is different from most passes
+			mSkipLoadStoreSemantics = true;
+#endif
 		}
 	};
 }

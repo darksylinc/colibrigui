@@ -46,5 +46,8 @@ namespace Ogre
 		virtual CompositorPass* addPass( const CompositorPassDef *definition, Camera *defaultCamera,
 										 CompositorNode *parentNode, const RenderTargetViewDef *rtvDef,
 										 SceneManager *sceneManager );
+
+		virtual void translateCustomPass( const AbstractNodePtr &node,
+										  CompositorPassDef     *customPassDef );
 	};
 }

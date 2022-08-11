@@ -23,6 +23,11 @@ namespace Ogre
 		m_colibriManager( colibriManager ),
 		mDefinition( definition )
 	{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+		if( !definition->mSkipLoadStoreSemantics )
+			initialize( rtv );
+#endif
+
 		TextureGpu *texture = mParentNode->getDefinedTexture( rtv->colourAttachments[0].textureName );
 		setResolutionToColibri( texture->getWidth(), texture->getHeight() );
 	}
@@ -41,8 +46,11 @@ namespace Ogre
 
 		notifyPassEarlyPreExecuteListeners();
 
-		//analyzeBarriers();
-		//executeResourceTransitions();
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
+		analyzeBarriers();
+		executeResourceTransitions();
+		setRenderPassDescToCurrent();
+#endif
 
 		//Fire the listener in case it wants to change anything
 		notifyPassPreExecuteListeners();
