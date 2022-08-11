@@ -103,6 +103,36 @@ namespace Ogre
 							" line " + StringConverter::toString( prop->line ) );
 					}
 				}
+				else if( prop->name == "aspect_ratio_mode" )
+				{
+					bool bValid = false;
+					if( prop->values.size() == 1u )
+					{
+						const AbstractNodePtr &valueNode = prop->values.back();
+						const Ogre::String value = valueNode->getValue();
+						if( value == "none" )
+						{
+							colibriGuiDef->mAspectRatioMode = CompositorPassColibriGuiDef::ArNone;
+							bValid = true;
+						}
+						else if( value == "keep_width" )
+						{
+							colibriGuiDef->mAspectRatioMode = CompositorPassColibriGuiDef::ArKeepWidth;
+							bValid = true;
+						}
+						else if( value == "keep_height" )
+						{
+							colibriGuiDef->mAspectRatioMode = CompositorPassColibriGuiDef::ArKeepHeight;
+							bValid = true;
+						}
+					}
+
+					if( !bValid )
+					{
+						compiler->addError( ScriptCompiler::CE_STRINGEXPECTED, obj->file, obj->line,
+											"aspect_ratio_mode accepts <none|keep_width|keep_height>" );
+					}
+				}
 			}
 			++itor;
 		}
