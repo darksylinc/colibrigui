@@ -136,6 +136,6 @@ namespace Ogre
 			}
 			++itor;
 		}
-#endif
 	}
+#endif
 }  // namespace Ogre
