@@ -236,6 +236,9 @@ namespace Colibri
 			nonProportionalFactor = std::min( hardMaxSize[bVertical] / nonProportionalSize, 1.0f );
 		}
 
+		// Protect against users using negative margin
+		accumMarginSize = std::max( accumMarginSize, 0.0f );
+
 		const float spaceLeftForMargins = Ogre::Math::Clamp( hardMaxSize[bVertical] -
 															 sizeToDistribute -
 															 nonProportionalSize,
