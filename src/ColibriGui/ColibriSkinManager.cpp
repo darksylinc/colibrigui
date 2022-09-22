@@ -433,6 +433,7 @@ namespace Colibri
 				skinPack.windowScrollArrowSize[0] = 64.0f;
 				skinPack.windowScrollArrowSize[1] = 64.0f;
 				skinPack.windowScrollArrowProportion = 0.5f;
+				skinPack.windowScrollArrowOrientation = 0.0f;
 
 				skinPack.sliderLineSize = 5.0f;
 				skinPack.sliderHandleProportion[0] = 0.8f;
@@ -494,6 +495,13 @@ namespace Colibri
 						skinPack.windowScrollArrowSize[1] =
 							static_cast<float>( itTmp->value[1].GetDouble() );
 					}
+				}
+
+				itTmp = skinValue.FindMember( "window_scroll_arrow_orientation" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+				{
+					skinPack.windowScrollArrowOrientation =
+						Ogre::Degree( static_cast<Ogre::Real>( itTmp->value.GetDouble() ) );
 				}
 
 				itTmp = skinValue.FindMember( "window_scroll_arrow_proportion" );
