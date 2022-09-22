@@ -175,11 +175,13 @@
         },
         "SpinnerBtnDecrement" :
         {
-            "auto" : "SpinnerBtnDecrement"
+            "auto" : "SpinnerBtnDecrement",
+            "window_scroll_arrow_size" : 64.0
         },
         "SpinnerBtnIncrement" :
         {
-            "auto" : "SpinnerBtnIncrement"
+            "auto" : "SpinnerBtnIncrement",
+            "window_scroll_arrow_size" : 64.0
         },
         "CheckboxTickmarkChecked" :
         {
@@ -220,6 +222,10 @@
     "default_skin_packs" :
     {
         "Window"                : "Background",
+        "WindowArrowScrollTop"  : "SpinnerBtnDecrement",
+        "WindowArrowScrollLeft" : "SpinnerBtnDecrement",
+        "WindowArrowScrollRight": "SpinnerBtnIncrement",
+        "WindowArrowScrollBottom": "SpinnerBtnIncrement",
         "Button"                : "Button",
         "Spinner"               : "Spinner",
         "SpinnerBtnDecrement"   : "SpinnerBtnDecrement",

@@ -40,6 +40,10 @@ namespace Colibri
 
 		WindowVec m_childWindows;
 
+		Widget *colibrigui_nullable m_arrows[Borders::NumBorders];
+		bool                            m_scrollArrowsVisibility[Borders::NumBorders];
+		float                           m_scrollArrowProportion[Borders::NumBorders];
+
 		void notifyChildWindowIsDirty();
 
 		/// Overloaded to also reorder the m_childWindows vec.
@@ -49,6 +53,15 @@ namespace Colibri
 
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved ) colibri_override;
 
+		inline bool isArrowBreadthFirstReady( const Widget *arrow ) const;
+
+		/** If window is scrollable, creates the arrow. If window is not, destroys the arrow
+			If the arrow needs to exist, we see if we have to show or hide it.
+			We also ensure it's correctly placed according to current scroll.
+		*/
+		void evaluateScrollArrowVisibility( Borders::Borders border );
+		void createScrollArrow( Borders::Borders border );
+
 	public:
 		Window( ColibriManager *manager );
 		virtual ~Window() colibri_override;
@@ -56,6 +69,21 @@ namespace Colibri
 		virtual void _initialize() colibri_override;
 		virtual void _destroy() colibri_override;
 		virtual bool isWindow() const colibri_final	{ return true; }
+
+		/** Shows arrows on each border that only appear when there is more to scroll
+		@param bVisible
+			True to show them. False to always hide them.
+		@param border
+			Which border to toggle. Use NumBorders to toggle all of them at once.
+		*/
+		void setScrollVisible( bool bVisible, Borders::Borders border = Borders::NumBorders );
+
+		/** Returns the value set by setScrollVisible(). NumBorders is not a valid input.
+		@remarks
+			The scroll arrow may still be hidden if the window is not scrollable or the
+			current scroll has already reached the edge.
+		*/
+		bool getScrollVisible( Borders::Borders border ) const;
 
 		/** Smoothly scrolls from current location towards input destination.
 		@param nextScroll

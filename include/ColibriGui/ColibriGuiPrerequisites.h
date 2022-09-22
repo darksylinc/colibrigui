@@ -389,6 +389,10 @@ namespace Colibri
 			ProgressbarLayer1,
 			SliderLine,
 			SliderHandle,
+			WindowArrowScrollTop,
+			WindowArrowScrollLeft,
+			WindowArrowScrollRight,
+			WindowArrowScrollBottom,
 			NumSkinWidgetTypes
 		};
 	}

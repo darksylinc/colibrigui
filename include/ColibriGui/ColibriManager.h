@@ -298,7 +298,7 @@ namespace Colibri
 		*/
 		void setDefaultSkins( std::string defaultSkinPacks
 							  [colibrigui_nonnull SkinWidgetTypes::NumSkinWidgetTypes] );
-		SkinInfo const * colibrigui_nonnull const * colibrigui_nullable
+		SkinInfo const * colibrigui_nullable const * colibrigui_nonnull
 				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
 		Ogre::IdString getDefaultSkinPackName( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
