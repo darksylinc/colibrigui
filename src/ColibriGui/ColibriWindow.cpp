@@ -222,7 +222,8 @@ namespace Colibri
 			->_setSkinPack( m_manager->getDefaultSkin( defaultSkinType ) );
 		m_arrows[border]->setSize( Ogre::Vector2( defaultSkinPack->windowScrollArrowSize ) );
 		m_arrows[border]->setZOrder( 255u );
-		m_arrows[border] = dummyFirstWidget;
+		if( dummyFirstWidget )
+			m_arrows[border] = dummyFirstWidget;
 	}
 	//-------------------------------------------------------------------------
 	void Window::setScrollVisible( bool bVisible, Borders::Borders border )
