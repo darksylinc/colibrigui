@@ -153,22 +153,22 @@ namespace Colibri
 		switch( border )
 		{
 		case Borders::Top:
-			m_arrows[border]->setHidden( m_currentScroll.y <= 0.0f );
+			m_arrows[border]->setHidden( m_currentScroll.y <= 0.0f || maxScroll.y <= 1e-4f );
 			m_arrows[border]->setTopLeft( Ogre::Vector2( arrowTopLeft.x, 0.0f ) + m_currentScroll );
 			break;
 		case Borders::Left:
-			m_arrows[border]->setHidden( m_currentScroll.x <= 0.0f );
+			m_arrows[border]->setHidden( m_currentScroll.x <= 0.0f || maxScroll.x <= 1e-4f );
 			m_arrows[border]->setTopLeft( Ogre::Vector2( 0.0f, arrowTopLeft.y ) + m_currentScroll );
 			break;
 		case Borders::Right:
-			m_arrows[border]->setHidden( m_currentScroll.x >= maxScroll.x );
+			m_arrows[border]->setHidden( m_currentScroll.x >= maxScroll.x || maxScroll.x <= 1e-4f );
 			m_arrows[border]->setTopLeft(
 				Ogre::Vector2( getSizeAfterClipping().x - m_arrows[border]->getSize().x,
 							   arrowTopLeft.y ) +
 				m_currentScroll );
 			break;
 		case Borders::Bottom:
-			m_arrows[border]->setHidden( m_currentScroll.y >= maxScroll.y );
+			m_arrows[border]->setHidden( m_currentScroll.y >= maxScroll.y || maxScroll.y <= 1e-4f );
 			m_arrows[border]->setTopLeft(
 				Ogre::Vector2( arrowTopLeft.x,
 							   getSizeAfterClipping().y - m_arrows[border]->getSize().y ) +
@@ -222,6 +222,8 @@ namespace Colibri
 			->_setSkinPack( m_manager->getDefaultSkin( defaultSkinType ) );
 		m_arrows[border]->setSize( Ogre::Vector2( defaultSkinPack->windowScrollArrowSize ) );
 		m_arrows[border]->setZOrder( 255u );
+		if( std::abs( defaultSkinPack->windowScrollArrowOrientation.valueRadians() ) >= 1e-6f )
+			m_arrows[border]->setOrientation( defaultSkinPack->windowScrollArrowOrientation );
 		if( dummyFirstWidget )
 			m_arrows[border] = dummyFirstWidget;
 	}

@@ -37,8 +37,9 @@ namespace Colibri
 		float   progressBarAnimSpeed;
 		float   progressBarAnimLength;
 
-		float windowScrollArrowSize[2];
-		float windowScrollArrowProportion;
+		float        windowScrollArrowSize[2];
+		float        windowScrollArrowProportion;
+		Ogre::Radian windowScrollArrowOrientation;
 
 		float sliderLineSize;
 		float sliderHandleProportion[2];
