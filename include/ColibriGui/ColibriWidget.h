@@ -98,6 +98,8 @@ namespace Colibri
 		Widget * colibrigui_nullable	m_nextWidget[Borders::NumBorders];
 		bool							m_autoSetNextWidget[Borders::NumBorders];
 		bool					m_hidden;
+		/// calculateChildrenSize will ignore a children widgets with this set to true
+		bool m_ignoreFromChildrenSize;
 		/// Can be highlighted & pressed by mouse cursor
 		bool					m_clickable;
 		/// Can be highlighted & pressed by keyboard
@@ -295,6 +297,9 @@ namespace Colibri
 		bool isHidden() const				{ return m_hidden; }
 
 		bool isDisabled() const				{ return m_currentState == States::Disabled; }
+
+		void setIgnoreFromChildrenSize( bool bIgnore );
+		bool ignoreFromChildrenSize() const { return m_ignoreFromChildrenSize; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
 		Window * colibrigui_nullable getAsWindow();

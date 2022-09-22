@@ -25,6 +25,7 @@ namespace Colibri
 		m_numWidgets( 0 ),
 		m_manager( manager ),
 		m_hidden( false ),
+		m_ignoreFromChildrenSize( false ),
 		m_clickable( false ),
 		m_keyboardNavigable( false ),
 		m_childrenClickable( false ),
@@ -296,6 +297,8 @@ namespace Colibri
 				setWidgetNavigationDirty();
 		}
 	}
+	//-------------------------------------------------------------------------
+	void Widget::setIgnoreFromChildrenSize( bool bIgnore ) { m_ignoreFromChildrenSize = bIgnore; }
 	//-------------------------------------------------------------------------
 	Window * colibrigui_nullable Widget::getAsWindow()
 	{
@@ -1237,7 +1240,7 @@ namespace Colibri
 		while( itor != end )
 		{
 			Widget *widget = *itor;
-			if( !widget->isHidden() )
+			if( !widget->isHidden() && !widget->ignoreFromChildrenSize() )
 				maxSize.makeCeil( widget->getLocalTopLeft() + widget->getSize() );
 			++itor;
 		}
