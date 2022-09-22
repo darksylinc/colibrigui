@@ -203,6 +203,7 @@ namespace Colibri
 			dummyFirstWidget->setZOrder( 255u );
 			dummyFirstWidget->setPressable( false );
 			dummyFirstWidget->setSize( Ogre::Vector2( defaultSkinPack->windowScrollArrowSize ) );
+			dummyFirstWidget->setIgnoreFromChildrenSize( true );
 
 			m_arrows[border] = dummyFirstWidget;
 			for( int i = 0; i < 2; ++i )
@@ -215,6 +216,7 @@ namespace Colibri
 		else
 		{
 			m_arrows[border] = m_manager->createWidget<Renderable>( this );
+			m_arrows[border]->setIgnoreFromChildrenSize( true );
 		}
 
 		COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable *>( m_arrows[border] ) );
