@@ -37,6 +37,9 @@ namespace Colibri
 		float   progressBarAnimSpeed;
 		float   progressBarAnimLength;
 
+		float windowScrollArrowSize[2];
+		float windowScrollArrowProportion;
+
 		float sliderLineSize;
 		float sliderHandleProportion[2];
 		float sliderPositionTopLeftProportion;

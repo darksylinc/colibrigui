@@ -258,7 +258,7 @@ namespace Colibri
 		const SkinInfoMap &skins = m_skinManager->getSkins();
 		const SkinPackMap &skinPacks = m_skinManager->getSkinPacks();
 
-		for( size_t widgetType=0u; widgetType<SkinWidgetTypes::NumSkinWidgetTypes; ++widgetType )
+		for( size_t widgetType = 0u; widgetType < SkinWidgetTypes::NumSkinWidgetTypes; ++widgetType )
 		{
 			const std::string &skinName = defaultSkinPacks[widgetType];
 
@@ -282,7 +282,7 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	SkinInfo const * colibrigui_nonnull const * colibrigui_nullable ColibriManager::getDefaultSkin(
+	SkinInfo const * colibrigui_nullable const * colibrigui_nonnull ColibriManager::getDefaultSkin(
 			SkinWidgetTypes::SkinWidgetTypes widgetType ) const
 	{
 		return m_defaultSkins[widgetType];

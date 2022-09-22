@@ -430,6 +430,10 @@ namespace Colibri
 				skinPack.progressBarAnimSpeed = 0.0f;
 				skinPack.progressBarAnimLength = 1.0f;
 
+				skinPack.windowScrollArrowSize[0] = 64.0f;
+				skinPack.windowScrollArrowSize[1] = 64.0f;
+				skinPack.windowScrollArrowProportion = 0.5f;
+
 				skinPack.sliderLineSize = 5.0f;
 				skinPack.sliderHandleProportion[0] = 0.8f;
 				skinPack.sliderHandleProportion[1] = 0.8f;
@@ -472,6 +476,32 @@ namespace Colibri
 				itTmp = skinValue.FindMember( "progress_anim_length" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
 					skinPack.progressBarAnimLength = static_cast<float>( itTmp->value.GetDouble() );
+
+				itTmp = skinValue.FindMember( "window_scroll_arrow_size" );
+				if( itTmp != skinValue.MemberEnd() )
+				{
+					if( itTmp->value.IsDouble() )
+					{
+						skinPack.windowScrollArrowSize[0] =
+							static_cast<float>( itTmp->value.GetDouble() );
+						skinPack.windowScrollArrowSize[1] = skinPack.windowScrollArrowSize[0];
+					}
+					else if( itTmp->value.IsArray() && itTmp->value.Size() == 2u &&
+							 itTmp->value[0].IsDouble() && itTmp->value[1].IsDouble() )
+					{
+						skinPack.windowScrollArrowSize[0] =
+							static_cast<float>( itTmp->value[0].GetDouble() );
+						skinPack.windowScrollArrowSize[1] =
+							static_cast<float>( itTmp->value[1].GetDouble() );
+					}
+				}
+
+				itTmp = skinValue.FindMember( "window_scroll_arrow_proportion" );
+				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
+				{
+					skinPack.windowScrollArrowProportion =
+						static_cast<float>( itTmp->value.GetDouble() );
+				}
 
 				itTmp = skinValue.FindMember( "slider_line_size" );
 				if( itTmp != skinValue.MemberEnd() && itTmp->value.IsDouble() )
@@ -570,8 +600,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void SkinManager::loadDefaultSkinPacks( const rapidjson::Value &packsValue, const char *filename )
 	{
-		const char *c_strSkinWidgetTypes[] =
-		{
+		const char *c_strSkinWidgetTypes[] = {
 			"Window",
 			"Button",
 			"Spinner",
@@ -585,7 +614,11 @@ namespace Colibri
 			"ProgressbarLayer0",
 			"ProgressbarLayer1",
 			"SliderLine",
-			"SliderHandle"
+			"SliderHandle",
+			"WindowArrowScrollTop",
+			"WindowArrowScrollLeft",
+			"WindowArrowScrollRight",
+			"WindowArrowScrollBottom",
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];

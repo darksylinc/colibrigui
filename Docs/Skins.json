@@ -45,6 +45,10 @@
 
             "progress_bar_type" : "basic | behind_glass",
 
+            "window_scroll_arrow_size" : 64.0,
+            "window_scroll_arrow_size" : [64.0, 128.0],
+            "window_scroll_arrow_proportion" : 0.5,
+
             "auto" : "base_name",
             "comment" : "Using auto, base_name will be appended the different suffixes e.g. We will look for base_name_disabled. If it is not found, the only one we assume it must be defined is base_name_idle"
         }
