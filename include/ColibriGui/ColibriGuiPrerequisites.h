@@ -330,7 +330,7 @@ namespace Colibri
 		}
 		float asFloat() const
 		{
-			return value26d6 / 64.0f;
+			return static_cast<float>( value26d6 ) / 64.0f;
 		}
 	};
 

@@ -250,7 +250,7 @@ namespace Colibri
 
 	public:
 		Widget( ColibriManager *manager );
-		virtual ~Widget();
+		~Widget() colibri_override;
 
 		/** Sets a user-supplied name for debugging purposes.
 		@remark
