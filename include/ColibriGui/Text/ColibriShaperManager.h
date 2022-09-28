@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 typedef struct FT_LibraryRec_  *FT_Library;
 typedef struct FT_FaceRec_*  FT_Face;
@@ -121,9 +121,9 @@ namespace Colibri
 
 		uint16_t m_defaultBmpFontForRaster;
 
-		Ogre::BufferPacked *colibrigui_nullable m_glyphAtlasBuffer;
-		Ogre::HlmsColibri *colibrigui_nullable  m_hlms;
-		Ogre::VaoManager *colibrigui_nullable   m_vaoManager;
+		Ogre::BufferPacked *colibri_nullable m_glyphAtlasBuffer;
+		Ogre::HlmsColibri *colibri_nullable  m_hlms;
+		Ogre::VaoManager *colibri_nullable   m_vaoManager;
 
 		void growAtlas( size_t sizeBytes );
 		size_t getAtlasOffset( size_t sizeBytes );
@@ -139,8 +139,8 @@ namespace Colibri
 		ShaperManager( ColibriManager *colibriManager );
 		~ShaperManager();
 
-		void setOgre( Ogre::HlmsColibri * colibrigui_nullable hlms,
-					  Ogre::VaoManager * colibrigui_nullable vaoManager );
+		void setOgre( Ogre::HlmsColibri * colibri_nullable hlms,
+					  Ogre::VaoManager * colibri_nullable vaoManager );
 
 		Shaper* addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
 						   const std::string &language );
@@ -163,7 +163,7 @@ namespace Colibri
 
 		/// Returns the font as a pointer set by setDefaultBmpFontForRaster
 		/// Can be nullptr if none is set
-		const BmpFont *colibrigui_nullable getDefaultBmpFontForRaster() const;
+		const BmpFont *colibri_nullable getDefaultBmpFontForRaster() const;
 
 		FT_Library getFreeTypeLibrary() const		{ return m_ftLibrary; }
 		LogListener* getLogListener() const;
@@ -236,11 +236,11 @@ namespace Colibri
 
 		void prepareToRender();
 
-		Ogre::HlmsColibri *colibrigui_nullable getOgreHlms() { return m_hlms; }
-		Ogre::VaoManager *colibrigui_nullable getOgreVaoManager() { return m_vaoManager; }
+		Ogre::HlmsColibri *colibri_nullable getOgreHlms() { return m_hlms; }
+		Ogre::VaoManager *colibri_nullable getOgreVaoManager() { return m_vaoManager; }
 
 		static const char* getErrorMessage( FT_Error errorCode );
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

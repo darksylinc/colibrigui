@@ -5,7 +5,7 @@
 
 #include "OgreIdString.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -45,7 +45,7 @@ namespace Colibri
 			False if failed to grab the text or there was no text in the clipboard,
 			true otherwise
 		*/
-		virtual bool getClipboardText( char * colibrigui_nonnull * const colibrigui_nullable outText )
+		virtual bool getClipboardText( char * colibri_nonnull * const colibri_nullable outText )
 		{
 			*outText = 0;
 			return false;
@@ -60,7 +60,7 @@ namespace Colibri
 		@param outText
 		@return
 		*/
-		virtual void freeClipboardText( char *colibrigui_nullable text ) {}
+		virtual void freeClipboardText( char *colibri_nullable text ) {}
 
 		/**	When called, an Editbox was pressed and thus on Android and iOS a virtual
 			keyboard or an input handler should be brought up.
@@ -147,15 +147,15 @@ namespace Colibri
 		/// Is one of the windows stored by this manager immediately dirty.
 		bool m_zOrderHasDirtyChildren;
 
-		Ogre::Root					* colibrigui_nullable m_root;
-		Ogre::VaoManager			* colibrigui_nullable m_vaoManager;
-		Ogre::ObjectMemoryManager	* colibrigui_nullable m_objectMemoryManager;
-		Ogre::SceneManager			* colibrigui_nullable m_sceneManager;
-		Ogre::VertexArrayObject		* colibrigui_nullable m_vao;
-		Ogre::VertexArrayObject		* colibrigui_nullable m_textVao;
-		Ogre::IndirectBufferPacked	* colibrigui_nullable m_indirectBuffer;
-		Ogre::CommandBuffer			* colibrigui_nullable m_commandBuffer;
-		Ogre::HlmsDatablock			* colibrigui_nullable m_defaultTextDatablock[States::NumStates];
+		Ogre::Root					* colibri_nullable m_root;
+		Ogre::VaoManager			* colibri_nullable m_vaoManager;
+		Ogre::ObjectMemoryManager	* colibri_nullable m_objectMemoryManager;
+		Ogre::SceneManager			* colibri_nullable m_sceneManager;
+		Ogre::VertexArrayObject		* colibri_nullable m_vao;
+		Ogre::VertexArrayObject		* colibri_nullable m_textVao;
+		Ogre::IndirectBufferPacked	* colibri_nullable m_indirectBuffer;
+		Ogre::CommandBuffer			* colibri_nullable m_commandBuffer;
+		Ogre::HlmsDatablock			* colibri_nullable m_defaultTextDatablock[States::NumStates];
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
@@ -199,7 +199,7 @@ namespace Colibri
 		SkinManager	*m_skinManager;
 		ShaperManager *m_shaperManager;
 
-		SkinInfo const * colibrigui_nullable
+		SkinInfo const * colibri_nullable
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
 		Ogre::IdString m_defaultSkinPackNames[SkinWidgetTypes::NumSkinWidgetTypes];
 
@@ -247,14 +247,14 @@ namespace Colibri
 
 		ShaperManager* getShaperManager()							{ return m_shaperManager; }
 
-		void setOgre( Ogre::Root * colibrigui_nullable root,
-					  Ogre::VaoManager * colibrigui_nullable vaoManager,
-					  Ogre::SceneManager * colibrigui_nullable sceneManager );
+		void setOgre( Ogre::Root * colibri_nullable root,
+					  Ogre::VaoManager * colibri_nullable vaoManager,
+					  Ogre::SceneManager * colibri_nullable sceneManager );
 		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
-		Ogre::HlmsDatablock * colibrigui_nonnull * colibrigui_nullable getDefaultTextDatablock()
+		Ogre::HlmsDatablock * colibri_nonnull * colibri_nullable getDefaultTextDatablock()
 																	{ return m_defaultTextDatablock; }
 		Ogre::HlmsManager *getOgreHlmsManager();
 
@@ -297,14 +297,14 @@ namespace Colibri
 			Empty string means none (you'll have to assign the skin yourself)
 		*/
 		void setDefaultSkins( std::string defaultSkinPacks
-							  [colibrigui_nonnull SkinWidgetTypes::NumSkinWidgetTypes] );
-		SkinInfo const * colibrigui_nullable const * colibrigui_nonnull
+							  [colibri_nonnull SkinWidgetTypes::NumSkinWidgetTypes] );
+		SkinInfo const * colibri_nullable const * colibri_nonnull
 				getDefaultSkin( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
 		Ogre::IdString getDefaultSkinPackName( SkinWidgetTypes::SkinWidgetTypes widgetType ) const;
 
 		/// This pointers can be casted to HlmsColibriDatablock
-		Ogre::HlmsDatablock * colibrigui_nullable getDefaultTextDatablock( States::States state ) const;
+		Ogre::HlmsDatablock * colibri_nullable getDefaultTextDatablock( States::States state ) const;
 
 		const Ogre::Vector2& getMouseCursorPosNdc() const			{ return m_mouseCursorPosNdc; }
 
@@ -428,7 +428,7 @@ namespace Colibri
 		void setColibriListener( ColibriListener *colibriListener );
 		ColibriListener* getColibriListener() const		{ return m_colibriListener; }
 
-		Window* createWindow( Window * colibrigui_nullable parent );
+		Window* createWindow( Window * colibri_nullable parent );
 
 		/// Destroy the window and all of its children window and widgets
 		void destroyWindow( Window *window );
@@ -516,7 +516,7 @@ namespace Colibri
 	protected:
 		/// Parent cannot be null
 		template <typename T>
-		T * colibrigui_nonnull _createWidget( Widget * colibrigui_nonnull parent )
+		T * colibri_nonnull _createWidget( Widget * colibri_nonnull parent )
 		{
 			COLIBRI_ASSERT( parent && "parent must be provided!" );
 
@@ -532,7 +532,7 @@ namespace Colibri
 	public:
 		/// Parent cannot be null
 		template <typename T>
-		T * colibrigui_nonnull createWidget( Widget * colibrigui_nonnull parent )
+		T * colibri_nonnull createWidget( Widget * colibri_nonnull parent )
 		{
 			return _createWidget<T>( parent );
 		}
@@ -542,10 +542,10 @@ namespace Colibri
 	};
 
 	template <>
-	Label *colibrigui_nonnull ColibriManager::createWidget<Label>( Widget *colibrigui_nonnull parent );
+	Label *colibri_nonnull ColibriManager::createWidget<Label>( Widget *colibri_nonnull parent );
 	template <>
-	LabelBmp *colibrigui_nonnull
-			  ColibriManager::createWidget<LabelBmp>( Widget *colibrigui_nonnull parent );
+	LabelBmp *colibri_nonnull
+			  ColibriManager::createWidget<LabelBmp>( Widget *colibri_nonnull parent );
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

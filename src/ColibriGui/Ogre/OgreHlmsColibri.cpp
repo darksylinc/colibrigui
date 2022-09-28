@@ -213,14 +213,10 @@ namespace Ogre
 
             //layout(binding = 0) uniform PassBuffer {} pass
             ConstBufferPacked *passBuffer = mPassBuffers[mCurrentPassBuffer-1];
-            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( VertexShader,
-                                                                           0, passBuffer, 0,
-                                                                           passBuffer->
-                                                                           getTotalSizeBytes() );
-            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( PixelShader,
-                                                                           0, passBuffer, 0,
-                                                                           passBuffer->
-                                                                           getTotalSizeBytes() );
+            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer(
+                VertexShader, 0, passBuffer, 0, (uint32)passBuffer->getTotalSizeBytes() );
+            *commandBuffer->addCommand<CbShaderBuffer>() =
+                CbShaderBuffer( PixelShader, 0, passBuffer, 0, (uint32)passBuffer->getTotalSizeBytes() );
 
             //layout(binding = 2) uniform InstanceBuffer {} instance
             if( mCurrentConstBuffer < mConstBuffers.size() &&
@@ -267,21 +263,17 @@ namespace Ogre
         {
             //layout(binding = 1) uniform MaterialBuf {} materialArray
             const ConstBufferPool::BufferPool *newPool = datablock->getAssignedPool();
-            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( VertexShader,
-                                                                           1, newPool->materialBuffer, 0,
-                                                                           newPool->materialBuffer->
-                                                                           getTotalSizeBytes() );
-            *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( PixelShader,
-                                                                           1, newPool->materialBuffer, 0,
-                                                                           newPool->materialBuffer->
-                                                                           getTotalSizeBytes() );
+            *commandBuffer->addCommand<CbShaderBuffer>() =
+                CbShaderBuffer( VertexShader, 1, newPool->materialBuffer, 0,
+                                (uint32)newPool->materialBuffer->getTotalSizeBytes() );
+            *commandBuffer->addCommand<CbShaderBuffer>() =
+                CbShaderBuffer( PixelShader, 1, newPool->materialBuffer, 0,
+                                (uint32)newPool->materialBuffer->getTotalSizeBytes() );
             if( newPool->extraBuffer )
             {
                 TexBufferPacked *extraBuffer = static_cast<TexBufferPacked*>( newPool->extraBuffer );
-                *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer( VertexShader, 1,
-                                                                               extraBuffer, 0,
-                                                                               extraBuffer->
-                                                                               getTotalSizeBytes() );
+                *commandBuffer->addCommand<CbShaderBuffer>() = CbShaderBuffer(
+                    VertexShader, 1, extraBuffer, 0, (uint32)extraBuffer->getTotalSizeBytes() );
             }
 
             mLastBoundPool = newPool;
@@ -336,13 +328,13 @@ namespace Ogre
                 if( datablock->mTexturesDescSet )
                 {
                     *commandBuffer->addCommand<CbTextures>() =
-                        CbTextures( texUnit, std::numeric_limits<uint16>::max(),
+                        CbTextures( (uint16)texUnit, std::numeric_limits<uint16>::max(),
                                     datablock->mTexturesDescSet );
 
                     if( !mHasSeparateSamplers )
                     {
                         *commandBuffer->addCommand<CbSamplers>() =
-                                CbSamplers( texUnit, datablock->mSamplersDescSet );
+                            CbSamplers( (uint16)texUnit, datablock->mSamplersDescSet );
                     }
 
                     texUnit += datablock->mTexturesDescSet->mTextures.size();
@@ -358,7 +350,7 @@ namespace Ogre
                     //Bind samplers
 					size_t texUnit = mSamplerUnitSlotStart;
                     *commandBuffer->addCommand<CbSamplers>() =
-                            CbSamplers( texUnit, datablock->mSamplersDescSet );
+                        CbSamplers( (uint16)texUnit, datablock->mSamplersDescSet );
                     mLastDescSampler = datablock->mSamplersDescSet;
                 }
             }
@@ -367,7 +359,7 @@ namespace Ogre
         mCurrentMappedConstBuffer   = currentMappedConstBuffer;
 		//mCurrentMappedTexBuffer     = currentMappedTexBuffer;
 
-        return ((mCurrentMappedConstBuffer - mStartMappedConstBuffer) >> 2) - 1;
+        return uint32( ( ( mCurrentMappedConstBuffer - mStartMappedConstBuffer ) >> 2u ) - 1u );
 	}
     //-----------------------------------------------------------------------------------
 	void HlmsColibri::getDefaultPaths( String &outDataFolderPath, StringVector &outLibraryFoldersPaths )

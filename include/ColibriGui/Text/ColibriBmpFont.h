@@ -6,7 +6,7 @@
 #include "OgreImage2.h"
 #include "OgreVector2.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Ogre
 {
@@ -46,8 +46,8 @@ namespace Colibri
 	{
 	protected:
 		std::string                              m_textureName;
-		Ogre::TextureGpu *colibrigui_nullable    m_fontTexture;
-		Ogre::HlmsDatablock *colibrigui_nullable m_datablock;
+		Ogre::TextureGpu *colibri_nullable    m_fontTexture;
+		Ogre::HlmsDatablock *colibri_nullable m_datablock;
 
 		FontSize m_fontSize;
 
@@ -90,8 +90,8 @@ namespace Colibri
 		FontSize getBakedFontSize() const { return m_fontSize; }
 
 		/// This pointer can be casted to HlmsColibriDatablock
-		Ogre::HlmsDatablock *colibrigui_nullable getDatablock() const { return m_datablock; }
+		Ogre::HlmsDatablock *colibri_nullable getDatablock() const { return m_datablock; }
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

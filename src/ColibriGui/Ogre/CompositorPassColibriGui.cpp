@@ -78,7 +78,7 @@ namespace Ogre
 		if( !mDefinition->mSetsResolution )
 			return;
 
-		const Vector2 resolution( width, height );
+		const Vector2 resolution( (Real)width, (Real)height );
 		const Vector2 halfResolution( resolution / 2.0f );
 
 		if( fabsf( halfResolution.x - m_colibriManager->getHalfWindowResolution().x ) > 1e-6f ||

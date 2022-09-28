@@ -141,7 +141,7 @@ namespace Colibri
 			if( m_denominator == 1 )
 				numberStr.a( m_minValue );
 			else
-				numberStr.a( m_minValue / (float)m_denominator );
+				numberStr.a( (float)m_minValue / (float)m_denominator );
 
 			m_optionLabel->setText( numberStr.c_str() );
 			m_optionLabel->sizeToFit();
@@ -152,7 +152,7 @@ namespace Colibri
 			if( m_denominator == 1 )
 				numberStr.a( m_maxValue );
 			else
-				numberStr.a( m_maxValue / (float)m_denominator );
+				numberStr.a( (float)m_maxValue / (float)m_denominator );
 
 			m_optionLabel->setText( numberStr.c_str() );
 			m_optionLabel->sizeToFit();
@@ -294,7 +294,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	float Spinner::getCurrentValueProcessed() const
 	{
-		return m_currentValue / static_cast<float>( m_denominator );
+		return static_cast<float>( m_currentValue ) / static_cast<float>( m_denominator );
 	}
 	//-------------------------------------------------------------------------
 	std::string Spinner::getCurrentValueStr() const
@@ -311,7 +311,7 @@ namespace Colibri
 			if( m_denominator == 1 )
 				numberStr.a( m_currentValue );
 			else
-				numberStr.a( m_currentValue / (float)m_denominator );
+				numberStr.a( (float)m_currentValue / (float)m_denominator );
 			return numberStr.c_str();
 		}
 	}

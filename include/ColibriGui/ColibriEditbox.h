@@ -3,7 +3,7 @@
 
 #include "ColibriGui/ColibriRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -25,8 +25,8 @@ namespace Colibri
 	{
 		Label                     *m_label;
 		Label                     *m_caret;
-		Label *colibrigui_nullable m_secureLabel;
-		Label *colibrigui_nullable m_placeholder;
+		Label *colibri_nullable m_secureLabel;
+		Label *colibri_nullable m_placeholder;
 		/// It's in glyphs
 		uint32_t m_cursorPos;
 
@@ -55,12 +55,12 @@ namespace Colibri
 	public:
 		Editbox( ColibriManager *manager );
 
-		void _initialize() colibri_override;
-		void _destroy() colibri_override;
+		void _initialize() override;
+		void _destroy() override;
 
 		Label *getLabel();
 
-		Label *colibrigui_nullable getPlaceholderLabel();
+		Label *colibri_nullable getPlaceholderLabel();
 
 		/// When changing the text programatically, prefer using this function over directly
 		/// modifying the Label (via getLabel) because this function will update the caret
@@ -74,12 +74,12 @@ namespace Colibri
 		@param text
 			Text to use. Can be empty or nullptr to disable the placeholder.
 		*/
-		void setPlaceholder( const char *colibrigui_nullable text );
+		void setPlaceholder( const char *colibri_nullable text );
 
 		/// Returns the text from the placeholder. Can be nullptr or empty if there is none
-		const std::string *colibrigui_nullable getPlaceholder() const;
+		const std::string *colibri_nullable getPlaceholder() const;
 
-		void setState( States::States state, bool smartHighlight = true ) colibri_override;
+		void setState( States::States state, bool smartHighlight = true ) override;
 
 		/// When true, text is rendered as '*' and Clipboard copy
 		/// is forbidden (Clipboard paste is still allowed).
@@ -101,23 +101,23 @@ namespace Colibri
 		/// On most platforms the hint is discarded and always returns ""
 		std::string getTextHint() const;
 
-		void _update( float timeSinceLast ) colibri_override;
+		void _update( float timeSinceLast ) override;
 
 		void _setTextEdit( const char *text, int32_t selectStart,
-						   int32_t selectLength ) colibri_override;
-		void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition ) colibri_override;
+						   int32_t selectLength ) override;
+		void _setTextSpecialKey( uint32_t keyCode, uint16_t keyMod, size_t repetition ) override;
 		void _setTextInput( const char *text, const bool bReplaceContents,
-							const bool bCallActionListener = true ) colibri_override;
+							const bool bCallActionListener = true ) override;
 
-		Ogre::Vector2 _getImeLocation() colibri_override;
+		Ogre::Vector2 _getImeLocation() override;
 
-		bool isTextMultiline() const colibri_override;
-		bool wantsTextInput() const colibri_override;
+		bool isTextMultiline() const override;
+		bool wantsTextInput() const override;
 
-		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		void _notifyActionKeyMovement( Borders::Borders direction ) colibri_override;
+		void _notifyActionKeyMovement( Borders::Borders direction ) override;
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

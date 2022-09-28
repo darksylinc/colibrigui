@@ -1456,7 +1456,7 @@ namespace Colibri
 		const Ogre::Vector2 invWindowRes = 0.5f * m_manager->getInvWindowResolution2x();
 
 		glyphIdx = std::min( glyphIdx, m_shapes[m_currentState].size() );
-		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + glyphIdx;
+		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin() + ptrdiff_t( glyphIdx );
 
 		if( itor != m_shapes[m_currentState].end() )
 		{

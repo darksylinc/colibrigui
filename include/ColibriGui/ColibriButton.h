@@ -3,7 +3,7 @@
 
 #include "ColibriGui/ColibriRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -28,8 +28,8 @@ namespace Colibri
 						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
 						States::States baseState=States::NumStates );
 
-		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

@@ -5,7 +5,7 @@
 #include "ColibriGui/ColibriRenderable.h"
 #include "ColibriGui/Text/ColibriShaper.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -86,13 +86,13 @@ namespace Colibri
 		/// are Private Use Area
 		std::map<States::States, PrivateAreaGlyphsVec> m_privateAreaGlyphs;
 		/// In case we have special symbols (Private Use Area) handled by a BMP font
-		LabelBmp *colibrigui_nullable m_rasterPrivateArea;
+		LabelBmp *colibri_nullable m_rasterPrivateArea;
 
 		/// Returns a RasterHelper for the given state. Creates one if it doesn't exist.
 		PrivateAreaGlyphsVec *createPrivateAreaGlyphs( States::States state );
 
 		/// Returns a RasterHelper for the given state. Nullptr if it doesn't exist.
-		PrivateAreaGlyphsVec *colibrigui_nullable getPrivateAreaGlyphs( States::States state );
+		PrivateAreaGlyphsVec *colibri_nullable getPrivateAreaGlyphs( States::States state );
 
 		void populateRasterPrivateArea();
 
@@ -158,9 +158,9 @@ namespace Colibri
 	public:
 		Label( ColibriManager *manager );
 
-		void _destroy() colibri_override;
+		void _destroy() override;
 
-		bool isLabel() const colibri_override { return true; }
+		bool isLabel() const override { return true; }
 
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)
@@ -412,17 +412,17 @@ namespace Colibri
 									 const bool isHorizontal );
 
 		void _fillBuffersAndCommands(
-			UiVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS vertexBuffer,
-			GlyphVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS textVertBuffer,
+			UiVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS vertexBuffer,
+			GlyphVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS textVertBuffer,
 			const Ogre::Vector2 &parentPos, const Ogre::Vector2 &parentCurrentScrollPos,
-			const Matrix2x3 &parentRot ) colibri_override;
+			const Matrix2x3 &parentRot ) override;
 
-		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		void setState( States::States state, bool smartHighlight = true ) colibri_override;
+		void setState( States::States state, bool smartHighlight = true ) override;
 
-		void _notifyCanvasChanged() colibri_override;
+		void _notifyCanvasChanged() override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

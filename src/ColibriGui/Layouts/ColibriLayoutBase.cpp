@@ -60,7 +60,7 @@ namespace Colibri
 		m_currentSize = m_adjustableWindow->getSize();
 	}
 	//-------------------------------------------------------------------------
-	Widget * colibrigui_nullable LayoutBase::getAdjustableWindow() const
+	Widget * colibri_nullable LayoutBase::getAdjustableWindow() const
 	{
 		return m_adjustableWindow;
 	}

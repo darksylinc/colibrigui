@@ -5,7 +5,7 @@
 #include "OgreMovableObject.h"
 #include "OgreRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Ogre
 {
@@ -51,4 +51,4 @@ namespace Ogre
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

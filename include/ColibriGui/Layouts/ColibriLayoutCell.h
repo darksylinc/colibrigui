@@ -4,7 +4,7 @@
 #include "ColibriGui/ColibriGuiPrerequisites.h"
 #include "OgreVector2.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -144,11 +144,11 @@ namespace Colibri
 
 		LayoutSpacer();
 
-		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;
-		void setCellSize( const Ogre::Vector2 &size ) colibri_final;
-		Ogre::Vector2 getCellSize() const colibri_final;
-		Ogre::Vector2 getCellMinSize() const colibri_final;
+		void setCellOffset( const Ogre::Vector2 &topLeft ) final;
+		void setCellSize( const Ogre::Vector2 &size ) final;
+		Ogre::Vector2 getCellSize() const final;
+		Ogre::Vector2 getCellMinSize() const final;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

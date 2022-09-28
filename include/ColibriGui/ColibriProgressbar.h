@@ -11,7 +11,7 @@ namespace Ogre
 	class HlmsUnlitDatablock;
 }
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -30,7 +30,7 @@ namespace Colibri
 		Regular Widgets are better isolated due to being able to share materials,
 		and referencing them only by name
 	*/
-	class Progressbar colibri_final : public Widget, Ogre::IdObject
+	class Progressbar final : public Widget, Ogre::IdObject
 	{
 	public:
 		enum DisplayType
@@ -44,7 +44,7 @@ namespace Colibri
 		};
 
 	protected:
-		Renderable *colibrigui_nullable m_layers[2];
+		Renderable *colibri_nullable m_layers[2];
 
 		bool  m_vertical;
 		bool  m_animated;
@@ -58,19 +58,19 @@ namespace Colibri
 		float       m_accumTime;
 		DisplayType m_displayType;
 
-		Ogre::HlmsUnlitDatablock *colibrigui_nullable m_progressLayerDatablock[2];
+		Ogre::HlmsUnlitDatablock *colibri_nullable m_progressLayerDatablock[2];
 
 		/// Stores a hard copy for idle & disabled, with a custom material so we can animate it
-		SkinInfo *colibrigui_nullable m_skinCopy;
+		SkinInfo *colibri_nullable m_skinCopy;
 
 		/// Assumes m_displayType has already been set
-		void cloneSkinAndDatablock( Ogre::IdString  skinPackName,
-									const SkinInfo *colibrigui_nonnull *colibrigui_nonnull
-																		outSkinInfos );
+		void cloneSkinAndDatablock( Ogre::IdString skinPackName,
+									const SkinInfo *colibri_nonnull *colibri_nonnull
+										outSkinInfos );
 		/// Assumes m_displayType has already been set
-		void cloneSkinAndDatablock( SkinInfo const *colibrigui_nonnull const *colibrigui_nonnull
-																			  skinInfos,
-									const SkinInfo *colibrigui_nonnull *colibrigui_nonnull outSkinInfos,
+		void cloneSkinAndDatablock( SkinInfo const *colibri_nonnull const *colibri_nonnull
+																						   skinInfos,
+									const SkinInfo *colibri_nonnull *colibri_nonnull outSkinInfos,
 									const bool                                             bIsAnimated );
 		void destroyClonedData();
 		void updateProgressbar();
@@ -78,15 +78,15 @@ namespace Colibri
 	public:
 		Progressbar( ColibriManager *manager );
 
-		void _initialize() colibri_override;
-		void _destroy() colibri_override;
+		void _initialize() override;
+		void _destroy() override;
 
 		Renderable *getFrameLayer();
 		Renderable *getProgressLayer();
 
 		/// @copydoc Renderable::setVisualsEnabled
-		void         setVisualsEnabled( bool bEnabled );
-		virtual bool isVisualsEnabled() const colibri_final;
+		void setVisualsEnabled( bool bEnabled );
+		bool isVisualsEnabled() const final;
 
 		/** See Renderable::setSkinPack.
 			This version sets the skin packs for both layer 0 and layer 1
@@ -116,10 +116,10 @@ namespace Colibri
 		void  setProgress( float progress );
 		float getProgress() const { return m_progress; }
 
-		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		void _update( float timeSinceLast ) colibri_override;
+		void _update( float timeSinceLast ) override;
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

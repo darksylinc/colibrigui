@@ -17,7 +17,7 @@ namespace rapidjson
 	typedef GenericValue<UTF8<char>, MemoryPoolAllocator<CrtAllocator> > Value;
 }
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -89,7 +89,7 @@ namespace Colibri
 		@return
 			SkinPack ptr. Nullptr if not found.
 		*/
-		SkinPack const *colibrigui_nullable findSkinPack(
+		SkinPack const *colibri_nullable findSkinPack(
 			Ogre::IdString name, LogSeverity::LogSeverity logSeverity = LogSeverity::Error ) const;
 
 		/** Finds the associated skin for the given State in the input skin pack
@@ -102,7 +102,7 @@ namespace Colibri
 			Associated skin for the given state in the given pack.
 			Nullptr if not found.
 		*/
-		SkinInfo const *colibrigui_nullable
+		SkinInfo const *colibri_nullable
 						findSkin( const SkinPack &pack, States::States state,
 								  LogSeverity::LogSeverity logSeverity = LogSeverity::Warning ) const;
 
@@ -111,4 +111,4 @@ namespace Colibri
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

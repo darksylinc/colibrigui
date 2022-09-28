@@ -5,8 +5,24 @@
 #include "ColibriGui/ColibriProgressbar.h"
 
 #include "OgreLwString.h"
+
+#if defined( __GNUC__ ) && !defined( __clang__ )
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+#if defined( __clang__ )
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wimplicit-int-float-conversion"
+#	pragma clang diagnostic ignored "-Wdeprecated-copy"
+#endif
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
+#if defined( __clang__ )
+#	pragma clang diagnostic pop
+#endif
+#if defined( __GNUC__ ) && !defined( __clang__ )
+#	pragma GCC diagnostic pop
+#endif
 
 #include "sds/sds_fstream.h"
 #include "sds/sds_fstreamApk.h"
@@ -193,8 +209,8 @@ namespace Colibri
 							itTmp->value.Size() == 2u &&
 							itTmp->value[0].IsUint() && itTmp->value[1].IsUint() )
 						{
-							texResolution.x = itTmp->value[0].GetUint();
-							texResolution.y = itTmp->value[1].GetUint();
+							texResolution.x = Ogre::Real( itTmp->value[0].GetUint() );
+							texResolution.y = Ogre::Real( itTmp->value[1].GetUint() );
 						}
 					}
 					else
@@ -217,8 +233,8 @@ namespace Colibri
 					itTmp->value.Size() == 2u &&
 					itTmp->value[0].IsUint() && itTmp->value[1].IsUint() )
 				{
-					texResolution.x = itTmp->value[0].GetUint();
-					texResolution.y = itTmp->value[1].GetUint();
+					texResolution.x = Ogre::Real( itTmp->value[0].GetUint() );
+					texResolution.y = Ogre::Real( itTmp->value[1].GetUint() );
 				}
 
 				itTmp = skinValue.FindMember( "material" );
@@ -388,8 +404,8 @@ namespace Colibri
 					itTmp->value[2].IsDouble() &&
 					( itTmp->value.Size() == 3u || itTmp->value[3].IsDouble() ) )
 				{
-					const size_t numElements = itTmp->value.Size();
-					for( size_t i = 0u; i < numElements; ++i )
+					const rapidjson::SizeType numElements = itTmp->value.Size();
+					for( rapidjson::SizeType i = 0u; i < numElements; ++i )
 					{
 						skinInfo.stateInfo.defaultColour[i] =
 							static_cast<float>( itTmp->value[i].GetDouble() );
@@ -646,7 +662,7 @@ namespace Colibri
 		m_colibriManager->setDefaultSkins( defaultSkins );
 	}
 	//-------------------------------------------------------------------------
-	SkinPack const *colibrigui_nullable
+	SkinPack const *colibri_nullable
 	SkinManager::findSkinPack( Ogre::IdString name, LogSeverity::LogSeverity logSeverity ) const
 	{
 		SkinPack const *retVal = 0;
@@ -669,7 +685,7 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	SkinInfo const *colibrigui_nullable SkinManager::findSkin(
+	SkinInfo const *colibri_nullable SkinManager::findSkin(
 		const SkinPack &pack, States::States state, LogSeverity::LogSeverity logSeverity ) const
 	{
 		SkinInfo const *retVal = 0;

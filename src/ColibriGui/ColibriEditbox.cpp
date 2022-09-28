@@ -3,7 +3,14 @@
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriManager.h"
 
+#if defined( __clang__ )
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
 #include "unicode/unistr.h"
+#if defined( __clang__ )
+#	pragma clang diagnostic pop
+#endif
 
 #define TODO_text_edit
 
@@ -103,7 +110,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	const std::string &Editbox::getText() const { return m_label->getText(); }
 	//-------------------------------------------------------------------------
-	void Editbox::setPlaceholder( const char *colibrigui_nullable text )
+	void Editbox::setPlaceholder( const char *colibri_nullable text )
 	{
 		if( !text )
 		{
@@ -132,7 +139,7 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	const std::string *colibrigui_nullable Editbox::getPlaceholder() const
+	const std::string *colibri_nullable Editbox::getPlaceholder() const
 	{
 		if( m_placeholder )
 			return &m_placeholder->getText();
@@ -285,13 +292,13 @@ namespace Colibri
 				const std::string &oldText = m_label->getText();
 				UnicodeString uStr( UnicodeString::fromUTF8( oldText ) );
 
-				uint32_t lastCursorPosToDelete = m_cursorPos;
+				size_t lastCursorPosToDelete = m_cursorPos;
 				if( keyCode == KeyCode::Backspace )
 				{
 					for( size_t i = 0u; i < repetition; ++i )
 					{
 						// Set the new cursor position
-						m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
+						m_cursorPos = (uint32_t)m_label->regressGlyphToPreviousCluster( m_cursorPos );
 						if( i == 0u )
 							lastCursorPosToDelete = m_cursorPos;
 					}
@@ -408,7 +415,7 @@ namespace Colibri
 			m_label->getGlyphStartUtf16( m_cursorPos, glyphStart, glyphLength );
 
 			// Append the text
-			uStr.insert( glyphStart, appendText );
+			uStr.insert( static_cast<int32_t>( glyphStart ), appendText );
 
 			// Convert back to UTF8
 			std::string result;
@@ -450,7 +457,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	Label *Editbox::getLabel() { return m_label; }
 	//-------------------------------------------------------------------------
-	Label *colibrigui_nullable Editbox::getPlaceholderLabel() { return m_placeholder; }
+	Label *colibri_nullable Editbox::getPlaceholderLabel() { return m_placeholder; }
 	//-------------------------------------------------------------------------
 	void Editbox::setTransformDirty( uint32_t dirtyReason )
 	{
@@ -469,18 +476,18 @@ namespace Colibri
 		if( direction == Borders::Left )
 		{
 			if( m_manager->swapRTLControls() )
-				m_cursorPos = m_label->advanceGlyphToNextCluster( m_cursorPos );
+				m_cursorPos = (uint32_t)m_label->advanceGlyphToNextCluster( m_cursorPos );
 			else
-				m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
+				m_cursorPos = (uint32_t)m_label->regressGlyphToPreviousCluster( m_cursorPos );
 			showCaret();
 			_callActionListeners( Action::ValueChanged );
 		}
 		else if( direction == Borders::Right )
 		{
 			if( m_manager->swapRTLControls() )
-				m_cursorPos = m_label->regressGlyphToPreviousCluster( m_cursorPos );
+				m_cursorPos = (uint32_t)m_label->regressGlyphToPreviousCluster( m_cursorPos );
 			else
-				m_cursorPos = m_label->advanceGlyphToNextCluster( m_cursorPos );
+				m_cursorPos = (uint32_t)m_label->advanceGlyphToNextCluster( m_cursorPos );
 
 			showCaret();
 			_callActionListeners( Action::ValueChanged );

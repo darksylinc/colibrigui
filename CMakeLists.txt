@@ -122,6 +122,12 @@ target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
 if( UNIX )
 	target_link_libraries( ${PROJECT_NAME} dl )
 endif()
+if( NOT MSVC )
+	target_compile_options( ${PROJECT_NAME} PRIVATE
+		-Wall -Winit-self -Wcast-qual -Wwrite-strings -Wextra
+		-Winconsistent-missing-destructor-override -Wcomma -Wsign-conversion -Wconversion
+		-Wno-unused-parameter -Wshadow -Wimplicit-fallthrough )
+endif()
 
 if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "NO" )

@@ -5,7 +5,7 @@
 
 #include "OgreIdString.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -44,15 +44,15 @@ namespace Colibri
 		Ogre::Vector2	m_tickmarkSize;
 
 		/// Each skin pack per m_skinPacks[m_currentValue]
-		SkinInfo const * colibrigui_nullable m_skinPacks[3][States::NumStates];
+		SkinInfo const * colibri_nullable m_skinPacks[3][States::NumStates];
 
 		void updateTickmark();
 
 	public:
 		Checkbox( ColibriManager *manager );
 
-		void _initialize() colibri_override;
-		void _destroy() colibri_override;
+		void _initialize() override;
+		void _destroy() override;
 
 		Button* getButton()								{ return m_button; }
 
@@ -88,10 +88,10 @@ namespace Colibri
 						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
 						States::States baseState=States::NumStates );
 
-		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		void notifyWidgetAction( Widget *widget, Action::Action action ) colibri_override;
+		void notifyWidgetAction( Widget *widget, Action::Action action ) override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

@@ -74,9 +74,10 @@ namespace Colibri
 				parentWindow->m_childWindows.erase( itor );
 			}
 			{
-				WidgetVec::iterator itor = std::find(
-					parentWindow->m_children.begin() + parentWindow->getOffsetStartWindowChildren(),
-					parentWindow->m_children.end(), this );
+				WidgetVec::iterator itor =
+					std::find( parentWindow->m_children.begin() +
+								   ptrdiff_t( parentWindow->getOffsetStartWindowChildren() ),
+							   parentWindow->m_children.end(), this );
 				parentWindow->m_children.erase( itor );
 			}
 		}
@@ -185,7 +186,7 @@ namespace Colibri
 
 		const SkinWidgetTypes::SkinWidgetTypes defaultSkinType =
 			static_cast<SkinWidgetTypes::SkinWidgetTypes>( SkinWidgetTypes::WindowArrowScrollTop +
-														   border );
+														   (int)border );
 		const SkinManager *skinManager = m_manager->getSkinManager();
 		const Ogre::IdString skinPackName = m_manager->getDefaultSkinPackName( defaultSkinType );
 		const SkinPack *defaultSkinPack = skinManager->findSkinPack( skinPackName, LogSeverity::Fatal );
@@ -478,7 +479,7 @@ namespace Colibri
 			window->m_parent = 0;
 
 			WidgetVec::iterator itWidget =
-				std::find( m_children.begin() + m_numWidgets, m_children.end(), window );
+				std::find( m_children.begin() + ptrdiff_t( m_numWidgets ), m_children.end(), window );
 			if( itWidget == m_children.end() )
 			{
 				LogListener *log = m_manager->getLogListener();
@@ -509,11 +510,12 @@ namespace Colibri
 	{
 		COLIBRI_ASSERT( !widget->isWindow() );
 		WidgetVec::const_iterator itor = std::find( m_children.begin(), m_children.end(), widget );
-		m_defaultChildWidget = itor - m_children.begin();
+		COLIBRI_ASSERT_LOW( itor - m_children.begin() < std::numeric_limits<uint16_t>::max() );
+		m_defaultChildWidget = static_cast<uint16_t>( itor - m_children.begin() );
 		COLIBRI_ASSERT( m_defaultChildWidget < m_numWidgets );
 	}
 	//-------------------------------------------------------------------------
-	Widget *colibrigui_nullable Window::getDefaultWidget() const
+	Widget *colibri_nullable Window::getDefaultWidget() const
 	{
 		Widget *retVal = 0;
 
@@ -543,7 +545,7 @@ namespace Colibri
 		COLIBRI_ASSERT( m_lastPrimaryAction < m_numWidgets );
 	}
 	//-------------------------------------------------------------------------
-	Widget *colibrigui_nullable Window::getLastPrimaryAction() const
+	Widget *colibri_nullable Window::getLastPrimaryAction() const
 	{
 		Widget *retVal = 0;
 

@@ -3,7 +3,7 @@
 
 #include "ColibriGui/ColibriRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -40,18 +40,18 @@ namespace Colibri
 
 		WindowVec m_childWindows;
 
-		Widget *colibrigui_nullable m_arrows[Borders::NumBorders];
+		Widget *colibri_nullable m_arrows[Borders::NumBorders];
 		bool                            m_scrollArrowsVisibility[Borders::NumBorders];
 		float                           m_scrollArrowProportion[Borders::NumBorders];
 
 		void notifyChildWindowIsDirty();
 
 		/// Overloaded to also reorder the m_childWindows vec.
-		virtual void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets ) colibri_override;
+		void reorderWidgetVec( bool widgetInListDirty, WidgetVec& widgets ) override;
 
 		Window* getParentAsWindow() const;
 
-		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved ) colibri_override;
+		size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved ) override;
 
 		inline bool isArrowBreadthFirstReady( const Widget *arrow ) const;
 
@@ -64,11 +64,11 @@ namespace Colibri
 
 	public:
 		Window( ColibriManager *manager );
-		virtual ~Window() colibri_override;
+		~Window() override;
 
-		virtual void _initialize() colibri_override;
-		virtual void _destroy() colibri_override;
-		virtual bool isWindow() const colibri_final	{ return true; }
+		void _initialize() override;
+		void _destroy() override;
+		bool isWindow() const final	{ return true; }
 
 		/** Shows arrows on each border that only appear when there is more to scroll
 		@param bVisible
@@ -100,7 +100,7 @@ namespace Colibri
 		/// if it's still animating.
 		/// To get the final scroll to achieve once animation finishes, use getNextScroll
 		/// This value may be temporarily outside the range [0; m_maxScroll]
-		virtual const Ogre::Vector2& getCurrentScroll() const colibri_final;
+		const Ogre::Vector2& getCurrentScroll() const final;
 		/// Returns the final scroll position. See getCurrentScroll
 		/// This value may be temporarily outside the range [0; m_maxScroll]
 		const Ogre::Vector2& getNextScroll() const						{ return m_nextScroll; }
@@ -128,7 +128,7 @@ namespace Colibri
 		/// Calculates & sets the required scrollable area based on the current size of all child
 		/// widgets & windows; and our current size.
 		/// This function will not call sizeToFit on children. You'll likely want to call this last.
-		virtual void sizeScrollToFit() colibri_override;
+		void sizeScrollToFit() override;
 
 		/// Returns true if it's still updating its scroll and the
 		/// focused widget by the mouse cursor is potentially dirty
@@ -137,7 +137,7 @@ namespace Colibri
 		/// See Widget::setWidgetNavigationDirty
 		/// Notifies all of our children widgets are dirty and we need to recalculate them.
 		/// Also inform our parent windows they need to call us for recalculation
-		virtual void setWidgetNavigationDirty() colibri_override;
+		void setWidgetNavigationDirty() override;
 
 		/// Similar to setWidgetNavigationDirty, but you should call this if this window
 		/// has changed, and we'll inform our parent that it needs to recalculate
@@ -155,8 +155,8 @@ namespace Colibri
 		/// Makes this widget the default widget (i.e. which widget the cursor
 		/// defaults to when the window is created)
 		/// If widget is not our child or nullptr, the current default is unset
-		void setDefault( Widget * colibrigui_nullable widget );
-		Widget* colibrigui_nullable getDefaultWidget() const;
+		void setDefault( Widget * colibri_nullable widget );
+		Widget* colibri_nullable getDefaultWidget() const;
 
 		/** Used to remember the last widget this window was into, so that user
 			can call:
@@ -171,8 +171,8 @@ namespace Colibri
 		@remarks
 			When there is no remembered widget, getDefaultWidget is returned instead.
 		*/
-		void    setLastPrimaryAction( Widget *colibrigui_nullable widget );
-		Widget *colibrigui_nullable getLastPrimaryAction() const;
+		void    setLastPrimaryAction( Widget *colibri_nullable widget );
+		Widget *colibri_nullable getLastPrimaryAction() const;
 
 		/** When true, clicking on an empty part of the window will consume mouse
 			cursor movements and clicks
@@ -187,17 +187,16 @@ namespace Colibri
 		void setConsumeCursor( bool bConsumeCursor ) { m_clickable = bConsumeCursor; }
 		bool getConsumeCursor() const { return m_clickable; }
 
-		virtual void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
-												  const Matrix2x3 &parentRot ) colibri_override;
+		void _updateDerivedTransformOnly( const Ogre::Vector2 &parentPos,
+										  const Matrix2x3     &parentRot ) override;
 
-		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS vertexBuffer,
-											  GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS textVertBuffer,
-											  const Ogre::Vector2 &parentPos,
-											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Matrix2x3 &parentRot ) colibri_final;
+		void _fillBuffersAndCommands(
+			UiVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS    vertexBuffer,            //
+			GlyphVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS textVertBuffer,          //
+			const Ogre::Vector2                                         &parentPos,               //
+			const Ogre::Vector2                                         &parentCurrentScrollPos,  //
+			const Matrix2x3                                             &parentRot ) final;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

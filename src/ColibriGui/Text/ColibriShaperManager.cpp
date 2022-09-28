@@ -92,8 +92,8 @@ namespace Colibri
 		m_ftLibrary = 0;
 	}
 	//-------------------------------------------------------------------------
-	void ShaperManager::setOgre( Ogre::HlmsColibri * colibrigui_nullable hlms,
-								 Ogre::VaoManager * colibrigui_nullable vaoManager )
+	void ShaperManager::setOgre( Ogre::HlmsColibri * colibri_nullable hlms,
+								 Ogre::VaoManager * colibri_nullable vaoManager )
 	{
 		if( m_hlms )
 			m_hlms->setGlyphAtlasBuffer( 0 );
@@ -223,33 +223,33 @@ namespace Colibri
 			if( m_offsetPtr + sizeBytes > m_atlasCapacity )
 			{
 				//We're out of space. First check if we can steal another slot.
-				CachedGlyphMap::iterator end  = m_glyphCache.end();
-				CachedGlyphMap::iterator bestUnusedGlyph = end;
+				const CachedGlyphMap::iterator enGlyph = m_glyphCache.end();
+				CachedGlyphMap::iterator bestUnusedGlyph = enGlyph;
 
-				for( size_t i=0; i<2u && bestUnusedGlyph == end; ++i )
+				for( size_t i = 0; i < 2u && bestUnusedGlyph == enGlyph; ++i )
 				{
-					CachedGlyphMap::iterator itor = m_glyphCache.begin();
-					while( itor != end )
+					CachedGlyphMap::iterator itGlyph = m_glyphCache.begin();
+					while( itGlyph != enGlyph )
 					{
-						if( !itor->second.refCount && itor->second.getSizeBytes() >= sizeBytes &&
-							(bestUnusedGlyph == end ||
-							 itor->second.getSizeBytes() < bestUnusedGlyph->second.getSizeBytes()) )
+						if( !itGlyph->second.refCount && itGlyph->second.getSizeBytes() >= sizeBytes &&
+							( bestUnusedGlyph == enGlyph ||
+							  itGlyph->second.getSizeBytes() < bestUnusedGlyph->second.getSizeBytes() ) )
 						{
-							bestUnusedGlyph = itor;
+							bestUnusedGlyph = itGlyph;
 						}
-						++itor;
+						++itGlyph;
 					}
 
-					//Not found? Try again, this time with all unused glyphs removed and merged.
-					//We may have two contiguous unused glyphs that are big enough to hold
-					//this new glyph, but weren't big enough individually.
-					if( i == 0 && bestUnusedGlyph == end )
+					// Not found? Try again, this time with all unused glyphs removed and merged.
+					// We may have two contiguous unused glyphs that are big enough to hold
+					// this new glyph, but weren't big enough individually.
+					if( i == 0 && bestUnusedGlyph == enGlyph )
 						flushReleasedGlyphs();
 				}
 
-				if( bestUnusedGlyph == end )
+				if( bestUnusedGlyph == enGlyph )
 				{
-					//Cannot steal. Grow the atlas, advance the pointer and get a fresh region
+					// Cannot steal. Grow the atlas, advance the pointer and get a fresh region
 					growAtlas( sizeBytes );
 					retVal = m_offsetPtr;
 					m_offsetPtr += sizeBytes;
@@ -276,7 +276,7 @@ namespace Colibri
 											 uint16_t fontIdx, bool bDummy )
 	{
 		FT_Error errorCode = FT_Load_Glyph( font, bDummy ? 0u : codepoint, FT_LOAD_DEFAULT );
-		if( colibrigui_unlikely( errorCode ) )
+		if( colibri_unlikely( errorCode ) )
 		{
 			LogListener *log = getLogListener();
 			char tmpBuffer[512];
@@ -303,11 +303,11 @@ namespace Colibri
 		newGlyph.bearingY	= static_cast<float>( slot->bitmap_top );
 		newGlyph.width		= static_cast<uint16_t>( ftBitmap.width );
 		newGlyph.height		= static_cast<uint16_t>( ftBitmap.rows );
-		newGlyph.offsetStart= getAtlasOffset( newGlyph.getSizeBytes() );
-		newGlyph.newlineSize= font->size->metrics.height / 64.0f;
-		newGlyph.regionUp = (float)font->size->metrics.ascender / (font->size->metrics.ascender -
-																   font->size->metrics.descender);
-		newGlyph.font		= fontIdx;
+		newGlyph.offsetStart = (uint32_t)getAtlasOffset( newGlyph.getSizeBytes() );
+		newGlyph.newlineSize = (float)font->size->metrics.height / 64.0f;
+		newGlyph.regionUp = (float)font->size->metrics.ascender /
+							float( font->size->metrics.ascender - font->size->metrics.descender );
+		newGlyph.font = fontIdx;
 		newGlyph.refCount	= 0;
 
 		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
@@ -398,11 +398,11 @@ namespace Colibri
 			if( itor->offset + itor->size == blockToMerge->offset )
 			{
 				itor->size += blockToMerge->size;
-				size_t idx = itor - blocks.begin();
+				ptrdiff_t idx = itor - blocks.begin();
 
 				//When blockToMerge is the last one, its index won't be the same
 				//after removing the other iterator, they will swap.
-				if( idx == blocks.size() - 1 )
+				if( idx == ptrdiff_t( blocks.size() - 1u ) )
 					idx = blockToMerge - blocks.begin();
 
 				Ogre::efficientVectorRemove( blocks, blockToMerge );
@@ -414,11 +414,11 @@ namespace Colibri
 			else if( blockToMerge->offset + blockToMerge->size == itor->offset )
 			{
 				blockToMerge->size += itor->size;
-				size_t idx = blockToMerge - blocks.begin();
+				ptrdiff_t idx = blockToMerge - blocks.begin();
 
 				//When blockToMerge is the last one, its index won't be the same
 				//after removing the other iterator, they will swap.
-				if( idx == blocks.size() - 1 )
+				if( idx == ptrdiff_t( blocks.size() - 1u ) )
 					idx = itor - blocks.begin();
 
 				Ogre::efficientVectorRemove( blocks, itor );
@@ -541,7 +541,7 @@ namespace Colibri
 		UErrorCode errorCode = U_ZERO_ERROR;
 		ubidi_setPara( m_bidi, uStr.getBuffer(), uStr.length(), textHorizDir, 0, &errorCode );
 
-		if( colibrigui_unlikely( !U_SUCCESS(errorCode) ) )
+		if( colibri_unlikely( !U_SUCCESS(errorCode) ) )
 		{
 			LogListener *log = this->getLogListener();
 			char tmpBuffer[512];
@@ -556,7 +556,7 @@ namespace Colibri
 		}
 
 		Shaper *shaper = 0;
-		if( colibrigui_unlikely( richText.font >= m_shapers.size() ) )
+		if( colibri_unlikely( richText.font >= m_shapers.size() ) )
 		{
 			LogListener *log = this->getLogListener();
 			char tmpBuffer[512];
@@ -602,8 +602,8 @@ namespace Colibri
 			const uint16_t *utf16Str = temp.getBuffer();
 #endif
 			shaper->setFontSize( richText.ptSize );
-			shaper->renderString( utf16Str, temp.length(), hbDir, richTextIdx,
-								  logicalStart, outShapes, bOutHasPrivateUse, true );
+			shaper->renderString( utf16Str, (size_t)temp.length(), hbDir, richTextIdx,
+								  (uint32_t)logicalStart, outShapes, bOutHasPrivateUse, true );
 		}
 
 		TextHorizAlignment::TextHorizAlignment finalRetVal;

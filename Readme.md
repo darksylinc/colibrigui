@@ -198,9 +198,8 @@ gonna happen and our core target market uses these platforms.
 
 ### What programming language is Colibri written?
 
-Colibri is written in C++98. This ensures maximum compatibility with even old compilers,
-and also very fast build times, since building with C++11 and afterwards often increases
-build times.
+Colibri targets C++11 as minimum, but tries to keep "modern C++" to a minimum.
+We mostly use `override` and `final` keywords.
 
 ### What's your memory consumption? Can you customize allocators?
 

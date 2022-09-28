@@ -112,7 +112,7 @@ namespace Colibri
 		m_hbFont = hb_ft_font_create( m_ftFont, NULL );
 		m_buffer = hb_buffer_create();
 
-		m_hbLanguage = hb_language_from_string( language.c_str(), language.size() );
+		m_hbLanguage = hb_language_from_string( language.c_str(), static_cast<int>( language.size() ) );
 	}
 	//-------------------------------------------------------------------------
 	Shaper::~Shaper()
@@ -161,7 +161,7 @@ namespace Colibri
 			const FT_UInt deviceVdpi = 96u;
 			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize.value26d6,
 												   deviceHdpi, deviceVdpi );
-			if( colibrigui_unlikely( errorCode ) )
+			if( colibri_unlikely( errorCode ) )
 			{
 				LogListener *log = m_shaperManager->getLogListener();
 				char tmpBuffer[512];
@@ -175,7 +175,7 @@ namespace Colibri
 							ShaperManager::getErrorMessage( errorCode ) );
 				log->log( errorMsg.c_str(), LogSeverity::Error );
 			}
-			else if( colibrigui_likely( m_hbFont != 0 ) )
+			else if( colibri_likely( m_hbFont != 0 ) )
 				hb_ft_font_changed( m_hbFont );
 		}
 	}
@@ -232,8 +232,9 @@ namespace Colibri
 		hb_buffer_set_script( m_buffer, m_script );
 		hb_buffer_set_language( m_buffer, m_hbLanguage );
 
-		hb_buffer_add_utf16( m_buffer, utf16Str, stringLength, 0, stringLength );
-		hb_shape( m_hbFont, m_buffer, m_features.empty() ? 0 : &m_features[0], m_features.size() );
+		hb_buffer_add_utf16( m_buffer, utf16Str, (int)stringLength, 0, (int)stringLength );
+		hb_shape( m_hbFont, m_buffer, m_features.empty() ? 0 : &m_features[0],
+				  (unsigned int)m_features.size() );
 
 		unsigned int glyphCount;
 		hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos( m_buffer, &glyphCount );
@@ -285,7 +286,7 @@ namespace Colibri
 
 				size_t replacedCodepoints = renderWithSubstituteFont(
 					&utf16Str[firstCluster], clusterLength, dir, richTextIdx,
-					clusterOffset + firstCluster, shapesVec, bOutHasPrivateUse );
+					uint32_t( clusterOffset + firstCluster ), shapesVec, bOutHasPrivateUse );
 
 				if( replacedCodepoints == clusterLength )
 					i += numUnknownGlyphs;
@@ -342,10 +343,12 @@ namespace Colibri
 				ShapedGlyph shapedGlyph;
 				if( !bIsPrivateArea )
 				{
-					shapedGlyph.advance =
-						Ogre::Vector2( glyphPos[i].x_advance, -glyphPos[i].y_advance ) / 64.0f;
-					shapedGlyph.offset =
-						Ogre::Vector2( glyphPos[i].x_offset, -glyphPos[i].y_offset ) / 64.0f;
+					shapedGlyph.advance = Ogre::Vector2( Ogre::Real( glyphPos[i].x_advance ),
+														 Ogre::Real( -glyphPos[i].y_advance ) ) /
+										  64.0f;
+					shapedGlyph.offset = Ogre::Vector2( Ogre::Real( glyphPos[i].x_offset ),
+														Ogre::Real( -glyphPos[i].y_offset ) ) /
+										 64.0f;
 				}
 				else
 				{
@@ -366,7 +369,7 @@ namespace Colibri
 					if( nextIdx < glyphCount )
 						shapedGlyph.clusterLength = glyphInfo[nextIdx].cluster - glyphInfo[i].cluster;
 					else
-						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
+						shapedGlyph.clusterLength = uint32_t( stringLength - glyphInfo[i].cluster );
 				}
 				else
 				{
@@ -380,7 +383,7 @@ namespace Colibri
 					if( prevIdx < glyphCount )
 						shapedGlyph.clusterLength = glyphInfo[prevIdx].cluster - glyphInfo[i].cluster;
 					else
-						shapedGlyph.clusterLength = stringLength - glyphInfo[i].cluster;
+						shapedGlyph.clusterLength = uint32_t( stringLength - glyphInfo[i].cluster );
 				}
 				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||

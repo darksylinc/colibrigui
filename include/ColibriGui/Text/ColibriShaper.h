@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 typedef struct FT_FaceRec_*  FT_Face;
 typedef struct FT_LibraryRec_  *FT_Library;
@@ -55,7 +55,7 @@ namespace Colibri
 		ShaperManager	*m_shaperManager;
 
 #ifdef __ANDROID__
-		AAsset *colibrigui_nullable m_asset;
+		AAsset *colibri_nullable m_asset;
 		FT_StreamRec *              m_stream;
 #endif
 
@@ -94,4 +94,4 @@ namespace Colibri
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

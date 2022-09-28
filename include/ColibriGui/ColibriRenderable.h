@@ -13,7 +13,7 @@ namespace Ogre
 	class HlmsColibri;
 }
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -76,8 +76,8 @@ namespace Colibri
 		//therefore the material ID)
 		Ogre::HlmsDatablock			*lastDatablock;
 		int							baseInstanceAndIndirectBuffers;
-		Ogre::CbDrawCallStrip		* colibrigui_nullable drawCmd;
-		Ogre::CbDrawStrip			* colibrigui_nullable drawCountPtr;
+		Ogre::CbDrawCallStrip		* colibri_nullable drawCmd;
+		Ogre::CbDrawStrip			* colibri_nullable drawCountPtr;
 		uint32_t primCount;
 		uint32_t basePrimCount[2]; //[0] = regular widgets, [1] = text
 		uint32_t nextFirstVertex;
@@ -127,9 +127,9 @@ namespace Colibri
 							 float invCanvasAspectRatio,
 							 Matrix2x3 parentRot );
 
-		virtual void _notifyCanvasChanged() colibri_override;
+		void _notifyCanvasChanged() override;
 
-		virtual void stateChanged( States::States newState ) colibri_override;
+		void stateChanged( States::States newState ) override;
 
 	public:
 		Renderable( ColibriManager *manager );
@@ -150,7 +150,7 @@ namespace Colibri
 			False to disable rendering.
 		*/
 		void setVisualsEnabled( bool bEnabled );
-		virtual bool isVisualsEnabled() const colibri_final;
+		bool isVisualsEnabled() const final;
 
 		/** Sets a custom colour
 		@param overrideSkinColour
@@ -193,7 +193,7 @@ namespace Colibri
 		@param bClipBordersMatchSkin
 			When false, we don't call setClipBordersMatchSkin
 		*/
-		void setBorderSize( const float borderSize[colibrigui_nonnull Borders::NumBorders],
+		void setBorderSize( const float borderSize[colibri_nonnull Borders::NumBorders],
 							States::States forState = States::NumStates,
 							bool bClipBordersMatchSkin = true );
 
@@ -203,9 +203,9 @@ namespace Colibri
 			skinInfo[i] can be null
 			skinInfo must be able to hold States::NumStates elements
 		*/
-		void _setSkinPack( SkinInfo const * colibrigui_nonnull const * colibrigui_nullable skinInfos );
+		void _setSkinPack( SkinInfo const * colibri_nonnull const * colibri_nullable skinInfos );
 
-		virtual void setState( States::States state, bool smartHighlight=true ) colibri_override;
+		void setState( States::States state, bool smartHighlight=true ) override;
 
 		/** Calls setClipBorders and makes the clipping region to match that of the current skin
 
@@ -216,30 +216,31 @@ namespace Colibri
 		void setClipBordersMatchSkin();
 		void setClipBordersMatchSkin( States::States state );
 
-		virtual void broadcastNewVao( Ogre::VertexArrayObject *vao,
-									  Ogre::VertexArrayObject *textVao ) colibri_final;
+		void broadcastNewVao( Ogre::VertexArrayObject *vao,
+									  Ogre::VertexArrayObject *textVao ) final;
 
-		virtual bool isRenderable() const colibri_final	{ return true; }
+		bool isRenderable() const final	{ return true; }
 
 		const StateInformation& getStateInformation( States::States state = States::NumStates ) const;
 
-		inline void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
+		inline void _fillBuffersAndCommands( UiVertex * colibri_nonnull * colibri_nonnull
 											 RESTRICT_ALIAS vertexBuffer,
-											 GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+											 GlyphVertex * colibri_nonnull * colibri_nonnull
 											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Vector2 &parentCurrentScrollPos,
 											 const Matrix2x3 &parentRot,
 											 const Ogre::Vector2 &currentScrollPos,
 											 bool forWindows );
-		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS vertexBuffer,
-											  GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
-											  RESTRICT_ALIAS textVertBuffer,
-											  const Ogre::Vector2 &parentPos,
-											  const Ogre::Vector2 &parentCurrentScrollPos,
-											  const Matrix2x3 &parentRot ) colibri_override;
+
+		void _fillBuffersAndCommands( UiVertex *colibri_nonnull *colibri_nonnull     //
+										  RESTRICT_ALIAS vertexBuffer,                     //
+									  GlyphVertex *colibri_nonnull *colibri_nonnull  //
+										  RESTRICT_ALIAS   textVertBuffer,                 //
+									  const Ogre::Vector2 &parentPos,                      //
+									  const Ogre::Vector2 &parentCurrentScrollPos,         //
+									  const Matrix2x3     &parentRot ) override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

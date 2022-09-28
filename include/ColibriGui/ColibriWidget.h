@@ -8,7 +8,7 @@
 #include "OgreVector2.h"
 #include "OgreVector4.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -81,7 +81,7 @@ namespace Colibri
 		/// WidgetListener::notifyWidgetDestroyed
 		/// Can only be nullptr if 'this' is a Window.
 		/// Windows can only be children of Windows.
-		Widget * colibrigui_nonnull m_parent;
+		Widget * colibri_nonnull m_parent;
 		/// Includes windows, and they're always at the end. See m_numWidgets
 		WidgetVec					m_children;
 		/// Widgets that are Renderables start from m_children[m_numNonRenderables]
@@ -95,7 +95,7 @@ namespace Colibri
 
 		ColibriManager          *m_manager;
 
-		Widget * colibrigui_nullable	m_nextWidget[Borders::NumBorders];
+		Widget * colibri_nullable	m_nextWidget[Borders::NumBorders];
 		bool							m_autoSetNextWidget[Borders::NumBorders];
 		bool					m_hidden;
 		/// calculateChildrenSize will ignore a children widgets with this set to true
@@ -216,7 +216,7 @@ namespace Colibri
 		virtual size_t notifyParentChildIsDestroyed( Widget *childWidgetBeingRemoved );
 
 		/// Looks and returns the next non-disabled widget. Nullptr if there is none
-		Widget *colibrigui_nullable getNextKeyboardNavigableWidget( const Borders::Borders direction );
+		Widget *colibri_nullable getNextKeyboardNavigableWidget( const Borders::Borders direction );
 
 		virtual void stateChanged( States::States newState ) {}
 
@@ -250,7 +250,7 @@ namespace Colibri
 
 	public:
 		Widget( ColibriManager *manager );
-		~Widget() colibri_override;
+		~Widget() override;
 
 		/** Sets a user-supplied name for debugging purposes.
 		@remark
@@ -265,7 +265,7 @@ namespace Colibri
 
 		/// Do not call directly. 'this' cannot be a Window
 		void _setParent( Widget *parent );
-		Widget * colibrigui_nonnull getParent() const				{ return m_parent; }
+		Widget * colibri_nonnull getParent() const				{ return m_parent; }
 
 		virtual bool isRenderable() const	{ return false; }
 		virtual bool isWindow() const		{ return false; }
@@ -302,7 +302,7 @@ namespace Colibri
 		bool ignoreFromChildrenSize() const { return m_ignoreFromChildrenSize; }
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns nullptr
-		Window * colibrigui_nullable getAsWindow();
+		Window * colibri_nullable getAsWindow();
 
 		/// If 'this' is a window, it returns 'this'. Otherwise it returns its
 		/// parent (or its parent's parent) until we find a window. Cannot
@@ -323,14 +323,14 @@ namespace Colibri
 		/// Will return the first Widget in the hierarchy where m_keyboardNavigable == true
 		/// Note it can return nullptr if no widget matches the criteria.
 		/// Note it can return 'this'
-		Widget * colibrigui_nullable getFirstKeyboardNavigableParent();
+		Widget * colibri_nullable getFirstKeyboardNavigableParent();
 
 		/// See Window::getCurrentScroll. For most widgets, this returns
 		/// zero (i.e. when scrolling is not supported)
 		virtual const Ogre::Vector2& getCurrentScroll() const;
 
 		// WidgetListener overload
-		virtual void notifyWidgetDestroyed( Widget *widget ) colibri_override;
+		void notifyWidgetDestroyed( Widget *widget ) override;
 
 		void addListener( WidgetListener *listener );
 		void removeListener( WidgetListener *listener );
@@ -455,7 +455,7 @@ namespace Colibri
 
 			If reciprocate is true, then this affects nextWidget as well.
 		*/
-		void setNextWidget( Widget *colibrigui_nullable nextWidget, Borders::Borders direction,
+		void setNextWidget( Widget *colibri_nullable nextWidget, Borders::Borders direction,
 							bool reciprocate = true, bool bManualOverride = false );
 
 		float getRight() const;
@@ -495,9 +495,9 @@ namespace Colibri
 		@param parentRot
 			Derived orientation of m_parent
 		*/
-		virtual void _fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
+		virtual void _fillBuffersAndCommands( UiVertex * colibri_nonnull * colibri_nonnull
 											  RESTRICT_ALIAS vertexBuffer,
-											  GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+											  GlyphVertex * colibri_nonnull * colibri_nonnull
 											  RESTRICT_ALIAS textVertBuffer,
 											  const Ogre::Vector2 &parentPos,
 											  const Ogre::Vector2 &parentCurrentScrollPos,
@@ -637,7 +637,7 @@ namespace Colibri
 			@see Renderable::setBorderSize
 		@param clipBorders
 		*/
-		void setClipBorders( float clipBorders[colibrigui_nonnull Borders::NumBorders] );
+		void setClipBorders( float clipBorders[colibri_nonnull Borders::NumBorders] );
 		/// Returns m_position + clipBorderTopLeft; aka where the working area for children starts
 		Ogre::Vector2 getTopLeftAfterClipping() const;
 		/// Returns m_position + m_size - clipBorderBottomRight;
@@ -721,11 +721,11 @@ namespace Colibri
 		virtual void sizeScrollToFit() {}
 
 		// LayoutCell overrides
-		virtual void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_override;
-		virtual void setCellSize( const Ogre::Vector2 &size ) colibri_override;
-		virtual Ogre::Vector2 getCellSize() const colibri_override;
-		virtual Ogre::Vector2 getCellMinSize() const colibri_override;
+		void setCellOffset( const Ogre::Vector2 &topLeft ) override;
+		void setCellSize( const Ogre::Vector2 &size ) override;
+		Ogre::Vector2 getCellSize() const override;
+		Ogre::Vector2 getCellMinSize() const override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

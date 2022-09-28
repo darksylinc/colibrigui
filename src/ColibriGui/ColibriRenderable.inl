@@ -10,7 +10,7 @@
 #define TODO_borderRepeatSize
 #define TODO_this_is_a_workaround_neg_y
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -93,9 +93,9 @@ namespace Colibri
 		#undef COLIBRI_ADD_VERTEX
 	}
 	//-------------------------------------------------------------------------
-	inline void Renderable::_fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
+	inline void Renderable::_fillBuffersAndCommands( UiVertex * colibri_nonnull * colibri_nonnull
 													 RESTRICT_ALIAS _vertexBuffer,
-													 GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+													 GlyphVertex * colibri_nonnull * colibri_nonnull
 													 RESTRICT_ALIAS _textVertBuffer,
 													 const Ogre::Vector2 &parentPos,
 													 const Ogre::Vector2 &parentScrollPos,
@@ -270,4 +270,4 @@ namespace Colibri
 	}
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

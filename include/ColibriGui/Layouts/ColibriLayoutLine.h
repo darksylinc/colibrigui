@@ -3,7 +3,7 @@
 
 #include "ColibriGui/Layouts/ColibriLayoutBase.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -126,10 +126,10 @@ namespace Colibri
 		/// Moves and resizes all cells to be layed out as either a row or a column.
 		void layout();
 
-		virtual void notifyLayoutUpdated() colibri_override;
+		void notifyLayoutUpdated() override;
 
-		virtual Ogre::Vector2 getCellMinSize() const colibri_override;
+		Ogre::Vector2 getCellMinSize() const override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

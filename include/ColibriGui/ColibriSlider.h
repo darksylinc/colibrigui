@@ -11,7 +11,7 @@ namespace Ogre
 	class HlmsUnlitDatablock;
 }
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -21,10 +21,10 @@ namespace Colibri
 
 		Layer 0 is drawn behind layer 1
 	*/
-	class Slider colibri_final : public Widget, Ogre::IdObject
+	class Slider final : public Widget, Ogre::IdObject
 	{
 	protected:
-		Renderable *colibrigui_nullable m_layers[2];
+		Renderable *colibri_nullable m_layers[2];
 
 		int32_t m_currentValue;
 
@@ -56,8 +56,8 @@ namespace Colibri
 	public:
 		Slider( ColibriManager *manager );
 
-		void _initialize() colibri_override;
-		void _destroy() colibri_override;
+		void _initialize() override;
+		void _destroy() override;
 
 		/// Sets a different skin pack (than default) for line and/or handle
 		///
@@ -67,9 +67,9 @@ namespace Colibri
 
 		/// @copydoc Renderable::setVisualsEnabled
 		void setVisualsEnabled( bool bEnabled );
-		bool isVisualsEnabled() const colibri_final;
+		bool isVisualsEnabled() const final;
 
-		void setState( States::States state, bool smartHighlight = true ) colibri_override;
+		void setState( States::States state, bool smartHighlight = true ) override;
 
 		/** Sets the size of the handle relative to the full
 			width (m_vertical = true) or height (m_vertical = false) of the Slider.
@@ -179,11 +179,11 @@ namespace Colibri
 		Renderable *getSliderLine();
 		Renderable *getSliderHandle();
 
-		void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		void notifyCursorMoved( const Ogre::Vector2 &posNDC ) colibri_override;
-		void _notifyActionKeyMovement( Borders::Borders direction ) colibri_override;
+		void notifyCursorMoved( const Ogre::Vector2 &posNDC ) override;
+		void _notifyActionKeyMovement( Borders::Borders direction ) override;
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

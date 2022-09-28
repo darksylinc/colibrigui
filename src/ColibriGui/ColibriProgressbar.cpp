@@ -67,7 +67,7 @@ namespace Colibri
 
 			COLIBRI_ASSERT_LOW( !m_progressLayerDatablock[0] && "_initialize already called!" );
 
-			SkinInfo const *colibrigui_nonnull newSkinInfos[States::NumStates];
+			SkinInfo const *colibri_nonnull newSkinInfos[States::NumStates];
 			cloneSkinAndDatablock( skinInfo, newSkinInfos, defaultSkinPack->progressBarIsAnimated );
 
 			Renderable *progressLayer = getProgressLayer();
@@ -96,13 +96,13 @@ namespace Colibri
 		destroyClonedData();
 	}
 	//-------------------------------------------------------------------------
-	Renderable *colibrigui_nullable Progressbar::getFrameLayer()
+	Renderable *colibri_nullable Progressbar::getFrameLayer()
 	{
 		const size_t frameLayer = m_displayType == Basic ? 0u : 1u;
 		return m_layers[frameLayer];
 	}
 	//-------------------------------------------------------------------------
-	Renderable *colibrigui_nullable Progressbar::getProgressLayer()
+	Renderable *colibri_nullable Progressbar::getProgressLayer()
 	{
 		const size_t progressLayer = m_displayType == Basic ? 1u : 0u;
 		return m_layers[progressLayer];
@@ -158,7 +158,7 @@ namespace Colibri
 			Ogre::IdString skinPackProgressName =
 				m_displayType == Basic ? skinPackLayer1Name : skinPackLayer0Name;
 
-			SkinInfo const *colibrigui_nonnull newSkinInfos[States::NumStates];
+			SkinInfo const *colibri_nonnull newSkinInfos[States::NumStates];
 			cloneSkinAndDatablock( skinPackProgressName, newSkinInfos );
 
 			Renderable *progressLayer = getProgressLayer();
@@ -179,7 +179,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Progressbar::cloneSkinAndDatablock( Ogre::IdString skinPackName,
-											 const SkinInfo *colibrigui_nonnull *colibrigui_nonnull
+											 const SkinInfo *colibri_nonnull *colibri_nonnull
 												 outSkinInfos )
 	{
 		SkinManager *skinManager = m_manager->getSkinManager();
@@ -187,7 +187,7 @@ namespace Colibri
 		if( !skinPack )
 			return;
 
-		SkinInfo const *colibrigui_nullable skinInfos[States::NumStates];
+		SkinInfo const *colibri_nullable skinInfos[States::NumStates];
 
 		for( size_t i = 0u; i < States::NumStates; ++i )
 			skinInfos[i] = skinManager->findSkin( *skinPack, static_cast<States::States>( i ) );

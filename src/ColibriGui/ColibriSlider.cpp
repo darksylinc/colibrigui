@@ -259,8 +259,12 @@ namespace Colibri
 					m_cursorOffset = posX - sliderValueUnorm;
 				}
 
+				const float fCursorOffset = float( m_cursorOffset );
+				const float fMinValue = float( m_minValue );
+				const float fMaxValue = float( m_maxValue );
+
 				setCurrentValue( static_cast<int32_t>(
-					roundf( ( posX - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) + m_minValue ) );
+					roundf( ( posX - fCursorOffset ) * ( fMaxValue - fMinValue ) ) + fMinValue ) );
 			}
 			else
 			{
@@ -277,8 +281,12 @@ namespace Colibri
 					m_cursorOffset = posY - sliderValueUnorm;
 				}
 
+				const float fCursorOffset = float( m_cursorOffset );
+				const float fMinValue = float( m_minValue );
+				const float fMaxValue = float( m_maxValue );
+
 				setCurrentValue( static_cast<int32_t>(
-					roundf( ( posY - m_cursorOffset ) * ( m_maxValue - m_minValue ) ) + m_minValue ) );
+					roundf( ( posY - fCursorOffset ) * ( fMaxValue - fMinValue ) ) + fMinValue ) );
 			}
 
 			m_manager->callActionListeners( this, Action::ValueChanged );
@@ -340,14 +348,15 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	float Slider::getCurrentValueProcessed() const
 	{
-		return m_currentValue / static_cast<float>( m_denominator );
+		return static_cast<float>( m_currentValue ) / static_cast<float>( m_denominator );
 	}
 	//-------------------------------------------------------------------------
 	float Slider::getCurrentValueUnorm() const
 	{
 		if( m_minValue == m_maxValue )
 			return 1.0f;
-		return ( m_currentValue - m_minValue ) / static_cast<float>( m_maxValue - m_minValue );
+		return static_cast<float>( m_currentValue - m_minValue ) /
+			   static_cast<float>( m_maxValue - m_minValue );
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setRange( int32_t minValue, int32_t maxValue )

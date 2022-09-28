@@ -3,7 +3,7 @@
 
 #include "ColibriGui/Layouts/ColibriLayoutCell.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -33,7 +33,7 @@ namespace Colibri
 			and modify its scroll area if m_hardMaxSize was exceeded unless m_preventScrolling
 			is true.
 		*/
-		Widget * colibrigui_nullable m_adjustableWindow;
+		Widget * colibri_nullable m_adjustableWindow;
 
 	public:
 		bool m_preventScrolling;
@@ -70,18 +70,17 @@ namespace Colibri
 	public:
 		LayoutBase( ColibriManager *colibriManager );
 
-		void setAdjustableWindow( Widget * colibrigui_nullable window );
-		Widget * colibrigui_nullable getAdjustableWindow() const;
+		void setAdjustableWindow( Widget * colibri_nullable window );
+		Widget * colibri_nullable getAdjustableWindow() const;
 
 		/// Utility function to batch apply margins to all cells in a list. Not recursive.
 		static void setMarginToAllCells( const LayoutCellVec &cells, const Ogre::Vector2 &margin );
 
-		void setCellOffset( const Ogre::Vector2 &topLeft ) colibri_final;
-		void setCellSize( const Ogre::Vector2 &size ) colibri_final;
-		virtual void setCellSize( const Ogre::Vector2 &size,
-								  const Ogre::Vector2 &hardSize ) colibri_final;
-		virtual Ogre::Vector2 getCellSize() const colibri_override;
+		void setCellOffset( const Ogre::Vector2 &topLeft ) final;
+		void setCellSize( const Ogre::Vector2 &size ) final;
+		void setCellSize( const Ogre::Vector2 &size, const Ogre::Vector2 &hardSize ) final;
+		Ogre::Vector2 getCellSize() const override;
 	};
 }
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

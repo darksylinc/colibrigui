@@ -100,10 +100,10 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	Widget *colibrigui_nullable
+	Widget *colibri_nullable
 	Widget::getNextKeyboardNavigableWidget( const Borders::Borders direction )
 	{
-		Widget *colibrigui_nullable nextWidget = this->m_nextWidget[direction];
+		Widget *colibri_nullable nextWidget = this->m_nextWidget[direction];
 
 		while( nextWidget && !nextWidget->isKeyboardNavigable() )
 			nextWidget = nextWidget->m_nextWidget[direction];
@@ -245,8 +245,8 @@ namespace Colibri
 				idx = parent->m_numNonRenderables;
 				++parent->m_numNonRenderables;
 			}
-			parent->m_children.insert( parent->m_children.begin() + idx, this );
-			++parent->m_numWidgets; //Must be incremented regardless of whether it's a renderable
+			parent->m_children.insert( parent->m_children.begin() + ptrdiff_t( idx ), this );
+			++parent->m_numWidgets;  // Must be incremented regardless of whether it's a renderable
 		}
 		else
 		{
@@ -300,7 +300,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Widget::setIgnoreFromChildrenSize( bool bIgnore ) { m_ignoreFromChildrenSize = bIgnore; }
 	//-------------------------------------------------------------------------
-	Window * colibrigui_nullable Widget::getAsWindow()
+	Window * colibri_nullable Widget::getAsWindow()
 	{
 		if( isWindow() )
 		{
@@ -332,7 +332,7 @@ namespace Colibri
 		return nextWidget == this;
 	}
 	//-------------------------------------------------------------------------
-	Widget * colibrigui_nullable Widget::getFirstKeyboardNavigableParent()
+	Widget * colibri_nullable Widget::getFirstKeyboardNavigableParent()
 	{
 		Widget *nextWidget = this;
 
@@ -447,7 +447,7 @@ namespace Colibri
 		if( itor == m_listeners.end() )
 		{
 			m_listeners.push_back( listener );
-			itor = m_listeners.begin() + m_listeners.size() - 1u;
+			itor = m_listeners.begin() + ptrdiff_t( m_listeners.size() - 1u );
 		}
 
 		++itor->refCount;
@@ -582,7 +582,7 @@ namespace Colibri
 		return m_childrenClickable;
 	}
 	//-------------------------------------------------------------------------
-	void Widget::setNextWidget( Widget *colibrigui_nullable nextWidget, Borders::Borders direction,
+	void Widget::setNextWidget( Widget *colibri_nullable nextWidget, Borders::Borders direction,
 								bool reciprocate, bool bManualOverride )
 	{
 		if( direction == Borders::NumBorders )
@@ -660,9 +660,9 @@ namespace Colibri
 		//The first window that our button is touching wins. We go in LIFO order.
 		const size_t numWindows = m_children.size() - m_numWidgets;
 		WidgetVec::const_reverse_iterator ritor = m_children.rbegin();
-		WidgetVec::const_reverse_iterator rend  = m_children.rbegin() + numWindows;
+		WidgetVec::const_reverse_iterator rendt = m_children.rbegin() + ptrdiff_t( numWindows );
 
-		while( ritor != rend && !retVal.widget && ( !retVal.window || !retVal.window->getClickable() ) )
+		while( ritor != rendt && !retVal.widget && ( !retVal.window || !retVal.window->getClickable() ) )
 		{
 			retVal = ( *ritor )->_setIdleCursorMoved( newPosNdc );
 			++ritor;
@@ -678,9 +678,9 @@ namespace Colibri
 		Ogre::Vector2 currentScroll = getCurrentScroll();
 
 		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.begin() + m_numWidgets;
+		WidgetVec::const_iterator endt = m_children.begin() + ptrdiff_t( m_numWidgets );
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			Widget *widget = *itor;
 			if( ( widget->m_clickable || widget->m_childrenClickable ) &&  //
@@ -803,18 +803,18 @@ namespace Colibri
 		if( !m_breadthFirst && !collectingBreadthFirst )
 		{
 			WidgetVec::const_iterator itor = m_children.begin();
-			WidgetVec::const_iterator end  = m_children.begin() + m_numNonRenderables;
+			WidgetVec::const_iterator endt = m_children.begin() + ptrdiff_t( m_numNonRenderables );
 
-			while( itor != end )
+			while( itor != endt )
 			{
 				(*itor)->addNonRenderableCommands( apiObject, false );
 				++itor;
 			}
 
-			itor = m_children.begin() + m_numNonRenderables;
-			end  = m_children.end();
+			itor = m_children.begin() + ptrdiff_t( m_numNonRenderables );
+			endt = m_children.end();
 
-			while( itor != end )
+			while( itor != endt )
 			{
 				COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
 				Renderable *asRenderable = static_cast<Renderable*>( *itor );
@@ -827,8 +827,9 @@ namespace Colibri
 			WidgetVec *breadthFirst = m_manager->m_breadthFirst;
 
 			breadthFirst[2].insert( breadthFirst[2].end(), m_children.begin(),
-									m_children.begin() + m_numNonRenderables );
-			breadthFirst[3].insert( breadthFirst[3].end(), m_children.begin() + m_numNonRenderables,
+									m_children.begin() + ptrdiff_t( m_numNonRenderables ) );
+			breadthFirst[3].insert( breadthFirst[3].end(),
+									m_children.begin() + ptrdiff_t( m_numNonRenderables ),
 									m_children.end() );
 
 			if( !collectingBreadthFirst )
@@ -1235,9 +1236,10 @@ namespace Colibri
 	{
 		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
 		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end  = m_children.begin() + getOffsetStartWindowChildren();
+		WidgetVec::const_iterator endt =
+			m_children.begin() + ptrdiff_t( getOffsetStartWindowChildren() );
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			Widget *widget = *itor;
 			if( !widget->isHidden() && !widget->ignoreFromChildrenSize() )

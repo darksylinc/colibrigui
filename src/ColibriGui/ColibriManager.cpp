@@ -126,9 +126,9 @@ namespace Colibri
 		m_skinManager->loadSkins( fullPath );
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setOgre( Ogre::Root * colibrigui_nullable root,
-								  Ogre::VaoManager * colibrigui_nullable vaoManager,
-								  Ogre::SceneManager * colibrigui_nullable sceneManager )
+	void ColibriManager::setOgre( Ogre::Root * colibri_nullable root,
+								  Ogre::VaoManager * colibri_nullable vaoManager,
+								  Ogre::SceneManager * colibri_nullable sceneManager )
 	{
 		delete m_commandBuffer;
 		m_commandBuffer = 0;
@@ -282,7 +282,7 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	SkinInfo const * colibrigui_nullable const * colibrigui_nonnull ColibriManager::getDefaultSkin(
+	SkinInfo const * colibri_nullable const * colibri_nonnull ColibriManager::getDefaultSkin(
 			SkinWidgetTypes::SkinWidgetTypes widgetType ) const
 	{
 		return m_defaultSkins[widgetType];
@@ -294,7 +294,7 @@ namespace Colibri
 		return m_defaultSkinPackNames[widgetType];
 	}
 	//-------------------------------------------------------------------------
-	Ogre::HlmsDatablock * colibrigui_nullable
+	Ogre::HlmsDatablock * colibri_nullable
 	ColibriManager::getDefaultTextDatablock( States::States state ) const
 	{
 		return m_defaultTextDatablock[state];
@@ -612,7 +612,7 @@ namespace Colibri
 	{
 		if( m_keyboardFocusedPair.widget )
 		{
-			Widget *colibrigui_nullable nextWidget =
+			Widget *colibri_nullable nextWidget =
 				m_keyboardFocusedPair.widget->getNextKeyboardNavigableWidget( direction );
 
 			if( nextWidget )
@@ -785,7 +785,7 @@ namespace Colibri
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	Window* ColibriManager::createWindow( Window * colibrigui_nullable parent )
+	Window* ColibriManager::createWindow( Window * colibri_nullable parent )
 	{
 		COLIBRI_ASSERT( (!parent || parent->isWindow()) &&
 						"parent can only be null or a window!" );
@@ -821,7 +821,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	template <>
-	Label * colibrigui_nonnull ColibriManager::createWidget<Label>( Widget * colibrigui_nonnull parent )
+	Label * colibri_nonnull ColibriManager::createWidget<Label>( Widget * colibri_nonnull parent )
 	{
 		Label *retVal = _createWidget<Label>( parent );
 		_notifyLabelCreated( retVal );
@@ -829,8 +829,8 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	template <>
-	LabelBmp *colibrigui_nonnull
-	ColibriManager::createWidget<LabelBmp>( Widget *colibrigui_nonnull parent )
+	LabelBmp *colibri_nonnull
+	ColibriManager::createWidget<LabelBmp>( Widget *colibri_nonnull parent )
 	{
 		LabelBmp *retVal = _createWidget<LabelBmp>( parent );
 		_notifyLabelBmpCreated( retVal );
@@ -927,16 +927,16 @@ namespace Colibri
 			{
 				//We do not update m_numTextGlyphs since it's pointless to shrink it.
 				//It will eventually be recalculated anyway
-				LabelVec::iterator itor = std::find( m_labels.begin(), m_labels.end(), widget );
-				Ogre::efficientVectorRemove( m_labels, itor );
+				LabelVec::iterator it = std::find( m_labels.begin(), m_labels.end(), widget );
+				Ogre::efficientVectorRemove( m_labels, it );
 				--m_numLabelsAndBmp;
 			}
 			else if( widget->isLabelBmp() )
 			{
 				//We do not update m_numTextGlyphsBmp since it's pointless to shrink it.
 				//It will eventually be recalculated anyway
-				LabelBmpVec::iterator itor = std::find( m_labelsBmp.begin(), m_labelsBmp.end(), widget );
-				Ogre::efficientVectorRemove( m_labelsBmp, itor );
+				LabelBmpVec::iterator it = std::find( m_labelsBmp.begin(), m_labelsBmp.end(), widget );
+				Ogre::efficientVectorRemove( m_labelsBmp, it );
 				--m_numLabelsAndBmp;
 			}
 
@@ -1101,7 +1101,7 @@ namespace Colibri
 					static_cast<Ogre::uint32>( m_numTextGlyphs * 6u );
 
 			Ogre::VertexBufferPacked *vertexBuffer = m_textVao->getBaseVertexBuffer();
-			const Ogre::uint32 currVertexCount = vertexBuffer->getNumElements();
+			const Ogre::uint32 currVertexCount = (uint32_t)vertexBuffer->getNumElements();
 			if( requiredVertexCount > currVertexCount )
 			{
 				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
@@ -1129,9 +1129,12 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	template <typename T>
 	void ColibriManager::autosetNavigation( const std::vector<T> &container,
-											size_t start, size_t numWidgets )
+											size_t _start, size_t _numWidgets )
 	{
-		COLIBRI_ASSERT( start + numWidgets <= container.size() );
+		COLIBRI_ASSERT( _start + _numWidgets <= container.size() );
+
+		const ptrdiff_t start = (ptrdiff_t)_start;
+		const ptrdiff_t numWidgets = (ptrdiff_t)_numWidgets;
 
 		typename std::vector<T>::const_iterator itor = container.begin() + start;
 		typename std::vector<T>::const_iterator end  = container.begin() + start + numWidgets;
@@ -1562,22 +1565,24 @@ namespace Colibri
 			updateZOrderDirty();
 		}
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
-
-		while( itor != end )
 		{
-			cursorFocusDirty |= (*itor)->update( timeSinceLast );
-			++itor;
+			WindowVec::const_iterator itor = m_windows.begin();
+			WindowVec::const_iterator endt = m_windows.end();
+
+			while( itor != endt )
+			{
+				cursorFocusDirty |= ( *itor )->update( timeSinceLast );
+				++itor;
+			}
 		}
 
 		{
 			WidgetVec::const_iterator itor = m_dirtyWidgets.begin();
-			WidgetVec::const_iterator end  = m_dirtyWidgets.end();
+			WidgetVec::const_iterator endt = m_dirtyWidgets.end();
 
-			while( itor != end )
+			while( itor != endt )
 			{
-				(*itor)->setTransformDirty( Widget::TransformDirtyAll );
+				( *itor )->setTransformDirty( Widget::TransformDirtyAll );
 				++itor;
 			}
 
@@ -1594,11 +1599,11 @@ namespace Colibri
 
 		{
 			WidgetVec::const_iterator itor = m_updateWidgets.begin();
-			WidgetVec::const_iterator end  = m_updateWidgets.end();
+			WidgetVec::const_iterator endt = m_updateWidgets.end();
 
-			while( itor != end )
+			while( itor != endt )
 			{
-				(*itor)->_update( timeSinceLast );
+				( *itor )->_update( timeSinceLast );
 				++itor;
 			}
 		}
@@ -1633,8 +1638,8 @@ namespace Colibri
 			++itor;
 		}
 
-		const size_t elementsWritten = vertex - startOffset;
-		const size_t elementsWrittenText = vertexText - startOffsetText;
+		const size_t elementsWritten = size_t( vertex - startOffset );
+		const size_t elementsWrittenText = size_t( vertexText - startOffsetText );
 		COLIBRI_ASSERT( elementsWritten <= vertexBuffer->getNumElements() );
 		COLIBRI_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
@@ -1693,8 +1698,8 @@ namespace Colibri
 		apiObjects.drawCmd = 0;
 		apiObjects.drawCountPtr = 0;
 		apiObjects.primCount = 0;
-		apiObjects.basePrimCount[0] = m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
-		apiObjects.basePrimCount[1] = m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.basePrimCount[0] = (uint32_t)m_vao->getBaseVertexBuffer()->_getFinalBufferStart();
+		apiObjects.basePrimCount[1] = (uint32_t)m_textVao->getBaseVertexBuffer()->_getFinalBufferStart();
 		apiObjects.nextFirstVertex = 0;
 
 		m_breadthFirst[0].clear();

@@ -5,7 +5,7 @@
 
 #include "ColibriGui/ColibriRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -87,7 +87,7 @@ namespace Colibri
 	public:
 		LabelBmp( ColibriManager *manager );
 
-		bool isLabelBmp() const colibri_override { return true; }
+		bool isLabelBmp() const override { return true; }
 
 		/// Sets the font size
 		void     setFontSize( FontSize defaultFontSize );
@@ -153,13 +153,13 @@ namespace Colibri
 		void sizeToFit();
 
 		void _fillBuffersAndCommands(
-			UiVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS vertexBuffer,
-			GlyphVertex *colibrigui_nonnull *colibrigui_nonnull RESTRICT_ALIAS textVertBuffer,
+			UiVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS vertexBuffer,
+			GlyphVertex *colibri_nonnull *colibri_nonnull RESTRICT_ALIAS textVertBuffer,
 			const Ogre::Vector2 &parentPos, const Ogre::Vector2 &parentCurrentScrollPos,
-			const Matrix2x3 &parentRot ) colibri_override;
+			const Matrix2x3 &parentRot ) override;
 
-		void setState( States::States state, bool smartHighlight = true ) colibri_override;
+		void setState( States::States state, bool smartHighlight = true ) override;
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

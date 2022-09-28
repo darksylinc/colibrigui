@@ -3,32 +3,24 @@
 #pragma once
 
 #if __clang__ && !defined( Q_CREATOR_RUN )
-	#define colibrigui_nullable _Nullable
-	#define colibrigui_nonnull _Nonnull
-	#define COLIBRIGUI_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")
-	#define COLIBRIGUI_ASSUME_NONNULL_END   _Pragma("clang assume_nonnull end")
-	#define colibrigui_likely(x)	__builtin_expect((x),1)
-	#define colibrigui_unlikely(x)	__builtin_expect((x),0)
+	#define colibri_nullable _Nullable
+	#define colibri_nonnull _Nonnull
+	#define COLIBRI_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")
+	#define COLIBRI_ASSUME_NONNULL_END   _Pragma("clang assume_nonnull end")
+	#define colibri_likely(x)	__builtin_expect((x),1)
+	#define colibri_unlikely(x)	__builtin_expect((x),0)
 #else
-	#define colibrigui_nullable
-	#define colibrigui_nonnull
-	#define COLIBRIGUI_ASSUME_NONNULL_BEGIN
-	#define COLIBRIGUI_ASSUME_NONNULL_END
+	#define colibri_nullable
+	#define colibri_nonnull
+	#define COLIBRI_ASSUME_NONNULL_BEGIN
+	#define COLIBRI_ASSUME_NONNULL_END
 	#if __GNUC__
-		#define colibrigui_likely(x)	__builtin_expect((x),1)
-		#define colibrigui_unlikely(x)	__builtin_expect((x),0)
+		#define colibri_likely(x)	__builtin_expect((x),1)
+		#define colibri_unlikely(x)	__builtin_expect((x),0)
 	#else
-		#define colibrigui_likely(x)	(x)
-		#define colibrigui_unlikely(x)	(x)
+		#define colibri_likely(x)	(x)
+		#define colibri_unlikely(x)	(x)
 	#endif
-#endif
-
-#if __cplusplus >= 201103L
-	#define colibri_override	override
-	#define colibri_final		final
-#else
-	#define colibri_override
-	#define colibri_final
 #endif
 
 #if defined( COLIBRI_FLEXIBILITY_LEVEL ) && COLIBRI_FLEXIBILITY_LEVEL > 1
@@ -41,7 +33,7 @@
 #include <math.h>
 #include "math_round.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 /// @defgroup Controls
 /// @defgroup Layout
@@ -177,8 +169,8 @@ namespace Colibri
 
 	struct FocusPair
 	{
-		Window * colibrigui_nullable window;
-		Widget * colibrigui_nullable widget;
+		Window * colibri_nullable window;
+		Widget * colibri_nullable widget;
 
 		FocusPair() : window( 0 ), widget( 0 ) {}
 	};
@@ -455,7 +447,7 @@ namespace sds
 #endif
 }  // namespace sds
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END
 
 // No checks done at all
 #define COLIBRIGUI_DEBUG_NONE		0

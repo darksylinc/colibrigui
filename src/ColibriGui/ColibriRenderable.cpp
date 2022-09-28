@@ -127,7 +127,7 @@ namespace Colibri
 		setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::setBorderSize( const float borderSize[colibrigui_nonnull Borders::NumBorders],
+	void Renderable::setBorderSize( const float borderSize[colibri_nonnull Borders::NumBorders],
 									States::States forState, bool bClipBordersMatchSkin )
 	{
 		if( forState == States::NumStates )
@@ -148,8 +148,8 @@ namespace Colibri
 			setClipBordersMatchSkin();
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::_setSkinPack( SkinInfo const * colibrigui_nonnull
-								   const * colibrigui_nullable skinInfos )
+	void Renderable::_setSkinPack( SkinInfo const * colibri_nonnull
+								   const * colibri_nullable skinInfos )
 	{
 		for( size_t i=0; i<States::NumStates; ++i )
 		{
@@ -264,9 +264,9 @@ namespace Colibri
 					apiObject.lastVaoName = vao->getVaoName();
 				}
 
-				void *offset = reinterpret_cast<void*>(
-								   apiObject.indirectBuffer->_getFinalBufferStart() +
-								   (apiObject.indirectDraw - apiObject.startIndirectDraw) );
+				void *offset = reinterpret_cast<void *>(
+					ptrdiff_t( apiObject.indirectBuffer->_getFinalBufferStart() ) +
+					( apiObject.indirectDraw - apiObject.startIndirectDraw ) );
 
 				CbDrawCallStrip *drawCall = commandBuffer->addCommand<CbDrawCallStrip>();
 				*drawCall = CbDrawCallStrip( apiObject.baseInstanceAndIndirectBuffers, vao, offset );
@@ -352,9 +352,9 @@ namespace Colibri
 		return m_stateInformation[state];
 	}
 	//-------------------------------------------------------------------------
-	void Renderable::_fillBuffersAndCommands( UiVertex * colibrigui_nonnull * colibrigui_nonnull
+	void Renderable::_fillBuffersAndCommands( UiVertex * colibri_nonnull * colibri_nonnull
 											 RESTRICT_ALIAS vertexBuffer,
-											 GlyphVertex * colibrigui_nonnull * colibrigui_nonnull
+											 GlyphVertex * colibri_nonnull * colibri_nonnull
 											 RESTRICT_ALIAS textVertBuffer,
 											 const Ogre::Vector2 &parentPos,
 											 const Ogre::Vector2 &parentCurrentScrollPos,

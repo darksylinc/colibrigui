@@ -3,7 +3,7 @@
 
 #include "ColibriGui/ColibriRenderable.h"
 
-COLIBRIGUI_ASSUME_NONNULL_BEGIN
+COLIBRI_ASSUME_NONNULL_BEGIN
 
 namespace Colibri
 {
@@ -40,9 +40,9 @@ namespace Colibri
 		};
 
 		/// Displays user-driven text. May be null
-		Label *colibrigui_nullable m_label;
+		Label *colibri_nullable m_label;
 		/// Displays the currently selected option
-		Label *colibrigui_nullable m_optionLabel;
+		Label *colibri_nullable m_optionLabel;
 		Button *                   m_decrement;
 		Button *                   m_increment;
 
@@ -63,7 +63,7 @@ namespace Colibri
 		std::vector<std::string> m_options;
 
 		/// Outputs already calculated sizes in columns
-		void getSizes( float outSizes[colibrigui_nonnull SW_NumSubWidgets] ) const;
+		void getSizes( float outSizes[colibri_nonnull SW_NumSubWidgets] ) const;
 
 		/// Same as its overload, but does not write to 'this' (except temporarily
 		/// to m_optionLabel to check all options) and also outputs outHeight.
@@ -79,8 +79,8 @@ namespace Colibri
 	public:
 		Spinner( ColibriManager *manager );
 
-		virtual void _initialize();
-		virtual void _destroy();
+		void _initialize() override;
+		void _destroy() override;
 
 		Label *_getOptionLabel() const { return m_optionLabel; }
 		Label *getLabel();
@@ -197,11 +197,11 @@ namespace Colibri
 		*/
 		void sizeToFit();
 
-		virtual void setTransformDirty( uint32_t dirtyReason ) colibri_final;
+		void setTransformDirty( uint32_t dirtyReason ) final;
 
-		virtual void notifyWidgetAction( Widget *widget, Action::Action action );
-		virtual void _notifyActionKeyMovement( Borders::Borders direction );
+		void notifyWidgetAction( Widget *widget, Action::Action action ) override;
+		void _notifyActionKeyMovement( Borders::Borders direction ) override;
 	};
 }  // namespace Colibri
 
-COLIBRIGUI_ASSUME_NONNULL_END
+COLIBRI_ASSUME_NONNULL_END

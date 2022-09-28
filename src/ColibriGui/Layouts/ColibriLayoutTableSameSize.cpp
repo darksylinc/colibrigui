@@ -101,9 +101,11 @@ namespace Colibri
 		{
 			Ogre::Vector2 softMaxSize = m_currentSize - adjWindowBorders;
 			softMaxSize.makeCeil( m_minSize );
-			Ogre::Vector2 softMaxSizePerCell = softMaxSize / Ogre::Vector2( numColumns, numRows );
+			Ogre::Vector2 softMaxSizePerCell =
+				softMaxSize / Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) );
 			const Ogre::Vector2 hardMaxSizePerCell =
-				( hardMaxSize - layoutMargin ) / Ogre::Vector2( numColumns, numRows );
+				( hardMaxSize - layoutMargin ) /
+				Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) );
 
 			LayoutCellVec::const_iterator itor = m_cells.begin();
 			LayoutCellVec::const_iterator endt = m_cells.end();
@@ -180,7 +182,7 @@ namespace Colibri
 			accumOffset.y += biggestSize.y;
 		}
 
-		m_currentSize = biggestSize * Ogre::Vector2( numColumns, numRows );
+		m_currentSize = biggestSize * Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) );
 		if( m_adjustableWindow )
 			syncToWindowSize();
 
@@ -209,7 +211,7 @@ namespace Colibri
 		const size_t numColumns = m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
 		const size_t numRows = !m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
 
-		biggestSize = biggestSize * Ogre::Vector2( numColumns, numRows );
+		biggestSize = biggestSize * Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) );
 
 		if( m_adjustableWindow )
 		{
