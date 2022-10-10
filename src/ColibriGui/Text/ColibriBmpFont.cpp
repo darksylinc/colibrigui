@@ -21,7 +21,7 @@
 namespace Colibri
 {
 	/// Outputs the next newline into outString, starting from data[idx]
-	inline size_t getNextNewLine( std::vector<char> data, size_t idx, std::string &outString )
+	inline size_t getNextNewLine( const std::vector<char>& data, size_t idx, std::string &outString )
 	{
 		outString.clear();
 

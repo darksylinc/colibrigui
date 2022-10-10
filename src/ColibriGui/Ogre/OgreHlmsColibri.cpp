@@ -123,9 +123,9 @@ namespace Ogre
 		if( mShaderProfile != "glsl" )
 			return retVal; //D3D embeds the texture slots in the shader.
 
-		GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 		if( getProperty( "colibri_text" ) )
 		{
+			GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 			psParams->setNamedConstant( "glyphAtlas", 2 );
 			mRenderSystem->bindGpuProgramParameters( GPT_FRAGMENT_PROGRAM, psParams, GPV_ALL );
 		}
@@ -375,7 +375,7 @@ namespace Ogre
 
         //Fill the library folder paths with the relevant folders
         outLibraryFoldersPaths.clear();
-        outLibraryFoldersPaths.push_back( "Hlms/Common/" + shaderSyntax );
+        outLibraryFoldersPaths.emplace_back( "Hlms/Common/" + shaderSyntax );
         outLibraryFoldersPaths.push_back( "Hlms/Common/Any" );
 		outLibraryFoldersPaths.push_back( "Hlms/Colibri/Any" );
 		outLibraryFoldersPaths.push_back( "Hlms/Unlit/Any" );

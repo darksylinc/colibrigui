@@ -125,7 +125,7 @@ namespace Colibri
 							 Ogre::Vector2 invSize,
 							 float canvasAspectRatio,
 							 float invCanvasAspectRatio,
-							 Matrix2x3 parentRot );
+							 const Matrix2x3& parentRot );
 
 		void _notifyCanvasChanged() override;
 

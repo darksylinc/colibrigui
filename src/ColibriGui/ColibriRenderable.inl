@@ -25,7 +25,7 @@ namespace Colibri
 									 Ogre::Vector2 invSize,
 									 float canvasAspectRatio,
 									 float invCanvasAspectRatio,
-									 Matrix2x3 derivedRot )
+									 const Matrix2x3& derivedRot )
 	{
 		TODO_this_is_a_workaround_neg_y;
 		Ogre::Vector2 tmp2d;

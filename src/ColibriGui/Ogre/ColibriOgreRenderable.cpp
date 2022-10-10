@@ -139,6 +139,7 @@ namespace Ogre
 	{
 		//Vertex declaration
 		VertexElement2Vec vertexElements;
+		vertexElements.reserve( 4 );
 		vertexElements.push_back( VertexElement2( VET_FLOAT2, VES_POSITION ) );
 		vertexElements.push_back( VertexElement2( VET_USHORT2_NORM, VES_TEXTURE_COORDINATES ) );
 		vertexElements.push_back( VertexElement2( VET_UBYTE4_NORM, VES_DIFFUSE ) );
@@ -162,6 +163,7 @@ namespace Ogre
 	{
 		//Vertex declaration
 		VertexElement2Vec vertexElements;
+		vertexElements.reserve( 5 );
 		vertexElements.push_back( VertexElement2( VET_FLOAT2, VES_POSITION ) );
 		vertexElements.push_back( VertexElement2( VET_USHORT2, VES_BLEND_INDICES ) );
 		vertexElements.push_back( VertexElement2( VET_UINT1, VES_TANGENT ) );

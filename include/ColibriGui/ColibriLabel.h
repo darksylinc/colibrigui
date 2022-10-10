@@ -153,7 +153,7 @@ namespace Colibri
 							 uint32_t offset,
 							 float canvasAspectRatio,
 							 float invCanvasAspectRatio,
-							 Matrix2x3 derivedRot );
+							 const Matrix2x3& derivedRot );
 
 	public:
 		Label( ColibriManager *manager );

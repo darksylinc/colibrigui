@@ -704,11 +704,6 @@ namespace Colibri
 		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
 		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
 
-		// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
-		// that there is equal distance from m_position to the first glyph, and the last glyph to
-		// m_position + m_size
-		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
-
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left )
 		{
 			// Displace horizontally, last line
@@ -725,6 +720,12 @@ namespace Colibri
 
 		if( m_vertAlignment != TextVertAlignment::Top && m_vertAlignment != TextVertAlignment::Natural )
 		{
+			// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)"
+			// so
+			// that there is equal distance from m_position to the first glyph, and the last glyph to
+			// m_position + m_size
+			const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
+
 			// Iterate again, to vertically displace the entire string
 			float newTop = widgetBottomRight.y - maxWidthHeight.y;
 			if( m_vertAlignment == TextVertAlignment::Center )
@@ -829,14 +830,15 @@ namespace Colibri
 		maxBottomRight.x = Ogre::Math::Abs( maxBottomRight.x );
 		maxBottomRight.y = Ogre::Math::Abs( maxBottomRight.y );
 
-		// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)" so
-		// that there is equal distance from m_position to the first glyph, and the last glyph to
-		// m_position + m_size
-		const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
-
 		if( m_actualHorizAlignment[state] != TextHorizAlignment::Left ||
 			m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
 		{
+			// We need the width & height from m_position to the last glyph. We add "+ abs(minTopLeft)"
+			// so
+			// that there is equal distance from m_position to the first glyph, and the last glyph to
+			// m_position + m_size
+			const Ogre::Vector2 maxWidthHeight( maxBottomRight + minTopLeft );
+
 			// Iterate again, to horizontally displace the entire string
 			float newLeft = widgetBottomRight.x - maxWidthHeight.x;
 			if( m_actualVertReadingDir[state] == VertReadingDir::ForceTTB )
@@ -890,7 +892,7 @@ namespace Colibri
 								uint32_t rgbaColour, Ogre::Vector2 parentDerivedTL,
 								Ogre::Vector2 parentDerivedBR, Ogre::Vector2 invSize, uint32_t offset,
 								float canvasAspectRatio, float invCanvasAspectRatio,
-								Matrix2x3 derivedRot )
+								const Matrix2x3& derivedRot )
 	{
 		TODO_this_is_a_workaround_neg_y;
 		Ogre::Vector2 tmp2d;
