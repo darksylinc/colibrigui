@@ -312,7 +312,7 @@ namespace Colibri
 
 		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
 		std::pair<CachedGlyphMap::iterator, bool> pair =
-				m_glyphCache.insert( std::pair<GlyphKey, CachedGlyph>( glyphKey, newGlyph ) );
+				m_glyphCache.emplace( glyphKey, newGlyph );
 
 		if( newGlyph.getSizeBytes() > 0 )
 		{
@@ -361,7 +361,7 @@ namespace Colibri
 
 		const GlyphKey glyphKey( codepoint, ptSize, fontIdx );
 		std::pair<CachedGlyphMap::iterator, bool> pair =
-				m_glyphCache.insert( std::pair<GlyphKey, CachedGlyph>( glyphKey, newGlyph ) );
+				m_glyphCache.emplace( glyphKey, newGlyph );
 
 		return &pair.first->second;
 	}
