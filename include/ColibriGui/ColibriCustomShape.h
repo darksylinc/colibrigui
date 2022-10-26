@@ -34,12 +34,10 @@ namespace Colibri
 
 		CustomShapeSizeMode::CustomShapeSizeMode m_sizeMode;
 
-		bool m_vertexCountDirty;
-
-		void flagDirty();
-
 	public:
 		CustomShape( ColibriManager *manager );
+
+		void _destroy() override;
 
 		/** Must be called first. Can be called again any time to grow or shrink the buffer.
 		@param numTriangles
@@ -53,11 +51,11 @@ namespace Colibri
 		/// Returns the number of vertices.
 		size_t getNumVertices() const { return m_vertices.size(); }
 
-		/** Sets the triangle 'idx' to the given positions, no UVs and a solid colour
+		/** Sets the triangle starting at 'vertexIdx' to the given positions, no UVs and a solid colour
 		@remarks
 			Winding order of v0, v1 & v2 is important for backface culling
 			if the material has culling enabled.
-		@param idx
+		@param vertexIdx
 			Vertex Idx to set. In range [0; getNumVertices())
 			Must be multiple of 3.
 		@param v0
@@ -73,6 +71,25 @@ namespace Colibri
 		void setTriangle( size_t vertexIdx, const Ogre::Vector2 &v0, const Ogre::Vector2 &v1,
 						  const Ogre::Vector2 &v2, const Ogre::ColourValue &colour );
 
+		/** Sets the quad (2 triangles) starting at 'vertexIdx' to the given dimensions
+		@param vertexIdx
+			Vertex Idx to set. In range [0; getNumVertices())
+			Must be multiple of 3.
+		@param topLeft
+			Top Left position.
+			See CustomShapeSizeMode::CustomShapeSizeMode for valid range.
+		@param size
+			Size of the quad.
+			bottomRight = topLeft + size;
+			See CustomShapeSizeMode::CustomShapeSizeMode for valid range.
+		@param colour
+			Solid colour to set. Values outside range [0; 1] is undefined behavior.
+		@param uvStart
+			UV of the topLeft. Values outside range [0; 1] is undefined behavior.
+		@param uvSize
+			Size of the UVs.
+			(uvStart + uvSize) must be in range [0; 1] otherwise it's undefined behavior.
+		*/
 		void setQuad( size_t vertexIdx, const Ogre::Vector2 &topLeft, const Ogre::Vector2 &size,
 					  const Ogre::ColourValue &colour,
 					  const Ogre::Vector2     &uvStart = Ogre::Vector2::ZERO,

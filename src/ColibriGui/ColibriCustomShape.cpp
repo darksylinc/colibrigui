@@ -7,26 +7,30 @@ using namespace Colibri;
 
 CustomShape::CustomShape( ColibriManager *manager ) :
 	Renderable( manager ),
-	m_sizeMode( CustomShapeSizeMode::Ndc ),
-	m_vertexCountDirty( false )
+	m_sizeMode( CustomShapeSizeMode::Ndc )
 {
 	setVao( m_manager->getVao() );
 
 	m_numVertices = 0;
 }
 //-------------------------------------------------------------------------
+void CustomShape::_destroy()
+{
+	m_manager->_addCustomShapesVertexCountChange( -static_cast<int32_t>( m_vertices.size() ) );
+	Renderable::_destroy();
+}
+//-------------------------------------------------------------------------
 void CustomShape::setNumTriangles( const size_t numTriangles )
 {
-	if( m_vertices.size() != numTriangles * 3u )
+	const size_t oldVertexCount = m_vertices.size();
+	const size_t newVertexCount = numTriangles * 3u;
+	if( oldVertexCount != newVertexCount )
 	{
-		m_vertices.resizePOD( numTriangles * 3u );
-		m_numVertices = static_cast<uint32_t>( numTriangles * 3u );
+		m_vertices.resizePOD( newVertexCount );
+		m_numVertices = static_cast<uint32_t>( newVertexCount );
 
-		if( !m_vertexCountDirty )
-		{
-			m_manager->_addDirtyCustomShapes( this );
-			m_vertexCountDirty = true;
-		}
+		m_manager->_addCustomShapesVertexCountChange(
+			static_cast<int32_t>( newVertexCount - oldVertexCount ) );
 	}
 }
 //-------------------------------------------------------------------------
@@ -70,6 +74,17 @@ void CustomShape::setQuad( size_t idx, const Ogre::Vector2 &topLeft, const Ogre:
 	const Ogre::Vector2 bottomRight( topLeft + size );
 	const Ogre::Vector2 uvEnd( uvStart + uvSize );
 
+	COLIBRI_ASSERT_HIGH( uvStart.x >= 0.0f && uvStart.x <= 1.0f &&  //
+						 uvStart.y >= 0.0f && uvStart.y <= 1.0f &&  //
+						 uvEnd.x >= 0.0f && uvEnd.x <= 1.0f &&      //
+						 uvEnd.y >= 0.0f && uvEnd.y <= 1.0f &&      //
+						 "UVs must be in range [0; 1]" );
+	COLIBRI_ASSERT_HIGH( colour.r >= 0.0f && colour.r <= 1.0f &&  //
+						 colour.g >= 0.0f && colour.g <= 1.0f &&  //
+						 colour.b >= 0.0f && colour.b <= 1.0f &&  //
+						 colour.a >= 0.0f && colour.a <= 1.0f &&  //
+						 "colour must be in range [0; 1]" );
+
 	size_t currVertIdx = idx;
 #define COLIBRI_ADD_VERTEX( _x, _y, _u, _v ) \
 	m_vertices[currVertIdx].x = static_cast<float>( _x ); \
@@ -80,7 +95,7 @@ void CustomShape::setQuad( size_t idx, const Ogre::Vector2 &topLeft, const Ogre:
 	m_vertices[currVertIdx].rgbaColour[1] = rgbaColour[1]; \
 	m_vertices[currVertIdx].rgbaColour[2] = rgbaColour[2]; \
 	m_vertices[currVertIdx].rgbaColour[3] = rgbaColour[3]; \
-	++currVertIdx;
+	++currVertIdx
 
 	COLIBRI_ADD_VERTEX( topLeft.x, topLeft.y, uvStart.x, uvStart.y );
 	COLIBRI_ADD_VERTEX( topLeft.x, bottomRight.y, uvStart.x, uvEnd.y );
@@ -96,14 +111,14 @@ void CustomShape::setQuad( size_t idx, const Ogre::Vector2 &topLeft, const Ogre:
 void CustomShape::setVertex( size_t idx, const Ogre::Vector2 &pos, const Ogre::Vector2 &uv,
 							 const Ogre::ColourValue &colour )
 {
-	COLIBRI_ASSERT_HIGH( uv.x >= 0.0f && uv.x <= 1.0f && uv.y >= 0.0f && uv.y <= 1.0f &&
+	COLIBRI_ASSERT_HIGH( uv.x >= 0.0f && uv.x <= 1.0f &&  //
+						 uv.y >= 0.0f && uv.y <= 1.0f &&  //
 						 "UVs must be in range [0; 1]" );
 	COLIBRI_ASSERT_HIGH( colour.r >= 0.0f && colour.r <= 1.0f &&  //
 						 colour.g >= 0.0f && colour.g <= 1.0f &&  //
 						 colour.b >= 0.0f && colour.b <= 1.0f &&  //
 						 colour.a >= 0.0f && colour.a <= 1.0f &&  //
 						 "colour must be in range [0; 1]" );
-	asd;
 
 	m_vertices[idx].x = static_cast<float>( pos.x );
 	m_vertices[idx].y = static_cast<float>( pos.y );

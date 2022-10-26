@@ -17,8 +17,8 @@ namespace Colibri
 	public:
 		Button( ColibriManager *manager );
 
-		virtual void _initialize();
-		virtual void _destroy();
+		void _initialize() override;
+		void _destroy() override;
 
 		Label* getLabel();
 

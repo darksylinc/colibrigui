@@ -110,6 +110,7 @@ namespace Colibri
 		size_t   m_numLabelsAndBmp;   /// Counts both Labels and LabelBmps
 		size_t   m_numTextGlyphs;     /// It's an upper bound. Current max number of glyphs may be lower
 		size_t   m_numTextGlyphsBmp;  /// It's an upper bound. Current max number of glyphs may be lower
+		size_t   m_numCustomShapesVertices;
 		LabelVec m_dirtyLabels;
 		LabelBmpVec m_dirtyLabelBmps;
 		WidgetVec m_dirtyWidgets;
@@ -489,6 +490,13 @@ namespace Colibri
 		void _setZOrderWindowDirty( bool windowInListDirty );
 		void _addDirtyLabel( Label *label );
 		void _addDirtyLabelBmp( LabelBmp *label );
+
+		/** Notify the manager that a CustomShape has changed its vertex count
+		@param vertexCountDiff
+			Positive with the number of new vertices.
+			Negative with the number of removed vertices.
+		*/
+		void _addCustomShapesVertexCountChange( int32_t vertexCountDiff );
 
 		/// Cannot be nullptr
 		void _stealKeyboardFocus( Widget *widget );

@@ -42,6 +42,7 @@ namespace Colibri
 		m_numLabelsAndBmp( 0u ),
 		m_numTextGlyphs( 0u ),
 		m_numTextGlyphsBmp( 0u ),
+		m_numCustomShapesVertices( 0u ),
 		m_logListener( &DefaultLogListener ),
 		m_colibriListener( &DefaultColibriListener ),
 		m_delayingDestruction( false ),
@@ -1078,7 +1079,8 @@ namespace Colibri
 			// Vertex buffer for most widgets
 			const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>(
 				( m_numWidgets - m_numLabelsAndBmp ) * ( 6u * 9u ) +  // Regular widgets
-				( m_numTextGlyphsBmp * 6u )                           // BmpLabel
+				( m_numTextGlyphsBmp * 6u ) +                         // BmpLabel
+				m_numCustomShapesVertices                             // CustomShape
 			);
 
 			Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
@@ -1459,6 +1461,13 @@ namespace Colibri
 			if( scrollOffset != Ogre::Vector2::ZERO )
 				parentWindow->setScrollAnimated( currentScroll + scrollOffset, false );
 		}
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_addCustomShapesVertexCountChange( int32_t vertexCountDiff )
+	{
+		int32_t newVertexCount = static_cast<int32_t>( m_numCustomShapesVertices ) + vertexCountDiff;
+		COLIBRI_ASSERT_LOW( newVertexCount >= 0 );
+		m_numCustomShapesVertices = static_cast<size_t>( newVertexCount );
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::_stealKeyboardFocus( Widget *widget )
