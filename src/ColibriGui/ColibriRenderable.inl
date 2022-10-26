@@ -125,7 +125,7 @@ namespace Colibri
 		Ogre::Vector2 parentDerivedTL;
 		Ogre::Vector2 parentDerivedBR;
 
-		Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
+		const Ogre::Vector2 invCanvasSize2x = m_manager->getInvCanvasSize2x();
 
 		if( forWindows )
 		{
@@ -161,7 +161,7 @@ namespace Colibri
 			rgbaColour[2] = static_cast<uint8_t>( m_colour.b * 255.0f + 0.5f );
 			rgbaColour[3] = static_cast<uint8_t>( m_colour.a * 255.0f + 0.5f );
 
-			Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
+			const Ogre::Vector2 invSize = 1.0f / (parentDerivedBR - parentDerivedTL);
 
 			const Ogre::Vector2 outerBottomRight	= this->m_derivedBottomRight;
 

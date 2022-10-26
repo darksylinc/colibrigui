@@ -63,6 +63,7 @@ namespace Colibri
 	{
 	protected:
 		friend class ColibriManager;
+		friend class CustomShape;
 		friend class Renderable;
 		friend class Label;
 		friend class LabelBmp;
