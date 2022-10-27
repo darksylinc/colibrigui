@@ -37,7 +37,7 @@ void CustomShape::setNumTriangles( const size_t numTriangles )
 void CustomShape::setTriangle( const size_t idx, const Ogre::Vector2 &v0, const Ogre::Vector2 &v1,
 							   const Ogre::Vector2 &v2, const Ogre::ColourValue &colour )
 {
-	COLIBRI_ASSERT_HIGH( idx % 3u && "idx must be multiple of 3" );
+	COLIBRI_ASSERT_HIGH( idx % 3u == 0u && "idx must be multiple of 3" );
 	m_vertices[idx].x = static_cast<float>( v0.x );
 	m_vertices[idx].y = static_cast<float>( v0.y );
 	m_vertices[idx + 1u].x = static_cast<float>( v1.x );
@@ -53,7 +53,7 @@ void CustomShape::setTriangle( const size_t idx, const Ogre::Vector2 &v0, const 
 	for( size_t i = 0u; i < 3u; ++i )
 	{
 		m_vertices[idx + i].u = 0u;
-		m_vertices[idx + i].y = 0u;
+		m_vertices[idx + i].v = 0u;
 		m_vertices[idx + i].rgbaColour[0] = rgbaColour[0];
 		m_vertices[idx + i].rgbaColour[1] = rgbaColour[1];
 		m_vertices[idx + i].rgbaColour[2] = rgbaColour[2];
@@ -65,7 +65,7 @@ void CustomShape::setQuad( size_t idx, const Ogre::Vector2 &topLeft, const Ogre:
 						   const Ogre::ColourValue &colour, const Ogre::Vector2 &uvStart,
 						   const Ogre::Vector2 &uvSize )
 {
-	COLIBRI_ASSERT_HIGH( idx % 3u && "idx must be multiple of 3" );
+	COLIBRI_ASSERT_HIGH( idx % 3u == 0u && "idx must be multiple of 3" );
 	const uint8_t rgbaColour[4] = { static_cast<uint8_t>( colour.r * 255.0f + 0.5f ),
 									static_cast<uint8_t>( colour.g * 255.0f + 0.5f ),
 									static_cast<uint8_t>( colour.b * 255.0f + 0.5f ),
@@ -123,7 +123,7 @@ void CustomShape::setVertex( size_t idx, const Ogre::Vector2 &pos, const Ogre::V
 	m_vertices[idx].x = static_cast<float>( pos.x );
 	m_vertices[idx].y = static_cast<float>( pos.y );
 	m_vertices[idx].u = static_cast<uint16_t>( uv.x * 65535.0f );
-	m_vertices[idx].y = static_cast<uint16_t>( uv.y * 65535.0f );
+	m_vertices[idx].v = static_cast<uint16_t>( uv.y * 65535.0f );
 	m_vertices[idx].rgbaColour[0] = static_cast<uint8_t>( colour.r * 255.0f + 0.5f );
 	m_vertices[idx].rgbaColour[1] = static_cast<uint8_t>( colour.g * 255.0f + 0.5f );
 	m_vertices[idx].rgbaColour[2] = static_cast<uint8_t>( colour.b * 255.0f + 0.5f );
@@ -161,7 +161,7 @@ void CustomShape::_fillBuffersAndCommands(
 	m_accumMaxClipBR = parentDerivedBR;
 
 	const Ogre::Vector2 widgetOffset =
-		m_sizeMode == CustomShapeSizeMode::Ndc ? Ogre::Vector2( 0.5f ) : Ogre::Vector2::ZERO;
+		m_sizeMode == CustomShapeSizeMode::Ndc ? Ogre::Vector2::UNIT_SCALE : Ogre::Vector2::ZERO;
 	const Ogre::Vector2 widgetHalfSize =
 		m_sizeMode == CustomShapeSizeMode::Ndc ? ( m_size * 0.5f ) : Ogre::Vector2::UNIT_SCALE;
 
