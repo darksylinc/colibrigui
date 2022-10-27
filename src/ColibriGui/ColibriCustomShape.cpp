@@ -1,7 +1,7 @@
 
 #include "ColibriGui/ColibriCustomShape.h"
 
-#include "ColibriRenderable.inl"
+#include "ColibriGui/ColibriManager.h"
 
 using namespace Colibri;
 

@@ -643,6 +643,7 @@ namespace Colibri
 			"WindowArrowScrollLeft",
 			"WindowArrowScrollRight",
 			"WindowArrowScrollBottom",
+			"RadarChart",
 		};
 
 		std::string defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes];

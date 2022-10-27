@@ -385,6 +385,7 @@ namespace Colibri
 			WindowArrowScrollLeft,
 			WindowArrowScrollRight,
 			WindowArrowScrollBottom,
+			RadarChart,
 			NumSkinWidgetTypes
 		};
 	}

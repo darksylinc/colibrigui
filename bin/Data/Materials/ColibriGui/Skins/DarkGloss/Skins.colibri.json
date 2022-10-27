@@ -75,6 +75,17 @@
             }
         },
 
+        "RadarChart" :
+        {
+            "copy_from" : "EmptyBg",
+            "material" : "RadarChart"
+        },
+        "RadarChartDisabled" :
+        {
+            "copy_from" : "RadarChart",
+            "material" : "RadarChartDisabled"
+        },
+
         "SpinnerBtnDecrement_idle" :
         {
             "material" : "AtlasTransparent",
@@ -216,6 +227,11 @@
             "slider_always_inside" : false,
             "slider_exclude_borders" : false,
             "slider_handle_border_is_halo" : false
+        },
+        "RadarChart" :
+        {
+            "all" : "RadarChart",
+            "disabled" : "RadarChartDisabled"
         }
     },
 
@@ -238,6 +254,7 @@
         "ProgressbarLayer0"     : "ProgressbarLayer0",
         "ProgressbarLayer1"     : "ProgressbarLayer1",
         "SliderLine"            : "SliderLine",
-        "SliderHandle"          : "Button"
+        "SliderHandle"          : "Button",
+        "RadarChart"            : "RadarChart"
     }
 }

@@ -15,6 +15,10 @@ namespace Colibri
 		{
 			/// Vertices must be provided in NDC range [-1; 1] and they will be scaled
 			/// to fit the widget's size. Vertices beyond this range will be clipped.
+			///
+			/// NOTE:
+			///	 x = -1 is left
+			///  y = -1 is up.
 			Ndc,
 
 			/// Vertices must be provided in Virtual Canvas units. Widget's size

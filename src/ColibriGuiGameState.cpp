@@ -24,15 +24,16 @@
 
 #include "OgreLogManager.h"
 
-#include "ColibriGui/ColibriManager.h"
-#include "ColibriGui/ColibriWindow.h"
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/ColibriEditbox.h"
 #include "ColibriGui/ColibriLabel.h"
-#include "ColibriGui/ColibriSpinner.h"
+#include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriProgressbar.h"
+#include "ColibriGui/ColibriRadarChart.h"
 #include "ColibriGui/ColibriSlider.h"
+#include "ColibriGui/ColibriSpinner.h"
+#include "ColibriGui/ColibriWindow.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
@@ -147,6 +148,18 @@ namespace Demo
 
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+
+		Colibri::RadarChart *radarChart =
+			colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
+		radarChart->m_minSize = Ogre::Vector2( 512, 512 );
+		radarChart->setNumTriangles( 3u );
+		radarChart->setTriangle( 0u, Ogre::Vector2( -1, -1 ), Ogre::Vector2( 0, 1 ),
+								 Ogre::Vector2( -1, 1 ), Ogre::ColourValue::Green );
+		radarChart->setTriangle( 3u, Ogre::Vector2( -1, -1 ), Ogre::Vector2( 0, 1 ),
+								 Ogre::Vector2( 1, -1 ), Ogre::ColourValue::Blue );
+		radarChart->setTriangle( 6u, Ogre::Vector2( 1, -1 ), Ogre::Vector2( 0, 1 ),
+								 Ogre::Vector2( 1, 1 ), Ogre::ColourValue::Red );
+		layout->addCell( radarChart );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->m_minSize = Ogre::Vector2( 350, 64 );
