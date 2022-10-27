@@ -201,7 +201,7 @@ void CustomShape::_fillBuffersAndCommands(
 			vertexBuffer->u = vertex.u;
 			vertexBuffer->v = vertex.v;
 			for( int i = 0; i < 4; ++i )
-				vertexBuffer->rgbaColour[0] = ( vertex.rgbaColour[0] * rgbaColour[0] ) / 255u;
+				vertexBuffer->rgbaColour[i] = ( vertex.rgbaColour[i] * rgbaColour[i] ) / 255u;
 
 			// Calculate clipping
 			vertexBuffer->clipDistance[Borders::Top] =
