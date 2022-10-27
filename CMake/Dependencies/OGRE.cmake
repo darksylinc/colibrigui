@@ -326,9 +326,14 @@ macro( addStaticDependencies OGRE_SOURCE, OGRE_BINARIES, OGRE_BUILD_SETTINGS_STR
 	string( FIND "${OGRE_BUILD_SETTINGS_STR}" "#define OGRE_NO_ZIP_ARCHIVE 0" OGRE_USES_ZIP )
 	if( NOT OGRE_USES_FREEIMAGE EQUAL -1 )
 		message( STATUS "Static lib needs zzip. Linking against it." )
+		if( UNIX )
+			set( ZZIPNAME zziplib )
+		else()
+			set( ZZIPNAME zzip )
+		endif()
 		set( TMP_DEPENDENCY_LIBS ${TMP_DEPENDENCY_LIBS}
-			debug zzip${OGRE_DEP_DEBUG_SUFFIX}
-			optimized zzip )
+			debug ${ZZIPNAME}${OGRE_DEP_DEBUG_SUFFIX}
+			optimized ${ZZIPNAME} )
 	endif()
 
 	set( OGRE_DEPENDENCY_LIBS ${TMP_DEPENDENCY_LIBS} )
