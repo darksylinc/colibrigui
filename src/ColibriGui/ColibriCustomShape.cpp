@@ -157,13 +157,18 @@ void CustomShape::_fillBuffersAndCommands(
 
 	parentDerivedTL.makeCeil( m_parent->m_accumMinClipTL );
 	parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );
+
+	parentDerivedTL.makeCeil( this->m_derivedTopLeft );
+	parentDerivedBR.makeFloor( this->m_derivedBottomRight );
+
 	m_accumMinClipTL = parentDerivedTL;
 	m_accumMaxClipBR = parentDerivedBR;
 
 	const Ogre::Vector2 widgetOffset =
 		m_sizeMode == CustomShapeSizeMode::Ndc ? Ogre::Vector2::UNIT_SCALE : Ogre::Vector2::ZERO;
 	const Ogre::Vector2 widgetHalfSize =
-		m_sizeMode == CustomShapeSizeMode::Ndc ? ( m_size * 0.5f ) : Ogre::Vector2::UNIT_SCALE;
+		( m_sizeMode == CustomShapeSizeMode::Ndc ? ( m_size * 0.5f ) : Ogre::Vector2::UNIT_SCALE ) *
+		invCanvasSize2x;
 
 	if( m_visualsEnabled )
 	{
@@ -180,11 +185,12 @@ void CustomShape::_fillBuffersAndCommands(
 		const float invCanvasAspectRatio = m_manager->getCanvasInvAspectRatio();
 
 		const Matrix2x3 derivedRot = m_derivedOrientation;
+		const Ogre::Vector2 derivedTopLeft = m_derivedTopLeft;
 
 		for( const UiVertex &vertex : m_vertices )
 		{
 			Ogre::Vector2 finalPos( Ogre::Real( vertex.x ), Ogre::Real( vertex.y ) );
-			finalPos = ( finalPos + widgetOffset ) * widgetHalfSize;
+			finalPos = derivedTopLeft + ( finalPos + widgetOffset ) * widgetHalfSize;
 
 			finalPos = Widget::mul( derivedRot, finalPos.x, finalPos.y * invCanvasAspectRatio );
 			finalPos.y *= canvasAspectRatio;
@@ -193,7 +199,7 @@ void CustomShape::_fillBuffersAndCommands(
 			vertexBuffer->y = static_cast<float>( -finalPos.y );
 
 			vertexBuffer->u = vertex.u;
-			vertexBuffer->y = vertex.y;
+			vertexBuffer->v = vertex.v;
 			for( int i = 0; i < 4; ++i )
 				vertexBuffer->rgbaColour[0] = ( vertex.rgbaColour[0] * rgbaColour[0] ) / 255u;
 
