@@ -459,8 +459,7 @@ namespace Demo
 	//-----------------------------------------------------------------------------------
 	void ColibriGuiGameState::destroyScene()
 	{
-		colibriManager->destroyWidget( orderButtonBack );
-		colibriManager->destroyWidget( orderButtonFront );
+		colibriManager->destroyWindow( fullWindow );
 		colibriManager->destroyWindow( mainWindow );
 		colibriManager->destroyWindow( vertWindow );
 		colibriManager->destroyWindow( overlapWindow1 );
