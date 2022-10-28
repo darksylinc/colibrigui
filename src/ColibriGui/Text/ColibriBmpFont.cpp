@@ -21,7 +21,7 @@
 namespace Colibri
 {
 	/// Outputs the next newline into outString, starting from data[idx]
-	inline size_t getNextNewLine( const std::vector<char>& data, size_t idx, std::string &outString )
+	inline size_t getNextNewLine( const std::vector<char> &data, size_t idx, std::string &outString )
 	{
 		outString.clear();
 
@@ -287,5 +287,10 @@ namespace Colibri
 		}
 
 		return Ogre::Vector4::ZERO;
+	}
+	//-------------------------------------------------------------------------
+	float BmpFont::getFontScale( const ShaperManager *shaperManager ) const
+	{
+		return 96.0f / ( m_fontSize.asFloat() * static_cast<float>( shaperManager->getDPI() ) );
 	}
 }  // namespace Colibri

@@ -121,6 +121,8 @@ namespace Colibri
 
 		uint16_t m_defaultBmpFontForRaster;
 
+		uint32_t m_dpi;
+
 		Ogre::BufferPacked *colibri_nullable m_glyphAtlasBuffer;
 		Ogre::HlmsColibri *colibri_nullable  m_hlms;
 		Ogre::VaoManager *colibri_nullable   m_vaoManager;
@@ -141,6 +143,9 @@ namespace Colibri
 
 		void setOgre( Ogre::HlmsColibri * colibri_nullable hlms,
 					  Ogre::VaoManager * colibri_nullable vaoManager );
+
+		void     setDPI( uint32_t dpi );
+		uint32_t getDPI() const { return m_dpi; }
 
 		Shaper* addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
 						   const std::string &language );

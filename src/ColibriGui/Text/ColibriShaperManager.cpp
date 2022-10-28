@@ -34,6 +34,7 @@ namespace Colibri
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
 		m_defaultBmpFontForRaster( std::numeric_limits<uint16_t>::max() ),
+		m_dpi( 96u ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
 		m_vaoManager( 0 )
@@ -129,6 +130,22 @@ namespace Colibri
 				++itor;
 			}
 		}
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::setDPI( uint32_t dpi )
+	{
+		LogListener *log = getLogListener();
+		if( dpi == 0 )
+		{
+			log->log( "Invalid DPI value. Using a default value.", LogSeverity::Error );
+			dpi = 96u;
+		}
+		m_dpi = dpi;
+
+		char tmpBuffer[128];
+		Ogre::LwString msg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+		msg.a( "setDPI = ", dpi );
+		log->log( msg.c_str(), LogSeverity::Info );
 	}
 	//-------------------------------------------------------------------------
 	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
@@ -341,7 +358,7 @@ namespace Colibri
 
 		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
 
-		const float fontScale = FontSize( ptSize ).asFloat() / bmpFont->getBakedFontSize().asFloat();
+		const float fontScale = FontSize( ptSize ).asFloat() * bmpFont->getFontScale( this );
 
 		//Create a cache entry
 		CachedGlyph newGlyph;

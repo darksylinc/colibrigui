@@ -89,6 +89,8 @@ namespace Colibri
 
 		FontSize getBakedFontSize() const { return m_fontSize; }
 
+		float getFontScale( const ShaperManager *shaperManager ) const;
+
 		/// This pointer can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock *colibri_nullable getDatablock() const { return m_datablock; }
 	};
