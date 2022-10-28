@@ -93,8 +93,6 @@ namespace Colibri
 			m_rasterPrivateArea = m_manager->createWidget<LabelBmp>( this );
 			m_rasterPrivateArea->m_rawMode = true;
 			m_rasterPrivateArea->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
-			m_rasterPrivateArea->setFontSize(
-				shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
 			m_rasterPrivateArea->setSize( m_size );
 		}
 
