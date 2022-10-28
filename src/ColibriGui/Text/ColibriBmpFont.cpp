@@ -291,6 +291,6 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	float BmpFont::getFontScale( const ShaperManager *shaperManager ) const
 	{
-		return 96.0f / ( m_fontSize.asFloat() * static_cast<float>( shaperManager->getDPI() ) );
+		return static_cast<float>( shaperManager->getDPI() ) / ( m_fontSize.asFloat() * 96.0f );
 	}
 }  // namespace Colibri
