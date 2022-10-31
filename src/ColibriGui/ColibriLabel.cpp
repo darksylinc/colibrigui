@@ -21,6 +21,18 @@ namespace Colibri
 			Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width, topLeft.y + shapedGlyph.glyph->height );
 	}
 
+	inline void getAlignmentCorners( const ShapedGlyph &shapedGlyph, Ogre::Vector2 &topLeft,
+									 Ogre::Vector2 &bottomRight )
+	{
+		topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
+				  Ogre::Vector2( shapedGlyph.glyph->bearingX, -shapedGlyph.glyph->bearingY );
+		bottomRight =
+			Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width, topLeft.y + shapedGlyph.glyph->height );
+
+		const Ogre::Vector2 nextTopLeft = shapedGlyph.caretPos + shapedGlyph.advance;
+		bottomRight.makeCeil( nextTopLeft );
+	}
+
 	Label::Label( ColibriManager *manager ) :
 		Renderable( manager ),
 		m_usesBackground( false ),
@@ -670,7 +682,7 @@ namespace Colibri
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( shapedGlyph, topLeft, bottomRight );
+			getAlignmentCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( ( shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y ) &&
 				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
@@ -781,7 +793,7 @@ namespace Colibri
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( shapedGlyph, topLeft, bottomRight );
+			getAlignmentCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( ( shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x ) &&
 				m_vertAlignment > TextVertAlignment::Top )
@@ -1593,7 +1605,8 @@ namespace Colibri
 		while( itor != end )
 		{
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( *itor, topLeft, bottomRight );
+			getAlignmentCorners( *itor, topLeft, bottomRight );
+
 			minTopLeft.makeFloor( topLeft );
 			maxBottomRight.makeCeil( bottomRight );
 			++itor;
