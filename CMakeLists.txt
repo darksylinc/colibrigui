@@ -123,10 +123,13 @@ if( UNIX )
 	target_link_libraries( ${PROJECT_NAME} dl )
 endif()
 if( NOT MSVC )
-	target_compile_options( ${PROJECT_NAME} PRIVATE
-		-Wall -Winit-self -Wcast-qual -Wwrite-strings -Wextra
-		-Winconsistent-missing-destructor-override -Wcomma -Wsign-conversion -Wconversion
-		-Wno-unused-parameter -Wshadow -Wimplicit-fallthrough )
+	set( compileOptions -Wall -Winit-self -Wcast-qual -Wwrite-strings -Wextra
+		-Wsign-conversion -Wconversion
+		-Wno-unused-parameter -Wshadow -Wimplicit-fallthrough)
+	if( NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
+		set( compileOptions ${compileOptions} -Winconsistent-missing-destructor-override -Wcomma )
+	endif()
+	target_compile_options( ${PROJECT_NAME} PRIVATE ${compileOptions})
 endif()
 
 if( APPLE )
