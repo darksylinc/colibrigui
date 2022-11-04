@@ -332,6 +332,7 @@ namespace Colibri
 		Ogre::Vector2 maxSize( Ogre::Vector2::ZERO );
 
 		float currentWidth = 0.0f;
+		float widthExcess = 0.0f;
 		uint32_t numLines = 1u;
 		BmpGlyphVec::const_iterator itor = m_shapes.begin();
 		BmpGlyphVec::const_iterator endt = m_shapes.end();
@@ -340,8 +341,9 @@ namespace Colibri
 		{
 			if( itor->isNewline )
 			{
-				maxSize.x = std::max( maxSize.x, currentWidth );
+				maxSize.x = std::max( maxSize.x, currentWidth + widthExcess );
 				currentWidth = 0.0f;
+				widthExcess = 0.0f;
 				++numLines;
 			}
 			else if( itor->isTab )
@@ -349,14 +351,22 @@ namespace Colibri
 				currentWidth = ceilf( ( currentWidth + itor->bmpChar->xadvance * 0.25f ) /
 									  ( itor->bmpChar->xadvance * 2.0f ) ) *
 							   ( itor->bmpChar->xadvance * 2.0f );
+				widthExcess = 0.0f;
 			}
 			else
 			{
+				// When xadvance < width, the excess "width - xadvance" must only be added when
+				// we reach the end of the line. Otherwise the last character will clip.
 				currentWidth += itor->bmpChar->xadvance;
+				widthExcess =
+					std::max( itor->bmpChar->width, itor->bmpChar->xadvance ) - itor->bmpChar->xadvance;
 			}
 
 			++itor;
 		}
+
+		currentWidth += widthExcess;
+		widthExcess = 0.0f;
 
 		maxSize.x = std::max( maxSize.x, currentWidth );
 		maxSize.y = ( m_shapes.back().bmpChar->yoffset + m_shapes.back().bmpChar->height ) *
