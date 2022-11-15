@@ -33,7 +33,6 @@
 #include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/ColibriProgressbar.h"
 #include "ColibriGui/ColibriSlider.h"
-#include "ColibriGui/ColibriSkinManager.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
@@ -115,7 +114,7 @@ namespace Demo
 		colibriManager->loadSkins( (mGraphicsSystem->getResourcePath() +
 								   "Materials/ColibriGui/Skins/DarkGloss/Skins.colibri.json").c_str() );
 
-		colibriManager->setTouchOnlyMode( true );
+		// colibriManager->setTouchOnlyMode( true );
 
 		fullWindow = colibriManager->createWindow( 0 );
 		mainWindow = colibriManager->createWindow( 0 );
