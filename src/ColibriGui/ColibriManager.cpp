@@ -52,6 +52,7 @@ namespace Colibri
 		m_widgetTransformsDirty( false ),
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
+		m_touchOnlyMode( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -250,6 +251,11 @@ namespace Colibri
 		}
 
 		return gridLoc;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::setTouchOnlyMode( bool bTouchOnlyMode )
+	{
+		m_touchOnlyMode = bTouchOnlyMode;
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setDefaultSkins(

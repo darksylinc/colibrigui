@@ -147,6 +147,8 @@ namespace Colibri
 		/// Is one of the windows stored by this manager immediately dirty.
 		bool m_zOrderHasDirtyChildren;
 
+		bool m_touchOnlyMode;
+
 		Ogre::Root					* colibri_nullable m_root;
 		Ogre::VaoManager			* colibri_nullable m_vaoManager;
 		Ogre::ObjectMemoryManager	* colibri_nullable m_objectMemoryManager;
@@ -283,6 +285,26 @@ namespace Colibri
 		void setDefaultFontSize26d6( uint32_t defaultFontSize ) { m_defaultFontSize = defaultFontSize; }
 
 		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
+
+		/** Devices that have no keyboard and no gamepad don't need the States::HighlightedButton
+			state, because this state means the button is currently selected by the keyboard/gamepad.
+
+			Furthermore, tapping a button will set that last button to HighlightedButton, which
+			some users may think it's still 'hit'.
+
+			Setting this value to true will cause newly created Widgets (and further calls to
+			Renderable::setSkinPack & Renderable::_setSkinPack) to replace HighlightedButton
+			skin with Idle.
+
+			Thus internally HighlightedButton events will still happen, but visually the widgets
+			will look like it does when Idle.
+		@param bTouchOnlyMode
+			True to set touch only mode (i.e. preferred method on iOS & Android unless a
+			gamepad/keyboard is attached and you support them).
+			False to disable touch only mode.
+		*/
+		void setTouchOnlyMode( bool bTouchOnlyMode );
+		bool getTouchOnlyMode() const { return m_touchOnlyMode; }
 
 		/**	Sets the default skins to be used when creating a new widget.
 			Usage:

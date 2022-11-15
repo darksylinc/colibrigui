@@ -121,6 +121,13 @@ namespace Colibri
 			}
 		}
 
+		if( m_manager->getTouchOnlyMode() )
+		{
+			m_stateInformation[States::HighlightedButton] = m_stateInformation[States::Idle];
+			if( States::HighlightedButton == m_currentState )
+				setDatablock( m_stateInformation[States::HighlightedButton].materialName );
+		}
+
 		if( !m_overrideSkinColour )
 			m_colour = m_stateInformation[m_currentState].defaultColour;
 
@@ -159,6 +166,13 @@ namespace Colibri
 				if( i == m_currentState )
 					setDatablock( m_stateInformation[i].materialName );
 			}
+		}
+
+		if( m_manager->getTouchOnlyMode() )
+		{
+			m_stateInformation[States::HighlightedButton] = m_stateInformation[States::Idle];
+			if( States::HighlightedButton == m_currentState )
+				setDatablock( m_stateInformation[States::HighlightedButton].materialName );
 		}
 
 		if( !m_overrideSkinColour )
