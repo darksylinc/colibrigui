@@ -657,7 +657,12 @@ namespace Colibri
 	{
 		FocusPair retVal;
 
-		//The first window that our button is touching wins. We go in LIFO order.
+		// We are hidden. We should not process anything.
+		// Let our parent caller move on to the next window/widget.
+		if( m_hidden )
+			return retVal;
+
+		// The first window that our button is touching wins. We go in LIFO order.
 		const size_t numWindows = m_children.size() - m_numWidgets;
 		WidgetVec::const_reverse_iterator ritor = m_children.rbegin();
 		WidgetVec::const_reverse_iterator rendt = m_children.rbegin() + ptrdiff_t( numWindows );
