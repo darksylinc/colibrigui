@@ -1482,7 +1482,7 @@ namespace Colibri
 			focusPair.widget = widget;
 		}
 
-		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget == widget )
+		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::Idle );
 			callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
