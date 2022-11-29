@@ -82,19 +82,12 @@ namespace Colibri
 			Value in range [0; 3).
 			0: Unchecked, 1: Checked, 2: Tri-state checked
 		@param skinPackName
-			Skin pack to set
+			Skin pack to set.
+
+			If an empty name is set IdString(), then when the checkbox goes into this state,
+			the skin won't be altered, meaning it will continue to use the skin it was using.
 		*/
 		void setTickmarkSkinPack( uint8_t stateValue, Ogre::IdString skinPackName );
-
-		/** Directly set the skins via pointers instead of requiring map lookups on the tickmark.
-			Same as calling m_tickmark->_setSkinPack()
-		@param skinInfo
-			Must not be null.
-			skinInfo[i] can be null
-			skinInfo must be able to hold States::NumStates elements
-		*/
-		void setTickmarkSkinPack( uint8_t                                                 stateValue,
-								  SkinInfo const *colibri_nonnull const *colibri_nullable skinInfos );
 
 		/** Same as calling m_tickmark->setSkin()
 			Very useful if you don't need want to setup a Skin Pack.
@@ -103,6 +96,9 @@ namespace Colibri
 			0: Unchecked, 1: Checked, 2: Tri-state checked
 		@param skinName
 			Name of the skin to use, i.e. m_manager->getSkinManager()->getSkins().find( skinName )
+
+			If an empty name is set IdString(), then when the checkbox goes into this state,
+			the skin won't be altered, meaning it will continue to use the skin it was using.
 		@param forState
 			The state to use, use special value States::NumStates to set this skin to all states
 		*/

@@ -67,55 +67,71 @@ namespace Colibri
 	void Checkbox::setTickmarkSkinPack( uint8_t stateValue, Ogre::IdString skinPackName )
 	{
 		COLIBRI_ASSERT_LOW( stateValue < 3u );
-		SkinManager *skinManager = m_manager->getSkinManager();
-		const SkinPack *pack = skinManager->findSkinPack( skinPackName );
-		if( pack )
+
+		if( skinPackName == Ogre::IdString() )
 		{
 			for( size_t i = 0; i < States::NumStates; ++i )
-			{
-				const SkinInfo *skin = skinManager->findSkin( *pack, static_cast<States::States>( i ) );
-				if( skin )
-					m_skinPacks[stateValue][i] = skin;
-			}
-
-			if( stateValue == m_currentValue )
-				m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+				m_skinPacks[stateValue][i] = nullptr;
 		}
-	}
-	//-------------------------------------------------------------------------
-	void Checkbox::setTickmarkSkinPack(
-		uint8_t stateValue, SkinInfo const *colibri_nonnull const *colibri_nullable skinInfos )
-	{
-		COLIBRI_ASSERT_LOW( stateValue < 3u );
-		for( size_t i = 0; i < States::NumStates; ++i )
-			m_skinPacks[stateValue][i] = skinInfos[i];
+		else
+		{
+			SkinManager *skinManager = m_manager->getSkinManager();
+			const SkinPack *pack = skinManager->findSkinPack( skinPackName );
+			if( pack )
+			{
+				for( size_t i = 0; i < States::NumStates; ++i )
+				{
+					const SkinInfo *skin =
+						skinManager->findSkin( *pack, static_cast<States::States>( i ) );
+					if( skin )
+						m_skinPacks[stateValue][i] = skin;
+				}
 
-		if( stateValue == m_currentValue )
-			m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+				if( stateValue == m_currentValue )
+					m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+			}
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setTickmarkSkin( uint8_t stateValue, Ogre::IdString skinName,
 									States::States forState )
 	{
-		SkinManager *skinManager = m_manager->getSkinManager();
-		const SkinInfoMap &skins = skinManager->getSkins();
+		COLIBRI_ASSERT_LOW( stateValue < 3u );
 
-		SkinInfoMap::const_iterator itor = skins.find( skinName );
-		if( itor != skins.end() )
+		if( skinName == Ogre::IdString() )
 		{
 			if( forState == States::NumStates )
 			{
 				for( size_t i = 0; i < States::NumStates; ++i )
-					m_skinPacks[stateValue][i] = &itor->second;
+					m_skinPacks[stateValue][i] = nullptr;
 			}
 			else
 			{
-				m_skinPacks[stateValue][forState] = &itor->second;
+				m_skinPacks[stateValue][forState] = nullptr;
 			}
 		}
+		else
+		{
+			SkinManager *skinManager = m_manager->getSkinManager();
+			const SkinInfoMap &skins = skinManager->getSkins();
 
-		if( stateValue == m_currentValue )
-			m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+			SkinInfoMap::const_iterator itor = skins.find( skinName );
+			if( itor != skins.end() )
+			{
+				if( forState == States::NumStates )
+				{
+					for( size_t i = 0; i < States::NumStates; ++i )
+						m_skinPacks[stateValue][i] = &itor->second;
+				}
+				else
+				{
+					m_skinPacks[stateValue][forState] = &itor->second;
+				}
+			}
+
+			if( stateValue == m_currentValue )
+				m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setCheckboxMode( Checkbox::Mode mode )
