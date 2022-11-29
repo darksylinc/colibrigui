@@ -4,6 +4,7 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/ColibriSkinManager.h"
 
 #include "OgreLwString.h"
 
@@ -14,7 +15,7 @@ namespace Colibri
 		m_button( 0 ),
 		m_tickmark( 0 ),
 		m_currentValue( 0 ),
-		m_triState( false ),
+		m_stateMode( TwoState ),
 		m_horizDir( HorizWidgetDir::AutoLTR ),
 		m_mode( BigButton ),
 		m_tickmarkMargin( manager->m_defaultTickmarkMargin ),
@@ -62,6 +63,60 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setSkinPack( Ogre::IdString skinPackName ) { m_button->setSkinPack( skinPackName ); }
+	//-------------------------------------------------------------------------
+	void Checkbox::setTickmarkSkinPack( uint8_t stateValue, Ogre::IdString skinPackName )
+	{
+		COLIBRI_ASSERT_LOW( stateValue < 3u );
+		SkinManager *skinManager = m_manager->getSkinManager();
+		const SkinPack *pack = skinManager->findSkinPack( skinPackName );
+		if( pack )
+		{
+			for( size_t i = 0; i < States::NumStates; ++i )
+			{
+				const SkinInfo *skin = skinManager->findSkin( *pack, static_cast<States::States>( i ) );
+				if( skin )
+					m_skinPacks[stateValue][i] = skin;
+			}
+
+			if( stateValue == m_currentValue )
+				m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void Checkbox::setTickmarkSkinPack(
+		uint8_t stateValue, SkinInfo const *colibri_nonnull const *colibri_nullable skinInfos )
+	{
+		COLIBRI_ASSERT_LOW( stateValue < 3u );
+		for( size_t i = 0; i < States::NumStates; ++i )
+			m_skinPacks[stateValue][i] = skinInfos[i];
+
+		if( stateValue == m_currentValue )
+			m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+	}
+	//-------------------------------------------------------------------------
+	void Checkbox::setTickmarkSkin( uint8_t stateValue, Ogre::IdString skinName,
+									States::States forState )
+	{
+		SkinManager *skinManager = m_manager->getSkinManager();
+		const SkinInfoMap &skins = skinManager->getSkins();
+
+		SkinInfoMap::const_iterator itor = skins.find( skinName );
+		if( itor != skins.end() )
+		{
+			if( forState == States::NumStates )
+			{
+				for( size_t i = 0; i < States::NumStates; ++i )
+					m_skinPacks[stateValue][i] = &itor->second;
+			}
+			else
+			{
+				m_skinPacks[stateValue][forState] = &itor->second;
+			}
+		}
+
+		if( stateValue == m_currentValue )
+			m_tickmark->_setSkinPack( m_skinPacks[m_currentValue] );
+	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setCheckboxMode( Checkbox::Mode mode )
 	{
@@ -172,9 +227,11 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void Checkbox::setTriState( bool triState )
+	void Checkbox::setTriState( bool triState ) { setStateMode( triState ? TriState : TwoState ); }
+	//-------------------------------------------------------------------------
+	void Checkbox::setStateMode( StateMode stateMode )
 	{
-		m_triState = triState;
+		m_stateMode = stateMode;
 		m_currentValue = Ogre::Math::Clamp<uint8_t>( m_currentValue, 0u, getMaxValue() );
 		updateTickmark();
 	}
@@ -211,10 +268,12 @@ namespace Colibri
 	{
 		if( action == Action::PrimaryActionPerform )
 		{
-			if( widget == this || widget == m_tickmark )
+			if( widget == this || widget == m_tickmark ||
+				( widget == m_button && m_currentValue == NoState ) )
 			{
 				m_currentValue = ( m_currentValue + 1u ) % ( getMaxValue() + 1u );
-				updateTickmark();
+				if( m_currentValue != NoState )
+					updateTickmark();
 				if( widget != this )
 					_callActionListeners( Action::PrimaryActionPerform );
 			}

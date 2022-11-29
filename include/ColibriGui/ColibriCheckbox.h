@@ -31,20 +31,39 @@ namespace Colibri
 			BigButton
 		};
 
+		enum StateMode
+		{
+			/// The checkbox behaves like a button. There's only 1 state:
+			/// 0: Unchecked
+			///
+			/// Useful when a button must contain an icon inside, so instead of a Button,
+			/// you can just use NoState Checkbox
+			NoState,
+
+			/// The default checkbox behavior:
+			/// 0: Unchecked, 1: Checked
+			TwoState,
+
+			/// The checkbox cycles between 3 states:
+			/// 0: Unchecked, 1: Checked, 2: Tri-state checked
+			TriState,
+		};
+
 	protected:
 		Button *m_button;
 		Button *m_tickmark;
 
-		uint8_t	m_currentValue;
-		bool	m_triState;
-		HorizWidgetDir::HorizWidgetDir	m_horizDir;
-		Mode	m_mode;
+		uint8_t   m_currentValue;
+		StateMode m_stateMode;
 
-		float			m_tickmarkMargin;
-		Ogre::Vector2	m_tickmarkSize;
+		HorizWidgetDir::HorizWidgetDir m_horizDir;
+		Mode                           m_mode;
+
+		float         m_tickmarkMargin;
+		Ogre::Vector2 m_tickmarkSize;
 
 		/// Each skin pack per m_skinPacks[m_currentValue]
-		SkinInfo const * colibri_nullable m_skinPacks[3][States::NumStates];
+		SkinInfo const *colibri_nullable m_skinPacks[3][States::NumStates];
 
 		void updateTickmark();
 
@@ -54,19 +73,51 @@ namespace Colibri
 		void _initialize() override;
 		void _destroy() override;
 
-		Button* getButton()								{ return m_button; }
+		Button *getButton() { return m_button; }
 
 		void setSkinPack( Ogre::IdString skinPackName );
 
-		void setCheckboxMode( Mode mode );
-		Mode getCheckboxMode() const					{ return m_mode; }
+		/** Sets the skin packs for each state (unchecked, checked, tri-checked)
+		@param stateValue
+			Value in range [0; 3).
+			0: Unchecked, 1: Checked, 2: Tri-state checked
+		@param skinPackName
+			Skin pack to set
+		*/
+		void setTickmarkSkinPack( uint8_t stateValue, Ogre::IdString skinPackName );
 
-		void setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size );
-		float getTickmarkMargin() const					{ return m_tickmarkMargin; }
-		Ogre::Vector2 getTickmarkSize() const			{ return m_tickmarkSize; }
+		/** Directly set the skins via pointers instead of requiring map lookups on the tickmark.
+			Same as calling m_tickmark->_setSkinPack()
+		@param skinInfo
+			Must not be null.
+			skinInfo[i] can be null
+			skinInfo must be able to hold States::NumStates elements
+		*/
+		void setTickmarkSkinPack( uint8_t                                                 stateValue,
+								  SkinInfo const *colibri_nonnull const *colibri_nullable skinInfos );
+
+		/** Same as calling m_tickmark->setSkin()
+			Very useful if you don't need want to setup a Skin Pack.
+		@param stateValue
+			Value in range [0; 3).
+			0: Unchecked, 1: Checked, 2: Tri-state checked
+		@param skinName
+			Name of the skin to use, i.e. m_manager->getSkinManager()->getSkins().find( skinName )
+		@param forState
+			The state to use, use special value States::NumStates to set this skin to all states
+		*/
+		void setTickmarkSkin( uint8_t stateValue, Ogre::IdString skinName,
+							  States::States forState = States::NumStates );
+
+		void setCheckboxMode( Mode mode );
+		Mode getCheckboxMode() const { return m_mode; }
+
+		void          setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size );
+		float         getTickmarkMargin() const { return m_tickmarkMargin; }
+		Ogre::Vector2 getTickmarkSize() const { return m_tickmarkSize; }
 
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
-		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const	{ return m_horizDir; }
+		HorizWidgetDir::HorizWidgetDir getHorizWidgetDir() const { return m_horizDir; }
 
 		/** Sets the current value of the Checkbox. 0: Unchecked, 1: Checked, 2: Tri-state checked
 			If value is out of bounds, it gets clamped.
@@ -76,22 +127,33 @@ namespace Colibri
 		*/
 		void setCurrentValue( uint8_t currentValue );
 
+		/// Deprecated. Use setStateMode() instead.
+		/// Setting this value to false is the same as calling setStateMode( TwoState )
+		COLIBRI_DEPRECATED
 		void setTriState( bool triState );
-		bool getTriState() const						{ return m_triState; }
 
-		uint8_t getCurrentValue() const 				{ return m_currentValue; }
-		uint8_t getMaxValue() const						{ return m_triState ? 2u : 1u; }
+		/// Deprecated. Use getStateMode() instead.
+		COLIBRI_DEPRECATED
+		bool getTriState() const { return m_stateMode == TriState; }
+
+		/// Sets the current state mode. See StateMode
+		void setStateMode( StateMode stateMode );
+
+		StateMode getStateMode() const { return m_stateMode; }
+
+		uint8_t getCurrentValue() const { return m_currentValue; }
+		uint8_t getMaxValue() const { return static_cast<uint8_t>( m_stateMode ); }
 
 		/// @copydoc Label::sizeToFit
-		void sizeToFit( float maxAllowedWidth=std::numeric_limits<float>::max(),
-						TextHorizAlignment::TextHorizAlignment newHorizPos=TextHorizAlignment::Left,
-						TextVertAlignment::TextVertAlignment newVertPos=TextVertAlignment::Top,
-						States::States baseState=States::NumStates );
+		void sizeToFit( float maxAllowedWidth = std::numeric_limits<float>::max(),
+						TextHorizAlignment::TextHorizAlignment newHorizPos = TextHorizAlignment::Left,
+						TextVertAlignment::TextVertAlignment   newVertPos = TextVertAlignment::Top,
+						States::States                         baseState = States::NumStates );
 
 		void setTransformDirty( uint32_t dirtyReason ) final;
 
 		void notifyWidgetAction( Widget *widget, Action::Action action ) override;
 	};
-}
+}  // namespace Colibri
 
 COLIBRI_ASSUME_NONNULL_END

@@ -170,7 +170,7 @@ namespace Demo
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
-		checkbox0->setTriState( true );
+		checkbox0->setStateMode( Colibri::Checkbox::TriState );
 		checkbox0->getButton()->getLabel()->setText( "This is a tri-state checkbox" );
 //		checkbox0->sizeToFit();
 //		checkbox0->setSize( checkbox0->getSize() + Ogre::Vector2( 0, 32 ) );
@@ -180,6 +180,15 @@ namespace Demo
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->getButton()->getLabel()->setText( "This checkbox has the tickmark outside" );
 		checkbox0->setCheckboxMode( Colibri::Checkbox::TickButton );
+		layout->addCell( checkbox0 );
+
+		// By setting a Checkbox into Checkbox::NoState mode, it turns into
+		// a Button that has an icon on the left or right (depending on Checkbox::setHorizWidgetDir)
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
+		checkbox0->getButton()->getLabel()->setText( "This button has an image" );
+		checkbox0->setStateMode( Colibri::Checkbox::NoState );
+		checkbox0->setTickmarkSkin( 0u, "EmptyBg" );
 		layout->addCell( checkbox0 );
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );
