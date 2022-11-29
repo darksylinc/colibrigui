@@ -6,7 +6,11 @@
 
 namespace Colibri
 {
-	Button::Button( ColibriManager *manager ) : Renderable( manager ), m_label( 0 )
+	Button::Button( ColibriManager *manager ) :
+		Renderable( manager ),
+		m_label( 0 ),
+		m_labelTopLeftMargin( Ogre::Vector2::ZERO ),
+		m_labelBottomRightMargin( Ogre::Vector2::ZERO )
 	{
 		m_clickable = true;
 		m_keyboardNavigable = true;

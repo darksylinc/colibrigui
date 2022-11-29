@@ -75,6 +75,9 @@ namespace Colibri
 
 		Button *getButton() { return m_button; }
 
+		/// Use with care. Modifying m_tickmark too much may break how the Checkbox works.
+		Button *getTickmark() { return m_tickmark; }
+
 		void setSkinPack( Ogre::IdString skinPackName );
 
 		/** Sets the skin packs for each state (unchecked, checked, tri-checked)
