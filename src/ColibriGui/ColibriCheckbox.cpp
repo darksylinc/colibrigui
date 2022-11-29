@@ -1,8 +1,9 @@
 
 #include "ColibriGui/ColibriCheckbox.h"
-#include "ColibriGui/ColibriManager.h"
+
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriLabel.h"
+#include "ColibriGui/ColibriManager.h"
 
 #include "OgreLwString.h"
 
@@ -30,12 +31,12 @@ namespace Colibri
 		m_button = m_manager->createWidget<Button>( this );
 		m_button->_setSkinPack( m_manager->getDefaultSkin( SkinWidgetTypes::Checkbox ) );
 
-		for( size_t i=0; i<3u; ++i )
+		for( size_t i = 0; i < 3u; ++i )
 		{
 			const SkinWidgetTypes::SkinWidgetTypes widgetType =
-					static_cast<SkinWidgetTypes::SkinWidgetTypes>(
-						SkinWidgetTypes::CheckboxTickmarkUnchecked + i );
-			memcpy( m_skinPacks[i], m_manager->getDefaultSkin( widgetType ), sizeof(m_skinPacks[i]) );
+				static_cast<SkinWidgetTypes::SkinWidgetTypes>(
+					SkinWidgetTypes::CheckboxTickmarkUnchecked + i );
+			memcpy( m_skinPacks[i], m_manager->getDefaultSkin( widgetType ), sizeof( m_skinPacks[i] ) );
 		}
 
 		m_tickmark = m_manager->createWidget<Button>( this );
@@ -46,7 +47,7 @@ namespace Colibri
 		Widget::_initialize();
 
 		m_tickmark->addActionListener( this, ActionMask::PrimaryActionPerform );
-		//Add ourselves as well
+		// Add ourselves as well
 		this->addActionListener( this, ActionMask::PrimaryActionPerform );
 	}
 	//-------------------------------------------------------------------------
@@ -54,16 +55,13 @@ namespace Colibri
 	{
 		Widget::_destroy();
 
-		//m_tickmark is a child of us, so it will be destroyed by our super class
+		// m_tickmark is a child of us, so it will be destroyed by our super class
 		m_tickmark = 0;
-		//m_button is a child of us, so it will be destroyed by our super class
+		// m_button is a child of us, so it will be destroyed by our super class
 		m_button = 0;
 	}
 	//-------------------------------------------------------------------------
-	void Checkbox::setSkinPack( Ogre::IdString skinPackName )
-	{
-		m_button->setSkinPack( skinPackName );
-	}
+	void Checkbox::setSkinPack( Ogre::IdString skinPackName ) { m_button->setSkinPack( skinPackName ); }
 	//-------------------------------------------------------------------------
 	void Checkbox::setCheckboxMode( Checkbox::Mode mode )
 	{
@@ -87,7 +85,7 @@ namespace Colibri
 	void Checkbox::updateTickmark()
 	{
 		if( !m_tickmark )
-			return; //_initialize hasn't been called yet
+			return;  //_initialize hasn't been called yet
 
 		const Ogre::Vector2 checkboxSize( getSizeAfterClipping() );
 		const float margin = m_tickmarkMargin;
@@ -97,6 +95,7 @@ namespace Colibri
 
 		const bool rightToLeft = m_manager->shouldSwapRTL( m_horizDir );
 
+		m_button->setLabelMargins( Ogre::Vector2::ZERO, Ogre::Vector2::ZERO );
 		if( m_mode == TickButton )
 		{
 			const Ogre::Vector2 buttonSize( checkboxSize.x - tickmarkSize.x - margin * 2.0f,
@@ -107,13 +106,13 @@ namespace Colibri
 			{
 				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - margin,
 													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
-				m_button->setTopLeft( Ogre::Vector2( m_tickmark->getLocalTopLeft().x -
-													 margin - buttonSize.x, 0.0f ) );
+				m_button->setTopLeft(
+					Ogre::Vector2( m_tickmark->getLocalTopLeft().x - margin - buttonSize.x, 0.0f ) );
 			}
 			else
 			{
-				m_tickmark->setTopLeft( Ogre::Vector2( margin,
-													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
+				m_tickmark->setTopLeft(
+					Ogre::Vector2( margin, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
 				m_button->setTopLeft( Ogre::Vector2( tickmarkSize.x + margin * 2.0f, 0.0f ) );
 			}
 		}
@@ -124,14 +123,34 @@ namespace Colibri
 
 			if( rightToLeft )
 			{
+				// Text inside the button should NOT overlap with the
+				// tickmark when the text isn't centered
+				if( m_button->hasLabel() &&
+					m_button->getLabel()->getTextHorizAlignment() != TextHorizAlignment::Center )
+				{
+					m_button->setLabelMargins(
+						Ogre::Vector2::ZERO,
+						Ogre::Vector2( m_tickmarkMargin * 2.0f + tickmarkSize.x, 0.0f ) );
+				}
+
 				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - margin,
 													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
 				m_button->setTopLeft( Ogre::Vector2::ZERO );
 			}
 			else
 			{
-				m_tickmark->setTopLeft( Ogre::Vector2( margin,
-													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
+				// Text inside the button should NOT overlap with the
+				// tickmark when the text isn't centered
+				if( m_button->hasLabel() &&
+					m_button->getLabel()->getTextHorizAlignment() != TextHorizAlignment::Center )
+				{
+					m_button->setLabelMargins(
+						Ogre::Vector2( m_tickmarkMargin * 2.0f + tickmarkSize.x, 0.0f ),
+						Ogre::Vector2::ZERO );
+				}
+
+				m_tickmark->setTopLeft(
+					Ogre::Vector2( margin, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
 				m_button->setTopLeft( Ogre::Vector2::ZERO );
 			}
 		}
@@ -160,10 +179,8 @@ namespace Colibri
 		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
-	void Checkbox::sizeToFit( float maxAllowedWidth,
-							  TextHorizAlignment::TextHorizAlignment newHorizPos,
-							  TextVertAlignment::TextVertAlignment newVertPos,
-							  States::States baseState )
+	void Checkbox::sizeToFit( float maxAllowedWidth, TextHorizAlignment::TextHorizAlignment newHorizPos,
+							  TextVertAlignment::TextVertAlignment newVertPos, States::States baseState )
 	{
 		m_button->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
 		const Ogre::Vector2 buttonSize = m_button->getSize();
@@ -173,16 +190,19 @@ namespace Colibri
 		if( m_mode == TickButton )
 			newSize.x = m_tickmarkSize.x + m_tickmarkMargin * 2.0f + buttonSize.x;
 		else
-			newSize.x = (m_tickmarkSize.x + m_tickmarkMargin * 2.0f) * 2.0f + buttonSize.x;
+			newSize.x = ( m_tickmarkSize.x + m_tickmarkMargin * 2.0f ) * 2.0f + buttonSize.x;
 		newSize.y = std::max( m_tickmarkSize.y, newSize.y );
 		setSize( newSize );
 	}
 	//-------------------------------------------------------------------------
 	void Checkbox::setTransformDirty( uint32_t dirtyReason )
 	{
-		//Only update the tickmark if our size is directly being changed, not our parent's
-		if( (dirtyReason & (TransformDirtyParentCaller|TransformDirtyScale)) == TransformDirtyScale )
+		// Only update the tickmark if our size is directly being changed, not our parent's
+		if( ( dirtyReason & ( TransformDirtyParentCaller | TransformDirtyScale ) ) ==
+			TransformDirtyScale )
+		{
 			updateTickmark();
+		}
 
 		Widget::setTransformDirty( dirtyReason );
 	}
@@ -193,11 +213,11 @@ namespace Colibri
 		{
 			if( widget == this || widget == m_tickmark )
 			{
-				m_currentValue = (m_currentValue + 1u) % (getMaxValue() + 1u);
+				m_currentValue = ( m_currentValue + 1u ) % ( getMaxValue() + 1u );
 				updateTickmark();
 				if( widget != this )
 					_callActionListeners( Action::PrimaryActionPerform );
 			}
 		}
 	}
-}
+}  // namespace Colibri

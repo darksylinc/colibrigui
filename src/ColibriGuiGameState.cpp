@@ -163,6 +163,13 @@ namespace Demo
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
+		checkbox0->getButton()->getLabel()->setText( "Left-aligned checkbox" );
+		checkbox0->getButton()->getLabel()->setTextHorizAlignment(
+			Colibri::TextHorizAlignment::Natural );
+		layout->addCell( checkbox0 );
+
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->setTriState( true );
 		checkbox0->getButton()->getLabel()->setText( "This is a tri-state checkbox" );
 //		checkbox0->sizeToFit();

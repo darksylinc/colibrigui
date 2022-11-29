@@ -26,6 +26,15 @@ namespace Colibri
 		m_label = 0;
 	}
 	//-------------------------------------------------------------------------
+	void Button::setLabelMargins( const Ogre::Vector2 &labelTopLeftMargin,
+								  const Ogre::Vector2 &labelBottomRightMargin )
+	{
+		m_labelTopLeftMargin = labelTopLeftMargin;
+		m_labelBottomRightMargin = labelBottomRightMargin;
+	}
+	//-------------------------------------------------------------------------
+	bool Button::hasLabel() const { return m_label != 0; }
+	//-------------------------------------------------------------------------
 	Label *Button::getLabel()
 	{
 		if( !m_label )
@@ -47,10 +56,13 @@ namespace Colibri
 		if( m_label )
 		{
 			// If m_label has already been positioned, then calculateChildrenSize
-			// already accounted for one m_label->m_margin, thus we must subtract it
+			// already accounted for one m_label->m_margin + m_labelTopLeftMargin,
+			// thus we must subtract it.
 			// If m_label hasn't been positioned yet, then getLocalTopLeft will be
-			// 0 and m_margin * 2.0 will be correct.
-			maxSize += m_label->m_margin * 2.0f - m_label->getLocalTopLeft();
+			// 0 and totalMargin will be correct.
+			const Ogre::Vector2 totalMargin =
+				m_label->m_margin * 2.0f + m_labelTopLeftMargin + m_labelBottomRightMargin;
+			maxSize += totalMargin - m_label->getLocalTopLeft();
 		}
 		setSize( maxSize );
 	}
@@ -59,11 +71,13 @@ namespace Colibri
 	{
 		if( m_label )
 		{
-			const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping() - m_label->m_margin * 2.0f;
+			const Ogre::Vector2 totalMargin =
+				m_label->m_margin * 2.0f + m_labelTopLeftMargin + m_labelBottomRightMargin;
+			const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping() - totalMargin;
 			if( m_label->getSize() != sizeAfterClipping )
 			{
-				m_label->setTopLeft( m_label->m_margin );
-				m_label->setSize( sizeAfterClipping - m_label->m_margin * 2.0f );
+				m_label->setTopLeft( m_label->m_margin + m_labelTopLeftMargin );
+				m_label->setSize( sizeAfterClipping - totalMargin );
 			}
 		}
 		Renderable::setTransformDirty( dirtyReason );
