@@ -79,7 +79,19 @@
         {
             "material" : "AtlasTransparent",
             "tex_resolution" : [512, 512],
-            "grid_uv" : { "center" : [160, 416, 64, 32] }
+            "grid_uv" :
+            {
+                "comment" :
+                ["We use center_right w/ empty pixel so we can",
+                "increase the hitbox for touch systems.",
+                "SpinnerBtnIncrement does the same in the opposite direction"],
+                "center_right" : [160, 384, 1, 1],
+                "center" : [160, 416, 64, 32]
+            },
+            "borders" :
+            {
+                "right" : [15, 0]
+            }
         },
         "SpinnerBtnDecrement_disabled" :
         {
@@ -101,7 +113,15 @@
         {
             "material" : "AtlasTransparent",
             "tex_resolution" : [512, 512],
-            "grid_uv" : { "center" : [160, 384, 64, 32] }
+            "grid_uv" :
+            {
+                "center_left" : [160, 384, 1, 1],
+                "center" : [160, 384, 64, 32]
+            },
+            "borders" :
+            {
+                "left" : [15, 0]
+            }
         },
         "SpinnerBtnIncrement_disabled" :
         {

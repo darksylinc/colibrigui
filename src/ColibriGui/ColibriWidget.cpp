@@ -1107,6 +1107,16 @@ namespace Colibri
 		return m_position + this->m_size * 0.5f;
 	}
 	//-------------------------------------------------------------------------
+	void Widget::setCenterIgnoringBorder( const Ogre::Vector2 &center )
+	{
+		setTopLeft( center - this->getSizeAfterClipping() * 0.5f - this->m_clipBorderTL );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getCenterIgnoringBorder() const
+	{
+		return m_position + this->m_clipBorderTL + this->getSizeAfterClipping() * 0.5f;
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setClipBorders( float clipBorders[Borders::NumBorders] )
 	{
 		if( m_clipBorderTL.x != clipBorders[Borders::Left]	||
