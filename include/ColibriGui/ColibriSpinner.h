@@ -43,8 +43,8 @@ namespace Colibri
 		Label *colibri_nullable m_label;
 		/// Displays the currently selected option
 		Label *colibri_nullable m_optionLabel;
-		Button *                   m_decrement;
-		Button *                   m_increment;
+		Button                 *m_decrement;
+		Button                 *m_increment;
 
 		int32_t m_currentValue;
 
@@ -58,6 +58,7 @@ namespace Colibri
 		bool  m_autoCalcSizes;
 		float m_sizeLabel;        /// Filled manually or automatically based on m_autoCalcSizes
 		float m_sizeOptionLabel;  /// Filled manually or automatically based on m_autoCalcSizes
+		float m_minArrowWidth;
 		HorizWidgetDir::HorizWidgetDir m_horizDir;
 
 		std::vector<std::string> m_options;
@@ -187,6 +188,12 @@ namespace Colibri
 			When autoCalculateFromMaxWidth is true, this value is ignored
 		*/
 		void setFixedWidths( bool bAutoCalculate, float labelWidth, float optionsLabelWidth );
+
+		/// Sets the minimum width between left and right arrows, so that multiple
+		/// spinners can look consistent
+		void setMinArrowWidth( float minArrowWidth );
+
+		float getMinArrowWidth() const { return m_minArrowWidth; }
 
 		float getLabelWidth() const { return m_sizeLabel; }
 		float getOptionsLabelWidth() const { return m_sizeOptionLabel; }

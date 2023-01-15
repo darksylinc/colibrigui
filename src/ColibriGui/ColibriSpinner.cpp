@@ -24,6 +24,7 @@ namespace Colibri
 		m_autoCalcSizes( true ),
 		m_sizeLabel( 0.0f ),
 		m_sizeOptionLabel( 0.0f ),
+		m_minArrowWidth( 0.0f ),
 		m_horizDir( HorizWidgetDir::AutoLTR )
 	{
 		m_clickable = true;
@@ -81,9 +82,9 @@ namespace Colibri
 		// For some unknown reason we have to sub two extra arrow margin from remainingSize
 		if( m_label )
 		{
-			const float remainingSize =
-				std::max( 0.0f, m_size.x - outSizes[SW_Decrement] - outSizes[SW_Increment] -
-									outSizes[SW_OptionLabel] - m_arrowMargin * 2.0f );
+			const float remainingSize = std::max(
+				0.0f, m_size.x - outSizes[SW_Decrement] - outSizes[SW_Increment] -
+						  outSizes[SW_OptionLabel] - m_arrowMargin * 2.0f - m_label->m_margin.x );
 			outSizes[SW_Label] = std::min( m_sizeLabel, remainingSize );
 			outSizes[SW_Space] = remainingSize - outSizes[SW_Label];
 		}
@@ -159,7 +160,7 @@ namespace Colibri
 			maxOptionSize.makeCeil( m_optionLabel->getSize() );
 		}
 
-		outSizeOptionLabel = maxOptionSize.x;
+		outSizeOptionLabel = std::max( maxOptionSize.x, m_minArrowWidth );
 		outHeight = maxOptionSize.y;
 
 		// Restore
@@ -227,7 +228,10 @@ namespace Colibri
 		if( !rightToLeft )
 		{
 			if( m_label )
+			{
+				colStart += m_label->m_margin.x;
 				m_label->setTopLeft( Ogre::Vector2( colStart, 0.0f ) );
+			}
 			colStart += columnSizes[SW_Label];
 			colStart += columnSizes[SW_Space];
 		}
@@ -252,7 +256,10 @@ namespace Colibri
 		if( rightToLeft )
 		{
 			if( m_label )
+			{
+				colStart += m_label->m_margin.x;
 				m_label->setTopLeft( Ogre::Vector2( colStart, 0.0f ) );
+			}
 			colStart += columnSizes[SW_Label];
 			colStart += columnSizes[SW_Space];
 		}
@@ -380,6 +387,13 @@ namespace Colibri
 			calculateSizes();
 			updateOptionLabel();
 		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setMinArrowWidth( float minArrowWidth )
+	{
+		m_minArrowWidth = minArrowWidth;
+		calculateSizes();
+		updateOptionLabel();
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::sizeToFit()
