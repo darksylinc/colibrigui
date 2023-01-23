@@ -40,6 +40,7 @@ namespace Colibri
 		m_shadowOutline( false ),
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
+		m_defaultColour( m_colour ),
 		m_backgroundSize( Ogre::Vector2::ZERO ),
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
@@ -253,7 +254,7 @@ namespace Colibri
 	void Label::setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx,
 							   States::States forState )
 	{
-		m_colour = colour;
+		m_defaultColour = colour;
 		if( forState == States::NumStates )
 		{
 			for( size_t i = 0; i < States::NumStates; ++i )
@@ -268,13 +269,13 @@ namespace Colibri
 
 				while( itor != endt )
 				{
-					itor->rgba32 = m_colour.getAsABGR();
+					itor->rgba32 = m_defaultColour.getAsABGR();
 					++itor;
 				}
 			}
 			else if( richTextTextIdx < m_richText[forState].size() )
 			{
-				m_richText[forState][richTextTextIdx].rgba32 = m_colour.getAsABGR();
+				m_richText[forState][richTextTextIdx].rgba32 = m_defaultColour.getAsABGR();
 			}
 		}
 	}
@@ -1213,7 +1214,7 @@ namespace Colibri
 		m_currVertexBufferOffset =
 			static_cast<uint32_t>( textVertBuffer - m_manager->_getTextVertexBufferBase() );
 
-		const uint32_t shadowColour = m_shadowColour.getAsABGR();
+		const uint32_t shadowColour = ( m_shadowColour * m_colour ).getAsABGR();
 
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
@@ -1255,6 +1256,11 @@ namespace Colibri
 		const float canvasAr = m_manager->getCanvasAspectRatio();
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
+		const uint8_t colourRgba8[4] = { static_cast<uint8_t>( m_colour.r * 255.0f ),
+										 static_cast<uint8_t>( m_colour.g * 255.0f ),
+										 static_cast<uint8_t>( m_colour.b * 255.0f ),
+										 static_cast<uint8_t>( m_colour.a * 255.0f ) };
+
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator endt = m_shapes[m_currentState].end();
 
@@ -1292,10 +1298,17 @@ namespace Colibri
 
 				const RichText &richText = m_richText[m_currentState][shapedGlyph.richTextIdx];
 
-				addQuad( textVertBuffer, topLeft, bottomRight,                        //
-						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,         //
-						 richText.rgba32, parentDerivedTL, parentDerivedBR, invSize,  //
-						 shapedGlyph.glyph->offsetStart,                              //
+				uint32_t rgba32 = richText.rgba32;
+
+				rgba32 |= ( ( rgba32 & 0xFFu ) * colourRgba8[0] ) / 255u;
+				rgba32 |= ( ( ( ( rgba32 >> 8u ) & 0xFFu ) * colourRgba8[1] ) / 255u ) << 8u;
+				rgba32 |= ( ( ( ( rgba32 >> 16u ) & 0xFFu ) * colourRgba8[2] ) / 255u ) << 16u;
+				rgba32 |= ( ( ( ( rgba32 >> 24u ) & 0xFFu ) * colourRgba8[3] ) / 255u ) << 24u;
+
+				addQuad( textVertBuffer, topLeft, bottomRight,                 //
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,  //
+						 rgba32, parentDerivedTL, parentDerivedBR, invSize,    //
+						 shapedGlyph.glyph->offsetStart,                       //
 						 canvasAr, invCanvasAr, derivedRot );
 				textVertBuffer += 6u;
 
@@ -1436,7 +1449,7 @@ namespace Colibri
 	{
 		RichText rt;
 		rt.ptSize = m_defaultFontSize;
-		rt.rgba32 = m_colour.getAsABGR();
+		rt.rgba32 = m_defaultColour.getAsABGR();
 		rt.noBackground = true;
 		rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
 		rt.font = m_defaultFont;

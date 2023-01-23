@@ -67,6 +67,7 @@ namespace Colibri
 		Ogre::ColourValue m_shadowColour;
 		Ogre::Vector2 m_shadowDisplace;
 
+		Ogre::ColourValue m_defaultColour;
 		Ogre::Vector2 m_backgroundSize;
 		Ogre::ColourValue m_defaultBackgroundColour;
 		FontSize m_defaultFontSize;
