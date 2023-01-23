@@ -228,6 +228,12 @@ namespace Colibri
 		void setShadowOutline( bool enable, Ogre::ColourValue shadowColour=Ogre::ColourValue::Black,
 							   const Ogre::Vector2 &shadowDisplace=Ogre::Vector2::UNIT_SCALE );
 
+		bool isShadowOutlineEnabled() const { return m_shadowOutline; }
+
+		const Ogre::ColourValue &getShadowColour() const { return m_shadowColour; }
+
+		const Ogre::Vector2 &getShadowDisplace() const { return m_shadowDisplace; }
+
 		/** Called by ColibriManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.
 		*/
