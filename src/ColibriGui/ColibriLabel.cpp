@@ -1298,17 +1298,18 @@ namespace Colibri
 
 				const RichText &richText = m_richText[m_currentState][shapedGlyph.richTextIdx];
 
-				uint32_t rgba32 = richText.rgba32;
+				const uint32_t oldRgba32 = richText.rgba32;
+				uint32_t newRgba32 = 0u;
 
-				rgba32 |= ( ( rgba32 & 0xFFu ) * colourRgba8[0] ) / 255u;
-				rgba32 |= ( ( ( ( rgba32 >> 8u ) & 0xFFu ) * colourRgba8[1] ) / 255u ) << 8u;
-				rgba32 |= ( ( ( ( rgba32 >> 16u ) & 0xFFu ) * colourRgba8[2] ) / 255u ) << 16u;
-				rgba32 |= ( ( ( ( rgba32 >> 24u ) & 0xFFu ) * colourRgba8[3] ) / 255u ) << 24u;
+				newRgba32 |= ( ( oldRgba32 & 0xFFu ) * colourRgba8[0] ) / 255u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 8u ) & 0xFFu ) * colourRgba8[1] ) / 255u ) << 8u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 16u ) & 0xFFu ) * colourRgba8[2] ) / 255u ) << 16u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 24u ) & 0xFFu ) * colourRgba8[3] ) / 255u ) << 24u;
 
-				addQuad( textVertBuffer, topLeft, bottomRight,                 //
-						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,  //
-						 rgba32, parentDerivedTL, parentDerivedBR, invSize,    //
-						 shapedGlyph.glyph->offsetStart,                       //
+				addQuad( textVertBuffer, topLeft, bottomRight,                  //
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,   //
+						 newRgba32, parentDerivedTL, parentDerivedBR, invSize,  //
+						 shapedGlyph.glyph->offsetStart,                        //
 						 canvasAr, invCanvasAr, derivedRot );
 				textVertBuffer += 6u;
 
