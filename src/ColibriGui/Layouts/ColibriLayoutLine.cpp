@@ -419,6 +419,9 @@ namespace Colibri
 			syncToWindowSize();
 
 		tellChildrenToUpdateLayout( m_cells );
+
+		if( m_adjustableWindow )
+			m_adjustableWindow->sizeScrollToFit();
 	}
 	//-------------------------------------------------------------------------
 	void LayoutLine::notifyLayoutUpdated()
