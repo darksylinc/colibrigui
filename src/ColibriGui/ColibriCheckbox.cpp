@@ -288,7 +288,7 @@ namespace Colibri
 				( widget == m_button && m_currentValue == NoState ) )
 			{
 				m_currentValue = ( m_currentValue + 1u ) % ( getMaxValue() + 1u );
-				if( m_currentValue != NoState )
+				if( m_stateMode != NoState )
 					updateTickmark();
 				if( widget != this )
 					_callActionListeners( Action::PrimaryActionPerform );
