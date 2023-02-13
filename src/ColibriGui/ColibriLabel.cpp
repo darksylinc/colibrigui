@@ -45,6 +45,8 @@ namespace Colibri
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
 		m_defaultFont( 0 ),
+		m_lineHeightScale( 1.0f ),
+		m_lastLineHeightScale( 1.0f ),
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
@@ -249,6 +251,12 @@ namespace Colibri
 				}
 			}
 		}
+	}
+	//-------------------------------------------------------------------------
+	void Label::setLineHeightScale( float lineHeightScale, float lastLineHeightScale )
+	{
+		m_lineHeightScale = lineHeightScale;
+		m_lastLineHeightScale = lastLineHeightScale;
 	}
 	//-------------------------------------------------------------------------
 	void Label::setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx,
@@ -1045,7 +1053,9 @@ namespace Colibri
 
 		// The newline itself has its own height, make sure it's considered
 		if( itor != endt )
-			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
+			largestHeight = std::max( itor->glyph->newlineSize, largestHeight ) * m_lineHeightScale;
+		else
+			largestHeight *= m_lastLineHeightScale;
 
 		return largestHeight;
 	}

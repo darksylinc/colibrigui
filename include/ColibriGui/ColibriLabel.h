@@ -73,6 +73,9 @@ namespace Colibri
 		FontSize m_defaultFontSize;
 		uint16_t m_defaultFont;
 
+		float m_lineHeightScale;
+		float m_lastLineHeightScale;
+
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
 		TextVertAlignment::TextVertAlignment	m_vertAlignment;
@@ -193,6 +196,35 @@ namespace Colibri
 		*/
 		void setDefaultFont( uint16_t defaultFont );
 		uint16_t getDefaultFont() const								{ return m_defaultFont; }
+
+		/** Sets the scale (aka line spacing) for the line height.
+
+			Besides simple Word-like line spacing effect, it is useful when a Label is mixed with a
+			BMP font and this font is poorly setup, causing huge line spacing issues.
+
+			The last line is treated differently because:
+				1. If the Label is not part of a Button, the Label's size may be too small,
+				   causing the text to look clipped. Hence last line must be different and
+				   you likely want lastLineHeightScale = 1.0
+				2. If you are dealing with the BMP font issue mentioned above, you'll want to
+				   set lastLineHeightScale = lineHeightScale
+		@param lineHeightScale
+			Scale of the line height. Values in range (0; 1) make the line spacing smaller.
+			Values > 1 make the spacing bigger. Default is 1
+		@param lastLineHeightScale
+			Scale of the last line. See lineHeightScale.
+			If the text only has one line, this value is used.
+		*/
+		void setLineHeightScale( float lineHeightScale, float lastLineHeightScale = 1.0f );
+
+		float getLineHeightScale() const { return m_lineHeightScale; }
+		float setLastLineLineHeightScale() const { return m_lastLineHeightScale; }
+
+		/// Name alias for setLineHeightScale()
+		void setLineSpacing( float lineHeightScale, float lastLineHeightScale )
+		{
+			setLineHeightScale( lineHeightScale, lastLineHeightScale );
+		}
 
 		/** Changes the colour of the current text (either all of it or a block); and sets
 			the default colour for new text to the input colour
