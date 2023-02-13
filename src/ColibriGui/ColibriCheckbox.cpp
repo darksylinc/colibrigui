@@ -18,7 +18,8 @@ namespace Colibri
 		m_stateMode( TwoState ),
 		m_horizDir( HorizWidgetDir::AutoLTR ),
 		m_mode( BigButton ),
-		m_tickmarkMargin( manager->m_defaultTickmarkMargin ),
+		m_tickmarkMarginToBorder( manager->m_defaultTickmarkMargin ),
+		m_tickmarkMarginToText( manager->m_defaultTickmarkMargin ),
 		m_tickmarkSize( manager->m_defaultTickmarkSize )
 	{
 		m_clickable = true;
@@ -140,9 +141,11 @@ namespace Colibri
 		updateTickmark();
 	}
 	//-------------------------------------------------------------------------
-	void Checkbox::setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size )
+	void Checkbox::setTickmarkMarginAndSize( float marginToBorder, float marginToText,
+											 const Ogre::Vector2 &size )
 	{
-		m_tickmarkMargin = margin;
+		m_tickmarkMarginToBorder = marginToBorder;
+		m_tickmarkMarginToText = marginToText;
 		m_tickmarkSize = size;
 		updateTickmark();
 	}
@@ -159,7 +162,8 @@ namespace Colibri
 			return;  //_initialize hasn't been called yet
 
 		const Ogre::Vector2 checkboxSize( getSizeAfterClipping() );
-		const float margin = m_tickmarkMargin;
+		const float marginToBorder = m_tickmarkMarginToBorder;
+		const float marginToText = m_tickmarkMarginToText;
 		const Ogre::Vector2 tickmarkSize( m_tickmarkSize );
 
 		m_tickmark->setSize( tickmarkSize );
@@ -169,22 +173,23 @@ namespace Colibri
 		m_button->setLabelMargins( Ogre::Vector2::ZERO, Ogre::Vector2::ZERO );
 		if( m_mode == TickButton )
 		{
-			const Ogre::Vector2 buttonSize( checkboxSize.x - tickmarkSize.x - margin * 2.0f,
-											checkboxSize.y );
+			const Ogre::Vector2 buttonSize(
+				checkboxSize.x - tickmarkSize.x - ( marginToBorder + marginToText ), checkboxSize.y );
 			m_button->setSize( buttonSize );
 
 			if( rightToLeft )
 			{
-				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - margin,
+				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - marginToBorder,
 													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
-				m_button->setTopLeft(
-					Ogre::Vector2( m_tickmark->getLocalTopLeft().x - margin - buttonSize.x, 0.0f ) );
+				m_button->setTopLeft( Ogre::Vector2(
+					m_tickmark->getLocalTopLeft().x - marginToText - buttonSize.x, 0.0f ) );
 			}
 			else
 			{
 				m_tickmark->setTopLeft(
-					Ogre::Vector2( margin, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
-				m_button->setTopLeft( Ogre::Vector2( tickmarkSize.x + margin * 2.0f, 0.0f ) );
+					Ogre::Vector2( marginToBorder, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
+				m_button->setTopLeft(
+					Ogre::Vector2( tickmarkSize.x + ( marginToBorder + marginToText ), 0.0f ) );
 			}
 		}
 		else
@@ -201,10 +206,10 @@ namespace Colibri
 				{
 					m_button->setLabelMargins(
 						Ogre::Vector2::ZERO,
-						Ogre::Vector2( m_tickmarkMargin * 2.0f + tickmarkSize.x, 0.0f ) );
+						Ogre::Vector2( marginToBorder + marginToText + tickmarkSize.x, 0.0f ) );
 				}
 
-				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - margin,
+				m_tickmark->setTopLeft( Ogre::Vector2( checkboxSize.x - tickmarkSize.x - marginToBorder,
 													   buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
 				m_button->setTopLeft( Ogre::Vector2::ZERO );
 			}
@@ -216,12 +221,12 @@ namespace Colibri
 					m_button->getLabel()->getTextHorizAlignment() != TextHorizAlignment::Center )
 				{
 					m_button->setLabelMargins(
-						Ogre::Vector2( m_tickmarkMargin * 2.0f + tickmarkSize.x, 0.0f ),
+						Ogre::Vector2( marginToBorder + marginToText + tickmarkSize.x, 0.0f ),
 						Ogre::Vector2::ZERO );
 				}
 
 				m_tickmark->setTopLeft(
-					Ogre::Vector2( margin, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
+					Ogre::Vector2( marginToBorder, buttonSize.y * 0.5f - tickmarkSize.y * 0.5f ) );
 				m_button->setTopLeft( Ogre::Vector2::ZERO );
 			}
 		}
@@ -261,9 +266,15 @@ namespace Colibri
 		Ogre::Vector2 newSize = buttonSize;
 
 		if( m_mode == TickButton )
-			newSize.x = m_tickmarkSize.x + m_tickmarkMargin * 2.0f + buttonSize.x;
+		{
+			newSize.x =
+				m_tickmarkSize.x + m_tickmarkMarginToBorder + m_tickmarkMarginToText + buttonSize.x;
+		}
 		else
-			newSize.x = ( m_tickmarkSize.x + m_tickmarkMargin * 2.0f ) * 2.0f + buttonSize.x;
+		{
+			newSize.x = ( m_tickmarkSize.x + m_tickmarkMarginToBorder + m_tickmarkMarginToText ) * 2.0f +
+						buttonSize.x;
+		}
 		newSize.y = std::max( m_tickmarkSize.y, newSize.y );
 		setSize( newSize );
 	}

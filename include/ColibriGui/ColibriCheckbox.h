@@ -59,7 +59,8 @@ namespace Colibri
 		HorizWidgetDir::HorizWidgetDir m_horizDir;
 		Mode                           m_mode;
 
-		float         m_tickmarkMargin;
+		float         m_tickmarkMarginToBorder;
+		float         m_tickmarkMarginToText;
 		Ogre::Vector2 m_tickmarkSize;
 
 		/// Each skin pack per m_skinPacks[m_currentValue]
@@ -111,8 +112,12 @@ namespace Colibri
 		void setCheckboxMode( Mode mode );
 		Mode getCheckboxMode() const { return m_mode; }
 
-		void          setTickmarkMarginAndSize( float margin, const Ogre::Vector2 &size );
-		float         getTickmarkMargin() const { return m_tickmarkMargin; }
+		void setTickmarkMarginAndSize( float marginToBorder, float marginToText,
+									   const Ogre::Vector2 &size );
+
+		float getTickmarkMarginToBorder() const { return m_tickmarkMarginToBorder; }
+		float getTickmarkMarginToText() const { return m_tickmarkMarginToText; }
+
 		Ogre::Vector2 getTickmarkSize() const { return m_tickmarkSize; }
 
 		void setHorizWidgetDir( HorizWidgetDir::HorizWidgetDir horizWidgetDir );
