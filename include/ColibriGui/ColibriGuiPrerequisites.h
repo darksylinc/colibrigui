@@ -80,6 +80,7 @@ namespace Colibri
 	class SkinManager;
 	class Slider;
 	class Spinner;
+	class ToggleButton;
 	class Widget;
 	class Window;
 
@@ -402,6 +403,8 @@ namespace Colibri
 			ProgressbarLayer1,
 			SliderLine,
 			SliderHandle,
+			ToggleButtonUnchecked,
+			ToggleButtonChecked,
 			WindowArrowScrollTop,
 			WindowArrowScrollLeft,
 			WindowArrowScrollRight,

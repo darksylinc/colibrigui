@@ -33,3 +33,20 @@ hlms ProgressBarLayerProgress unlit
 {
 	diffuse_map ProgressBar_l0.png
 }
+
+hlms AtlasRed unlit
+{
+	diffuse 1 0.1 0.1 1
+	diffuse_map Atlas.png
+}
+hlms AtlasRedDisabled unlit
+{
+	diffuse 1 0.1 0.1 0.2
+	scene_blend alpha_blend
+	diffuse_map Atlas.png
+}
+hlms AtlasRedBrighter unlit
+{
+	diffuse 2 0.1 0.1 1
+	diffuse_map Atlas.png
+}

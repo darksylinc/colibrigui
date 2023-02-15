@@ -33,6 +33,7 @@
 #include "ColibriGui/ColibriSpinner.h"
 #include "ColibriGui/ColibriProgressbar.h"
 #include "ColibriGui/ColibriSlider.h"
+#include "ColibriGui/ColibriToggleButton.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
 #include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
@@ -51,6 +52,7 @@ namespace Demo
 	Colibri::Button *button1 = 0;
 	Colibri::Spinner *spinner0 = 0;
 	Colibri::Checkbox *checkbox0 = 0;
+	Colibri::ToggleButton *toggleButton = 0;
 	Colibri::Editbox *editbox0 = 0;
 	Colibri::Progressbar *progressBar0 = 0;
 	Colibri::Progressbar *progressBar1 = 0;
@@ -155,6 +157,11 @@ namespace Demo
 		button0->getLabel()->setText( "This \uE001 is a button" );
 		button0->sizeToFit();
 		layout->addCell( button0 );
+
+		toggleButton = colibriManager->createWidget<Colibri::ToggleButton>( mainWindow );
+		toggleButton->m_minSize = Ogre::Vector2( 350, 64 );
+		toggleButton->getLabel()->setText( "Toggle Button: Click me" );
+		layout->addCell( toggleButton );
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
