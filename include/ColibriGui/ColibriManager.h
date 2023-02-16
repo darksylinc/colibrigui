@@ -286,18 +286,18 @@ namespace Colibri
 
 		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
 
-		/** Devices that have no keyboard and no gamepad don't need the States::HighlightedButton
-			state, because this state means the button is currently selected by the keyboard/gamepad.
-
-			Furthermore, tapping a button will set that last button to HighlightedButton, which
-			some users may think it's still 'hit'.
+		/** Devices that have no keyboard and no gamepad don't need as
+			many states as there are in States.
 
 			Setting this value to true will cause newly created Widgets (and further calls to
-			Renderable::setSkinPack & Renderable::_setSkinPack) to replace HighlightedButton
-			skin with Idle.
+			Renderable::setSkinPack & Renderable::_setSkinPack) to replace skins for
+			HighlightedButtonAndCursor with HighlightedButton and
+			HighlightedCursor skin with Idle.
 
-			Thus internally HighlightedButton events will still happen, but visually the widgets
-			will look like it does when Idle.
+			Thus internally these events still happen, but visually the widgets will look
+			like it does by their replaced versions.
+
+			This means there's fewer possible "visual" states, causing less confusion.
 		@param bTouchOnlyMode
 			True to set touch only mode (i.e. preferred method on iOS & Android unless a
 			gamepad/keyboard is attached and you support them).

@@ -123,9 +123,16 @@ namespace Colibri
 
 		if( m_manager->getTouchOnlyMode() )
 		{
-			m_stateInformation[States::HighlightedButton] = m_stateInformation[States::Idle];
-			if( States::HighlightedButton == m_currentState )
-				setDatablock( m_stateInformation[States::HighlightedButton].materialName );
+			m_stateInformation[States::HighlightedButtonAndCursor] =
+				m_stateInformation[States::HighlightedButton];
+			m_stateInformation[States::HighlightedCursor] = m_stateInformation[States::Idle];
+
+			// setDatablock() call above set the wrong material. Re-set it to idle.
+			if( m_currentState == States::HighlightedButtonAndCursor ||
+				m_currentState == States::HighlightedCursor )
+			{
+				setDatablock( m_stateInformation[m_currentState].materialName );
+			}
 		}
 
 		if( !m_overrideSkinColour )
@@ -170,9 +177,16 @@ namespace Colibri
 
 		if( m_manager->getTouchOnlyMode() )
 		{
-			m_stateInformation[States::HighlightedButton] = m_stateInformation[States::Idle];
-			if( States::HighlightedButton == m_currentState )
-				setDatablock( m_stateInformation[States::HighlightedButton].materialName );
+			m_stateInformation[States::HighlightedButtonAndCursor] =
+				m_stateInformation[States::HighlightedButton];
+			m_stateInformation[States::HighlightedCursor] = m_stateInformation[States::Idle];
+
+			// setDatablock() call above set the wrong material. Re-set it to idle.
+			if( m_currentState == States::HighlightedButtonAndCursor ||
+				m_currentState == States::HighlightedCursor )
+			{
+				setDatablock( m_stateInformation[m_currentState].materialName );
+			}
 		}
 
 		if( !m_overrideSkinColour )
