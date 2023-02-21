@@ -28,45 +28,47 @@ THE SOFTWARE.
 
 #include "OgreStableHeaders.h"
 
-#include "ColibriGui/ColibriAssert.h"
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
+
+#include "ColibriGui/ColibriAssert.h"
 #include "ColibriGui/Ogre/OgreHlmsColibriDatablock.h"
-#include "OgreUnlitProperty.h"
-#include "OgreHlmsListener.h"
 
-#include "OgreLwString.h"
-
-#include "OgreViewport.h"
+#include "CommandBuffer/OgreCbShaderBuffer.h"
+#include "CommandBuffer/OgreCbTexture.h"
+#include "CommandBuffer/OgreCommandBuffer.h"
+#include "Compositor/OgreCompositorShadowNode.h"
 #include "OgreCamera.h"
-#include "OgreHighLevelGpuProgramManager.h"
+#include "OgreDescriptorSetTexture.h"
 #include "OgreHighLevelGpuProgram.h"
+#include "OgreHighLevelGpuProgramManager.h"
+#include "OgreHlmsListener.h"
+#include "OgreHlmsManager.h"
+#include "OgreLogManager.h"
+#include "OgreLwString.h"
+#include "OgreRenderQueue.h"
+#include "OgreSceneManager.h"
+#include "OgreTextureGpu.h"
+#include "OgreUnlitProperty.h"
+#include "OgreViewport.h"
+#include "OgreWorkarounds.h"
+#include "Vao/OgreConstBufferPacked.h"
+#include "Vao/OgreStagingBuffer.h"
+#include "Vao/OgreTexBufferPacked.h"
+#include "Vao/OgreVaoManager.h"
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 #	include "Vao/OgreReadOnlyBufferPacked.h"
 #	include "OgreRootLayout.h"
 #endif
 
-#include "OgreDescriptorSetTexture.h"
-#include "OgreTextureGpu.h"
-
-#include "OgreSceneManager.h"
-#include "OgreRenderQueue.h"
-#include "Compositor/OgreCompositorShadowNode.h"
-#include "Vao/OgreVaoManager.h"
-#include "Vao/OgreConstBufferPacked.h"
-#include "Vao/OgreTexBufferPacked.h"
-#include "Vao/OgreStagingBuffer.h"
-
-#include "OgreHlmsManager.h"
-#include "OgreLogManager.h"
-
-#include "CommandBuffer/OgreCommandBuffer.h"
-#include "CommandBuffer/OgreCbTexture.h"
-#include "CommandBuffer/OgreCbShaderBuffer.h"
-
-#include "OgreWorkarounds.h"
-
 namespace Ogre
 {
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+#	define COLIBRI_TID tid,
+#	define COLIBRI_NOTID kNoTid,
+#else
+#	define COLIBRI_TID
+#	define COLIBRI_NOTID
+#endif
 
     extern const String c_unlitBlendModes[];
 
@@ -91,15 +93,15 @@ namespace Ogre
 	}
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	//-----------------------------------------------------------------------------------
-	void HlmsColibri::setupRootLayout( RootLayout &rootLayout )
+	void HlmsColibri::setupRootLayout( RootLayout &rootLayout COLIBRI_TID_ARG_DECL )
 	{
-		HlmsUnlit::setupRootLayout( rootLayout );
+		HlmsUnlit::setupRootLayout( rootLayout COLIBRI_TID_ARG );
 
-		if( getProperty( "colibri_text" ) )
+		if( getProperty( COLIBRI_TID "colibri_text" ) )
 		{
 			DescBindingRange *descBindingRanges = rootLayout.mDescBindingRanges[0];
 
-			if( getProperty( "use_read_only_buffer" ) )
+			if( getProperty( COLIBRI_TID "use_read_only_buffer" ) )
 			{
 				descBindingRanges[DescBindingTypes::ReadOnlyBuffer].end = 3u;
 			}
@@ -112,18 +114,17 @@ namespace Ogre
 	}
 #endif
 	//-----------------------------------------------------------------------------------
-	const HlmsCache* HlmsColibri::createShaderCacheEntry( uint32 renderableHash,
-														  const HlmsCache &passCache,
-														  uint32 finalHash,
-														  const QueuedRenderable &queuedRenderable )
+	const HlmsCache *HlmsColibri::createShaderCacheEntry(
+		uint32 renderableHash, const HlmsCache &passCache, uint32 finalHash,
+		const QueuedRenderable &queuedRenderable COLIBRI_TID_ARG_DECL )
 	{
-		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry( renderableHash, passCache,
-																	 finalHash, queuedRenderable );
+		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry(
+			renderableHash, passCache, finalHash, queuedRenderable COLIBRI_TID_ARG );
 
 		if( mShaderProfile != "glsl" )
-			return retVal; //D3D embeds the texture slots in the shader.
+			return retVal;  // D3D embeds the texture slots in the shader.
 
-		if( getProperty( "colibri_text" ) )
+		if( getProperty( COLIBRI_TID "colibri_text" ) )
 		{
 			GpuProgramParametersSharedPtr psParams = retVal->pso.pixelShader->getDefaultParameters();
 			psParams->setNamedConstant( "glyphAtlas", 2 );
@@ -137,30 +138,32 @@ namespace Ogre
 	{
 		HlmsUnlit::calculateHashForPreCreate( renderable, inOutPieces );
 
-		//See ColibriOgreRenderable
+        // See ColibriOgreRenderable
 		const Ogre::Renderable::CustomParameterMap &customParams = renderable->getCustomParameters();
 		if( customParams.find( 6372 ) != customParams.end() )
 		{
-			setProperty( "colibri_gui", 1 );
-			setProperty( HlmsBaseProp::IdentityWorld, 1 );
+			setProperty( COLIBRI_NOTID "colibri_gui", 1 );
+			setProperty( COLIBRI_NOTID HlmsBaseProp::IdentityWorld, 1 );
 
 			if( mRenderSystem->getCapabilities()->hasCapability( RSC_USER_CLIP_PLANES ) )
-				setProperty( HlmsBaseProp::PsoClipDistances, 4 );
+				setProperty( COLIBRI_NOTID HlmsBaseProp::PsoClipDistances, 4 );
 
-			setProperty( "ogre_version", ( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 +
-										   OGRE_VERSION_PATCH ) );
+			setProperty(
+				COLIBRI_NOTID "ogre_version",
+				( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 + OGRE_VERSION_PATCH ) );
 		}
 
 		// See Colibri::Label
 		if( customParams.find( 6373 ) != customParams.end() )
 		{
-			setProperty( "colibri_text", 1 );
+			setProperty( COLIBRI_NOTID "colibri_text", 1 );
 
-			setProperty( "ogre_version", ( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 +
-										   OGRE_VERSION_PATCH ) );
+			setProperty(
+				COLIBRI_NOTID "ogre_version",
+				( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 + OGRE_VERSION_PATCH ) );
 
 			if( needsReadOnlyBuffer( mRenderSystem->getCapabilities(), mRenderSystem->getVaoManager() ) )
-				setProperty( "use_read_only_buffer", 1 );
+				setProperty( COLIBRI_NOTID "use_read_only_buffer", 1 );
 		}
 	}
 	//-----------------------------------------------------------------------------------
