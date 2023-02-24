@@ -248,10 +248,13 @@ namespace Colibri
 
 			uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
 			VertexArrayObject *vao = mVaoPerLod[0].back();
-			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
-																	  *apiObject.passCache,
-																	  queuedRenderable,
-																	  false );
+			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial(
+				apiObject.lastHlmsCache, *apiObject.passCache, queuedRenderable, false
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+				,
+				nullptr
+#endif
+			);
 			if( lastHlmsCacheHash != hlmsCache->hash )
 			{
 				CbPipelineStateObject *psoCmd = commandBuffer->addCommand<CbPipelineStateObject>();

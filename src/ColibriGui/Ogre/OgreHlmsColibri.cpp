@@ -114,10 +114,11 @@ namespace Ogre
 	//-----------------------------------------------------------------------------------
 	const HlmsCache *HlmsColibri::createShaderCacheEntry(
 		uint32 renderableHash, const HlmsCache &passCache, uint32 finalHash,
-		const QueuedRenderable &queuedRenderable COLIBRI_TID_ARG_DECL )
+		const QueuedRenderable &queuedRenderable COLIBRI_STUB_ENTRY_ARG_DECL COLIBRI_TID_ARG_DECL )
 	{
-		const HlmsCache *retVal = HlmsUnlit::createShaderCacheEntry(
-			renderableHash, passCache, finalHash, queuedRenderable COLIBRI_TID_ARG );
+		const HlmsCache *retVal =
+			HlmsUnlit::createShaderCacheEntry( renderableHash, passCache, finalHash,
+											   queuedRenderable COLIBRI_STUB_ENTRY_ARG COLIBRI_TID_ARG );
 
 		if( mShaderProfile != "glsl" )
 			return retVal;  // D3D embeds the texture slots in the shader.

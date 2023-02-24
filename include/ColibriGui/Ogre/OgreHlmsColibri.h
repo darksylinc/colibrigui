@@ -35,9 +35,14 @@ THE SOFTWARE.
 #endif
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+#	define COLIBRI_STUB_ENTRY_ARG_DECL , HlmsCache *reservedStubEntry
+#	define COLIBRI_STUB_ENTRY_ARG , reservedStubEntry
+#	define COLIBRI_TID_ARG , tid
 #	define COLIBRI_TID_ARG_DECL , const size_t tid
 #	define COLIBRI_TID_ARG , tid
 #else
+#	define COLIBRI_STUB_ENTRY_ARG_DECL
+#	define COLIBRI_STUB_ENTRY_ARG
 #	define COLIBRI_TID_ARG_DECL
 #	define COLIBRI_TID_ARG
 #endif
@@ -78,7 +83,8 @@ namespace Ogre
 
 		const HlmsCache *createShaderCacheEntry(
 			uint32 renderableHash, const HlmsCache &passCache, uint32 finalHash,
-			const QueuedRenderable &queuedRenderable COLIBRI_TID_ARG_DECL ) override;
+			const QueuedRenderable &queuedRenderable COLIBRI_STUB_ENTRY_ARG_DECL
+				COLIBRI_TID_ARG_DECL ) override;
 
 		void calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces ) override;
 
