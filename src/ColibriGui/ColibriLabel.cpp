@@ -67,7 +67,7 @@ namespace Colibri
 		{
 			m_glyphsDirty[i] = false;
 			m_glyphsPlaced[i] = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 			m_glyphsAligned[i] = true;
 #endif
 		}
@@ -178,7 +178,7 @@ namespace Colibri
 			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				m_glyphsPlaced[i] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 				m_glyphsAligned[i] = false;
 #endif
 			}
@@ -373,7 +373,7 @@ namespace Colibri
 				{
 					m_shapes[state] = m_shapes[i];
 					m_glyphsPlaced[state] = m_glyphsPlaced[i];
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 					m_glyphsAligned[state] = m_glyphsAligned[i];
 #endif
 					m_actualHorizAlignment[state] = m_actualHorizAlignment[i];
@@ -636,7 +636,7 @@ namespace Colibri
 		}
 
 		m_glyphsPlaced[state] = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = false;
 #endif
 
@@ -757,7 +757,7 @@ namespace Colibri
 			}
 		}
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
 	}
@@ -899,7 +899,7 @@ namespace Colibri
 			}
 		}
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
 	}
@@ -1374,7 +1374,7 @@ namespace Colibri
 			m_manager->_addDirtyLabel( this );
 		m_glyphsDirty[state] = true;
 		m_glyphsPlaced[state] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = false;
 #endif
 		m_usesBackground = false;

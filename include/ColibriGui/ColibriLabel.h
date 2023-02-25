@@ -44,7 +44,7 @@ namespace Colibri
 
 		bool m_glyphsDirty[States::NumStates];
 		bool m_glyphsPlaced[States::NumStates];
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool m_glyphsAligned[States::NumStates];
 #endif
 		/// For internal use. Set to true if any of RichText uses background, false otherwise.

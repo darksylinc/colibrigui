@@ -208,7 +208,7 @@ namespace Colibri
 		UiVertex		*m_vertexBufferBase;
 		GlyphVertex		*m_textVertexBufferBase;
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool m_fillBuffersStarted;
 		bool m_renderingStarted;
 #endif

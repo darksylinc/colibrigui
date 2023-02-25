@@ -80,7 +80,7 @@ namespace Colibri
 		m_shaperManager( 0 ),
 		m_vertexBufferBase( 0 ),
 		m_textVertexBufferBase( 0 )
-	#if COLIBRIGUI_DEBUG_MEDIUM
+	#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 	,	m_fillBuffersStarted( false )
 	,	m_renderingStarted( false )
 	#endif
@@ -1617,7 +1617,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::prepareRenderCommands()
 	{
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = true;
 #endif
 
@@ -1654,14 +1654,14 @@ namespace Colibri
 		m_vertexBufferBase = 0;
 		m_textVertexBufferBase = 0;
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = false;
 #endif
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::render()
 	{
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_renderingStarted = true;
 #endif
 		ApiEncapsulatedObjects apiObjects;
@@ -1739,7 +1739,7 @@ namespace Colibri
 		m_commandBuffer->execute();
 		hlms->postCommandBufferExecution( m_commandBuffer );
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_renderingStarted = false;
 #endif
 	}
