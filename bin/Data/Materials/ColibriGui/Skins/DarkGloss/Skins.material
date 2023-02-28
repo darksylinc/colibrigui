@@ -5,48 +5,57 @@ hlms EmptyBg unlit
 
 hlms Atlas unlit
 {
+	depth_check off
 	diffuse_map Atlas.png
 }
 hlms AtlasTransparent unlit
 {
+	depth_check off
 	scene_blend alpha_blend
 	diffuse_map Atlas.png
 }
 hlms AtlasDisabled unlit
 {
+	depth_check off
 	diffuse 1 1 1 0.2
 	scene_blend alpha_blend
 	diffuse_map Atlas.png
 }
 hlms AtlasBrighter unlit
 {
+	depth_check off
 	diffuse 2 2 2 1
 	diffuse_map Atlas.png
 }
 hlms AtlasBrighterTransparent unlit
 {
+	depth_check off
 	diffuse 2 2 2 1
 	scene_blend alpha_blend
 	diffuse_map Atlas.png
 }
 hlms ProgressBarLayerProgress unlit
 {
+	depth_check off
 	diffuse_map ProgressBar_l0.png
 }
 
 hlms AtlasRed unlit
 {
+	depth_check off
 	diffuse 1 0.1 0.1 1
 	diffuse_map Atlas.png
 }
 hlms AtlasRedDisabled unlit
 {
+	depth_check off
 	diffuse 1 0.1 0.1 0.2
 	scene_blend alpha_blend
 	diffuse_map Atlas.png
 }
 hlms AtlasRedBrighter unlit
 {
+	depth_check off
 	diffuse 2 0.1 0.1 1
 	diffuse_map Atlas.png
 }
