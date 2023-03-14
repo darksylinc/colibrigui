@@ -106,7 +106,9 @@ namespace Demo
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
-		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ),
+		const float aspectRatioColibri =
+			static_cast<float>( window->getHeight() ) / static_cast<float>( window->getWidth() );
+		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1920.0f * aspectRatioColibri ),
 									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
 
 		//colibriManager = new Colibri::ColibriManager();

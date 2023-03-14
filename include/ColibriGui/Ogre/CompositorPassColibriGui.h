@@ -27,6 +27,8 @@ namespace Ogre
 		Camera                  *mCamera;
 		Colibri::ColibriManager *m_colibriManager;
 
+		IdString m_textureName;
+
 		void setResolutionToColibri( uint32 width, uint32 height );
 
 	public:
