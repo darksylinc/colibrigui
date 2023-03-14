@@ -357,6 +357,7 @@ namespace Colibri
 		COLIBRI_ASSERT_MEDIUM( bmpFont );
 
 		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
+		const BmpToFontAlignment fontAlignment = bmpFont->getFontAlignment( fontIdx );
 
 		const float fontScale = FontSize( ptSize ).asFloat() * bmpFont->getFontScale( this );
 
@@ -366,8 +367,10 @@ namespace Colibri
 		newGlyph.ptSize		= ptSize;
 		newGlyph.width		= uint16_t( std::round( bmpGlyph.width * fontScale ) );
 		newGlyph.height		= uint16_t( std::round( bmpGlyph.height * fontScale ) );
-		newGlyph.bearingX	= 0.0f;
-		newGlyph.bearingY = newGlyph.height * float( dummyCodepoint->bearingY ) / dummyCodepoint->height;
+		newGlyph.bearingX = ( fontAlignment.xoffset * fontScale ) / dummyCodepoint->height;
+		newGlyph.bearingY = ( ( newGlyph.height * float( dummyCodepoint->bearingY ) ) +
+							  ( fontAlignment.yoffset * fontScale ) ) /
+							dummyCodepoint->height;
 		newGlyph.offsetStart = 0u;
 		newGlyph.newlineSize= newGlyph.height;
 		newGlyph.regionUp	= 1.0f;  // Is this correct?

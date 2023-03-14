@@ -211,6 +211,21 @@ namespace Colibri
 		datablock->setTexture( 0u, m_fontTexture );
 	}
 	//-------------------------------------------------------------------------
+	void BmpFont::addFontAlignment( uint16_t fontIdx, const Ogre::Vector2 &offset )
+	{
+		if( fontIdx >= m_bmpToFontAlignments.size() )
+			m_bmpToFontAlignments.resize( fontIdx + 1u, { 0.0f, 0.0f } );
+		m_bmpToFontAlignments[fontIdx] = { (float)offset.x * m_fontSize.asFloat(),
+										   (float)offset.y * m_fontSize.asFloat() };
+	}
+	//-------------------------------------------------------------------------
+	BmpToFontAlignment BmpFont::getFontAlignment( size_t fontIdx ) const
+	{
+		if( fontIdx >= m_bmpToFontAlignments.size() )
+			return { 0.0f, 0.0f };
+		return m_bmpToFontAlignments[fontIdx];
+	}
+	//-------------------------------------------------------------------------
 	struct OrderByCodepoint
 	{
 		bool operator()( uint32_t a, const BmpChar &b ) const { return a < b.id; }
