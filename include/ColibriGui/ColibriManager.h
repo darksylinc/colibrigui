@@ -81,7 +81,12 @@ namespace Colibri
 		*/
 		virtual void showTextInput( Colibri::Editbox * /*editbox*/ ) {}
 
-		/// Notifies when canvas has changed (i.e. ColibriManager::setCanvasSize was called)
+		/** Notifies when canvas has changed (i.e. ColibriManager::setCanvasSize was called)
+		@remarks
+			This function gets called a little late, before rendering.
+			If you create or destroy Widgets or alter a Label's content, you must
+			call ColibriManager::update
+		*/
 		virtual void notifyCanvasOrResolutionUpdated() {}
 	};
 
