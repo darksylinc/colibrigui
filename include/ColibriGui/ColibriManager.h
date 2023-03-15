@@ -80,6 +80,9 @@ namespace Colibri
 			Editbox requesting the text input UI element
 		*/
 		virtual void showTextInput( Colibri::Editbox * /*editbox*/ ) {}
+
+		/// Notifies when canvas has changed (i.e. ColibriManager::setCanvasSize was called)
+		virtual void notifyCanvasOrResolutionUpdated() {}
 	};
 
 	class ColibriManager

@@ -326,6 +326,8 @@ namespace Colibri
 			(*itor)->_notifyCanvasChanged();
 			++itor;
 		}
+
+		m_colibriListener->notifyCanvasOrResolutionUpdated();
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateWidgetsFocusedByCursor()
