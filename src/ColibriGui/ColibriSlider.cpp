@@ -153,13 +153,14 @@ namespace Colibri
 
 			// Horizontally: Half a handle is added to the line on each side as padding.
 			// Vertically: Center the line
-			m_layers[0]->setTopLeft( Ogre::Vector2( handlePadding * 0.5f, lineTop ) );
+			m_layers[0]->setTopLeft(
+				Ogre::Vector2( handlePadding * 0.5f + handleTopLeftBorder.x, lineTop ) );
 
 			// Other than the padding, the width is used to its full, but the height is always constant.
-			const float reducedLineWidth = fullSize.x - handlePadding;
+			const float reducedLineWidth = fullSize.x - handlePadding - handleCombinedBorder.x;
 			m_layers[0]->setSize( Ogre::Vector2( reducedLineWidth, sliderLineHeight ) );
 
-			const float slideableArea = frameSize.x - handleSize.x + handleCombinedBorder.x;
+			const float slideableArea = frameSize.x - handleSize.x;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
@@ -174,10 +175,6 @@ namespace Colibri
 				frameOrigin.x + ( slideableArea * targetSliderValue ) - handleTopLeftBorder.x,
 				Ogre::Math::lerp( mostTopCenter, mostBottomCenter, m_handleTopLeftProportion ) -
 					handleSize.y * 0.5f );
-			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
-			// However it still does a very good job at preventing the handle from "wobbling" as
-			// the user moves it
-			handleTopLeft = m_manager->snapToPixels( handleTopLeft );
 			m_layers[1]->setTopLeft( handleTopLeft );
 		}
 		else
@@ -191,13 +188,14 @@ namespace Colibri
 
 			// Vertically: Half a handle is added to the line on each side as padding.
 			// Horizontally: Center the line
-			m_layers[0]->setTopLeft( Ogre::Vector2( lineLeft, handlePadding * 0.5f ) );
+			m_layers[0]->setTopLeft(
+				Ogre::Vector2( lineLeft, handlePadding * 0.5f + handleTopLeftBorder.y ) );
 
 			// Other than the padding, the width is used to its full, but the height is always constant.
-			const float reducedLineHeight = fullSize.y - handlePadding;
+			const float reducedLineHeight = fullSize.y - handlePadding - handleCombinedBorder.y;
 			m_layers[0]->setSize( Ogre::Vector2( sliderLineWidth, reducedLineHeight ) );
 
-			const float slideableArea = frameSize.y - handleSize.y + handleCombinedBorder.y;
+			const float slideableArea = frameSize.y - handleSize.y;
 
 			// Slider handle
 			m_layers[1]->setSize( handleSize );
@@ -210,13 +208,49 @@ namespace Colibri
 			Ogre::Vector2 handleTopLeft(
 				Ogre::Math::lerp( mostLeftCenter, mostRightCenter, m_handleTopLeftProportion ) -
 					handleSize.x * 0.5f,
-				frameOrigin.y + ( slideableArea * targetSliderValue ) - handleTopLeftBorder.y );
-			// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
-			// However it still does a very good job at preventing the handle from "wobbling" as
-			// the user moves it
-			handleTopLeft = m_manager->snapToPixels( handleTopLeft );
+				frameOrigin.y + ( slideableArea * targetSliderValue ) );
 			m_layers[1]->setTopLeft( handleTopLeft );
 		}
+
+		const Ogre::Vector2 handleTopLeft = m_layers[1]->getLocalTopLeft();
+		const Ogre::Vector2 handleBottomRight = m_layers[1]->getLocalBottomRight();
+		if( ( handleTopLeft.x < 0.0f || handleTopLeft.y < 0.0f ||  //
+			  handleBottomRight.x > m_size.x || handleBottomRight.y > m_size.y ) )
+		{
+			static bool sWarnedOnce = false;
+			if( !sWarnedOnce )
+			{
+				char tmpBuffer[384];
+				Ogre::LwString errorMsg(
+					Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+
+				errorMsg =
+					"Slider handle ends outside of parent. It will be clipped. You can shrink "
+					"slider_line_size, shrink slider_handle_proportion, change "
+					"slider_handle_position_top_left_proportion to move the handle around until it "
+					"doesn't clip, or set the the slider size to at least ";
+
+				if( !m_vertical )
+				{
+					const float lineTop = ( frameSize.y - m_lineSize ) * 0.5f;
+					errorMsg.a( "height = ", lineTop );
+				}
+				else
+				{
+					const float lineLeft = ( frameSize.x - m_lineSize ) * 0.5f;
+					errorMsg.a( "width = ", lineLeft );
+				}
+
+				LogListener *logListener = m_manager->getLogListener();
+				logListener->log( errorMsg.c_str(), LogSeverity::Warning );
+				sWarnedOnce = true;
+			}
+		}
+
+		// This snap isn't perfect because it only snaps to local coordinates, not final NDC coord.
+		// However it still does a very good job at preventing the handle from "wobbling" as
+		// the user moves it
+		m_layers[1]->setTopLeft( m_manager->snapToPixels( handleTopLeft ) );
 
 		for( size_t i = 0u; i < 2u; ++i )
 			m_layers[i]->updateDerivedTransformFromParent( false );
