@@ -97,6 +97,7 @@ public:
 	NativeColibriInputResponse *m_nativeColibriInputResponse;
 	void showTextInput( Colibri::Editbox *editbox ) override
 	{
+		// Note: The editbox can safely become dangling pointer after Android_showTextInput returns.
 		Android_showTextInput( editbox, m_nativeColibriInputResponse );
 	}
 }
