@@ -90,6 +90,7 @@ if( NOT COLIBRIGUI_LIB_ONLY )
 else()
 	add_recursive( ./src/ColibriGui SOURCES )
 	add_recursive( ./include/ColibriGui HEADERS )
+	list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/src/ColibriGui/iOS/Colibri_iOS.mm")
 endif()
 
 if( APPLE )
