@@ -16,12 +16,17 @@ namespace Colibri
 	public:
 		struct DataEntry
 		{
-			/// Value for this data entry, where 0 is minimum value
-			/// and 0xFFFF the maximum possible value.
+			/// Value for this data entry in range [0; 1]
+			float curr;
+			/// Value for the next "updgrade".
 			///
-			/// The displayed value (if shown on screen) will be scaled
-			/// by RadarChart::m_scale
-			uint16_t value;
+			/// It's best explained with an example: Let's say an RPG Character
+			/// you have STR, HP, MP, DEX stats. These can be upgraded by spending points.
+			///
+			/// With 'next' you can show two superimposed graphs: one indicates the current STR value,
+			/// the other indicates the next value to acquire if the user spends points on the
+			/// next STR upgrade.
+			float next;
 			/// Label for this data entry
 			std::string name;
 		};
@@ -31,6 +36,13 @@ namespace Colibri
 			LabelDisplayNone,
 			LabelDisplayNameOnly,
 			LabelDisplayNameAndValue
+		};
+
+		enum ChartShapeType
+		{
+			ShapeOutline,
+			ShapeCurrent,
+			ShapeNext
 		};
 
 	protected:
@@ -46,6 +58,14 @@ namespace Colibri
 		/// Labels are in virtual canvas, which means we have to reposition
 		/// them every time our widget changes its shape's size
 		void updateLabelsPosition();
+
+		Ogre::Vector2 rotate( Ogre::Vector2 start, Ogre::Real angle );
+
+		void drawRadarChart( Ogre::ColourValue backgroundColor, Ogre::ColourValue darkColor,
+							 Ogre::ColourValue lightColor, float lineWidth );
+
+		size_t drawChartShape( size_t tri_offset, enum ChartShapeType type, Ogre::ColourValue shapeColor,
+							   Ogre::ColourValue backgroundColor, float lineWidth, bool drawAsLine );
 
 	public:
 		RadarChart( ColibriManager *manager );
@@ -67,6 +87,7 @@ namespace Colibri
 							float                         fScale = 1.0f / 65535.0f );
 
 		void setTransformDirty( uint32_t dirtyReason ) override;
+		void drawChartTriangles();
 	};
 }  // namespace Colibri
 

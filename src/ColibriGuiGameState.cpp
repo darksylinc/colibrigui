@@ -152,13 +152,7 @@ namespace Demo
 		Colibri::RadarChart *radarChart =
 			colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
 		radarChart->m_minSize = Ogre::Vector2( 512, 512 );
-		radarChart->setNumTriangles( 3u );
-		radarChart->setTriangle( 0u, Ogre::Vector2( -1, -1 ), Ogre::Vector2( 0, 1 ),
-								 Ogre::Vector2( -1, 1 ), Ogre::ColourValue::Green );
-		radarChart->setTriangle( 3u, Ogre::Vector2( -1, -1 ), Ogre::Vector2( 0, 1 ),
-								 Ogre::Vector2( 1, -1 ), Ogre::ColourValue::Blue );
-		radarChart->setTriangle( 6u, Ogre::Vector2( 1, -1 ), Ogre::Vector2( 0, 1 ),
-								 Ogre::Vector2( 1, 1 ), Ogre::ColourValue::Red );
+		radarChart->drawChartTriangles();
 		layout->addCell( radarChart );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
