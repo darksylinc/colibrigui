@@ -52,21 +52,34 @@ namespace Colibri
 			ShapeNext
 		};
 
+		struct DisplaySettings
+		{
+			/// How big the chart should be. In range (0; 1)
+			float chartSize;
+
+			/// The distance from the chart to the labels.
+			/// In range [0; 1] but for best results make sure:
+			///
+			/// chartSize + chartToLabelDistance <= 1
+			float chartToLabelDistance;
+
+			Ogre::ColourValue backgroundColor;
+			Ogre::ColourValue darkColor;
+			Ogre::ColourValue lightColor;
+
+			float lineThickness;
+
+			DisplaySettings();
+		};
+
 	protected:
 		std::vector<DataEntry>        m_dataSeries;
 		std::vector<Colibri::Label *> m_labels;
 
-		/// How big the chart should be. In range (0; 1)
-		float m_chartSize;
-
-		/// The distance from the chart to the labels.
-		/// In range [0; 1] but for best results make sure:
-		///
-		/// m_chartSize + m_chartToLabelDistance <= 1
-		float m_chartToLabelDistance;
-
 		/// Whether to show text on screen and how
 		LabelDisplay m_labelDisplay;
+
+		DisplaySettings m_displaySettings;
 
 		/// Labels are in virtual canvas, which means we have to reposition
 		/// them every time our widget changes its shape's size
@@ -82,11 +95,24 @@ namespace Colibri
 		void drawRadarChart( Ogre::ColourValue backgroundColor, Ogre::ColourValue darkColor,
 							 Ogre::ColourValue lightColor, float lineWidth );
 
+		void drawChartTriangles();
+
 	public:
 		RadarChart( ColibriManager *manager );
 
 		void _initialize() override;
 		void _destroy() override;
+
+		/** Set the display settings.
+
+			If you've already called setDataSeries(), you must call
+			redrawRadarChart() for changes to take effect.
+		@param displaySettings
+			New display settings.
+		*/
+		void setDisplaySettings( const DisplaySettings &displaySettings );
+
+		const DisplaySettings &getDisplaySettings() const { return m_displaySettings; }
 
 		/** Replaces the current data series with a new one.
 		@param dataSeries
@@ -100,8 +126,22 @@ namespace Colibri
 		void setDataSeries( const std::vector<DataEntry> &dataSeries,
 							LabelDisplay                  labelDisplay = LabelDisplayNone );
 
+		/// Users can directly access the labels to modify them
+		/// (i.e. change the text or its formatting).
+		///
+		/// The Labels are only changed when setDataSeries() is called.
+		/// The labels' size is important for positioning.
+		///
+		/// The labels' position is changed every time redrawRadarChart() is called though.
+		/// If you've modified the labels' position, make sure to call redrawRadarChart()
+		/// after you're done in order for those changes to take effect.
+		const std::vector<Colibri::Label *> &getLabels() const { return m_labels; }
+
+		/// Redraws the radar triangles to apply the latest display settings
+		/// and repositions the labels.
+		void redrawRadarChart();
+
 		void setTransformDirty( uint32_t dirtyReason ) override;
-		void drawChartTriangles();
 	};
 }  // namespace Colibri
 

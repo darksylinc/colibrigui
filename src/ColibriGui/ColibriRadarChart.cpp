@@ -6,10 +6,21 @@
 
 using namespace Colibri;
 
+RadarChart::DisplaySettings::DisplaySettings() :
+	chartSize( 0.7f ),
+	chartToLabelDistance( 0.15f ),
+	backgroundColor( 37.0 / 512.0, 42.0 / 512.0, 67.0 / 512.0, 1.0f ),
+	darkColor( 0.367f, 0.216f, 0.11f, 1.0f ),
+	lightColor( 1.0f, 0.588f, 0.11f, 1.0f ),
+	lineThickness( 0.02f )
+{
+}
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 RadarChart::RadarChart( ColibriManager *manager ) :
 	CustomShape( manager ),
-	m_chartSize( 0.7f ),
-	m_chartToLabelDistance( 0.15f )
+	m_labelDisplay( LabelDisplayNone )
 {
 }
 //-------------------------------------------------------------------------
@@ -45,7 +56,7 @@ size_t RadarChart::drawChartShape( size_t triOffset, ChartShapeType type, Ogre::
 	const float lineThickness = lineWidth;
 	const Ogre::Real rot = 360.0f / ( (float)numDataSeries );
 
-	const Ogre::Vector2 spoke( 0, -m_chartSize );
+	const Ogre::Vector2 spoke( 0, -m_displaySettings.chartSize );
 
 	const size_t numShapes = ( drawAsLine ) ? 2u : 1u;
 
@@ -112,22 +123,20 @@ void RadarChart::drawRadarChart( const Ogre::ColourValue backgroundColor,
 //-------------------------------------------------------------------------
 void RadarChart::drawChartTriangles()
 {
-	// TODO: GET light and dark menu color from UIManager as well as alternating background color maybe
-	// as param
-	const Ogre::ColourValue backgroundColor =
-		Ogre::ColourValue( 37.0 / 512.0, 42.0 / 512.0, 67.0 / 512.0, 1.0f );
-	const Ogre::ColourValue darkColor = Ogre::ColourValue( 0.367f, 0.216f, 0.11f, 1.0f );
-	const Ogre::ColourValue lightColor = Ogre::ColourValue( 1.0f, 0.588f, 0.11f, 1.0f );
-
-	// TODO: Probably expose line width for Asi as param.
-	const float lineWidth = 0.02f;
-	drawRadarChart( backgroundColor, darkColor, lightColor, lineWidth );
+	drawRadarChart( m_displaySettings.backgroundColor, m_displaySettings.darkColor,
+					m_displaySettings.lightColor, m_displaySettings.lineThickness );
+}
+//-------------------------------------------------------------------------
+void RadarChart::setDisplaySettings( const DisplaySettings &displaySettings )
+{
+	m_displaySettings = displaySettings;
 }
 //-------------------------------------------------------------------------
 void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
 								const LabelDisplay labelDisplay )
 {
 	const size_t numRequiredLabels = labelDisplay == LabelDisplayNone ? 0u : dataSeries.size();
+	m_labelDisplay = labelDisplay;
 
 	{
 		// Remove excess labels
@@ -176,6 +185,11 @@ void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
 		}
 	}
 
+	redrawRadarChart();
+}
+//-------------------------------------------------------------------------
+void RadarChart::redrawRadarChart()
+{
 	drawChartTriangles();
 	updateLabelsPosition();
 }
@@ -184,10 +198,7 @@ void RadarChart::setTransformDirty( uint32_t dirtyReason )
 {
 	// Only update if our size is directly being changed, not our parent's
 	if( ( dirtyReason & ( TransformDirtyParentCaller | TransformDirtyScale ) ) == TransformDirtyScale )
-	{
-		drawChartTriangles();
 		updateLabelsPosition();
-	}
 
 	Widget::setTransformDirty( dirtyReason );
 }
@@ -203,7 +214,8 @@ void RadarChart::updateLabelsPosition()
 
 	const Ogre::Real rot = 360.0f / ( (float)numDataSeries );
 
-	const Ogre::Vector2 spoke( 0, -( m_chartSize + m_chartToLabelDistance ) );
+	const Ogre::Vector2 spoke(
+		0, -( m_displaySettings.chartSize + m_displaySettings.chartToLabelDistance ) );
 
 	for( size_t i = 0; i < numDataSeries; ++i )
 	{

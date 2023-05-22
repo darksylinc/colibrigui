@@ -158,11 +158,11 @@ namespace Demo
 		Colibri::RadarChart *radarChart =
 			colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
 		radarChart->m_minSize = Ogre::Vector2( 512, 512 );
-		const std::vector<Colibri::RadarChart::DataEntry> dataSeries = { { 0.55f, 0.95f, "STR" },
-																		 { 0.41f, 0.81f, "DEF" },
-																		 { 0.65f, 0.7f, "HP" },
-																		 { 0.4f, 0.9f, "MP" },
-																		 { 0.75f, 0.85f, "CRT" } };
+		const std::vector<Colibri::RadarChart::DataEntry> dataSeries = { { 0.55f, 0.95f, "STR\n10" },
+																		 { 0.41f, 0.81f, "DEF\n5" },
+																		 { 0.65f, 0.7f, "HP\n100.00" },
+																		 { 0.4f, 0.9f, "MP\n50.00" },
+																		 { 0.75f, 0.85f, "CRT\n11" } };
 		radarChart->setDataSeries( dataSeries, Colibri::RadarChart::LabelDisplayName );
 		layout->addCell( radarChart );
 
