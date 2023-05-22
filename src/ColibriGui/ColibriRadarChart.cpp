@@ -8,7 +8,8 @@ using namespace Colibri;
 
 RadarChart::RadarChart( ColibriManager *manager ) :
 	CustomShape( manager ),
-	m_scale( 1.0f / std::numeric_limits<uint16_t>::max() )
+	m_chartSize( 0.7f ),
+	m_chartToLabelDistance( 0.15f )
 {
 }
 //-------------------------------------------------------------------------
@@ -36,20 +37,19 @@ Ogre::Vector2 RadarChart::rotate( Ogre::Vector2 start, Ogre::Real angle )
 	return Widget::mul( orientation, start );
 }
 //-------------------------------------------------------------------------
-size_t RadarChart::drawChartShape( size_t triOffset, enum ChartShapeType type,
-								   Ogre::ColourValue shapeColor, Ogre::ColourValue backgroundColor,
-								   float lineWidth, bool drawAsLine )
+size_t RadarChart::drawChartShape( size_t triOffset, ChartShapeType type, Ogre::ColourValue shapeColor,
+								   Ogre::ColourValue backgroundColor, float lineWidth, bool drawAsLine )
 {
 	const size_t numDataSeries = m_dataSeries.size();
 
 	const float lineThickness = lineWidth;
 	const Ogre::Real rot = 360.0f / ( (float)numDataSeries );
 
-	const Ogre::Vector2 spoke( 0, -1 );
+	const Ogre::Vector2 spoke( 0, -m_chartSize );
 
-	const size_t num_shapes = ( drawAsLine ) ? 2u : 1u;
+	const size_t numShapes = ( drawAsLine ) ? 2u : 1u;
 
-	for( size_t k = 0; k < num_shapes; ++k )
+	for( size_t k = 0; k < numShapes; ++k )
 	{
 		for( size_t i = 0; i < numDataSeries; ++i )
 		{
@@ -75,38 +75,9 @@ size_t RadarChart::drawChartShape( size_t triOffset, enum ChartShapeType type,
 						 rotate( current, rot * static_cast<Ogre::Real>( i ) ),
 						 rotate( next, rot * static_cast<Ogre::Real>( nextIdx ) ), color );
 			triOffset++;
-			current = next;
 		}
 	}
 	return triOffset;
-}
-//-------------------------------------------------------------------------
-void RadarChart::drawChartTriangles()
-{
-	// TODO: Remove hard coded example data for the chart if the series doesn't have values
-	if( m_dataSeries.empty() )
-	{
-		std::vector<float> next_chart_coords = { 0.95f, 0.81f, 0.7f, 0.9f, 0.85f };
-		std::vector<float> current_chart_coords = { 0.55f, 0.41f, 0.65f, 0.4f, 0.75f };
-		for( size_t i = 0u; i < 5u; ++i )
-		{
-			DataEntry data;
-			data.curr = current_chart_coords[i];
-			data.next = next_chart_coords[i];
-			m_dataSeries.push_back( data );
-		}
-	}
-
-	// TODO: GET light and dark menu color from UIManager as well as alternating background color maybe
-	// as param
-	const Ogre::ColourValue backgroundColor =
-		Ogre::ColourValue( 37.0 / 512.0, 42.0 / 512.0, 67.0 / 512.0, 1.0f );
-	const Ogre::ColourValue darkColor = Ogre::ColourValue( 0.367f, 0.216f, 0.11f, 1.0f );
-	const Ogre::ColourValue lightColor = Ogre::ColourValue( 1.0f, 0.588f, 0.11f, 1.0f );
-
-	// TODO: Probably expose line width for Asi as param.
-	const float lineWidth = 0.02f;
-	drawRadarChart( backgroundColor, darkColor, lightColor, lineWidth );
 }
 //-------------------------------------------------------------------------
 void RadarChart::drawRadarChart( const Ogre::ColourValue backgroundColor,
@@ -139,8 +110,22 @@ void RadarChart::drawRadarChart( const Ogre::ColourValue backgroundColor,
 	triOffset = drawChartShape( triOffset, ShapeCurrent, lightColor, backgroundColor, lineWidth, false );
 }
 //-------------------------------------------------------------------------
+void RadarChart::drawChartTriangles()
+{
+	// TODO: GET light and dark menu color from UIManager as well as alternating background color maybe
+	// as param
+	const Ogre::ColourValue backgroundColor =
+		Ogre::ColourValue( 37.0 / 512.0, 42.0 / 512.0, 67.0 / 512.0, 1.0f );
+	const Ogre::ColourValue darkColor = Ogre::ColourValue( 0.367f, 0.216f, 0.11f, 1.0f );
+	const Ogre::ColourValue lightColor = Ogre::ColourValue( 1.0f, 0.588f, 0.11f, 1.0f );
+
+	// TODO: Probably expose line width for Asi as param.
+	const float lineWidth = 0.02f;
+	drawRadarChart( backgroundColor, darkColor, lightColor, lineWidth );
+}
+//-------------------------------------------------------------------------
 void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
-								const LabelDisplay labelDisplay, const float fScale )
+								const LabelDisplay labelDisplay )
 {
 	const size_t numRequiredLabels = labelDisplay == LabelDisplayNone ? 0u : dataSeries.size();
 
@@ -164,7 +149,6 @@ void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
 	}
 
 	m_dataSeries = dataSeries;
-	m_scale = fScale;
 
 	// Create required labels
 	const size_t numLabelsToAdd = std::max( m_labels.size(), numRequiredLabels ) - m_labels.size();
@@ -187,24 +171,12 @@ void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
 
 		for( size_t i = 0u; i < numDataSeries; ++i )
 		{
-			if( labelDisplay == LabelDisplayNameOnly )
-			{
-				m_labels[i]->setText( m_dataSeries[i].name );
-			}
-			else
-			{
-				m_labels[i]->setText( m_dataSeries[i].name + "\n" +
-									  std::to_string( m_dataSeries[i].curr * fScale ) );
-			}
-
+			m_labels[i]->setText( m_dataSeries[i].name );
 			m_labels[i]->sizeToFit();
 		}
 	}
 
-	// TODO
-	// this->setNumTriangles();
-	// this->setTriangle();
-
+	drawChartTriangles();
 	updateLabelsPosition();
 }
 //-------------------------------------------------------------------------
@@ -213,6 +185,7 @@ void RadarChart::setTransformDirty( uint32_t dirtyReason )
 	// Only update if our size is directly being changed, not our parent's
 	if( ( dirtyReason & ( TransformDirtyParentCaller | TransformDirtyScale ) ) == TransformDirtyScale )
 	{
+		drawChartTriangles();
 		updateLabelsPosition();
 	}
 
@@ -221,5 +194,26 @@ void RadarChart::setTransformDirty( uint32_t dirtyReason )
 //-------------------------------------------------------------------------
 void RadarChart::updateLabelsPosition()
 {
-	// TODO
+	if( m_labelDisplay == LabelDisplayNone )
+		return;
+
+	const size_t numDataSeries = m_dataSeries.size();
+
+	COLIBRI_ASSERT_LOW( numDataSeries == m_labels.size() );
+
+	const Ogre::Real rot = 360.0f / ( (float)numDataSeries );
+
+	const Ogre::Vector2 spoke( 0, -( m_chartSize + m_chartToLabelDistance ) );
+
+	for( size_t i = 0; i < numDataSeries; ++i )
+	{
+		const Ogre::Vector2 ndcPos = rotate( spoke, rot * static_cast<Ogre::Real>( i ) );
+		Ogre::Vector2 canvasPos = ( ndcPos * 0.5f + 0.5f ) * m_size;
+
+		canvasPos = canvasPos - m_labels[i]->getSize() * 0.5f;
+		canvasPos.makeCeil( Ogre::Vector2::ZERO );
+		canvasPos.makeFloor( m_size - m_labels[i]->getSize() );
+
+		m_labels[i]->setTopLeft( canvasPos );
+	}
 }

@@ -10,6 +10,12 @@ namespace Colibri
 	/** @ingroup Controls
 	@class RadarChart
 		A widget used to draw a radar chart, aka Spider Graph / Spider Chart.
+
+		Thick lines are drawn using a simple trick: If we have e.g. 6 datapoints,
+		then we draw an hexagon and then a smaller hexagon on top with the same colour
+		as the background colour.
+
+		Thus a smaller hexagon visually results in a thicker line.
 	*/
 	class RadarChart : public CustomShape
 	{
@@ -18,6 +24,7 @@ namespace Colibri
 		{
 			/// Value for this data entry in range [0; 1]
 			float curr;
+
 			/// Value for the next "updgrade".
 			///
 			/// It's best explained with an example: Let's say an RPG Character
@@ -27,6 +34,7 @@ namespace Colibri
 			/// the other indicates the next value to acquire if the user spends points on the
 			/// next STR upgrade.
 			float next;
+
 			/// Label for this data entry
 			std::string name;
 		};
@@ -34,8 +42,7 @@ namespace Colibri
 		enum LabelDisplay
 		{
 			LabelDisplayNone,
-			LabelDisplayNameOnly,
-			LabelDisplayNameAndValue
+			LabelDisplayName
 		};
 
 		enum ChartShapeType
@@ -49,8 +56,14 @@ namespace Colibri
 		std::vector<DataEntry>        m_dataSeries;
 		std::vector<Colibri::Label *> m_labels;
 
-		/// Scale
-		float m_scale;
+		/// How big the chart should be. In range (0; 1)
+		float m_chartSize;
+
+		/// The distance from the chart to the labels.
+		/// In range [0; 1] but for best results make sure:
+		///
+		/// m_chartSize + m_chartToLabelDistance <= 1
+		float m_chartToLabelDistance;
 
 		/// Whether to show text on screen and how
 		LabelDisplay m_labelDisplay;
@@ -61,11 +74,13 @@ namespace Colibri
 
 		Ogre::Vector2 rotate( Ogre::Vector2 start, Ogre::Real angle );
 
+		/// Draws the polygon which can be a pentagon/hexagon/etc depending on the number of data entries
+		size_t drawChartShape( size_t triOffset, ChartShapeType type, Ogre::ColourValue shapeColor,
+							   Ogre::ColourValue backgroundColor, float lineWidth, bool drawAsLine );
+
+		/// Draws the entire chart
 		void drawRadarChart( Ogre::ColourValue backgroundColor, Ogre::ColourValue darkColor,
 							 Ogre::ColourValue lightColor, float lineWidth );
-
-		size_t drawChartShape( size_t tri_offset, enum ChartShapeType type, Ogre::ColourValue shapeColor,
-							   Ogre::ColourValue backgroundColor, float lineWidth, bool drawAsLine );
 
 	public:
 		RadarChart( ColibriManager *manager );
@@ -83,8 +98,7 @@ namespace Colibri
 			when displaying the values in text on screen
 		*/
 		void setDataSeries( const std::vector<DataEntry> &dataSeries,
-							LabelDisplay                  labelDisplay = LabelDisplayNone,
-							float                         fScale = 1.0f / 65535.0f );
+							LabelDisplay                  labelDisplay = LabelDisplayNone );
 
 		void setTransformDirty( uint32_t dirtyReason ) override;
 		void drawChartTriangles();

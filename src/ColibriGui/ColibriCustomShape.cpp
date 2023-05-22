@@ -218,17 +218,16 @@ void CustomShape::_fillBuffersAndCommands(
 		*_vertexBuffer = vertexBuffer;
 
 		const Matrix2x3 &finalRot = this->m_derivedOrientation;
-		WidgetVec::const_iterator itor = m_children.begin();
-		WidgetVec::const_iterator end = m_children.end();
+
+		const Ogre::Vector2 currentScrollPos = Ogre::Vector2::ZERO;
 
 		const Ogre::Vector2 outerTopLeftWithClipping =
-			m_derivedTopLeft + ( m_clipBorderTL - parentScrollPos ) * invCanvasSize2x;
+			m_derivedTopLeft + ( m_clipBorderTL - currentScrollPos ) * invCanvasSize2x;
 
-		while( itor != end )
+		for( Widget *child : m_children )
 		{
-			( *itor )->_fillBuffersAndCommands( _vertexBuffer, _textVertBuffer, outerTopLeftWithClipping,
-												parentScrollPos, finalRot );
-			++itor;
+			child->_fillBuffersAndCommands( _vertexBuffer, _textVertBuffer, outerTopLeftWithClipping,
+											currentScrollPos, finalRot );
 		}
 	}
 }
