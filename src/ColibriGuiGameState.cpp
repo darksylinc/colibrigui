@@ -164,7 +164,6 @@ namespace Demo
 																		 { 0.4f, 0.9f, "MP\n50.00" },
 																		 { 0.75f, 0.85f, "CRT\n11" } };
 		radarChart->setDataSeries( dataSeries, Colibri::RadarChart::LabelDisplayName );
-		layout->addCell( radarChart );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->m_minSize = Ogre::Vector2( 350, 64 );
@@ -271,6 +270,8 @@ namespace Demo
 		sliderLabel->sizeToFit();
 		sliderLabel->m_minSize = Ogre::Vector2( 350, 32 );
 		layout->addCell( sliderLabel );
+
+		layout->addCell( radarChart );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();
