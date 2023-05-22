@@ -36,6 +36,12 @@ namespace Colibri
 #endif
 
 	public:
+		/// When true, it cannot be edited. On mobile, we won't
+		/// trigger the native editbox either.
+		///
+		/// @remark	PUBLIC MEMEBER: CAN BE EDITED DIRECTLY
+		bool m_readOnly;
+
 		/// When true, multiline prevents Enter key from being
 		/// used for activating the Widget's PrimaryAction
 		///

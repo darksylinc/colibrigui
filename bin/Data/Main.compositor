@@ -26,6 +26,9 @@ compositor_node RenderingNode
             // True is the default value since 99% of the time
             // we want to append ourselves to the previous pass.
             skip_load_store_semantics true
+
+            profiling_id "Colibri GUI"
+            aspect_ratio_mode keep_width
         }
     }
 }

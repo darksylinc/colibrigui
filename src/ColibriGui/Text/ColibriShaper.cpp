@@ -157,8 +157,8 @@ namespace Colibri
 
 		if( oldSize != m_ptSize )
 		{
-			const FT_UInt deviceHdpi = 96u;
-			const FT_UInt deviceVdpi = 96u;
+			const FT_UInt deviceHdpi = m_shaperManager->getDPI();
+			const FT_UInt deviceVdpi = m_shaperManager->getDPI();
 			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize.value26d6,
 												   deviceHdpi, deviceVdpi );
 			if( colibri_unlikely( errorCode ) )

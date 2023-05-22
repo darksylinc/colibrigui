@@ -24,6 +24,7 @@ namespace Colibri
 		m_autoCalcSizes( true ),
 		m_sizeLabel( 0.0f ),
 		m_sizeOptionLabel( 0.0f ),
+		m_minArrowWidth( 0.0f ),
 		m_horizDir( HorizWidgetDir::AutoLTR )
 	{
 		m_clickable = true;
@@ -81,9 +82,9 @@ namespace Colibri
 		// For some unknown reason we have to sub two extra arrow margin from remainingSize
 		if( m_label )
 		{
-			const float remainingSize =
-				std::max( 0.0f, m_size.x - outSizes[SW_Decrement] - outSizes[SW_Increment] -
-									outSizes[SW_OptionLabel] - m_arrowMargin * 2.0f );
+			const float remainingSize = std::max(
+				0.0f, m_size.x - outSizes[SW_Decrement] - outSizes[SW_Increment] -
+						  outSizes[SW_OptionLabel] - m_arrowMargin * 2.0f - m_label->m_margin.x );
 			outSizes[SW_Label] = std::min( m_sizeLabel, remainingSize );
 			outSizes[SW_Space] = remainingSize - outSizes[SW_Label];
 		}
@@ -159,7 +160,7 @@ namespace Colibri
 			maxOptionSize.makeCeil( m_optionLabel->getSize() );
 		}
 
-		outSizeOptionLabel = maxOptionSize.x;
+		outSizeOptionLabel = std::max( maxOptionSize.x, m_minArrowWidth );
 		outHeight = maxOptionSize.y;
 
 		// Restore
@@ -209,8 +210,8 @@ namespace Colibri
 		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
 
 		const Ogre::Vector2 arrowSize( m_arrowSize );
-		m_decrement->setSize( arrowSize );
-		m_increment->setSize( arrowSize );
+		m_decrement->setSizeAfterClipping( arrowSize );
+		m_increment->setSizeAfterClipping( arrowSize );
 
 		float columnSizes[SW_NumSubWidgets];
 		getSizes( columnSizes );
@@ -227,28 +228,38 @@ namespace Colibri
 		if( !rightToLeft )
 		{
 			if( m_label )
+			{
+				colStart += m_label->m_margin.x;
 				m_label->setTopLeft( Ogre::Vector2( colStart, 0.0f ) );
+			}
 			colStart += columnSizes[SW_Label];
 			colStart += columnSizes[SW_Space];
 		}
 
-		m_decrement->setTopLeft( Ogre::Vector2( colStart + arrowMargin, 0.0f ) );
-		m_decrement->setCenter(
-			Ogre::Vector2( m_decrement->getCenter().x, m_optionLabel->getCenter().y ) );
+		// Use setCenterIgnoringBorder because the use of (invisible) borders can be
+		// VERY useful to increase the hitbox for touch events.
+		m_decrement->setTopLeft(
+			Ogre::Vector2( colStart + arrowMargin - m_decrement->getBorderTopLeft().x, 0.0f ) );
+		m_decrement->setCenterIgnoringBorder(
+			Ogre::Vector2( m_decrement->getCenterIgnoringBorder().x, m_optionLabel->getCenter().y ) );
 		colStart += columnSizes[SW_Decrement];
 
 		m_optionLabel->setTopLeft( Ogre::Vector2( colStart, 0.0f ) );
 		colStart += columnSizes[SW_OptionLabel];
 
-		m_increment->setTopLeft( Ogre::Vector2( colStart + arrowMargin, 0.0f ) );
-		m_increment->setCenter(
-			Ogre::Vector2( m_increment->getCenter().x, m_optionLabel->getCenter().y ) );
+		m_increment->setTopLeft(
+			Ogre::Vector2( colStart + arrowMargin - m_increment->getBorderTopLeft().x, 0.0f ) );
+		m_increment->setCenterIgnoringBorder(
+			Ogre::Vector2( m_increment->getCenterIgnoringBorder().x, m_optionLabel->getCenter().y ) );
 		colStart += columnSizes[SW_Increment];
 
 		if( rightToLeft )
 		{
 			if( m_label )
+			{
+				colStart += m_label->m_margin.x;
 				m_label->setTopLeft( Ogre::Vector2( colStart, 0.0f ) );
+			}
 			colStart += columnSizes[SW_Label];
 			colStart += columnSizes[SW_Space];
 		}
@@ -376,6 +387,13 @@ namespace Colibri
 			calculateSizes();
 			updateOptionLabel();
 		}
+	}
+	//-------------------------------------------------------------------------
+	void Spinner::setMinArrowWidth( float minArrowWidth )
+	{
+		m_minArrowWidth = minArrowWidth;
+		calculateSizes();
+		updateOptionLabel();
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::sizeToFit()

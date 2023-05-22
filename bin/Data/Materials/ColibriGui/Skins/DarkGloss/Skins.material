@@ -39,6 +39,27 @@ hlms ProgressBarLayerProgress unlit
 	depth_check off
 	diffuse_map ProgressBar_l0.png
 }
+
+hlms AtlasRed unlit
+{
+	depth_check off
+	diffuse 1 0.1 0.1 1
+	diffuse_map Atlas.png
+}
+hlms AtlasRedDisabled unlit
+{
+	depth_check off
+	diffuse 1 0.1 0.1 0.2
+	scene_blend alpha_blend
+	diffuse_map Atlas.png
+}
+hlms AtlasRedBrighter unlit
+{
+	depth_check off
+	diffuse 2 0.1 0.1 1
+	diffuse_map Atlas.png
+}
+
 hlms RadarChart unlit
 {
 	depth_check off

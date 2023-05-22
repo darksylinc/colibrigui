@@ -657,7 +657,12 @@ namespace Colibri
 	{
 		FocusPair retVal;
 
-		//The first window that our button is touching wins. We go in LIFO order.
+		// We are hidden. We should not process anything.
+		// Let our parent caller move on to the next window/widget.
+		if( m_hidden )
+			return retVal;
+
+		// The first window that our button is touching wins. We go in LIFO order.
 		const size_t numWindows = m_children.size() - m_numWidgets;
 		WidgetVec::const_reverse_iterator ritor = m_children.rbegin();
 		WidgetVec::const_reverse_iterator rendt = m_children.rbegin() + ptrdiff_t( numWindows );
@@ -1100,6 +1105,16 @@ namespace Colibri
 	Ogre::Vector2 Widget::getCenter() const
 	{
 		return m_position + this->m_size * 0.5f;
+	}
+	//-------------------------------------------------------------------------
+	void Widget::setCenterIgnoringBorder( const Ogre::Vector2 &center )
+	{
+		setTopLeft( center - this->getSizeAfterClipping() * 0.5f - this->m_clipBorderTL );
+	}
+	//-------------------------------------------------------------------------
+	Ogre::Vector2 Widget::getCenterIgnoringBorder() const
+	{
+		return m_position + this->m_clipBorderTL + this->getSizeAfterClipping() * 0.5f;
 	}
 	//-------------------------------------------------------------------------
 	void Widget::setClipBorders( float clipBorders[Borders::NumBorders] )

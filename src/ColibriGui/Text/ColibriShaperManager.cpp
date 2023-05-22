@@ -34,6 +34,7 @@ namespace Colibri
 		m_defaultDirection( UBIDI_DEFAULT_LTR /*Note: non-defaults like UBIDI_RTL work differently!*/ ),
 		m_useVerticalLayoutWhenAvailable( false ),
 		m_defaultBmpFontForRaster( std::numeric_limits<uint16_t>::max() ),
+		m_dpi( 96u ),
 		m_glyphAtlasBuffer( 0 ),
 		m_hlms( 0 ),
 		m_vaoManager( 0 )
@@ -129,6 +130,22 @@ namespace Colibri
 				++itor;
 			}
 		}
+	}
+	//-------------------------------------------------------------------------
+	void ShaperManager::setDPI( uint32_t dpi )
+	{
+		LogListener *log = getLogListener();
+		if( dpi == 0 )
+		{
+			log->log( "Invalid DPI value. Using a default value.", LogSeverity::Error );
+			dpi = 96u;
+		}
+		m_dpi = dpi;
+
+		char tmpBuffer[128];
+		Ogre::LwString msg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+		msg.a( "setDPI = ", dpi );
+		log->log( msg.c_str(), LogSeverity::Info );
 	}
 	//-------------------------------------------------------------------------
 	Shaper* ShaperManager::addShaper( uint32_t /*hb_script_t*/ script, const char *fontPath,
@@ -340,8 +357,9 @@ namespace Colibri
 		COLIBRI_ASSERT_MEDIUM( bmpFont );
 
 		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
+		const BmpToFontAlignment fontAlignment = bmpFont->getFontAlignment( fontIdx );
 
-		const float fontScale = FontSize( ptSize ).asFloat() / bmpFont->getBakedFontSize().asFloat();
+		const float fontScale = FontSize( ptSize ).asFloat() * bmpFont->getFontScale( this );
 
 		//Create a cache entry
 		CachedGlyph newGlyph;
@@ -349,8 +367,10 @@ namespace Colibri
 		newGlyph.ptSize		= ptSize;
 		newGlyph.width		= uint16_t( std::round( bmpGlyph.width * fontScale ) );
 		newGlyph.height		= uint16_t( std::round( bmpGlyph.height * fontScale ) );
-		newGlyph.bearingX	= 0.0f;
-		newGlyph.bearingY = newGlyph.height * float( dummyCodepoint->bearingY ) / dummyCodepoint->height;
+		newGlyph.bearingX = ( fontAlignment.xoffset * fontScale ) / dummyCodepoint->height;
+		newGlyph.bearingY = ( ( newGlyph.height * float( dummyCodepoint->bearingY ) ) +
+							  ( fontAlignment.yoffset * fontScale ) ) /
+							dummyCodepoint->height;
 		newGlyph.offsetStart = 0u;
 		newGlyph.newlineSize= newGlyph.height;
 		newGlyph.regionUp	= 1.0f;  // Is this correct?

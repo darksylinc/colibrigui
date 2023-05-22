@@ -29,6 +29,27 @@
 	#define colibri_virtual_l1
 #endif
 
+#if __cplusplus >= 201402L
+#	define COLIBRI_DEPRECATED [[deprecated]]
+#	define COLIBRI_DEPRECATED_VER( x ) [[deprecated]]
+#	define COLIBRI_DEPRECATED_ENUM_VER( x ) [[deprecated]]
+#else
+#	if defined( _MSC_VER )
+#		define COLIBRI_DEPRECATED __declspec( deprecated )
+#		define COLIBRI_DEPRECATED_VER( x ) __declspec( deprecated )
+#		define COLIBRI_DEPRECATED_ENUM_VER( x )
+#	elif defined( __GNUC__ ) || defined( __clang__ )
+#		define COLIBRI_DEPRECATED __attribute__( ( deprecated ) )
+#		define COLIBRI_DEPRECATED_VER( x ) __attribute__( ( deprecated ) )
+#		define COLIBRI_DEPRECATED_ENUM_VER( x ) __attribute__( ( deprecated ) )
+#	else
+#		pragma message( "WARNING: You need to implement COLIBRI_DEPRECATED for this compiler" )
+#		define COLIBRI_DEPRECATED
+#		define COLIBRI_DEPRECATED_VER( x )
+#		define COLIBRI_DEPRECATED_ENUM_VER( x )
+#	endif
+#endif
+
 #include <stdint.h>
 #include <math.h>
 #include "math_round.h"
@@ -59,6 +80,7 @@ namespace Colibri
 	class SkinManager;
 	class Slider;
 	class Spinner;
+	class ToggleButton;
 	class Widget;
 	class Window;
 
@@ -381,6 +403,8 @@ namespace Colibri
 			ProgressbarLayer1,
 			SliderLine,
 			SliderHandle,
+			ToggleButtonUnchecked,
+			ToggleButtonChecked,
 			WindowArrowScrollTop,
 			WindowArrowScrollLeft,
 			WindowArrowScrollRight,

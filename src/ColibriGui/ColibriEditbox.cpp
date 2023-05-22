@@ -26,6 +26,7 @@ namespace Colibri
 #if defined( __ANDROID__ ) || ( defined( __APPLE__ ) && defined( TARGET_OS_IPHONE ) && TARGET_OS_IPHONE )
 		m_inputType( InputType::Text ),
 #endif
+		m_readOnly( false ),
 		m_multiline( false ),
 		m_blinkTimer( 0 )
 	{
@@ -151,7 +152,7 @@ namespace Colibri
 	{
 		const bool wasActive = requiresActiveUpdate();
 
-		if( m_currentState != state && state == States::Pressed )
+		if( m_currentState != state && state == States::Pressed && !m_readOnly )
 		{
 			ColibriListener *colibriListener = m_manager->getColibriListener();
 			colibriListener->showTextInput( this );
@@ -282,6 +283,20 @@ namespace Colibri
 	{
 		COLIBRI_ASSERT_LOW( repetition > 0u );
 
+		if( m_readOnly )
+		{
+			// Only handle Ctrl+C (Copy) and then return
+			if( keyCode == 'c' && ( keyMod & ( KeyMod::LCtrl | KeyMod::RCtrl ) ) )
+			{
+				if( !isSecureEntry() )
+				{
+					ColibriListener *colibriListener = m_manager->getColibriListener();
+					colibriListener->setClipboardText( m_label->getText().c_str() );
+				}
+			}
+			return;
+		}
+
 		if( keyCode == KeyCode::Backspace || keyCode == KeyCode::Delete )
 		{
 			bool isAtLimit = ( keyCode == KeyCode::Backspace && m_cursorPos == 0 ) ||
@@ -399,6 +414,9 @@ namespace Colibri
 	void Editbox::_setTextInput( const char *text, const bool bReplaceContents,
 								 const bool bCallActionListener )
 	{
+		if( m_readOnly )
+			return;
+
 		size_t oldGlyphCount = 0u;
 
 		if( !bReplaceContents )
@@ -453,7 +471,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	bool Editbox::isTextMultiline() const { return m_multiline; }
 	//-------------------------------------------------------------------------
-	bool Editbox::wantsTextInput() const { return true; }
+	bool Editbox::wantsTextInput() const { return !m_readOnly; }
 	//-------------------------------------------------------------------------
 	Label *Editbox::getLabel() { return m_label; }
 	//-------------------------------------------------------------------------

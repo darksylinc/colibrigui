@@ -53,6 +53,7 @@ namespace Colibri
 		m_widgetTransformsDirty( false ),
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
+		m_touchOnlyMode( false ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -80,7 +81,7 @@ namespace Colibri
 		m_shaperManager( 0 ),
 		m_vertexBufferBase( 0 ),
 		m_textVertexBufferBase( 0 )
-	#if COLIBRIGUI_DEBUG_MEDIUM
+	#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 	,	m_fillBuffersStarted( false )
 	,	m_renderingStarted( false )
 	#endif
@@ -253,6 +254,11 @@ namespace Colibri
 		return gridLoc;
 	}
 	//-------------------------------------------------------------------------
+	void ColibriManager::setTouchOnlyMode( bool bTouchOnlyMode )
+	{
+		m_touchOnlyMode = bTouchOnlyMode;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::setDefaultSkins(
 		std::string defaultSkinPacks[SkinWidgetTypes::NumSkinWidgetTypes] )
 	{
@@ -321,6 +327,8 @@ namespace Colibri
 			(*itor)->_notifyCanvasChanged();
 			++itor;
 		}
+
+		m_colibriListener->notifyCanvasOrResolutionUpdated();
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::updateWidgetsFocusedByCursor()
@@ -1485,7 +1493,7 @@ namespace Colibri
 			focusPair.widget = widget;
 		}
 
-		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget == widget )
+		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::Idle );
 			callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
@@ -1620,7 +1628,7 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::prepareRenderCommands()
 	{
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = true;
 #endif
 
@@ -1657,14 +1665,14 @@ namespace Colibri
 		m_vertexBufferBase = 0;
 		m_textVertexBufferBase = 0;
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = false;
 #endif
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::render()
 	{
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_renderingStarted = true;
 #endif
 		ApiEncapsulatedObjects apiObjects;
@@ -1742,7 +1750,7 @@ namespace Colibri
 		m_commandBuffer->execute();
 		hlms->postCommandBufferExecution( m_commandBuffer );
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_renderingStarted = false;
 #endif
 	}

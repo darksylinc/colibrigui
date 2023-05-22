@@ -33,6 +33,7 @@
 #include "ColibriGui/ColibriRadarChart.h"
 #include "ColibriGui/ColibriSlider.h"
 #include "ColibriGui/ColibriSpinner.h"
+#include "ColibriGui/ColibriToggleButton.h"
 #include "ColibriGui/ColibriWindow.h"
 
 #include "ColibriGui/Layouts/ColibriLayoutLine.h"
@@ -52,6 +53,7 @@ namespace Demo
 	Colibri::Button *button1 = 0;
 	Colibri::Spinner *spinner0 = 0;
 	Colibri::Checkbox *checkbox0 = 0;
+	Colibri::ToggleButton *toggleButton = 0;
 	Colibri::Editbox *editbox0 = 0;
 	Colibri::Progressbar *progressBar0 = 0;
 	Colibri::Progressbar *progressBar1 = 0;
@@ -105,7 +107,9 @@ namespace Demo
 
 		Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 
-		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1080.0f ),
+		const float aspectRatioColibri =
+			static_cast<float>( window->getHeight() ) / static_cast<float>( window->getWidth() );
+		colibriManager->setCanvasSize( Ogre::Vector2( 1920.0f, 1920.0f * aspectRatioColibri ),
 									   Ogre::Vector2( window->getWidth(), window->getHeight() ) );
 
 		//colibriManager = new Colibri::ColibriManager();
@@ -114,6 +118,8 @@ namespace Demo
 								 mGraphicsSystem->getSceneManager() );
 		colibriManager->loadSkins( (mGraphicsSystem->getResourcePath() +
 								   "Materials/ColibriGui/Skins/DarkGloss/Skins.colibri.json").c_str() );
+
+		// colibriManager->setTouchOnlyMode( true );
 
 		fullWindow = colibriManager->createWindow( 0 );
 		mainWindow = colibriManager->createWindow( 0 );
@@ -161,6 +167,11 @@ namespace Demo
 		button0->sizeToFit();
 		layout->addCell( button0 );
 
+		toggleButton = colibriManager->createWidget<Colibri::ToggleButton>( mainWindow );
+		toggleButton->m_minSize = Ogre::Vector2( 350, 64 );
+		toggleButton->getLabel()->setText( "Toggle Button: Click me" );
+		layout->addCell( toggleButton );
+
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->getButton()->getLabel()->setText( "This is a checkbox" );
@@ -168,7 +179,14 @@ namespace Demo
 
 		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
-		checkbox0->setTriState( true );
+		checkbox0->getButton()->getLabel()->setText( "Left-aligned checkbox" );
+		checkbox0->getButton()->getLabel()->setTextHorizAlignment(
+			Colibri::TextHorizAlignment::Natural );
+		layout->addCell( checkbox0 );
+
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
+		checkbox0->setStateMode( Colibri::Checkbox::TriState );
 		checkbox0->getButton()->getLabel()->setText( "This is a tri-state checkbox" );
 //		checkbox0->sizeToFit();
 //		checkbox0->setSize( checkbox0->getSize() + Ogre::Vector2( 0, 32 ) );
@@ -178,6 +196,15 @@ namespace Demo
 		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
 		checkbox0->getButton()->getLabel()->setText( "This checkbox has the tickmark outside" );
 		checkbox0->setCheckboxMode( Colibri::Checkbox::TickButton );
+		layout->addCell( checkbox0 );
+
+		// By setting a Checkbox into Checkbox::NoState mode, it turns into
+		// a Button that has an icon on the left or right (depending on Checkbox::setHorizWidgetDir)
+		checkbox0 = colibriManager->createWidget<Colibri::Checkbox>( mainWindow );
+		checkbox0->m_minSize = Ogre::Vector2( 350, 64 );
+		checkbox0->getButton()->getLabel()->setText( "This button has an image" );
+		checkbox0->setStateMode( Colibri::Checkbox::NoState );
+		checkbox0->setTickmarkSkin( 0u, "EmptyBg" );
 		layout->addCell( checkbox0 );
 
 		spinner0 = colibriManager->createWidget<Colibri::Spinner>( mainWindow );

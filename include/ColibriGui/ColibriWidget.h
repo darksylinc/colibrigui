@@ -605,6 +605,19 @@ namespace Colibri
 		void setCenter( const Ogre::Vector2 &center );
 		Ogre::Vector2 getCenter() const;
 
+		/** Re-center this widget but pretending the clip borders didn't exist, as if they were 0.
+		@param center
+			New center
+		*/
+		void setCenterIgnoringBorder( const Ogre::Vector2 &center );
+
+		/** Returns the center of this widget but pretending the
+			clip borders didn't exist, as if they were 0.
+		@return
+			Center of this widget, ignoring borders
+		*/
+		Ogre::Vector2 getCenterIgnoringBorder() const;
+
 		const Ogre::Vector2& getLocalTopLeft() const			{ return m_position; }
 		Ogre::Vector2 getLocalBottomRight() const				{ return m_position + m_size; }
 		const Ogre::Vector2& getSize() const					{ return m_size; }

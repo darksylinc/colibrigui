@@ -90,6 +90,7 @@ if( NOT COLIBRIGUI_LIB_ONLY )
 else()
 	add_recursive( ./src/ColibriGui SOURCES )
 	add_recursive( ./include/ColibriGui HEADERS )
+	list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/src/ColibriGui/iOS/Colibri_iOS.mm")
 endif()
 
 if( APPLE )
@@ -104,6 +105,14 @@ if( APPLE )
 
 	#file( GLOB_RECURSE RESOURCES ./src/*.storyboard )
 	set( RESOURCES ${RESOURCES} ./bin/Data "./bin/Data/resources2.cfg" "/tmp/plugins.cfg" "${OGRE_SOURCE}/Samples/Media/" )
+
+
+	if( APPLE_IOS )
+		list( APPEND SOURCES
+			"src/ColibriGui/iOS/Colibri_iOS.mm" )
+		list( APPEND HEADERS
+			"include/ColibriGui/iOS/Colibri_iOS.h" )
+	endif()
 endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )

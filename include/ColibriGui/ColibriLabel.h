@@ -44,7 +44,7 @@ namespace Colibri
 
 		bool m_glyphsDirty[States::NumStates];
 		bool m_glyphsPlaced[States::NumStates];
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool m_glyphsAligned[States::NumStates];
 #endif
 		/// For internal use. Set to true if any of RichText uses background, false otherwise.
@@ -67,10 +67,14 @@ namespace Colibri
 		Ogre::ColourValue m_shadowColour;
 		Ogre::Vector2 m_shadowDisplace;
 
+		Ogre::ColourValue m_defaultColour;
 		Ogre::Vector2 m_backgroundSize;
 		Ogre::ColourValue m_defaultBackgroundColour;
 		FontSize m_defaultFontSize;
 		uint16_t m_defaultFont;
+
+		float m_lineHeightScale;
+		float m_lastLineHeightScale;
 
 		LinebreakMode::LinebreakMode			m_linebreakMode;
 		TextHorizAlignment::TextHorizAlignment	m_horizAlignment;
@@ -193,6 +197,35 @@ namespace Colibri
 		void setDefaultFont( uint16_t defaultFont );
 		uint16_t getDefaultFont() const								{ return m_defaultFont; }
 
+		/** Sets the scale (aka line spacing) for the line height.
+
+			Besides simple Word-like line spacing effect, it is useful when a Label is mixed with a
+			BMP font and this font is poorly setup, causing huge line spacing issues.
+
+			The last line is treated differently because:
+				1. If the Label is not part of a Button, the Label's size may be too small,
+				   causing the text to look clipped. Hence last line must be different and
+				   you likely want lastLineHeightScale = 1.0
+				2. If you are dealing with the BMP font issue mentioned above, you'll want to
+				   set lastLineHeightScale = lineHeightScale
+		@param lineHeightScale
+			Scale of the line height. Values in range (0; 1) make the line spacing smaller.
+			Values > 1 make the spacing bigger. Default is 1
+		@param lastLineHeightScale
+			Scale of the last line. See lineHeightScale.
+			If the text only has one line, this value is used.
+		*/
+		void setLineHeightScale( float lineHeightScale, float lastLineHeightScale = 1.0f );
+
+		float getLineHeightScale() const { return m_lineHeightScale; }
+		float setLastLineLineHeightScale() const { return m_lastLineHeightScale; }
+
+		/// Name alias for setLineHeightScale()
+		void setLineSpacing( float lineHeightScale, float lastLineHeightScale )
+		{
+			setLineHeightScale( lineHeightScale, lastLineHeightScale );
+		}
+
 		/** Changes the colour of the current text (either all of it or a block); and sets
 			the default colour for new text to the input colour
 		@remarks
@@ -227,6 +260,12 @@ namespace Colibri
 		*/
 		void setShadowOutline( bool enable, Ogre::ColourValue shadowColour=Ogre::ColourValue::Black,
 							   const Ogre::Vector2 &shadowDisplace=Ogre::Vector2::UNIT_SCALE );
+
+		bool isShadowOutlineEnabled() const { return m_shadowOutline; }
+
+		const Ogre::ColourValue &getShadowColour() const { return m_shadowColour; }
+
+		const Ogre::Vector2 &getShadowDisplace() const { return m_shadowDisplace; }
 
 		/** Called by ColibriManager after we've told them we're dirty.
 			It will update m_shapes so we can correctly render text.

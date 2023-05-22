@@ -1,13 +1,13 @@
 
 #include "ColibriGui/Ogre/CompositorPassColibriGui.h"
-#include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
+
 #include "ColibriGui/ColibriManager.h"
+#include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
 
 #include "Compositor/OgreCompositorNode.h"
 #include "Compositor/OgreCompositorWorkspace.h"
 #include "Compositor/OgreCompositorWorkspaceListener.h"
 #include "OgreCamera.h"
-
 #include "OgrePixelFormatGpuUtils.h"
 #include "OgreRenderSystem.h"
 #include "OgreSceneManager.h"
@@ -32,13 +32,14 @@ namespace Ogre
 #endif
 		mCamera = defaultCamera;
 
-		TextureGpu *texture = mParentNode->getDefinedTexture( rtv->colourAttachments[0].textureName );
+		m_textureName = rtv->colourAttachments[0].textureName;
+		TextureGpu *texture = mParentNode->getDefinedTexture( m_textureName );
 		setResolutionToColibri( texture->getWidth(), texture->getHeight() );
 	}
 	//-----------------------------------------------------------------------------------
 	void CompositorPassColibriGui::execute( const Camera *lodCamera )
 	{
-		//Execute a limited number of times?
+		// Execute a limited number of times?
 		if( mNumPassesLeft != std::numeric_limits<uint32>::max() )
 		{
 			if( !mNumPassesLeft )
@@ -60,7 +61,7 @@ namespace Ogre
 		sceneManager->_setCamerasInProgress( CamerasInProgress( mCamera ) );
 		sceneManager->_setCurrentCompositorPass( this );
 
-		//Fire the listener in case it wants to change anything
+		// Fire the listener in case it wants to change anything
 		notifyPassPreExecuteListeners();
 
 		m_colibriManager->prepareRenderCommands();
@@ -89,16 +90,15 @@ namespace Ogre
 			if( mDefinition->mAspectRatioMode == CompositorPassColibriGuiDef::ArKeepWidth )
 			{
 				const float newAr = resolution.y / resolution.x;
-				canvasSize.y = round( canvasSize.x * newAr );
+				canvasSize.y = canvasSize.x * newAr;
 			}
 			else if( mDefinition->mAspectRatioMode == CompositorPassColibriGuiDef::ArKeepHeight )
 			{
 				const float newAr = resolution.x / resolution.y;
-				canvasSize.x = round( canvasSize.y * newAr );
+				canvasSize.x = canvasSize.y * newAr;
 			}
 
-			m_colibriManager->setCanvasSize( canvasSize,
-											 resolution );
+			m_colibriManager->setCanvasSize( canvasSize, resolution );
 		}
 	}
 	//-----------------------------------------------------------------------------------
@@ -106,7 +106,14 @@ namespace Ogre
 	{
 		bool usedByUs = CompositorPass::notifyRecreated( channel );
 
-		if( usedByUs &&
+		if( !usedByUs )
+		{
+			// Because of mSkipLoadStoreSemantics, notifyRecreated may return false incorrectly
+			TextureGpu *texture = mParentNode->getDefinedTexture( m_textureName );
+			usedByUs = texture == channel;
+		}
+
+		if( usedByUs &&  //
 			!PixelFormatGpuUtils::isDepth( channel->getPixelFormat() ) &&
 			!PixelFormatGpuUtils::isStencil( channel->getPixelFormat() ) )
 		{
@@ -115,4 +122,4 @@ namespace Ogre
 
 		return usedByUs;
 	}
-}
+}  // namespace Ogre

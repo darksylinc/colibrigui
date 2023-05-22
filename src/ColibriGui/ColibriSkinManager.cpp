@@ -639,6 +639,8 @@ namespace Colibri
 			"ProgressbarLayer1",
 			"SliderLine",
 			"SliderHandle",
+			"ToggleButtonUnchecked",
+			"ToggleButtonChecked",
 			"WindowArrowScrollTop",
 			"WindowArrowScrollLeft",
 			"WindowArrowScrollRight",

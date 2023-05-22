@@ -42,16 +42,24 @@ namespace Colibri
 
 	typedef std::vector<BmpGlyph> BmpGlyphVec;
 
+	struct BmpToFontAlignment
+	{
+		float xoffset;
+		float yoffset;
+	};
+
 	class BmpFont
 	{
 	protected:
-		std::string                              m_textureName;
+		std::string                           m_textureName;
 		Ogre::TextureGpu *colibri_nullable    m_fontTexture;
 		Ogre::HlmsDatablock *colibri_nullable m_datablock;
 
 		FontSize m_fontSize;
 
 		std::vector<BmpChar> m_chars;
+
+		std::vector<BmpToFontAlignment> m_bmpToFontAlignments;
 
 		BmpChar m_emptyChar;
 
@@ -80,6 +88,19 @@ namespace Colibri
 
 		void setOgre( Ogre::HlmsColibri *hlms, Ogre::TextureGpuManager *textureManager );
 
+		/** When rendering raster (bmp) fonts into normal i.e. via
+			ShaperManager::setDefaultBmpFontForRaster, sometimes they are not properly aligned.
+
+			This function fixes it by hand.
+		@param fontIdx
+			Idx of the font to map
+		@param offset
+			Offset to apply
+		*/
+		void addFontAlignment( uint16_t fontIdx, const Ogre::Vector2 &offset );
+
+		BmpToFontAlignment getFontAlignment( size_t fontIdx ) const;
+
 		void renderString( const std::string &utf8Str, BmpGlyphVec &outShapes ) const;
 		void renderCodepoint( const uint32_t codepoint, BmpGlyphVec &outShapes ) const;
 
@@ -88,6 +109,8 @@ namespace Colibri
 		Ogre::Vector4 getInvResolution() const;
 
 		FontSize getBakedFontSize() const { return m_fontSize; }
+
+		float getFontScale( const ShaperManager *shaperManager ) const;
 
 		/// This pointer can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock *colibri_nullable getDatablock() const { return m_datablock; }

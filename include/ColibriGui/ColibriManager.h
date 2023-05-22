@@ -80,6 +80,14 @@ namespace Colibri
 			Editbox requesting the text input UI element
 		*/
 		virtual void showTextInput( Colibri::Editbox * /*editbox*/ ) {}
+
+		/** Notifies when canvas has changed (i.e. ColibriManager::setCanvasSize was called)
+		@remarks
+			This function gets called a little late, before rendering.
+			If you create or destroy Widgets or alter a Label's content, you must
+			call ColibriManager::update
+		*/
+		virtual void notifyCanvasOrResolutionUpdated() {}
 	};
 
 	class ColibriManager
@@ -148,6 +156,8 @@ namespace Colibri
 		/// Is one of the windows stored by this manager immediately dirty.
 		bool m_zOrderHasDirtyChildren;
 
+		bool m_touchOnlyMode;
+
 		Ogre::Root					* colibri_nullable m_root;
 		Ogre::VaoManager			* colibri_nullable m_vaoManager;
 		Ogre::ObjectMemoryManager	* colibri_nullable m_objectMemoryManager;
@@ -207,7 +217,7 @@ namespace Colibri
 		UiVertex		*m_vertexBufferBase;
 		GlyphVertex		*m_textVertexBufferBase;
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool m_fillBuffersStarted;
 		bool m_renderingStarted;
 #endif
@@ -284,6 +294,26 @@ namespace Colibri
 		void setDefaultFontSize26d6( uint32_t defaultFontSize ) { m_defaultFontSize = defaultFontSize; }
 
 		uint32_t getDefaultFontSize26d6() const						{ return m_defaultFontSize; }
+
+		/** Devices that have no keyboard and no gamepad don't need as
+			many states as there are in States.
+
+			Setting this value to true will cause newly created Widgets (and further calls to
+			Renderable::setSkinPack & Renderable::_setSkinPack) to replace skins for
+			HighlightedButtonAndCursor with HighlightedButton and
+			HighlightedCursor skin with Idle.
+
+			Thus internally these events still happen, but visually the widgets will look
+			like it does by their replaced versions.
+
+			This means there's fewer possible "visual" states, causing less confusion.
+		@param bTouchOnlyMode
+			True to set touch only mode (i.e. preferred method on iOS & Android unless a
+			gamepad/keyboard is attached and you support them).
+			False to disable touch only mode.
+		*/
+		void setTouchOnlyMode( bool bTouchOnlyMode );
+		bool getTouchOnlyMode() const { return m_touchOnlyMode; }
 
 		/**	Sets the default skins to be used when creating a new widget.
 			Usage:

@@ -34,6 +34,19 @@ THE SOFTWARE.
 #	define OGRE_MAKE_VERSION( maj, min, patch ) ( ( maj << 16 ) | ( min << 8 ) | patch )
 #endif
 
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+#	define COLIBRI_STUB_ENTRY_ARG_DECL , HlmsCache *reservedStubEntry
+#	define COLIBRI_STUB_ENTRY_ARG , reservedStubEntry
+#	define COLIBRI_TID_ARG , tid
+#	define COLIBRI_TID_ARG_DECL , const size_t tid
+#	define COLIBRI_TID_ARG , tid
+#else
+#	define COLIBRI_STUB_ENTRY_ARG_DECL
+#	define COLIBRI_STUB_ENTRY_ARG
+#	define COLIBRI_TID_ARG_DECL
+#	define COLIBRI_TID_ARG
+#endif
+
 namespace Ogre
 {
 	class HlmsColibriDatablock;
@@ -58,33 +71,32 @@ namespace Ogre
 		@see	CompositorPassColibriGuiProvider
 	*/
 	class HlmsColibri : public HlmsUnlit
-    {
+	{
 	protected:
 		// It's ReadOnlyBufferPacked on Mali
 		// It's TexBufferPacked everywhere else
 		BufferPacked *mGlyphAtlasBuffer;
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
-		virtual void setupRootLayout( RootLayout &rootLayout );
+		void setupRootLayout( RootLayout &rootLayout COLIBRI_TID_ARG_DECL ) override;
 #endif
 
-		virtual const HlmsCache* createShaderCacheEntry( uint32 renderableHash,
-														 const HlmsCache &passCache,
-														 uint32 finalHash,
-														 const QueuedRenderable &queuedRenderable );
+		const HlmsCache *createShaderCacheEntry(
+			uint32 renderableHash, const HlmsCache &passCache, uint32 finalHash,
+			const QueuedRenderable &queuedRenderable COLIBRI_STUB_ENTRY_ARG_DECL
+				COLIBRI_TID_ARG_DECL ) override;
 
-		virtual void calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces );
+		void calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces ) override;
 
-		virtual HlmsDatablock* createDatablockImpl( IdString datablockName,
-													const HlmsMacroblock *macroblock,
-													const HlmsBlendblock *blendblock,
-													const HlmsParamVec &paramVec );
+		HlmsDatablock *createDatablockImpl( IdString datablockName, const HlmsMacroblock *macroblock,
+											const HlmsBlendblock *blendblock,
+											const HlmsParamVec   &paramVec ) override;
 
-    public:
+	public:
 		HlmsColibri( Archive *dataFolder, ArchiveVec *libraryFolders );
-		HlmsColibri( Archive *dataFolder, ArchiveVec *libraryFolders,
-					 HlmsTypes type, const String &typeName );
-		virtual ~HlmsColibri();
+		HlmsColibri( Archive *dataFolder, ArchiveVec *libraryFolders, HlmsTypes type,
+					 const String &typeName );
+		~HlmsColibri() override;
 
 		void setGlyphAtlasBuffer( BufferPacked *texBuffer );
 
@@ -93,15 +105,14 @@ namespace Ogre
 		static bool needsReadOnlyBuffer( const RenderSystemCapabilities *caps,
 										 const VaoManager               *vaoManager );
 
-		uint32 fillBuffersForColibri( const HlmsCache *cache,
-									  const QueuedRenderable &queuedRenderable,
-									  bool casterPass, uint32 baseVertex,
-									  uint32 lastCacheHash, CommandBuffer *commandBuffer );
+		uint32 fillBuffersForColibri( const HlmsCache *cache, const QueuedRenderable &queuedRenderable,
+									  bool casterPass, uint32 baseVertex, uint32 lastCacheHash,
+									  CommandBuffer *commandBuffer );
 
-        /// @copydoc HlmsPbs::getDefaultPaths
-        static void getDefaultPaths( String& outDataFolderPath, StringVector& outLibraryFoldersPaths );
+		/// @copydoc HlmsPbs::getDefaultPaths
+		static void getDefaultPaths( String &outDataFolderPath, StringVector &outLibraryFoldersPaths );
 	};
-}
+}  // namespace Ogre
 
 #include "OgreHeaderSuffix.h"
 

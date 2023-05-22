@@ -21,6 +21,18 @@ namespace Colibri
 			Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width, topLeft.y + shapedGlyph.glyph->height );
 	}
 
+	inline void getAlignmentCorners( const ShapedGlyph &shapedGlyph, Ogre::Vector2 &topLeft,
+									 Ogre::Vector2 &bottomRight )
+	{
+		topLeft = shapedGlyph.caretPos + shapedGlyph.offset +
+				  Ogre::Vector2( shapedGlyph.glyph->bearingX, -shapedGlyph.glyph->bearingY );
+		bottomRight =
+			Ogre::Vector2( topLeft.x + shapedGlyph.glyph->width, topLeft.y + shapedGlyph.glyph->height );
+
+		const Ogre::Vector2 nextTopLeft = shapedGlyph.caretPos + shapedGlyph.advance;
+		bottomRight.makeCeil( nextTopLeft );
+	}
+
 	Label::Label( ColibriManager *manager ) :
 		Renderable( manager ),
 		m_usesBackground( false ),
@@ -28,10 +40,13 @@ namespace Colibri
 		m_shadowOutline( false ),
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
+		m_defaultColour( m_colour ),
 		m_backgroundSize( Ogre::Vector2::ZERO ),
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
 		m_defaultFont( 0 ),
+		m_lineHeightScale( 1.0f ),
+		m_lastLineHeightScale( 1.0f ),
 		m_linebreakMode( LinebreakMode::WordWrap ),
 		m_horizAlignment( TextHorizAlignment::Natural ),
 		m_vertAlignment( TextVertAlignment::Natural ),
@@ -52,7 +67,7 @@ namespace Colibri
 		{
 			m_glyphsDirty[i] = false;
 			m_glyphsPlaced[i] = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 			m_glyphsAligned[i] = true;
 #endif
 		}
@@ -93,8 +108,6 @@ namespace Colibri
 			m_rasterPrivateArea = m_manager->createWidget<LabelBmp>( this );
 			m_rasterPrivateArea->m_rawMode = true;
 			m_rasterPrivateArea->setFont( shaperManager->getDefaultBmpFontForRasterIdx() );
-			m_rasterPrivateArea->setFontSize(
-				shaperManager->getDefaultBmpFontForRaster()->getBakedFontSize() );
 			m_rasterPrivateArea->setSize( m_size );
 		}
 
@@ -165,7 +178,7 @@ namespace Colibri
 			for( size_t i = 0; i < States::NumStates; ++i )
 			{
 				m_glyphsPlaced[i] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 				m_glyphsAligned[i] = false;
 #endif
 			}
@@ -240,10 +253,16 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Label::setLineHeightScale( float lineHeightScale, float lastLineHeightScale )
+	{
+		m_lineHeightScale = lineHeightScale;
+		m_lastLineHeightScale = lastLineHeightScale;
+	}
+	//-------------------------------------------------------------------------
 	void Label::setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx,
 							   States::States forState )
 	{
-		m_colour = colour;
+		m_defaultColour = colour;
 		if( forState == States::NumStates )
 		{
 			for( size_t i = 0; i < States::NumStates; ++i )
@@ -258,13 +277,13 @@ namespace Colibri
 
 				while( itor != endt )
 				{
-					itor->rgba32 = m_colour.getAsABGR();
+					itor->rgba32 = m_defaultColour.getAsABGR();
 					++itor;
 				}
 			}
 			else if( richTextTextIdx < m_richText[forState].size() )
 			{
-				m_richText[forState][richTextTextIdx].rgba32 = m_colour.getAsABGR();
+				m_richText[forState][richTextTextIdx].rgba32 = m_defaultColour.getAsABGR();
 			}
 		}
 	}
@@ -354,7 +373,7 @@ namespace Colibri
 				{
 					m_shapes[state] = m_shapes[i];
 					m_glyphsPlaced[state] = m_glyphsPlaced[i];
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 					m_glyphsAligned[state] = m_glyphsAligned[i];
 #endif
 					m_actualHorizAlignment[state] = m_actualHorizAlignment[i];
@@ -617,7 +636,7 @@ namespace Colibri
 		}
 
 		m_glyphsPlaced[state] = true;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = false;
 #endif
 
@@ -672,7 +691,7 @@ namespace Colibri
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( shapedGlyph, topLeft, bottomRight );
+			getAlignmentCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( ( shapedGlyph.isNewline || prevCaretY != shapedGlyph.caretPos.y ) &&
 				m_actualHorizAlignment[state] != TextHorizAlignment::Left )
@@ -738,7 +757,7 @@ namespace Colibri
 			}
 		}
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
 	}
@@ -783,7 +802,7 @@ namespace Colibri
 			const ShapedGlyph &shapedGlyph = *itor;
 
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( shapedGlyph, topLeft, bottomRight );
+			getAlignmentCorners( shapedGlyph, topLeft, bottomRight );
 
 			if( ( shapedGlyph.isNewline || prevCaretX != shapedGlyph.caretPos.x ) &&
 				m_vertAlignment > TextVertAlignment::Top )
@@ -880,7 +899,7 @@ namespace Colibri
 			}
 		}
 
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = true;
 #endif
 	}
@@ -1034,7 +1053,9 @@ namespace Colibri
 
 		// The newline itself has its own height, make sure it's considered
 		if( itor != endt )
-			largestHeight = std::max( itor->glyph->newlineSize, largestHeight );
+			largestHeight = std::max( itor->glyph->newlineSize, largestHeight ) * m_lineHeightScale;
+		else
+			largestHeight *= m_lastLineHeightScale;
 
 		return largestHeight;
 	}
@@ -1203,7 +1224,7 @@ namespace Colibri
 		m_currVertexBufferOffset =
 			static_cast<uint32_t>( textVertBuffer - m_manager->_getTextVertexBufferBase() );
 
-		const uint32_t shadowColour = m_shadowColour.getAsABGR();
+		const uint32_t shadowColour = ( m_shadowColour * m_colour ).getAsABGR();
 
 		const Ogre::Vector2 halfWindowRes = m_manager->getHalfWindowResolution();
 		const Ogre::Vector2 invWindowRes = m_manager->getInvWindowResolution2x();
@@ -1245,6 +1266,11 @@ namespace Colibri
 		const float canvasAr = m_manager->getCanvasAspectRatio();
 		const float invCanvasAr = m_manager->getCanvasInvAspectRatio();
 
+		const uint8_t colourRgba8[4] = { static_cast<uint8_t>( m_colour.r * 255.0f ),
+										 static_cast<uint8_t>( m_colour.g * 255.0f ),
+										 static_cast<uint8_t>( m_colour.b * 255.0f ),
+										 static_cast<uint8_t>( m_colour.a * 255.0f ) };
+
 		ShapedGlyphVec::const_iterator itor = m_shapes[m_currentState].begin();
 		ShapedGlyphVec::const_iterator endt = m_shapes[m_currentState].end();
 
@@ -1282,10 +1308,18 @@ namespace Colibri
 
 				const RichText &richText = m_richText[m_currentState][shapedGlyph.richTextIdx];
 
-				addQuad( textVertBuffer, topLeft, bottomRight,                        //
-						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,         //
-						 richText.rgba32, parentDerivedTL, parentDerivedBR, invSize,  //
-						 shapedGlyph.glyph->offsetStart,                              //
+				const uint32_t oldRgba32 = richText.rgba32;
+				uint32_t newRgba32 = 0u;
+
+				newRgba32 |= ( ( oldRgba32 & 0xFFu ) * colourRgba8[0] ) / 255u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 8u ) & 0xFFu ) * colourRgba8[1] ) / 255u ) << 8u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 16u ) & 0xFFu ) * colourRgba8[2] ) / 255u ) << 16u;
+				newRgba32 |= ( ( ( ( oldRgba32 >> 24u ) & 0xFFu ) * colourRgba8[3] ) / 255u ) << 24u;
+
+				addQuad( textVertBuffer, topLeft, bottomRight,                  //
+						 shapedGlyph.glyph->width, shapedGlyph.glyph->height,   //
+						 newRgba32, parentDerivedTL, parentDerivedBR, invSize,  //
+						 shapedGlyph.glyph->offsetStart,                        //
 						 canvasAr, invCanvasAr, derivedRot );
 				textVertBuffer += 6u;
 
@@ -1340,7 +1374,7 @@ namespace Colibri
 			m_manager->_addDirtyLabel( this );
 		m_glyphsDirty[state] = true;
 		m_glyphsPlaced[state] = false;
-#if COLIBRIGUI_DEBUG_MEDIUM
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_glyphsAligned[state] = false;
 #endif
 		m_usesBackground = false;
@@ -1426,7 +1460,7 @@ namespace Colibri
 	{
 		RichText rt;
 		rt.ptSize = m_defaultFontSize;
-		rt.rgba32 = m_colour.getAsABGR();
+		rt.rgba32 = m_defaultColour.getAsABGR();
 		rt.noBackground = true;
 		rt.backgroundRgba32 = m_defaultBackgroundColour.getAsABGR();
 		rt.font = m_defaultFont;
@@ -1595,7 +1629,8 @@ namespace Colibri
 		while( itor != end )
 		{
 			Ogre::Vector2 topLeft, bottomRight;
-			getCorners( *itor, topLeft, bottomRight );
+			getAlignmentCorners( *itor, topLeft, bottomRight );
+
 			minTopLeft.makeFloor( topLeft );
 			maxBottomRight.makeCeil( bottomRight );
 			++itor;

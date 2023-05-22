@@ -121,6 +121,20 @@ namespace Colibri
 			}
 		}
 
+		if( m_manager->getTouchOnlyMode() )
+		{
+			m_stateInformation[States::HighlightedButtonAndCursor] =
+				m_stateInformation[States::HighlightedButton];
+			m_stateInformation[States::HighlightedCursor] = m_stateInformation[States::Idle];
+
+			// setDatablock() call above set the wrong material. Re-set it to idle.
+			if( m_currentState == States::HighlightedButtonAndCursor ||
+				m_currentState == States::HighlightedCursor )
+			{
+				setDatablock( m_stateInformation[m_currentState].materialName );
+			}
+		}
+
 		if( !m_overrideSkinColour )
 			m_colour = m_stateInformation[m_currentState].defaultColour;
 
@@ -158,6 +172,20 @@ namespace Colibri
 				m_stateInformation[i] = skinInfos[i]->stateInfo;
 				if( i == m_currentState )
 					setDatablock( m_stateInformation[i].materialName );
+			}
+		}
+
+		if( m_manager->getTouchOnlyMode() )
+		{
+			m_stateInformation[States::HighlightedButtonAndCursor] =
+				m_stateInformation[States::HighlightedButton];
+			m_stateInformation[States::HighlightedCursor] = m_stateInformation[States::Idle];
+
+			// setDatablock() call above set the wrong material. Re-set it to idle.
+			if( m_currentState == States::HighlightedButtonAndCursor ||
+				m_currentState == States::HighlightedCursor )
+			{
+				setDatablock( m_stateInformation[m_currentState].materialName );
 			}
 		}
 
@@ -220,10 +248,13 @@ namespace Colibri
 
 			uint32 lastHlmsCacheHash = apiObject.lastHlmsCache->hash;
 			VertexArrayObject *vao = mVaoPerLod[0].back();
-			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial( apiObject.lastHlmsCache,
-																	  *apiObject.passCache,
-																	  queuedRenderable,
-																	  false );
+			const HlmsCache *hlmsCache = apiObject.hlms->getMaterial(
+				apiObject.lastHlmsCache, *apiObject.passCache, queuedRenderable, false
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+				,
+				nullptr
+#endif
+			);
 			if( lastHlmsCacheHash != hlmsCache->hash )
 			{
 				CbPipelineStateObject *psoCmd = commandBuffer->addCommand<CbPipelineStateObject>();

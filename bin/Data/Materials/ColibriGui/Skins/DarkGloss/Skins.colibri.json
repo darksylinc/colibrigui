@@ -90,7 +90,19 @@
         {
             "material" : "AtlasTransparent",
             "tex_resolution" : [512, 512],
-            "grid_uv" : { "center" : [160, 416, 64, 32] }
+            "grid_uv" :
+            {
+                "comment" :
+                ["We use center_right w/ empty pixel so we can",
+                "increase the hitbox for touch systems.",
+                "SpinnerBtnIncrement does the same in the opposite direction"],
+                "center_right" : [160, 384, 1, 1],
+                "center" : [160, 416, 64, 32]
+            },
+            "borders" :
+            {
+                "right" : [15, 0]
+            }
         },
         "SpinnerBtnDecrement_disabled" :
         {
@@ -112,7 +124,15 @@
         {
             "material" : "AtlasTransparent",
             "tex_resolution" : [512, 512],
-            "grid_uv" : { "center" : [160, 384, 64, 32] }
+            "grid_uv" :
+            {
+                "center_left" : [160, 384, 1, 1],
+                "center" : [160, 384, 64, 32]
+            },
+            "borders" :
+            {
+                "left" : [15, 0]
+            }
         },
         "SpinnerBtnIncrement_disabled" :
         {
@@ -145,6 +165,37 @@
         {
             "copy_from" : "CheckboxTickmarkUnchecked",
             "grid_uv" : { "center" : [128, 448, 32, 32] }
+        },
+
+        "ToggleButton_idle" :
+        {
+            "copy_from" : "Button_idle",
+            "material" : "AtlasRed"
+        },
+        "ToggleButton_disabled" :
+        {
+            "copy_from" : "ToggleButton_idle",
+            "material" : "AtlasRedDisabled"
+        },
+        "ToggleButton_highlighted_cursor" :
+        {
+            "copy_from" : "ToggleButton_idle",
+            "material" : "AtlasRedBrighter"
+        },
+        "ToggleButton_highlighted_button" :
+        {
+            "copy_from" : "Button_highlighted_button",
+            "material" : "AtlasRed"
+        },
+        "ToggleButton_highlighted_button_and_cursor" :
+        {
+            "copy_from" : "ToggleButton_highlighted_button",
+            "material" : "AtlasRedBrighter"
+        },
+        "ToggleButton_pressed" :
+        {
+            "copy_from" : "Button_pressed",
+            "material" : "AtlasRed"
         },
 
         "ProgressbarLayer0" :
@@ -206,6 +257,10 @@
         {
             "all" : "CheckboxTickmarkThirdState"
         },
+        "ToggleButton" :
+        {
+            "auto" : "ToggleButton"
+        },
         "ProgressbarLayer0" :
         {
             "all" : "ProgressbarLayer0",
@@ -255,6 +310,8 @@
         "ProgressbarLayer1"     : "ProgressbarLayer1",
         "SliderLine"            : "SliderLine",
         "SliderHandle"          : "Button",
+        "ToggleButtonUnchecked" : "Button",
+        "ToggleButtonChecked"   : "ToggleButton",
         "RadarChart"            : "RadarChart"
     }
 }
