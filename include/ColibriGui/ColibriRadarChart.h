@@ -81,6 +81,8 @@ namespace Colibri
 
 		DisplaySettings m_displaySettings;
 
+		Ogre::Vector2 m_proportion;
+
 		/// Labels are in virtual canvas, which means we have to reposition
 		/// them every time our widget changes its shape's size
 		void updateLabelsPosition();
@@ -104,7 +106,7 @@ namespace Colibri
 		void _destroy() override;
 
 		/** Set the display settings.
-
+		@remarks
 			If you've already called setDataSeries(), you must call
 			redrawRadarChart() for changes to take effect.
 		@param displaySettings
@@ -113,6 +115,20 @@ namespace Colibri
 		void setDisplaySettings( const DisplaySettings &displaySettings );
 
 		const DisplaySettings &getDisplaySettings() const { return m_displaySettings; }
+
+		/** Sets the proportion the chart should occupy. Useful if you want the background
+			to expand to be much bigger or the widget does not have an aspect ratio of 1:1.
+
+			It affects the text as well.
+		@remarks
+			If you've already called setDataSeries(), you must call
+			redrawRadarChart() for changes to take effect.
+		@param proportion
+			Value in range [0; 1]
+		*/
+		void setPropotion( const Ogre::Vector2 &proportion );
+
+		const Ogre::Vector2 &getPropotion() const { return m_proportion; }
 
 		/** Replaces the current data series with a new one.
 		@param dataSeries

@@ -20,7 +20,8 @@ RadarChart::DisplaySettings::DisplaySettings() :
 //-------------------------------------------------------------------------
 RadarChart::RadarChart( ColibriManager *manager ) :
 	CustomShape( manager ),
-	m_labelDisplay( LabelDisplayNone )
+	m_labelDisplay( LabelDisplayNone ),
+	m_proportion( Ogre::Vector2::UNIT_SCALE )
 {
 }
 //-------------------------------------------------------------------------
@@ -57,6 +58,7 @@ size_t RadarChart::drawChartShape( size_t triOffset, ChartShapeType type, Ogre::
 	const Ogre::Real rot = 360.0f / ( (float)numDataSeries );
 
 	const Ogre::Vector2 spoke( 0, -m_displaySettings.chartSize );
+	const Ogre::Vector2 proportion = m_proportion;
 
 	const size_t numShapes = ( drawAsLine ) ? 2u : 1u;
 
@@ -82,9 +84,9 @@ size_t RadarChart::drawChartShape( size_t triOffset, ChartShapeType type, Ogre::
 
 			Ogre::ColourValue color = ( k == 0 ) ? shapeColor : backgroundColor;
 
-			setTriangle( triOffset * 3u, Ogre::Vector2( 0, 0 ),
-						 rotate( current, rot * static_cast<Ogre::Real>( i ) ),
-						 rotate( next, rot * static_cast<Ogre::Real>( nextIdx ) ), color );
+			setTriangle( triOffset * 3u, Ogre::Vector2( 0, 0 ) * proportion,
+						 rotate( current, rot * static_cast<Ogre::Real>( i ) ) * proportion,
+						 rotate( next, rot * static_cast<Ogre::Real>( nextIdx ) ) * proportion, color );
 			triOffset++;
 		}
 	}
@@ -130,6 +132,11 @@ void RadarChart::drawChartTriangles()
 void RadarChart::setDisplaySettings( const DisplaySettings &displaySettings )
 {
 	m_displaySettings = displaySettings;
+}
+//-------------------------------------------------------------------------
+void RadarChart::setPropotion( const Ogre::Vector2 &proportion )
+{
+	m_proportion = proportion;
 }
 //-------------------------------------------------------------------------
 void RadarChart::setDataSeries( const std::vector<DataEntry> &dataSeries,
@@ -216,10 +223,11 @@ void RadarChart::updateLabelsPosition()
 
 	const Ogre::Vector2 spoke(
 		0, -( m_displaySettings.chartSize + m_displaySettings.chartToLabelDistance ) );
+	const Ogre::Vector2 proportion = m_proportion;
 
 	for( size_t i = 0; i < numDataSeries; ++i )
 	{
-		const Ogre::Vector2 ndcPos = rotate( spoke, rot * static_cast<Ogre::Real>( i ) );
+		const Ogre::Vector2 ndcPos = rotate( spoke, rot * static_cast<Ogre::Real>( i ) ) * proportion;
 		Ogre::Vector2 canvasPos = ( ndcPos * 0.5f + 0.5f ) * m_size;
 
 		canvasPos = canvasPos - m_labels[i]->getSize() * 0.5f;
