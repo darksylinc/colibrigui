@@ -72,6 +72,7 @@ namespace Colibri
 	class LayoutCell;
 	class LogListener;
 	class Progressbar;
+	class RadarChart;
 	class Renderable;
 	struct ShapedGlyph;
 	class Shaper;
