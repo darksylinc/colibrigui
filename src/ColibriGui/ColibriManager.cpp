@@ -1594,8 +1594,10 @@ namespace Colibri
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
 		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
 #else
-		vertexBuffer->upload( localVertexData.data(), 0u, elementsWritten );
-		vertexBufferText->upload( localVertexText.data(), 0u, elementsWrittenText );
+		if( elementsWritten > 0u )
+			vertexBuffer->upload( localVertexData.data(), 0u, elementsWritten );
+		if( elementsWrittenText > 0u )
+			vertexBufferText->upload( localVertexText.data(), 0u, elementsWrittenText );
 #endif
 
 		m_vertexBufferBase = 0;
