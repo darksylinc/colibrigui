@@ -158,15 +158,16 @@ namespace Colibri
 
 		bool m_touchOnlyMode;
 
-		Ogre::Root					* colibri_nullable m_root;
-		Ogre::VaoManager			* colibri_nullable m_vaoManager;
-		Ogre::ObjectMemoryManager	* colibri_nullable m_objectMemoryManager;
-		Ogre::SceneManager			* colibri_nullable m_sceneManager;
-		Ogre::VertexArrayObject		* colibri_nullable m_vao;
-		Ogre::VertexArrayObject		* colibri_nullable m_textVao;
-		Ogre::IndirectBufferPacked	* colibri_nullable m_indirectBuffer;
-		Ogre::CommandBuffer			* colibri_nullable m_commandBuffer;
-		Ogre::HlmsDatablock			* colibri_nullable m_defaultTextDatablock[States::NumStates];
+		Ogre::Root *colibri_nullable                m_root;
+		Ogre::VaoManager *colibri_nullable          m_vaoManager;
+		Ogre::ObjectMemoryManager *colibri_nullable m_objectMemoryManager;
+		Ogre::SceneManager *colibri_nullable        m_sceneManager;
+		Ogre::VertexArrayObject *colibri_nullable   m_vao;
+		Ogre::VertexArrayObject *colibri_nullable   m_textVao;
+		std::vector<Ogre::IndirectBufferPacked *>   m_indirectBuffer;
+		uint32_t                                    m_currIndirectBuffer;
+		Ogre::CommandBuffer *colibri_nullable       m_commandBuffer;
+		Ogre::HlmsDatablock *colibri_nullable       m_defaultTextDatablock[States::NumStates];
 
 		Ogre::Vector2				m_canvasSize;
 		Ogre::Vector2				m_invCanvasSize2x;
@@ -268,6 +269,8 @@ namespace Colibri
 		Ogre::HlmsDatablock * colibri_nonnull * colibri_nullable getDefaultTextDatablock()
 																	{ return m_defaultTextDatablock; }
 		Ogre::HlmsManager *getOgreHlmsManager();
+
+		Ogre::IndirectBufferPacked *getIndirectBuffer();
 
 		/// When true, swaps the controls for RTL languages such as arabic. That means spinners
 		/// increment when clicking left button, for example

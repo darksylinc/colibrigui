@@ -28,7 +28,18 @@ namespace Ogre
 	{
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
 		if( !definition->mSkipLoadStoreSemantics )
+		{
 			initialize( rtv );
+		}
+#	ifdef COLIBRI_MULTIPASS_SUPPORT
+		else
+		{
+			OGRE_EXCEPT(
+				Exception::ERR_INVALIDPARAMS,
+				"skip_load_store_semantics MUST be false when compiled with COLIBRI_MULTIPASS_SUPPORT",
+				"CompositorPassColibriGui::CompositorPassColibriGui" );
+		}
+#	endif
 #endif
 		mCamera = defaultCamera;
 
@@ -65,6 +76,10 @@ namespace Ogre
 		notifyPassPreExecuteListeners();
 
 		m_colibriManager->prepareRenderCommands();
+
+		RenderSystem *renderSystem = sceneManager->getDestinationRenderSystem();
+		renderSystem->executeRenderPassDescriptorDelayedActions();
+
 		m_colibriManager->render();
 
 		sceneManager->_setCurrentCompositorPass( 0 );

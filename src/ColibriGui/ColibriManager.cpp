@@ -59,7 +59,7 @@ namespace Colibri
 		m_objectMemoryManager( 0 ),
 		m_sceneManager( 0 ),
 		m_vao( 0 ),
-		m_indirectBuffer( 0 ),
+		m_currIndirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
 		m_allowingScrollAlways( false ),
 		m_allowingScrollGestureWhileButtonDown( false ),
@@ -128,19 +128,19 @@ namespace Colibri
 		m_skinManager->loadSkins( fullPath );
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::setOgre( Ogre::Root * colibri_nullable root,
-								  Ogre::VaoManager * colibri_nullable vaoManager,
-								  Ogre::SceneManager * colibri_nullable sceneManager )
+	void ColibriManager::setOgre( Ogre::Root *colibri_nullable root,
+								  Ogre::VaoManager *colibri_nullable vaoManager,
+								  Ogre::SceneManager *colibri_nullable sceneManager )
 	{
 		delete m_commandBuffer;
 		m_commandBuffer = 0;
-		if( m_indirectBuffer )
+		for( Ogre::IndirectBufferPacked *indirectBuffer : m_indirectBuffer )
 		{
-			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
-				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
-			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
-			m_indirectBuffer = 0;
+			if( indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
+				indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
+			m_vaoManager->destroyIndirectBuffer( indirectBuffer );
 		}
+		m_indirectBuffer.clear();
 		if( m_vao )
 		{
 			Ogre::ColibriOgreRenderable::destroyVao( m_vao, m_vaoManager );
@@ -161,13 +161,9 @@ namespace Colibri
 		if( vaoManager )
 		{
 			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
-			//m_defaultIndexBuffer = Ogre::ColibriOgreRenderable::createIndexBuffer( vaoManager );
+			// m_defaultIndexBuffer = Ogre::ColibriOgreRenderable::createIndexBuffer( vaoManager );
 			m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, vaoManager );
 			m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, vaoManager );
-			size_t requiredBytes = 1u * sizeof( Ogre::CbDrawStrip );
-			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
-																   Ogre::BT_DYNAMIC_PERSISTENT,
-																   0, false );
 			m_commandBuffer = new Ogre::CommandBuffer();
 			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
 		}
@@ -212,23 +208,45 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	Ogre::HlmsManager *ColibriManager::getOgreHlmsManager()
+	Ogre::HlmsManager *ColibriManager::getOgreHlmsManager() { return m_root->getHlmsManager(); }
+	//-------------------------------------------------------------------------
+	Ogre::IndirectBufferPacked *ColibriManager::getIndirectBuffer()
 	{
-		return m_root->getHlmsManager();
+		if( m_currIndirectBuffer >= m_indirectBuffer.size() ||
+			( m_numWidgets * sizeof( Ogre::CbDrawStrip ) >
+			  m_indirectBuffer[m_currIndirectBuffer]->getNumElements() ) )
+		{
+			// Erase all indirect buffers from [m_currIndirectBuffer; end)
+			// because they must all be too small (if they exist at all)
+			std::vector<Ogre::IndirectBufferPacked *>::const_iterator itor =
+				m_indirectBuffer.begin() + m_currIndirectBuffer;
+			std::vector<Ogre::IndirectBufferPacked *>::const_iterator endt = m_indirectBuffer.end();
+
+			while( itor != endt )
+			{
+				Ogre::IndirectBufferPacked *indirectBuffer = *itor;
+				if( indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
+					indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
+				m_vaoManager->destroyIndirectBuffer( indirectBuffer );
+				++itor;
+			}
+			m_indirectBuffer.erase( m_indirectBuffer.begin() + m_currIndirectBuffer, endt );
+
+			// Create new buffer large enough to hold all widgets.
+			const size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
+			m_indirectBuffer.emplace_back( m_vaoManager->createIndirectBuffer(
+				requiredBytes, Ogre::BT_DYNAMIC_PERSISTENT, 0, false ) );
+		}
+
+		return m_indirectBuffer[m_currIndirectBuffer];
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setSwapRTLControls( bool swapRtl )
 	{
 		m_swapRTLControls = swapRtl;
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
-
-		while( itor != end )
-		{
-			(*itor)->setTransformDirty( Widget::TransformDirtyAll );
-			++itor;
-		}
+		for( Window *window : m_windows )
+			window->setTransformDirty( Widget::TransformDirtyAll );
 	}
 	//-------------------------------------------------------------------------
 	GridLocations::GridLocations ColibriManager::getSwappedGridLocation(
@@ -314,19 +332,13 @@ namespace Colibri
 		m_invCanvasSize2x = 2.0f / canvasSize;
 		m_pixelSize = 1.0f / windowResolution;
 		m_pixelSize2x = 2.0f / windowResolution;
-		m_halfWindowResolution	= windowResolution / 2.0f;
+		m_halfWindowResolution = windowResolution / 2.0f;
 		m_invWindowResolution2x = 2.0f / windowResolution;
 		m_canvasAspectRatio = canvasSize.x / canvasSize.y;
 		m_canvasInvAspectRatio = canvasSize.y / canvasSize.x;
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
-
-		while( itor != end )
-		{
-			(*itor)->_notifyCanvasChanged();
-			++itor;
-		}
+		for( Window *window : m_windows )
+			window->_notifyCanvasChanged();
 
 		m_colibriListener->notifyCanvasOrResolutionUpdated();
 	}
@@ -339,11 +351,11 @@ namespace Colibri
 
 		FocusPair focusedPair;
 
-		//The first window that our button is touching wins. We go in LIFO order.
+		// The first window that our button is touching wins. We go in LIFO order.
 		WindowVec::const_reverse_iterator ritor = m_windows.rbegin();
-		WindowVec::const_reverse_iterator rend  = m_windows.rend();
+		WindowVec::const_reverse_iterator rendt = m_windows.rend();
 
-		while( ritor != rend && !focusedPair.widget &&
+		while( ritor != rendt && !focusedPair.widget &&
 			   ( !focusedPair.window || !focusedPair.window->getClickable() ) )
 		{
 			focusedPair = ( *ritor )->_setIdleCursorMoved( newPosNdc );
@@ -355,9 +367,9 @@ namespace Colibri
 			//Do not steal focus from keyboard (by only moving the cursor) if we're holding
 			//the main key button down (clicking does steal the focus from keyboard in
 			//setMouseCursorPressed)
-			const bool oldFullyFocusedByKey = m_primaryButtonDown &&
+			const bool oldFullyFocusedByKey = m_primaryButtonDown &&  //
 											  m_keyboardFocusedPair.widget == m_cursorFocusedPair.widget;
-			const bool newFullyFocusedByKey = m_primaryButtonDown &&
+			const bool newFullyFocusedByKey = m_primaryButtonDown &&  //
 											  m_keyboardFocusedPair.widget == focusedPair.widget;
 
 			if( m_cursorFocusedPair.widget && !oldFullyFocusedByKey )
@@ -377,8 +389,8 @@ namespace Colibri
 				{
 					if( m_mouseCursorButtonDown )
 					{
-						//This call may end up calling focusedPair.widget->getParent()->setState()
-						//which would override ours, thus it needs to be called first
+						// This call may end up calling focusedPair.widget->getParent()->setState()
+						// which would override ours, thus it needs to be called first
 						overrideKeyboardFocusWith( focusedPair );
 					}
 
@@ -390,8 +402,8 @@ namespace Colibri
 				}
 				else
 				{
-					//This call may end up calling focusedPair.widget->getParent()->setState()
-					//which would override ours, thus it needs to be called first
+					// This call may end up calling focusedPair.widget->getParent()->setState()
+					// which would override ours, thus it needs to be called first
 					overrideKeyboardFocusWith( focusedPair );
 
 					focusedPair.widget->setState( States::Pressed );
@@ -421,18 +433,20 @@ namespace Colibri
 	void ColibriManager::setMouseCursorMoved( Ogre::Vector2 newPosInCanvas )
 	{
 		const Ogre::Vector2 oldPos = m_mouseCursorPosNdc;
-		newPosInCanvas = (newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE);
+		newPosInCanvas = ( newPosInCanvas * m_invCanvasSize2x - Ogre::Vector2::UNIT_SCALE );
 		m_mouseCursorPosNdc = newPosInCanvas;
 
-		if( m_allowingScrollGestureWhileButtonDown && (m_allowingScrollAlways ||
-			(m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll())) )
+		if( m_allowingScrollGestureWhileButtonDown &&
+			( m_allowingScrollAlways ||
+			  ( m_cursorFocusedPair.window && m_cursorFocusedPair.window->hasScroll() ) ) )
 		{
-			bool scrollConsumed = setScroll( (oldPos - m_mouseCursorPosNdc) * 0.5f * m_canvasSize );
+			bool scrollConsumed = setScroll( ( oldPos - m_mouseCursorPosNdc ) * 0.5f * m_canvasSize );
 			//^^ setScroll will call updateWidgetsFocusedByCursor if necessary
 
-			if( !scrollConsumed ){
+			if( !scrollConsumed )
+			{
 				setCancel();
-				//setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
+				// setCancel changed m_allowingScrollGestureWhileButtonDown, so restore it
 				m_allowingScrollGestureWhileButtonDown = true;
 			}
 		}
@@ -446,8 +460,8 @@ namespace Colibri
 	{
 		if( m_cursorFocusedPair.widget )
 		{
-			//This call may end up calling m_cursorFocusedPair.widget->getParent()->setState(),
-			//which would override ours, thus it needs to be called first
+			// This call may end up calling m_cursorFocusedPair.widget->getParent()->setState(),
+			// which would override ours, thus it needs to be called first
 			overrideKeyboardFocusWith( m_cursorFocusedPair );
 
 			if( m_cursorFocusedPair.widget->isPressable() )
@@ -465,7 +479,7 @@ namespace Colibri
 		}
 		else if( m_primaryButtonDown )
 		{
-			//User clicked outside any widget while keyboard was being hold down. Cancel that key.
+			// User clicked outside any widget while keyboard was being hold down. Cancel that key.
 			setCancel();
 		}
 
@@ -556,7 +570,7 @@ namespace Colibri
 			newKeyboardState = States::HighlightedButtonAndCursor;
 		}
 
-		//Highlight with cursor
+		// Highlight with cursor
 		if( m_cursorFocusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( newCursorState, false );
@@ -566,7 +580,7 @@ namespace Colibri
 		m_mouseCursorButtonDown = false;
 		m_allowingScrollGestureWhileButtonDown = false;
 
-		//Highlight with keyboard
+		// Highlight with keyboard
 		if( m_keyboardFocusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( newKeyboardState, true );
@@ -575,8 +589,8 @@ namespace Colibri
 		}
 		m_primaryButtonDown = false;
 
-		//Cursor and keyboard are highlighting the same widget.
-		//Let's make sure we only call the callback once.
+		// Cursor and keyboard are highlighting the same widget.
+		// Let's make sure we only call the callback once.
 		if( cursorAndKeyboardMatch && m_cursorFocusedPair.widget )
 			callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 	}
@@ -675,8 +689,8 @@ namespace Colibri
 	{
 		updateKeyDirection( direction );
 		m_keyDirDown = direction;
-		m_keyTextInputDown	= 0;
-		m_keyModInputDown	= 0;
+		m_keyTextInputDown = 0;
+		m_keyModInputDown = 0;
 		m_keyRepeatWaitTimer = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -690,14 +704,8 @@ namespace Colibri
 		if( !m_widgetTransformsDirty )
 			return;
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator endt = m_windows.end();
-
-		while( itor != endt )
-		{
-			( *itor )->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
-			++itor;
-		}
+		for( Window *window : m_windows )
+			window->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
 
 		m_widgetTransformsDirty = false;
 	}
@@ -709,7 +717,7 @@ namespace Colibri
 		{
 			if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget->consumesScroll() )
 			{
-				//If the widget focused by the cursor consumes the scroll, just update and leave.
+				// If the widget focused by the cursor consumes the scroll, just update and leave.
 				updateWidgetsFocusedByCursor();
 				return true;
 			}
@@ -755,8 +763,8 @@ namespace Colibri
 			m_keyboardFocusedPair.widget->_setTextSpecialKey( keyCode, keyMod, 1u );
 		if( m_keyDirDown != Borders::NumBorders )
 			setKeyDirectionReleased( m_keyDirDown );
-		m_keyTextInputDown	= keyCode;
-		m_keyModInputDown	= keyMod;
+		m_keyTextInputDown = keyCode;
+		m_keyModInputDown = keyMod;
 		m_keyRepeatWaitTimer = 0;
 	}
 	//-------------------------------------------------------------------------
@@ -788,16 +796,15 @@ namespace Colibri
 		if( m_keyboardFocusedPair.widget )
 		{
 			retVal = m_keyboardFocusedPair.widget->_getImeLocation();
-			retVal = (retVal + 1.0f) * m_halfWindowResolution;
+			retVal = ( retVal + 1.0f ) * m_halfWindowResolution;
 		}
 
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	Window* ColibriManager::createWindow( Window * colibri_nullable parent )
+	Window *ColibriManager::createWindow( Window *colibri_nullable parent )
 	{
-		COLIBRI_ASSERT( (!parent || parent->isWindow()) &&
-						"parent can only be null or a window!" );
+		COLIBRI_ASSERT( ( !parent || parent->isWindow() ) && "parent can only be null or a window!" );
 
 		Window *retVal = new Window( this );
 
@@ -830,7 +837,7 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	template <>
-	Label * colibri_nonnull ColibriManager::createWidget<Label>( Widget * colibri_nonnull parent )
+	Label *colibri_nonnull ColibriManager::createWidget<Label>( Widget *colibri_nonnull parent )
 	{
 		Label *retVal = _createWidget<Label>( parent );
 		_notifyLabelCreated( retVal );
@@ -838,21 +845,20 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	template <>
-	LabelBmp *colibri_nonnull
-	ColibriManager::createWidget<LabelBmp>( Widget *colibri_nonnull parent )
+	LabelBmp *colibri_nonnull ColibriManager::createWidget<LabelBmp>( Widget *colibri_nonnull parent )
 	{
 		LabelBmp *retVal = _createWidget<LabelBmp>( parent );
 		_notifyLabelBmpCreated( retVal );
 		return retVal;
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_notifyLabelCreated( Label* label )
+	void ColibriManager::_notifyLabelCreated( Label *label )
 	{
 		m_labels.push_back( label );
 		++m_numLabelsAndBmp;
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_notifyLabelBmpCreated( LabelBmp* label )
+	void ColibriManager::_notifyLabelBmpCreated( LabelBmp *label )
 	{
 		m_labelsBmp.push_back( label );
 		++m_numLabelsAndBmp;
@@ -877,8 +883,10 @@ namespace Colibri
 
 			if( itor == m_windows.end() )
 			{
-				m_logListener->log( "Window does not belong to this ColibriManager! "
-									"Double free perhaps?", LogSeverity::Fatal );
+				m_logListener->log(
+					"Window does not belong to this ColibriManager! "
+					"Double free perhaps?",
+					LogSeverity::Fatal );
 			}
 			else
 				m_windows.erase( itor );
@@ -919,8 +927,8 @@ namespace Colibri
 
 		if( widget->isWindow() )
 		{
-			COLIBRI_ASSERT( dynamic_cast<Window*>( widget ) );
-			destroyWindow( static_cast<Window*>( widget ) );
+			COLIBRI_ASSERT( dynamic_cast<Window *>( widget ) );
+			destroyWindow( static_cast<Window *>( widget ) );
 		}
 		else
 		{
@@ -934,16 +942,16 @@ namespace Colibri
 
 			if( widget->isLabel() )
 			{
-				//We do not update m_numTextGlyphs since it's pointless to shrink it.
-				//It will eventually be recalculated anyway
+				// We do not update m_numTextGlyphs since it's pointless to shrink it.
+				// It will eventually be recalculated anyway
 				LabelVec::iterator it = std::find( m_labels.begin(), m_labels.end(), widget );
 				Ogre::efficientVectorRemove( m_labels, it );
 				--m_numLabelsAndBmp;
 			}
 			else if( widget->isLabelBmp() )
 			{
-				//We do not update m_numTextGlyphsBmp since it's pointless to shrink it.
-				//It will eventually be recalculated anyway
+				// We do not update m_numTextGlyphsBmp since it's pointless to shrink it.
+				// It will eventually be recalculated anyway
 				LabelBmpVec::iterator it = std::find( m_labelsBmp.begin(), m_labelsBmp.end(), widget );
 				Ogre::efficientVectorRemove( m_labelsBmp, it );
 				--m_numLabelsAndBmp;
@@ -958,19 +966,16 @@ namespace Colibri
 	void ColibriManager::destroyDelayedWidgets()
 	{
 		m_delayingDestruction = false;
-		DelayedDestructionVec::const_iterator itor = m_delayedDestruction.begin();
-		DelayedDestructionVec::const_iterator endt = m_delayedDestruction.end();
 
-		while( itor != endt )
+		for( const DelayedDestruction &delayedWidget : m_delayedDestruction )
 		{
-			if( itor->windowVariantCalled )
+			if( delayedWidget.windowVariantCalled )
 			{
-				COLIBRI_ASSERT_HIGH( dynamic_cast<Window *>( itor->widget ) );
-				destroyWindow( static_cast<Window *>( itor->widget ) );
+				COLIBRI_ASSERT_HIGH( dynamic_cast<Window *>( delayedWidget.widget ) );
+				destroyWindow( static_cast<Window *>( delayedWidget.widget ) );
 			}
 			else
-				destroyWidget( itor->widget );
-			++itor;
+				destroyWidget( delayedWidget.widget );
 		}
 
 		m_delayedDestruction.clear();
@@ -991,10 +996,7 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_setAsParentlessWindow( Window *window )
-	{
-		m_windows.push_back( window );
-	}
+	void ColibriManager::_setAsParentlessWindow( Window *window ) { m_windows.push_back( window ); }
 	//-------------------------------------------------------------------------
 	void ColibriManager::setAsParentlessWindow( Window *window )
 	{
@@ -1014,10 +1016,7 @@ namespace Colibri
 			m_dirtyWidgets.push_back( widget );
 	}
 	//-----------------------------------------------------------------------------------
-	void ColibriManager::_addUpdateWidget( Widget *widget )
-	{
-		m_updateWidgets.push_back( widget );
-	}
+	void ColibriManager::_addUpdateWidget( Widget *widget ) { m_updateWidgets.push_back( widget ); }
 	//-----------------------------------------------------------------------------------
 	void ColibriManager::_removeUpdateWidget( Widget *widget )
 	{
@@ -1034,7 +1033,7 @@ namespace Colibri
 		FocusPair focusedPair = _focusedPair;
 		focusedPair.widget = focusedPair.widget->getFirstKeyboardNavigableParent();
 
-		//Mouse can steal focus from keyboard and force them to match.
+		// Mouse can steal focus from keyboard and force them to match.
 		if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget != focusedPair.widget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::Idle );
@@ -1043,9 +1042,9 @@ namespace Colibri
 		m_keyboardFocusedPair = focusedPair;
 		m_primaryButtonDown = false;
 
-		//If cursor clicked on a widget which is not navigable by the keyboard, then the cursor
-		//is setting a different state for that widget. We need to switch the keyboard one
-		//to highlighted
+		// If cursor clicked on a widget which is not navigable by the keyboard, then the cursor
+		// is setting a different state for that widget. We need to switch the keyboard one
+		// to highlighted
 		if( focusedPair.widget != cursorWidget )
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton, false );
@@ -1055,13 +1054,13 @@ namespace Colibri
 	//-----------------------------------------------------------------------------------
 	void ColibriManager::overrideCursorFocusWith( const FocusPair &focusedPair )
 	{
-		//Keyboard can cancel mouse actions, but it won't steal his focus.
+		// Keyboard can cancel mouse actions, but it won't steal his focus.
 		if( m_cursorFocusedPair.widget && m_cursorFocusedPair.widget != focusedPair.widget )
 		{
 			m_cursorFocusedPair.widget->setState( States::HighlightedCursor, false );
 			callActionListeners( m_cursorFocusedPair.widget, Action::Cancel );
 		}
-		//m_cursorFocusedPair = focusedPair;
+		// m_cursorFocusedPair = focusedPair;
 		m_mouseCursorButtonDown = false;
 	}
 	//-----------------------------------------------------------------------------------
@@ -1071,17 +1070,6 @@ namespace Colibri
 		COLIBRI_ASSERT_LOW( m_dirtyLabelBmps.empty() && "updateDirtyLabels has not been called!" );
 
 		bool anyVaoChanged = false;
-
-		if( m_numWidgets * sizeof( Ogre::CbDrawStrip ) > m_indirectBuffer->getNumElements() )
-		{
-			if( m_indirectBuffer->getMappingState() != Ogre::MS_UNMAPPED )
-				m_indirectBuffer->unmap( Ogre::UO_UNMAP_ALL );
-			m_vaoManager->destroyIndirectBuffer( m_indirectBuffer );
-			const size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
-			m_indirectBuffer = m_vaoManager->createIndirectBuffer( requiredBytes,
-																   Ogre::BT_DYNAMIC_PERSISTENT,
-																   0, false );
-		}
 
 		{
 			// Vertex buffer for most widgets
@@ -1095,9 +1083,8 @@ namespace Colibri
 			const uint32_t currVertexCount = static_cast<uint32_t>( vertexBuffer->getNumElements() );
 			if( requiredVertexCount > currVertexCount )
 			{
-				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
-															  currVertexCount +
-															  (currVertexCount >> 1u) );
+				const Ogre::uint32 newVertexCount =
+					std::max( requiredVertexCount, currVertexCount + ( currVertexCount >> 1u ) );
 				Ogre::ColibriOgreRenderable::destroyVao( m_vao, m_vaoManager );
 				m_vao = Ogre::ColibriOgreRenderable::createVao( newVertexCount, m_vaoManager );
 
@@ -1106,17 +1093,15 @@ namespace Colibri
 		}
 
 		{
-			//Vertex buffer for text
-			const Ogre::uint32 requiredVertexCount =
-					static_cast<Ogre::uint32>( m_numTextGlyphs * 6u );
+			// Vertex buffer for text
+			const Ogre::uint32 requiredVertexCount = static_cast<Ogre::uint32>( m_numTextGlyphs * 6u );
 
 			Ogre::VertexBufferPacked *vertexBuffer = m_textVao->getBaseVertexBuffer();
 			const Ogre::uint32 currVertexCount = (uint32_t)vertexBuffer->getNumElements();
 			if( requiredVertexCount > currVertexCount )
 			{
-				const Ogre::uint32 newVertexCount = std::max( requiredVertexCount,
-															  currVertexCount +
-															  (currVertexCount >> 1u) );
+				const Ogre::uint32 newVertexCount =
+					std::max( requiredVertexCount, currVertexCount + ( currVertexCount >> 1u ) );
 				Ogre::ColibriOgreRenderable::destroyVao( m_textVao, m_vaoManager );
 				m_textVao = Ogre::ColibriOgreRenderable::createTextVao( newVertexCount, m_vaoManager );
 				anyVaoChanged = true;
@@ -1125,21 +1110,14 @@ namespace Colibri
 
 		if( anyVaoChanged )
 		{
-			WindowVec::const_iterator itor = m_windows.begin();
-			WindowVec::const_iterator end  = m_windows.end();
-
-			while( itor != end )
-			{
-				(*itor)->broadcastNewVao( m_vao, m_textVao );
-				++itor;
-			}
+			for( Window *window : m_windows )
+				window->broadcastNewVao( m_vao, m_textVao );
 		}
-
 	}
 	//-------------------------------------------------------------------------
 	template <typename T>
-	void ColibriManager::autosetNavigation( const std::vector<T> &container,
-											size_t _start, size_t _numWidgets )
+	void ColibriManager::autosetNavigation( const std::vector<T> &container, size_t _start,
+											size_t _numWidgets )
 	{
 		COLIBRI_ASSERT( _start + _numWidgets <= container.size() );
 
@@ -1147,13 +1125,13 @@ namespace Colibri
 		const ptrdiff_t numWidgets = (ptrdiff_t)_numWidgets;
 
 		typename std::vector<T>::const_iterator itor = container.begin() + start;
-		typename std::vector<T>::const_iterator end  = container.begin() + start + numWidgets;
+		typename std::vector<T>::const_iterator endt = container.begin() + start + numWidgets;
 
-		//Remove existing links
-		while( itor != end )
+		// Remove existing links
+		while( itor != endt )
 		{
 			Widget *widget = *itor;
-			for( size_t i=0; i<4u; ++i )
+			for( size_t i = 0; i < 4u; ++i )
 			{
 				if( widget->isKeyboardNavigable() && widget->m_autoSetNextWidget[i] )
 					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
@@ -1161,47 +1139,42 @@ namespace Colibri
 			++itor;
 		}
 
-		//Search for them again
+		// Search for them again
 		itor = container.begin() + start;
 
-		while( itor != end )
+		while( itor != endt )
 		{
 			Widget *widget = *itor;
 
 			if( widget->isKeyboardNavigable() )
 			{
 				Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
-				float closestSiblingDistances[Borders::NumBorders] =
-				{
-					std::numeric_limits<float>::max(),
-					std::numeric_limits<float>::max(),
-					std::numeric_limits<float>::max(),
-					std::numeric_limits<float>::max()
+				float closestSiblingDistances[Borders::NumBorders] = {
+					std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max(), std::numeric_limits<float>::max()
 				};
 
 				typename std::vector<T>::const_iterator it2 = itor + 1u;
-				while( it2 != end )
+				while( it2 != endt )
 				{
 					Widget *widget2 = *it2;
 
 					if( widget2->isKeyboardNavigable() )
 					{
-						const Ogre::Vector2 cornerToCorner[4] =
-						{
-							widget2->m_position -
-							widget->m_position,
+						const Ogre::Vector2 cornerToCorner[4] = {
+							widget2->m_position - widget->m_position,
 
 							Ogre::Vector2( widget2->getRight(), widget2->m_position.y ) -
-							Ogre::Vector2( widget->getRight(), widget->m_position.y ),
+								Ogre::Vector2( widget->getRight(), widget->m_position.y ),
 
 							Ogre::Vector2( widget2->m_position.x, widget2->getBottom() ) -
-							Ogre::Vector2( widget->m_position.x, widget->getBottom() ),
+								Ogre::Vector2( widget->m_position.x, widget->getBottom() ),
 
 							Ogre::Vector2( widget2->getRight(), widget2->getBottom() ) -
-							Ogre::Vector2( widget->getRight(), widget->getBottom() ),
+								Ogre::Vector2( widget->getRight(), widget->getBottom() ),
 						};
 
-						for( size_t i=0; i<4u; ++i )
+						for( size_t i = 0; i < 4u; ++i )
 						{
 							Ogre::Vector2 dirTo = cornerToCorner[i];
 
@@ -1251,7 +1224,7 @@ namespace Colibri
 					++it2;
 				}
 
-				for( size_t i=0; i<4u; ++i )
+				for( size_t i = 0; i < 4u; ++i )
 				{
 					if( widget->m_autoSetNextWidget[i] && !widget->m_nextWidget[i] )
 						widget->setNextWidget( closestSiblings[i], static_cast<Borders::Borders>( i ) );
@@ -1266,40 +1239,31 @@ namespace Colibri
 	{
 		if( window->m_widgetNavigationDirty )
 		{
-			//Update the widgets from this 'window'
+			// Update the widgets from this 'window'
 			autosetNavigation( window->m_children, 0, window->m_numWidgets );
 			window->m_widgetNavigationDirty = false;
 		}
 
 		if( window->m_windowNavigationDirty )
 		{
-			//Update the widgets of the children windows from this 'window'
+			// Update the widgets of the children windows from this 'window'
 			autosetNavigation( window->m_childWindows, 0, window->m_childWindows.size() );
 			window->m_windowNavigationDirty = false;
 		}
 
 		if( window->m_childrenNavigationDirty )
 		{
-			//Our windows' window are dirty
-			WindowVec::const_iterator itor = window->m_childWindows.begin();
-			WindowVec::const_iterator end  = window->m_childWindows.end();
-
-			while( itor != end )
-				autosetNavigation( *itor++ );
+			// Our windows' window are dirty
+			for( Window *childWindow : window->m_childWindows )
+				autosetNavigation( childWindow );
 
 			window->m_childrenNavigationDirty = false;
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_notifyNumGlyphsIsDirty()
-	{
-		m_numGlyphsDirty = true;
-	}
+	void ColibriManager::_notifyNumGlyphsIsDirty() { m_numGlyphsDirty = true; }
 	//-------------------------------------------------------------------------
-	void ColibriManager::_notifyNumGlyphsBmpIsDirty()
-	{
-		m_numGlyphsBmpDirty = true;
-	}
+	void ColibriManager::_notifyNumGlyphsBmpIsDirty() { m_numGlyphsBmpDirty = true; }
 	//-------------------------------------------------------------------------
 	void ColibriManager::_updateDirtyLabels()
 	{
@@ -1370,11 +1334,8 @@ namespace Colibri
 
 		if( m_windowNavigationDirty )
 		{
-			WindowVec::const_iterator itor = m_windows.begin();
-			WindowVec::const_iterator end  = m_windows.end();
-
-			while( itor != end )
-				autosetNavigation( *itor++ );
+			for( Window *window : m_windows )
+				autosetNavigation( window );
 
 			m_windowNavigationDirty = false;
 		}
@@ -1391,7 +1352,7 @@ namespace Colibri
 		m_zOrderHasDirtyChildren = false;
 	}
 	//-------------------------------------------------------------------------
-	bool compareZOrder( const Window* w1, const Window* w2 )
+	bool compareZOrder( const Window *w1, const Window *w2 )
 	{
 		return w1->_getZOrderInternal() < w2->_getZOrderInternal();
 	}
@@ -1403,28 +1364,16 @@ namespace Colibri
 			std::stable_sort( windows.begin(), windows.end(), compareZOrder );
 		}
 
-		WindowVec::iterator itor = windows.begin();
-		WindowVec::iterator endt = windows.end();
-
-		while( itor != endt )
+		for( Window *window : windows )
 		{
-			if( ( *itor )->getZOrderHasDirtyChildren() )
-			{
-				( *itor )->updateZOrderDirty();
-			}
-			++itor;
+			if( window->getZOrderHasDirtyChildren() )
+				window->updateZOrderDirty();
 		}
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_setWindowNavigationDirty()
-	{
-		m_windowNavigationDirty = true;
-	}
+	void ColibriManager::_setWindowNavigationDirty() { m_windowNavigationDirty = true; }
 	//-------------------------------------------------------------------------
-	void ColibriManager::_setWidgetTransformsDirty()
-	{
-		m_widgetTransformsDirty = true;
-	}
+	void ColibriManager::_setWidgetTransformsDirty() { m_widgetTransformsDirty = true; }
 	//-------------------------------------------------------------------------
 	void ColibriManager::_setZOrderWindowDirty( bool windowInListDirty )
 	{
@@ -1432,21 +1381,18 @@ namespace Colibri
 		m_zOrderHasDirtyChildren |= windowInListDirty;
 	}
 	//-------------------------------------------------------------------------
-	void ColibriManager::_addDirtyLabel( Label *label )
-	{
-		m_dirtyLabels.push_back( label );
-	}
+	void ColibriManager::_addDirtyLabel( Label *label ) { m_dirtyLabels.push_back( label ); }
 	//-------------------------------------------------------------------------
 	void ColibriManager::_addDirtyLabelBmp( LabelBmp *label ) { m_dirtyLabelBmps.push_back( label ); }
 	//-------------------------------------------------------------------------
 	void ColibriManager::scrollToWidget( Widget *widget )
 	{
-		//Only scroll if the immediate parent is a window.
+		// Only scroll if the immediate parent is a window.
 		Window *parentWindow = widget->getParent()->getAsWindow();
 		if( parentWindow )
 		{
-			//Ensure the widget is up to date. The window is implicitly going to be updated.
-			//widget->updateDerivedTransformFromParent();
+			// Ensure the widget is up to date. The window is implicitly going to be updated.
+			// widget->updateDerivedTransformFromParent();
 
 			const Ogre::Vector2 currentScroll = parentWindow->getCurrentScroll();
 
@@ -1516,6 +1462,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::update( float timeSinceLast )
 	{
+		m_currIndirectBuffer = 0u;
+
 		updateAllDerivedTransforms();
 
 		//_setTextSpecialKey must be called before autosetNavigation
@@ -1547,7 +1495,7 @@ namespace Colibri
 		if( m_keyboardFocusedPair.widget && !m_keyboardFocusedPair.widget->isKeyboardNavigable() )
 			m_keyboardFocusedPair.widget = 0;
 		if( m_cursorFocusedPair.widget &&
-			(m_cursorFocusedPair.widget->isHidden() || m_cursorFocusedPair.widget->isDisabled()) )
+			( m_cursorFocusedPair.widget->isHidden() || m_cursorFocusedPair.widget->isDisabled() ) )
 		{
 			m_cursorFocusedPair = m_keyboardFocusedPair;
 		}
@@ -1582,48 +1530,23 @@ namespace Colibri
 			updateZOrderDirty();
 		}
 
-		{
-			WindowVec::const_iterator itor = m_windows.begin();
-			WindowVec::const_iterator endt = m_windows.end();
+		for( Window *window : m_windows )
+			cursorFocusDirty |= window->update( timeSinceLast );
 
-			while( itor != endt )
-			{
-				cursorFocusDirty |= ( *itor )->update( timeSinceLast );
-				++itor;
-			}
-		}
-
-		{
-			WidgetVec::const_iterator itor = m_dirtyWidgets.begin();
-			WidgetVec::const_iterator endt = m_dirtyWidgets.end();
-
-			while( itor != endt )
-			{
-				( *itor )->setTransformDirty( Widget::TransformDirtyAll );
-				++itor;
-			}
-
-			m_dirtyWidgets.clear();
-		}
+		for( Widget *dirtyWidget : m_dirtyWidgets )
+			dirtyWidget->setTransformDirty( Widget::TransformDirtyAll );
+		m_dirtyWidgets.clear();
 
 		if( cursorFocusDirty )
 		{
-			//Scroll changed, cursor may now be highlighting a different widget
+			// Scroll changed, cursor may now be highlighting a different widget
 			updateWidgetsFocusedByCursor();
 		}
 
 		m_shaperManager->updateGpuBuffers();
 
-		{
-			WidgetVec::const_iterator itor = m_updateWidgets.begin();
-			WidgetVec::const_iterator endt = m_updateWidgets.end();
-
-			while( itor != endt )
-			{
-				( *itor )->_update( timeSinceLast );
-				++itor;
-			}
-		}
+		for( Widget *updateWidget : m_updateWidgets )
+			updateWidget->_update( timeSinceLast );
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::prepareRenderCommands()
@@ -1635,32 +1558,45 @@ namespace Colibri
 		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
 		Ogre::VertexBufferPacked *vertexBufferText = m_textVao->getBaseVertexBuffer();
 
-		UiVertex *vertex = reinterpret_cast<UiVertex*>(
-							   vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
+#ifndef COLIBRI_MULTIPASS_SUPPORT
+		UiVertex *vertex =
+			reinterpret_cast<UiVertex *>( vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
+#else
+		std::vector<UiVertex> localVertexData;
+		localVertexData.resize( vertexBuffer->getNumElements() );
+		UiVertex *vertex = localVertexData.data();
+#endif
 		UiVertex *startOffset = vertex;
 		m_vertexBufferBase = startOffset;
 
-		GlyphVertex *vertexText = reinterpret_cast<GlyphVertex*>(
-									  vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
+#ifndef COLIBRI_MULTIPASS_SUPPORT
+		GlyphVertex *vertexText = reinterpret_cast<GlyphVertex *>(
+			vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
+#else
+		std::vector<GlyphVertex> localVertexText;
+		localVertexText.resize( vertexBufferText->getNumElements() );
+		GlyphVertex *vertexText = localVertexText.data();
+#endif
 		GlyphVertex *startOffsetText = vertexText;
 		m_textVertexBufferBase = startOffsetText;
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
-
-		while( itor != end )
+		for( Window *window : m_windows )
 		{
-			( *itor )->_fillBuffersAndCommands( &vertex, &vertexText, -Ogre::Vector2::UNIT_SCALE,
-												Ogre::Vector2::ZERO, Matrix2x3::IDENTITY );
-			++itor;
+			window->_fillBuffersAndCommands( &vertex, &vertexText, -Ogre::Vector2::UNIT_SCALE,
+											 Ogre::Vector2::ZERO, Matrix2x3::IDENTITY );
 		}
 
 		const size_t elementsWritten = size_t( vertex - startOffset );
 		const size_t elementsWrittenText = size_t( vertexText - startOffsetText );
 		COLIBRI_ASSERT( elementsWritten <= vertexBuffer->getNumElements() );
 		COLIBRI_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
+#ifndef COLIBRI_MULTIPASS_SUPPORT
 		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
 		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
+#else
+		vertexBuffer->upload( localVertexData.data(), 0u, elementsWritten );
+		vertexBufferText->upload( localVertexText.data(), 0u, elementsWrittenText );
+#endif
 
 		m_vertexBufferBase = 0;
 		m_textVertexBufferBase = 0;
@@ -1694,16 +1630,16 @@ namespace Colibri
 		apiObjects.hlms = hlmsColibri;
 		apiObjects.lastVaoName = 0;
 		apiObjects.commandBuffer = m_commandBuffer;
-		apiObjects.indirectBuffer = m_indirectBuffer;
+		apiObjects.indirectBuffer = getIndirectBuffer();
 		if( m_vaoManager->supportsIndirectBuffers() )
 		{
-			apiObjects.indirectDraw = reinterpret_cast<uint8_t*>(
-										  m_indirectBuffer->map( 0,
-																 m_indirectBuffer->getNumElements() ) );
+			apiObjects.indirectDraw = reinterpret_cast<uint8_t *>(
+				apiObjects.indirectBuffer->map( 0, apiObjects.indirectBuffer->getNumElements() ) );
 		}
 		else
 		{
-			apiObjects.indirectDraw = reinterpret_cast<uint8_t*>( m_indirectBuffer->getSwBufferPtr() );
+			apiObjects.indirectDraw =
+				reinterpret_cast<uint8_t *>( apiObjects.indirectBuffer->getSwBufferPtr() );
 		}
 		apiObjects.startIndirectDraw = apiObjects.indirectDraw;
 		apiObjects.lastDatablock = 0;
@@ -1724,14 +1660,8 @@ namespace Colibri
 		m_breadthFirst[2].clear();
 		m_breadthFirst[3].clear();
 
-		WindowVec::const_iterator itor = m_windows.begin();
-		WindowVec::const_iterator end  = m_windows.end();
-
-		while( itor != end )
-		{
-			(*itor)->_addCommands( apiObjects, false );
-			++itor;
-		}
+		for( Window *window : m_windows )
+			window->_addCommands( apiObjects, false );
 
 		if( apiObjects.drawCountPtr && apiObjects.drawCountPtr->primCount == 0u )
 		{
@@ -1744,12 +1674,13 @@ namespace Colibri
 		}
 
 		if( m_vaoManager->supportsIndirectBuffers() )
-			m_indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
+			apiObjects.indirectBuffer->unmap( Ogre::UO_KEEP_PERSISTENT );
 
 		hlms->preCommandBufferExecution( m_commandBuffer );
 		m_commandBuffer->execute();
 		hlms->postCommandBufferExecution( m_commandBuffer );
 
+		++m_currIndirectBuffer;
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_renderingStarted = false;
 #endif

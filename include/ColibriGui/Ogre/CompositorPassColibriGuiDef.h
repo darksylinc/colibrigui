@@ -5,6 +5,8 @@
 
 #include "Compositor/Pass/OgreCompositorPassDef.h"
 
+#include "ColibriGui/ColibriGuiPrerequisites.h"
+
 namespace Ogre
 {
 	/** @ingroup Api_Backend
@@ -41,8 +43,10 @@ namespace Ogre
 			mProfilingId = "Colibri Gui";
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
+#	ifndef COLIBRI_MULTIPASS_SUPPORT
 			// Default behavior is different from most passes
 			mSkipLoadStoreSemantics = true;
+#	endif
 #endif
 		}
 	};
