@@ -45,13 +45,6 @@ namespace Colibri
 			LabelDisplayName
 		};
 
-		enum ChartShapeType
-		{
-			ShapeOutline,
-			ShapeCurrent,
-			ShapeNext
-		};
-
 		struct DisplaySettings
 		{
 			/// How big the chart should be. In range (0; 1)
@@ -63,11 +56,18 @@ namespace Colibri
 			/// chartSize + chartToLabelDistance <= 1
 			float chartToLabelDistance;
 
-			Ogre::ColourValue backgroundColor;
+			Ogre::ColourValue emptyBackgroundColor;
+			Ogre::ColourValue radarBackgroundColor;
 			Ogre::ColourValue darkColor;
 			Ogre::ColourValue lightColor;
+			Ogre::ColourValue fgLineColor;
 
-			float lineThickness;
+			float fgLineThickness;
+
+			float    bgTopRingThickness;
+			float    bgRingThickness;
+			float    bgSpokeThickness;
+			uint32_t numRings;
 
 			DisplaySettings();
 		};
@@ -87,17 +87,17 @@ namespace Colibri
 		/// them every time our widget changes its shape's size
 		void updateLabelsPosition();
 
-		Ogre::Vector2 rotate( Ogre::Vector2 start, Ogre::Real angle );
+		Ogre::Vector2 rotate( Ogre::Vector2 start, Ogre::Radian angle );
 
 		/// Draws the polygon which can be a pentagon/hexagon/etc depending on the number of data entries
-		size_t drawChartShape( size_t triOffset, ChartShapeType type, Ogre::ColourValue shapeColor,
-							   Ogre::ColourValue backgroundColor, float lineWidth, bool drawAsLine );
+		size_t drawChartShape( size_t triOffset, Ogre::ColourValue shapeColor,
+							   Ogre::ColourValue lineColor, float lineThickness, bool bDrawCurr );
+
+		size_t drawBackgroundShape( size_t triOffset, const Ogre::ColourValue darkColor,
+									const Ogre::ColourValue backgroundColor );
 
 		/// Draws the entire chart
-		void drawRadarChart( Ogre::ColourValue backgroundColor, Ogre::ColourValue darkColor,
-							 Ogre::ColourValue lightColor, float lineWidth );
-
-		void drawChartTriangles();
+		void drawRadarChart();
 
 	public:
 		RadarChart( ColibriManager *manager );
