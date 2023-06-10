@@ -176,12 +176,7 @@ namespace Colibri
 		{
 			m_horizAlignment = horizAlignment;
 			for( size_t i = 0; i < States::NumStates; ++i )
-			{
-				m_glyphsPlaced[i] = false;
-#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
-				m_glyphsAligned[i] = false;
-#endif
-			}
+				flagDirty( static_cast<States::States>( i ) );
 		}
 	}
 	//-------------------------------------------------------------------------
