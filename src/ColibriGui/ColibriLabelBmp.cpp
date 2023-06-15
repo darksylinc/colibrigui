@@ -165,8 +165,9 @@ namespace Colibri
 		ShaperManager *shaperManager = m_manager->getShaperManager();
 		const BmpFont *bmpFont = shaperManager->getBmpFont( m_font );
 
+		const bool bRawMode = m_rawMode;
 		const float fontScale =
-			m_rawMode ? 1.0f : m_fontSize.asFloat() * bmpFont->getFontScale( shaperManager );
+			bRawMode ? 1.0f : m_fontSize.asFloat() * bmpFont->getFontScale( shaperManager );
 		Ogre::Vector2 currentTopLeft( Ogre::Vector2::ZERO );
 
 		const Ogre::Vector4 texInvResolution( bmpFont->getInvResolution() );
@@ -184,8 +185,8 @@ namespace Colibri
 					currentTopLeft + Ogre::Vector2( bmpGlyph.xoffset, bmpGlyph.yoffset );
 				Ogre::Vector2 bottomRight = topLeft + Ogre::Vector2( bmpGlyph.width, bmpGlyph.height );
 
-				topLeft *= fontScale;
-				bottomRight *= fontScale;
+				topLeft *= fontScale * ( bRawMode ? 1.0f : bmpGlyph.bmpChar->fontScale );
+				bottomRight *= fontScale * ( bRawMode ? 1.0f : bmpGlyph.bmpChar->fontScale );
 
 				const Ogre::Vector2 glyphSize = bottomRight - topLeft;
 
@@ -358,8 +359,9 @@ namespace Colibri
 				// When xadvance < width, the excess "width - xadvance" must only be added when
 				// we reach the end of the line. Otherwise the last character will clip.
 				currentWidth += itor->bmpChar->xadvance;
-				widthExcess =
-					std::max( itor->bmpChar->width, itor->bmpChar->xadvance ) - itor->bmpChar->xadvance;
+				widthExcess = std::max( itor->bmpChar->width * itor->bmpChar->fontScale,
+										static_cast<float>( itor->bmpChar->xadvance ) ) -
+							  itor->bmpChar->xadvance;
 			}
 
 			++itor;

@@ -16,6 +16,7 @@
 #include "OgreLwString.h"
 
 #include "ft2build.h"
+
 #include "freetype/freetype.h"
 
 #include "unicode/ubidi.h"
@@ -359,14 +360,18 @@ namespace Colibri
 		const BmpGlyph bmpGlyph = bmpFont->renderCodepoint( codepoint );
 		const BmpToFontAlignment fontAlignment = bmpFont->getFontAlignment( fontIdx );
 
+		// fontAlignment.xoffset must NOT include bmpGlyph.bmpChar->fontScale, so we
+		// don't include it in fontScale variable.
 		const float fontScale = FontSize( ptSize ).asFloat() * bmpFont->getFontScale( this );
 
 		//Create a cache entry
 		CachedGlyph newGlyph;
 		newGlyph.codepoint	= codepoint;
 		newGlyph.ptSize		= ptSize;
-		newGlyph.width		= uint16_t( std::round( bmpGlyph.width * fontScale ) );
-		newGlyph.height		= uint16_t( std::round( bmpGlyph.height * fontScale ) );
+		newGlyph.width =
+			uint16_t( std::round( bmpGlyph.width * fontScale * bmpGlyph.bmpChar->fontScale ) );
+		newGlyph.height =
+			uint16_t( std::round( bmpGlyph.height * fontScale * bmpGlyph.bmpChar->fontScale ) );
 		newGlyph.bearingX = ( fontAlignment.xoffset * fontScale ) / dummyCodepoint->height;
 		newGlyph.bearingY = ( ( newGlyph.height * float( dummyCodepoint->bearingY ) ) +
 							  ( fontAlignment.yoffset * fontScale ) ) /

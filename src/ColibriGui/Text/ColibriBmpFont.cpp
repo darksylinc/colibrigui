@@ -149,6 +149,12 @@ namespace Colibri
 				bmpChar.yoffset = sds::toU16withDefault( settings["yoffset"] );
 				bmpChar.xadvance = sds::toU16withDefault( settings["xadvance"] );
 
+				// Colibri extensions
+				// fontScale =  scales the base font size (up or down) in case the atlas has different
+				//				resolutions but you don't want to respect that resolution.
+				// TODO: This is a float, not an uint
+				bmpChar.fontScale = sds::toU16withDefault( settings["fontScale"], 1u );
+
 				if( !m_chars.empty() && m_chars.back().id > bmpChar.id )
 					bIsSorted = false;
 				m_chars.push_back( bmpChar );

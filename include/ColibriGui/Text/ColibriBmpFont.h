@@ -25,6 +25,7 @@ namespace Colibri
 		uint16_t xoffset;
 		uint16_t yoffset;
 		uint16_t xadvance;
+		float    fontScale;
 
 		bool operator<( const BmpChar &other ) const { return this->id < other.id; }
 	};
