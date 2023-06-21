@@ -212,8 +212,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	Ogre::IndirectBufferPacked *ColibriManager::getIndirectBuffer()
 	{
+		const size_t numWidgets = std::max<size_t>( 16u, m_numWidgets );
 		if( m_currIndirectBuffer >= m_indirectBuffer.size() ||
-			( m_numWidgets * sizeof( Ogre::CbDrawStrip ) >
+			( numWidgets * sizeof( Ogre::CbDrawStrip ) >
 			  m_indirectBuffer[m_currIndirectBuffer]->getNumElements() ) )
 		{
 			// Erase all indirect buffers from [m_currIndirectBuffer; end)
@@ -233,7 +234,7 @@ namespace Colibri
 			m_indirectBuffer.erase( m_indirectBuffer.begin() + m_currIndirectBuffer, endt );
 
 			// Create new buffer large enough to hold all widgets.
-			const size_t requiredBytes = m_numWidgets * sizeof( Ogre::CbDrawStrip );
+			const size_t requiredBytes = numWidgets * sizeof( Ogre::CbDrawStrip );
 			m_indirectBuffer.emplace_back( m_vaoManager->createIndirectBuffer(
 				requiredBytes, Ogre::BT_DYNAMIC_PERSISTENT, 0, false ) );
 		}
