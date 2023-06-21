@@ -132,10 +132,13 @@ if( UNIX )
 	target_link_libraries( ${PROJECT_NAME} dl )
 endif()
 if( NOT MSVC )
-	target_compile_options( ${PROJECT_NAME} PRIVATE
-		-Wall -Winit-self -Wcast-qual -Wwrite-strings -Wextra
-		-Winconsistent-missing-destructor-override -Wcomma -Wsign-conversion -Wconversion
-		-Wno-unused-parameter -Wshadow -Wimplicit-fallthrough )
+	set( ColibriWarningOptions -Wall -Winit-self -Wcast-qual -Wwrite-strings -Wextra
+		-Wsign-conversion -Wconversion
+		-Wno-unused-parameter -Wshadow -Wimplicit-fallthrough)
+	if( CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+		set( ColibriWarningOptions ${compileOptions} -Winconsistent-missing-destructor-override -Wcomma )
+	endif()
+	target_compile_options( ${PROJECT_NAME} PRIVATE ${ColibriWarningOptions} )
 endif()
 
 if( APPLE )
