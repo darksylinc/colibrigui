@@ -81,7 +81,7 @@ namespace Colibri
 			if( m_label->getSize() != sizeAfterClipping )
 			{
 				m_label->setTopLeft( m_label->m_margin + m_labelTopLeftMargin );
-				m_label->setSize( sizeAfterClipping - totalMargin );
+				m_label->setSize( sizeAfterClipping );
 			}
 		}
 		Renderable::setTransformDirty( dirtyReason );
