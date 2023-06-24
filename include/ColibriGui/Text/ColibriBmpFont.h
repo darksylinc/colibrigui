@@ -25,7 +25,9 @@ namespace Colibri
 		uint16_t xoffset;
 		uint16_t yoffset;
 		uint16_t xadvance;
-		float    fontScale;
+		/// This only applies to BmpChar::width and BmpChar::height. Used when the resolution
+		/// in the atlas bmp does not match the size it intends to be rendered at.
+		float fontScale;
 
 		bool operator<( const BmpChar &other ) const { return this->id < other.id; }
 	};
