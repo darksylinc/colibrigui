@@ -232,7 +232,8 @@ namespace Colibri
 				if( itor->isNewline )
 				{
 					currentTopLeft.x = 0.0f;
-					currentTopLeft.y += itor->bmpChar->yoffset + itor->bmpChar->height;
+					currentTopLeft.y +=
+						itor->bmpChar->yoffset + itor->bmpChar->height * itor->bmpChar->fontScale;
 				}
 				else if( itor->isTab )
 				{
@@ -371,7 +372,8 @@ namespace Colibri
 		widthExcess = 0.0f;
 
 		maxSize.x = std::max( maxSize.x, currentWidth );
-		maxSize.y = ( m_shapes.back().bmpChar->yoffset + m_shapes.back().bmpChar->height ) *
+		maxSize.y = ( m_shapes.back().bmpChar->yoffset +
+					  m_shapes.back().bmpChar->height * m_shapes.back().bmpChar->fontScale ) *
 					static_cast<Ogre::Real>( numLines );
 
 		ShaperManager *shaperManager = m_manager->getShaperManager();
