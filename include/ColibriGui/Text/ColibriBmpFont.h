@@ -95,6 +95,9 @@ namespace Colibri
 			ShaperManager::setDefaultBmpFontForRaster, sometimes they are not properly aligned.
 
 			This function fixes it by hand.
+		@remarks
+			Before tweaking this setting, see if toggling Shaper::setUseCodepoint0ForRaster
+			fixes all alignment issues.
 		@param fontIdx
 			Idx of the font to map
 		@param offset

@@ -66,7 +66,8 @@ namespace Colibri
 		m_shaperManager( shaperManager ),
 		m_ptSize( 0u ),
 		m_fontIdx(
-			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) )
+			std::max<uint16_t>( static_cast<uint16_t>( shaperManager->getShapers().size() ), 1u ) ),
+		m_useCodepoint0ForRaster( false )
 	{
 #ifndef __ANDROID__
 		FT_Error errorCode = FT_New_Face( m_library, fontLocation, 0, &m_ftFont );
@@ -184,6 +185,13 @@ namespace Colibri
 	{
 		return m_ptSize;
 	}
+	//-------------------------------------------------------------------------
+	void Shaper::setUseCodepoint0ForRaster( bool useCodepoint0ForRaster )
+	{
+		m_useCodepoint0ForRaster = useCodepoint0ForRaster ;
+	}
+	//-------------------------------------------------------------------------
+	bool Shaper::getUseCodepoint0ForRaster() const { return m_useCodepoint0ForRaster; }
 	//-------------------------------------------------------------------------
 	size_t Shaper::renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 											 hb_direction_t dir, uint32_t richTextIdx,
@@ -337,8 +345,9 @@ namespace Colibri
 					bOutHasPrivateUse = true;
 				}
 
-				const CachedGlyph *glyph = m_shaperManager->acquireGlyph(
-					m_ftFont, codepoint, m_ptSize.value26d6, m_fontIdx, bIsPrivateArea );
+				const CachedGlyph *glyph =
+					m_shaperManager->acquireGlyph( m_ftFont, codepoint, m_ptSize.value26d6, m_fontIdx,
+												   bIsPrivateArea, m_useCodepoint0ForRaster );
 
 				ShapedGlyph shapedGlyph;
 				if( !bIsPrivateArea )

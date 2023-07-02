@@ -133,7 +133,7 @@ namespace Colibri
 								  bool bDummy );
 		/// Used only for private areas
 		CachedGlyph *createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
-										uint16_t fontIdx );
+										uint16_t fontIdx, const bool bUseCodepoint0ForRaster );
 		void         destroyGlyph( CachedGlyphMap::iterator glyphIt );
 		void mergeContiguousBlocks( RangeVec::iterator blockToMerge, RangeVec &blocks );
 
@@ -190,11 +190,13 @@ namespace Colibri
 			When true, we will use codepoint 0's glyph data
 			Useful when Label needs to rely on LabelBmp to draw glyphs from
 			private use area.
+		@param bUseCodepoint0ForRaster
 		@return
 			Cached glyph
 		*/
 		const CachedGlyph *acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
-										 uint16_t fontIdx, bool bDummy );
+										 uint16_t fontIdx, bool bDummy,
+										 const bool bUseCodepoint0ForRaster );
 		/// WARNING: const_casts cachedGlyph, which means it's not thread safe
 		void addRefCount( const CachedGlyph *cachedGlyph );
 		/** Decreases the reference count of a glyph, for when it's not needed anymore

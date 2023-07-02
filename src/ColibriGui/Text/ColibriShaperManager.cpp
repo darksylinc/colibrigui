@@ -349,10 +349,11 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	CachedGlyph *ShaperManager::createRasterGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
-												   uint16_t fontIdx )
+												   uint16_t fontIdx, const bool bUseCodepoint0ForRaster )
 	{
 		// We need to know the bearing of most characters and hope it aligns well
-		const CachedGlyph *dummyCodepoint = acquireGlyph( font, 0u, ptSize, fontIdx, false );
+		const CachedGlyph *dummyCodepoint =
+			acquireGlyph( font, bUseCodepoint0ForRaster ? 0u : 'Y', ptSize, fontIdx, false, false );
 
 		const BmpFont *bmpFont = getDefaultBmpFontForRaster();
 		COLIBRI_ASSERT_MEDIUM( bmpFont );
@@ -364,7 +365,15 @@ namespace Colibri
 		// don't include it in fontScale variable.
 		const float fontScale = FontSize( ptSize ).asFloat() * bmpFont->getFontScale( this );
 
-		//Create a cache entry
+		const float dummyBearing = dummyCodepoint->bearingY;
+		// 1.25f is arbitrary but it works well for most fonts.
+		const float dummyHeight = dummyCodepoint->height * ( bUseCodepoint0ForRaster ? 1.0f : 1.25f );
+
+		COLIBRI_ASSERT_MEDIUM( dummyHeight != 0.0f &&
+							   "Font doesn't define a height for the codepoint we for reference!. Try "
+							   "toggling Shaper::setUseCodepoint0ForRaster" );
+
+		// Create a cache entry
 		CachedGlyph newGlyph;
 		newGlyph.codepoint	= codepoint;
 		newGlyph.ptSize		= ptSize;
@@ -372,10 +381,9 @@ namespace Colibri
 			uint16_t( std::round( bmpGlyph.width * fontScale * bmpGlyph.bmpChar->fontScale ) );
 		newGlyph.height =
 			uint16_t( std::round( bmpGlyph.height * fontScale * bmpGlyph.bmpChar->fontScale ) );
-		newGlyph.bearingX = ( fontAlignment.xoffset * fontScale ) / dummyCodepoint->height;
-		newGlyph.bearingY = ( ( newGlyph.height * float( dummyCodepoint->bearingY ) ) +
-							  ( fontAlignment.yoffset * fontScale ) ) /
-							dummyCodepoint->height;
+		newGlyph.bearingX = ( fontAlignment.xoffset * fontScale ) / dummyHeight;
+		newGlyph.bearingY =
+			( ( newGlyph.height * dummyBearing ) + ( fontAlignment.yoffset * fontScale ) ) / dummyHeight;
 		newGlyph.offsetStart = 0u;
 		newGlyph.newlineSize= newGlyph.height;
 		newGlyph.regionUp	= 1.0f;  // Is this correct?
@@ -460,7 +468,8 @@ namespace Colibri
 	}
 	//-------------------------------------------------------------------------
 	const CachedGlyph *ShaperManager::acquireGlyph( FT_Face font, uint32_t codepoint, uint32_t ptSize,
-													uint16_t fontIdx, bool bDummy )
+													uint16_t fontIdx, bool bDummy,
+													const bool bUseCodepoint0ForRaster )
 	{
 		CachedGlyph *retVal = 0;
 
@@ -474,9 +483,14 @@ namespace Colibri
 		else
 		{
 			if( !bDummy || !getDefaultBmpFontForRaster() )
+			{
 				retVal = createGlyph( font, codepoint, ptSize, fontIdx, bDummy );
+			}
 			else
-				retVal = createRasterGlyph( font, codepoint, ptSize, fontIdx );
+			{
+				retVal =
+					createRasterGlyph( font, codepoint, ptSize, fontIdx, bUseCodepoint0ForRaster );
+			}
 		}
 
 		++retVal->refCount;

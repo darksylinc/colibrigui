@@ -62,6 +62,9 @@ namespace Colibri
 		FontSize	m_ptSize; //Font size in points
 		uint16_t	m_fontIdx;
 
+		/// See setUseCodepoint0ForRaster()
+		bool m_useCodepoint0ForRaster;
+
 		size_t renderWithSubstituteFont( const uint16_t *utf16Str, size_t stringLength,
 										 hb_direction_t dir, uint32_t richTextIdx,
 										 uint32_t clusterOffset, ShapedGlyphVec &outShapes,
@@ -78,6 +81,24 @@ namespace Colibri
 
 		void setFontSize( FontSize ptSize );
 		FontSize getFontSize() const;
+
+		/** When raster fonts are used, we need to fetch a dummy glyph to base our parameters
+			and align the raster glyphs (e.g. emoji).
+
+			For that we have two methods. One based on codepoint 0 and another on codepoint 'Y'.
+			Neither of them is perfect so toggle this setting if the emojis are misaligned.
+		@remarks
+			Some fonts do not specify codepoint 0 and return invalid data, thus you'll have to
+			set this to true.
+
+			See BmpFont::addFontAlignment for manually tweaking alignment between
+			normal and specific BMP fonts.
+		@param useCodepoint0ForRaster
+			True to use codepoint 0 (not '0', but '\0').
+			False to use 'Y'
+		*/
+		void setUseCodepoint0ForRaster( bool useCodepoint0ForRaster );
+		bool getUseCodepoint0ForRaster() const;
 
 		size_t renderString( const uint16_t *utf16Str, size_t stringLength, hb_direction_t dir,
 							 uint32_t richTextIdx, uint32_t clusterOffset, ShapedGlyphVec &outShapes,
