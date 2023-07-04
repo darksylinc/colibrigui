@@ -152,8 +152,8 @@ namespace Colibri
 				// Colibri extensions
 				// fontScale =  scales the base font size (up or down) in case the atlas has different
 				//				resolutions but you don't want to respect that resolution.
-				// TODO: This is a float, not an uint
-				bmpChar.fontScale = sds::toU16withDefault( settings["fontScale"], 1u );
+				bmpChar.fontScale =
+					Ogre::StringConverter::parseReal( settings["fontScale"], Ogre::Real( 1.0f ) );
 
 				if( !m_chars.empty() && m_chars.back().id > bmpChar.id )
 					bIsSorted = false;
