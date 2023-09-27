@@ -89,12 +89,12 @@
         "GraphChart" :
         {
             "copy_from" : "EmptyBg",
-            "material" : "RadarChart"
+            "material" : "GraphChart"
         },
         "GraphChartDisabled" :
         {
             "copy_from" : "GraphChart",
-            "material" : "RadarChartDisabled"
+            "material" : "GraphChartDisabled"
         },
 
         "SpinnerBtnDecrement_idle" :
