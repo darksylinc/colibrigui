@@ -1,7 +1,7 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE
-    (Object-oriented Graphics Rendering Engine)
+	(Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
 Copyright (c) 2000-2014 Torus Knot Software Ltd
@@ -163,6 +163,12 @@ namespace Ogre
 
 			if( needsReadOnlyBuffer( mRenderSystem->getCapabilities(), mRenderSystem->getVaoManager() ) )
 				setProperty( COLIBRI_NOTID "use_read_only_buffer", 1 );
+		}
+
+		// See Colibri::Label
+		if( customParams.find( 6374 ) != customParams.end() )
+		{
+			setProperty( COLIBRI_NOTID "colibri_graph", 1 );
 		}
 	}
 	//-----------------------------------------------------------------------------------

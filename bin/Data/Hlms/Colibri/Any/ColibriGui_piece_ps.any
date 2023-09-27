@@ -76,4 +76,43 @@
 	@end
 @end
 
+@end /// colibri_gui && colibri_text
+
+@property( colibri_gui && colibri_graph )
+	@piece( custom_ps_preLights )
+		const midf2 graphStartTL = midf2_c( 0.1f, 0.1f );
+		const midf2 graphEndBR = midf2_c( 0.9f, 0.9f );
+		const midf stripeLength = _h( 0.2f );
+		const midf2 stripeBlankAreaLength = midf2_c( 0.0f, 0.15f );
+
+		if(  inPs.uv0.x >= graphStartTL.x &&  inPs.uv0.x <= graphEndBR.x &&
+			 inPs.uv0.y >= graphStartTL.y &&  inPs.uv0.y <= graphEndBR.y )
+		{
+			// Inner area of the graph. posInsideGraph is in range [0; 1]
+			const midf2 posInsideGraph = (  inPs.uv0 - graphStartTL ) / ( graphEndBR - graphStartTL );
+
+			const midf stripeRegionY = mod( posInsideGraph.y, stripeLength );
+			if( stripeRegionY <= stripeBlankAreaLength.y )
+				diffuseCol.xyzw = midf4_c( 0.0f, 0.0f, 0.0f, 0.2f );
+			else
+				diffuseCol.xyzw = midf4_c( 1.0f, 1.0f, 1.0f, 1.0f );
+
+			const uint num_datapoints = 1u;
+
+			for( uint i = 0u; i < num_datapoints; ++i )
+			{
+				const midf datapoint = SampleDiffuse0(
+					DiffuseTexture0, DiffuseSampler0,
+					midf2_c( posInsideGraph.x, ( midf_c( i ) + _h( 0.5 ) ) / num_datapoints ) ).x;
+
+				if( posInsideGraph.y <= datapoint )
+					diffuseCol.xyzw = midf4_c( 0.0f, 1.0f, 0.0f, 0.85f );
+			}
+		}
+		else
+		{
+			// We were in the outer area of the graph.
+			diffuseCol.xyzw = midf4_c( 0.0f, 0.0f, 0.0f, 0.5f );
+		}
+	@end
 @end

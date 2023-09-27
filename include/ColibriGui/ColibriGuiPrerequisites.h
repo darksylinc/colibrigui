@@ -71,6 +71,7 @@ namespace Colibri
 	class Checkbox;
 	class ColibriManager;
 	class Editbox;
+	class GraphChart;
 	class Label;
 	class LabelBmp;
 	class LayoutCell;
@@ -415,6 +416,7 @@ namespace Colibri
 			WindowArrowScrollRight,
 			WindowArrowScrollBottom,
 			RadarChart,
+			GraphChart,
 			NumSkinWidgetTypes
 		};
 	}
