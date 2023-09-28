@@ -27,6 +27,7 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/ColibriEditbox.h"
+#include "ColibriGui/ColibriGraphChart.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriProgressbar.h"
@@ -155,6 +156,25 @@ namespace Demo
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
+		Colibri::GraphChart *graphChart =
+			colibriManager->createWidget<Colibri::GraphChart>( mainWindow );
+		graphChart->m_minSize = Ogre::Vector2( 512, 512 );
+		graphChart->setMaxValues( 1u, 128u );
+
+		graphChart->getColumns()[0].label->setText( "FPS" );
+		graphChart->getColumns()[0].label->sizeToFit();
+
+		srand( 101 );
+		for( size_t i = 0u; i < graphChart->getEntriesPerColumn(); ++i )
+		{
+			//graphChart->getColumns()[0].values[i] = ( i * 65535u ) / graphChart->getEntriesPerColumn();
+			//graphChart->getColumns()[0].values[i] = ( rand() % 65536u );
+			double val = ( rand() % 65536 ) / 65535.0;
+			val = val * 0.05 + 0.5;
+			graphChart->getColumns()[0].values[i] = val;
+		}
+		graphChart->syncChart();
+
 		Colibri::RadarChart *radarChart =
 			colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
 		radarChart->m_minSize = Ogre::Vector2( 512, 512 );
@@ -164,6 +184,8 @@ namespace Demo
 																		 { 0.4f, 0.9f, "MP\n50.00" },
 																		 { 0.75f, 0.85f, "CRT\n11" } };
 		radarChart->setDataSeries( dataSeries, Colibri::RadarChart::LabelDisplayName );
+
+		layout->addCell( graphChart );
 
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->m_minSize = Ogre::Vector2( 350, 64 );

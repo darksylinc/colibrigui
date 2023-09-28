@@ -10,26 +10,41 @@ namespace Colibri
 	/** @ingroup Controls
 	@class RadarChart
 		A widget used to draw a graph/chart.
-	@remarks
-		For various technical reasons, the number of datapoints that can be displayed
-		per column is 2048.
 	*/
 	class GraphChart : public CustomShape
 	{
 	public:
 		struct Column
 		{
-			/// Value for this data entry in range [0; 65535]
-			uint16_t *values;
+			/// Value for this data entry is in range (-inf; inf).
+			/// See setDataRange().
+			float *values;
 
-			// void setValue( const size_t idx, const float value ) { values[idx] = value * 65535.0f; }
+			Colibri::Label       *label;
+			Colibri::CustomShape *rectangle;
+		};
+
+		struct Params
+		{
+			uint16_t numLines;
+			float    lineThickness;
 		};
 
 	protected:
-		std::vector<Column>   m_columns;
-		std::vector<uint16_t> m_allValues;
+		std::vector<Column> m_columns;
+		std::vector<float>  m_allValues;
 
 		Ogre::TextureGpu *m_textureData;
+
+		bool m_labelsDirty;
+
+		bool m_autoMin;
+		bool m_autoMax;
+
+		float m_minSample;
+		float m_maxSample;
+
+		std::vector<Colibri::Label> m_labels;
 
 	public:
 		GraphChart( ColibriManager *manager );
@@ -38,6 +53,8 @@ namespace Colibri
 		void _destroy() override;
 
 		/** Indicates the upper limits.
+		@remarks
+			All previous data may be cleared!
 		@param numColumns
 			Number of columns to display.
 		@param entriesPerColumn
@@ -46,7 +63,28 @@ namespace Colibri
 		*/
 		void setMaxValues( uint32_t numColumns, uint32_t entriesPerColumn );
 
+		/// Returns the setting set to setMaxValues().
 		uint32_t getEntriesPerColumn() const;
+
+		/** Sets the min & max values to display from our dataset.
+		@param autoMin
+			When true, we will auto-calculate the min value based on the minimum value
+			we find on the dataset.
+			<br/>
+			The final value is:
+				m_minValue = std::min( autoCalculatedMin, minValue );
+		@param autoMax
+			When true, we will auto-calculate the max value based on the maximum value
+			we find on the dataset.
+			<br/>
+			The final value is:
+				m_maxValue = std::max( autoCalculatedMax, maxValue );
+		@param minValue
+			Minimum value to display. Values below this threshold are not shown unless autoMin = true.
+		@param maxValue
+			Maximum value to display. Values above this threshold are not shown unless autoMax = true.
+		 */
+		void setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue );
 
 		/// Direct access to data to modify it.
 		/// Call syncChart() once you're done modifying it.
@@ -55,6 +93,8 @@ namespace Colibri
 		const std::vector<Column> &getColumns() const { return m_columns; }
 
 		void syncChart();
+
+		void setTransformDirty( uint32_t dirtyReason ) override;
 	};
 }  // namespace Colibri
 
