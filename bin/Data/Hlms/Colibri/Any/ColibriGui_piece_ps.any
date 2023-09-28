@@ -80,10 +80,14 @@
 
 @property( colibri_gui && colibri_graph )
 	@piece( custom_ps_preLights )
-		const midf2 graphStartTL = midf2_c( 0.1f, 0.1f );
-		const midf2 graphEndBR = midf2_c( 0.9f, 0.9f );
-		const midf intervalLength = _h( 0.2f );
-		const midf2 intervalBlankAreaSize = midf2_c( 0.0f, 0.18f );
+		// const midf2 graphStartTL = midf2_c( 0.1f, 0.1f );
+		// const midf2 graphEndBR = midf2_c( 0.9f, 0.9f );
+		// const midf intervalLength = _h( 0.2f );
+		// const midf2 intervalBlankAreaSize = midf2_c( 0.0f, 0.18f );
+		const midf2 graphStartTL = midf2_c( @insertpiece( colibri_graphStartTL ) );
+		const midf2 graphEndBR = midf2_c( @insertpiece( colibri_graphStartBR ) );
+		const midf intervalLength = _h( @insertpiece( colibri_intervalLength ) );
+		const midf2 intervalBlankAreaSize = midf2_c( @insertpiece( colibri_intervalBlankAreaSize ) );
 		const midf lineThickness = intervalLength - intervalBlankAreaSize.y;
 
 		if( inPs.uv0.x >= graphStartTL.x && inPs.uv0.x <= graphEndBR.x &&
@@ -100,9 +104,9 @@
 
 			const midf stripeRegionY = mod( posInsideGraph.y, intervalLength );
 			if( stripeRegionY <= intervalBlankAreaSize.y )
-				diffuseCol.xyzw = midf4_c( 0.0f, 0.0f, 0.0f, 0.5f );
+				diffuseCol.xyzw = midf4_c( @insertpiece( colibri_bgInnerColour ) );
 			else
-				diffuseCol.xyzw = midf4_c( 1.0f, 1.0f, 1.0f, 1.0f );
+				diffuseCol.xyzw = midf4_c( @insertpiece( colibri_lineColour ) );
 
 			const uint num_datapoints = 1u;
 
@@ -125,7 +129,7 @@
 		else
 		{
 			// We were in the outer area of the graph.
-			diffuseCol.xyzw = midf4_c( 0.0f, 0.0f, 0.0f, 0.75f );
+			diffuseCol.xyzw = midf4_c(  @insertpiece( colibri_bgOuterColour ) );
 		}
 	@end
 @end

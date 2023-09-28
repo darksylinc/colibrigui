@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include "ColibriGui/Ogre/OgreHlmsColibri.h"
 
 #include "ColibriGui/ColibriAssert.h"
+#include "ColibriGui/ColibriGraphChart.h"
 #include "ColibriGui/Ogre/OgreHlmsColibriDatablock.h"
 
 #include "CommandBuffer/OgreCbShaderBuffer.h"
@@ -133,6 +134,23 @@ namespace Ogre
 		return retVal;
 	}
 	//-----------------------------------------------------------------------------------
+	static inline const char *toPieceStr( LwString &str, const ColourValue &colourValue )
+	{
+		str.clear();
+		str.a( colourValue.r, "f, ", colourValue.g, "f, " );
+		return str.a( colourValue.b, "f, ", colourValue.a, "f" ).c_str();
+	}
+	static inline const char *toPieceStr( LwString &str, const Vector2 &value )
+	{
+		str.clear();
+		return str.a( value.x, "f, ", value.y, "f" ).c_str();
+	}
+	static inline const char *toPieceStr( LwString &str, const float value )
+	{
+		str.clear();
+		return str.a( value, "f" ).c_str();
+	}
+
 	void HlmsColibri::calculateHashForPreCreate( Renderable *renderable, PiecesMap *inOutPieces )
 	{
 		HlmsUnlit::calculateHashForPreCreate( renderable, inOutPieces );
@@ -169,6 +187,34 @@ namespace Ogre
 		if( customParams.find( 6374 ) != customParams.end() )
 		{
 			setProperty( COLIBRI_NOTID "colibri_graph", 1 );
+
+			COLIBRI_ASSERT_HIGH( dynamic_cast<Colibri::GraphChart *>( renderable ) );
+			Colibri::GraphChart *graphChart = static_cast<Colibri::GraphChart *>( renderable );
+			const Colibri::GraphChart::Params &params = graphChart->getParams();
+
+			char tmpBuffer[128];
+			LwString pieceStr( LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+			pieceStr.clear();
+			inOutPieces[PixelShader]["colibri_graphStartTL"] =
+				toPieceStr( pieceStr, params.graphInnerTopLeft );
+			pieceStr.clear();
+			inOutPieces[PixelShader]["colibri_graphStartBR"] =
+				toPieceStr( pieceStr, params.graphInnerTopLeft + params.graphInnerSize );
+
+			const float intervalLength = 1.0f / float( params.numLines - 1u );
+			pieceStr.clear();
+			inOutPieces[PixelShader]["colibri_intervalLength"] = toPieceStr( pieceStr, intervalLength );
+
+			const float intervalBlankAreaSize = intervalLength - params.lineThickness;
+			pieceStr.clear();
+			inOutPieces[PixelShader]["colibri_intervalBlankAreaSize"] =
+				toPieceStr( pieceStr, Vector2( 0.0f, intervalBlankAreaSize ) );
+
+			inOutPieces[PixelShader]["colibri_lineColour"] = toPieceStr( pieceStr, params.lineColour );
+			inOutPieces[PixelShader]["colibri_bgInnerColour"] =
+				toPieceStr( pieceStr, params.bgInnerColour );
+			inOutPieces[PixelShader]["colibri_bgOuterColour"] =
+				toPieceStr( pieceStr, params.bgOuterColour );
 		}
 	}
 	//-----------------------------------------------------------------------------------

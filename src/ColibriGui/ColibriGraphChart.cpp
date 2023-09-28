@@ -16,6 +16,19 @@
 
 using namespace Colibri;
 
+GraphChart::Params::Params() :
+	numLines( 6u ),
+	lineThickness( 0.02f ),
+	graphInnerTopLeft( Ogre::Vector2( 0.1f ) ),
+	graphInnerSize( Ogre::Vector2( 0.8f ) ),
+	lineColour( Ogre::ColourValue::White ),
+	bgInnerColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
+	bgOuterColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.75f ) )
+{
+}
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 GraphChart::GraphChart( ColibriManager *manager ) :
 	CustomShape( manager ),
 	m_textureData( 0 ),

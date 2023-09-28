@@ -28,6 +28,17 @@ namespace Colibri
 		{
 			uint16_t numLines;
 			float    lineThickness;
+
+			// In UV space, range [0; 1)
+			Ogre::Vector2 graphInnerTopLeft;
+			// In UV space, range (0; 1]
+			Ogre::Vector2 graphInnerSize;
+
+			Ogre::ColourValue lineColour;
+			Ogre::ColourValue bgInnerColour;
+			Ogre::ColourValue bgOuterColour;
+
+			Params();
 		};
 
 	protected:
@@ -45,6 +56,8 @@ namespace Colibri
 		float m_maxSample;
 
 		std::vector<Colibri::Label> m_labels;
+
+		Params m_params;
 
 	public:
 		GraphChart( ColibriManager *manager );
@@ -92,7 +105,11 @@ namespace Colibri
 
 		const std::vector<Column> &getColumns() const { return m_columns; }
 
+		const GraphChart::Params &getParams() const { return m_params; }
+
 		void syncChart();
+
+		void build( const Params &params );
 
 		void setTransformDirty( uint32_t dirtyReason ) override;
 	};
