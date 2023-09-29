@@ -203,6 +203,15 @@ uint32_t GraphChart::getEntriesPerColumn() const
 	return m_textureData->getWidth();
 }
 //-------------------------------------------------------------------------
+void GraphChart::setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue )
+{
+	m_autoMin = autoMin;
+	m_autoMax = autoMax;
+	m_minSample = minValue;
+	m_maxSample = maxValue;
+	m_labelsDirty = true;
+}
+//-------------------------------------------------------------------------
 void GraphChart::positionGraphLegend()
 {
 	{
@@ -339,6 +348,7 @@ void GraphChart::syncChart()
 
 	stagingTexture->stopMapRegion();
 	stagingTexture->upload( textureBox, m_textureData, 0u );
+	textureManager->removeStagingTexture( stagingTexture );
 
 	// Workaround OgreNext bug where calling syncChart() multiple times in a row causes Vulkan
 	// race conditions because it doesn't place barriers to protect each copy as it assumes
