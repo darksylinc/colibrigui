@@ -17,8 +17,8 @@
 using namespace Colibri;
 
 GraphChart::Params::Params() :
-	numLines( 6u ),
-	lineThickness( 0.02f ),
+	numLines( 5u ),
+	lineThickness( 0.01f ),
 	graphInnerTopLeft( Ogre::Vector2( 0.1f ) ),
 	graphInnerSize( Ogre::Vector2( 0.8f ) ),
 	lineColour( Ogre::ColourValue::White ),
@@ -36,6 +36,7 @@ GraphChart::GraphChart( ColibriManager *manager ) :
 	m_autoMin( false ),
 	m_autoMax( false ),
 	m_markersOnRight( false ),
+	m_autoMinMaxRounding( 0.0f ),
 	m_minSample( 0.0f ),
 	m_maxSample( 1.0f ),
 	m_lastMinValue( std::numeric_limits<float>::max() ),
@@ -203,10 +204,12 @@ uint32_t GraphChart::getEntriesPerColumn() const
 	return m_textureData->getWidth();
 }
 //-------------------------------------------------------------------------
-void GraphChart::setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue )
+void GraphChart::setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue,
+							   float autoMinMaxRounding )
 {
 	m_autoMin = autoMin;
 	m_autoMax = autoMax;
+	m_autoMinMaxRounding = autoMinMaxRounding;
 	m_minSample = minValue;
 	m_maxSample = maxValue;
 	m_labelsDirty = true;
@@ -227,6 +230,9 @@ void GraphChart::positionGraphLegend()
 	const size_t numColumns = m_columns.size();
 
 	LayoutTableSameSize rootLayout( m_manager );
+
+	rootLayout.m_numColumns = numColumns;
+
 	std::vector<LayoutLine> columnLines;
 	columnLines.resize( m_columns.size(), m_manager );
 
@@ -327,6 +333,14 @@ void GraphChart::syncChart()
 					if( autoMax )
 						maxSample = std::max( m_columns[y].values[x], maxSample );
 				}
+			}
+
+			if( m_autoMinMaxRounding != 0.0f )
+			{
+				if( autoMin )
+					minSample = std::round( minSample / m_autoMinMaxRounding ) * m_autoMinMaxRounding;
+				if( autoMax )
+					maxSample = std::round( maxSample / m_autoMinMaxRounding ) * m_autoMinMaxRounding;
 			}
 		}
 	}

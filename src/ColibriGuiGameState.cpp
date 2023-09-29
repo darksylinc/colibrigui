@@ -163,7 +163,7 @@ namespace Demo
 		graphChart->m_minSize = Ogre::Vector2( 512, 512 );
 		graphChart->setMaxValues( 2u, 128u );
 
-		graphChart->setDataRange( false, true, 0.0f, 60.0f );
+		graphChart->setDataRange( false, true, 0.0f, 60.0f, 10.0f );
 		graphChart->setLabelsPrecision( 0 );
 
 		graphChart->getColumns()[0].label->setText( "FPS" );

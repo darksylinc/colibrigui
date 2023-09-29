@@ -56,6 +56,7 @@ namespace Colibri
 		bool m_autoMax;
 		bool m_markersOnRight;
 
+		float m_autoMinMaxRounding;
 		float m_minSample;
 		float m_maxSample;
 		float m_lastMinValue;
@@ -108,8 +109,16 @@ namespace Colibri
 			Minimum value to display. Values below this threshold are not shown unless autoMin = true.
 		@param maxValue
 			Maximum value to display. Values above this threshold are not shown unless autoMax = true.
-		 */
-		void setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue );
+		@param autoMinMaxRounding
+			When autoMin or autoMax are true; this value control the steps in which to round to.
+			For example if this graph is evaluating FPS (frames per second) with VSync on, many samples
+			will be in range [58; 63]. With this setting set to 0 (disabled), maxValue will be constantly
+			jumping.
+			By setting autoMinMaxRounding = 10.0f, the max value will be rounded to 50, 60, or 70
+			depending on the input data.
+		*/
+		void setDataRange( bool autoMin, bool autoMax, float minValue, float maxValue,
+						   float autoMinMaxRounding );
 
 		/// Direct access to data to modify it.
 		/// Call syncChart() once you're done modifying it.
