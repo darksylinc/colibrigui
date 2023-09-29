@@ -35,6 +35,7 @@ GraphChart::GraphChart( ColibriManager *manager ) :
 	m_labelsDirty( true ),
 	m_autoMin( false ),
 	m_autoMax( false ),
+	m_markersOnRight( false ),
 	m_minSample( 0.0f ),
 	m_maxSample( 1.0f ),
 	m_lastMinValue( std::numeric_limits<float>::max() ),
@@ -101,7 +102,7 @@ void GraphChart::_destroy()
 		m_textureData = 0;
 	}
 
-	// No need to destroy m_labels. They are our children and will be destroyed
+	// No need to destroy m_markers. They are our children and will be destroyed
 	// automatically with us.
 	CustomShape::_destroy();
 }
@@ -254,17 +255,24 @@ void GraphChart::positionMarkersInLines( const float minValue, const float maxVa
 		const float value = Ogre::Math::lerp( maxValue, minValue, fW );
 		char tmpBuffer[64];
 		Ogre::LwString valStr( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
-		m_labels[i]->setText( valStr.a( Ogre::LwString::Float( value, m_labelPrecision ) ).c_str() );
-		m_labels[i]->sizeToFit();
+		m_markers[i]->setText( valStr.a( Ogre::LwString::Float( value, m_labelPrecision ) ).c_str() );
+		m_markers[i]->sizeToFit();
+
+		float leftPos;
+
+		const float margin = 5.0f;
+		if( m_markersOnRight )
+			leftPos = graphInnerSize.x + margin;
+		else
+			leftPos = -m_markers[i]->getSize().x - margin;
 
 		// Honestly I can't make sense of this math ('top' and 'intervalLength' calculation).
 		// What I thought would work didn't. I arrived to this formula by trial and error. It just works.
 		const float intervalLength =
 			graphInnerSize.y * ( ( 1.0f - lineThickness ) / float( numLines - 1u ) );
 		const float top = float( i ) * intervalLength + lineThickness * 1.5f * graphInnerSize.y;
-		m_labels[i]->setTopLeft(
-			graphInnerTopLeft +
-			Ogre::Vector2( -m_labels[i]->getSize().x, top - m_labels[i]->getSize().y * 0.5f ) );
+		m_markers[i]->setTopLeft( graphInnerTopLeft +
+								  Ogre::Vector2( leftPos, top - m_markers[i]->getSize().y * 0.5f ) );
 	}
 }
 //-------------------------------------------------------------------------
@@ -347,24 +355,31 @@ void GraphChart::syncChart()
 	positionLabels();
 }
 //-------------------------------------------------------------------------
+void GraphChart::setMarkersFontSize( FontSize fontSize )
+{
+	for( Colibri::Label *label : m_markers )
+		label->setDefaultFontSize( fontSize );
+	m_labelsDirty = true;
+}
+//-------------------------------------------------------------------------
 void GraphChart::build( const Params &params )
 {
 	m_params = params;
 
-	const size_t oldNumLabels = m_labels.size();
+	const size_t oldNumLabels = m_markers.size();
 	const size_t newNumLabels = m_params.numLines + 1u;
 	if( newNumLabels < oldNumLabels )
 	{
 		// Destroy excess labels.
-		std::vector<Colibri::Label *>::iterator itor = m_labels.begin() + newNumLabels;
-		std::vector<Colibri::Label *>::iterator endt = m_labels.end();
+		std::vector<Colibri::Label *>::iterator itor = m_markers.begin() + newNumLabels;
+		std::vector<Colibri::Label *>::iterator endt = m_markers.end();
 
 		while( itor != endt )
 			m_manager->destroyWidget( *itor++ );
 	}
-	m_labels.resize( newNumLabels );
+	m_markers.resize( newNumLabels );
 	for( size_t i = oldNumLabels; i < newNumLabels; ++i )
-		m_labels[i] = m_manager->createWidget<Colibri::Label>( this );
+		m_markers[i] = m_manager->createWidget<Colibri::Label>( this );
 
 	Ogre::HlmsDatablock *datablock = mHlmsDatablock;
 	_setNullDatablock();

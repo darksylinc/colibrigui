@@ -167,6 +167,7 @@ namespace Demo
 														  Ogre::ColourValue( 0.0f, 1.0f, 0.0f, 0.85f ) );
 
 		graphChart->build( Colibri::GraphChart::Params() );
+		graphChart->setMarkersFontSize( colibriManager->getDefaultFontSize26d6() * 12u / 16u );
 
 		srand( 101 );
 		for( size_t i = 0u; i < graphChart->getEntriesPerColumn(); ++i )

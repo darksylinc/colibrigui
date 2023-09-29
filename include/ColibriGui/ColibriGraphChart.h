@@ -54,15 +54,16 @@ namespace Colibri
 
 		bool m_autoMin;
 		bool m_autoMax;
+		bool m_markersOnRight;
 
 		float m_minSample;
 		float m_maxSample;
 		float m_lastMinValue;
 		float m_lastMaxValue;
 
-		int m_labelPrecision;
+		int32_t m_labelPrecision;
 
-		std::vector<Colibri::Label *> m_labels;
+		std::vector<Colibri::Label *> m_markers;
 
 		Params m_params;
 
@@ -118,21 +119,55 @@ namespace Colibri
 
 		const GraphChart::Params &getParams() const { return m_params; }
 
-		void syncChart();
+		/** Sets the font size of the markers.
+		@remarks
+			If called, must be done so after build().
+			Calling build() again may cause us to forget this setting.
+		@param fontSize
+			Font size.
+		*/
+		void setMarkersFontSize( FontSize fontSize );
+
+		/** Defines whether the markers are displayed on the left or right.
+		@param bOnRight
+			True to display on the right, false on the left.
+		*/
+		void setMarkersOnRight( bool bOnRight )
+		{
+			m_markersOnRight = bOnRight;
+			m_labelsDirty = true;
+		}
+		bool getMarkersOnRight() const { return m_markersOnRight; }
+
+		/** Set how many decimals to show on the labels.
+		@param precision
+			Negative value for default.
+		*/
+		void setLabelsPrecision( int32_t precision )
+		{
+			m_labelPrecision = precision;
+			m_labelsDirty = true;
+		}
+		int getLabelsPrecision() const { return m_labelPrecision; }
 
 		/** MUST be called after setMaxValues() and before rendering.
-			Per-column colours are set via:
+			Per-column must be set before calling this function via:
 			@code
 				graphChart->getColumns()[i].rectangle->
 					setColour( true, Ogre::ColourValue( 0.0f, 1.0f, 0.0f, 0.85f ) );
 			@endcode
-			and must be set before calling build().
 		@remarks
 			Changing these settings can trigger a shader recompilation.
 			You *can* call syncChart() after build().
+			<br/>
+			You *can* call this function again if you wish to change settings.
 		@param params
 		*/
 		void build( const Params &params );
+
+		/// After you've called build() you can still modify all the values of Column::values.
+		/// Every time you do that, you must call syncChart() again.
+		void syncChart();
 
 		void setTransformDirty( uint32_t dirtyReason ) override;
 	};
