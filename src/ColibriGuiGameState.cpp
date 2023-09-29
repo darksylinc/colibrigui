@@ -163,6 +163,10 @@ namespace Demo
 
 		graphChart->getColumns()[0].label->setText( "FPS" );
 		graphChart->getColumns()[0].label->sizeToFit();
+		graphChart->getColumns()[0].rectangle->setColour( true,
+														  Ogre::ColourValue( 0.0f, 1.0f, 0.0f, 0.85f ) );
+
+		graphChart->build( Colibri::GraphChart::Params() );
 
 		srand( 101 );
 		for( size_t i = 0u; i < graphChart->getEntriesPerColumn(); ++i )

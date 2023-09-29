@@ -110,14 +110,21 @@
 
 			const uint num_datapoints = 1u;
 
-			for( uint i = 0u; i < num_datapoints; ++i )
+			const float4 bgColour = diffuseCol;
+
+			@foreach( colibri_numDatasets, n )
 			{
-				const midf datapoint = SampleDiffuse0(
-					DiffuseTexture0, DiffuseSampler0,
-					midf2_c( posInsideGraph.x, ( midf_c( i ) + _h( 0.5 ) ) / num_datapoints ) ).x;
+				const midf datapoint =
+					SampleDiffuse0( DiffuseTexture0, DiffuseSampler0,
+									midf2_c( posInsideGraph.x, ( midf_c( @n ) + _h( 0.5 ) ) /
+																   @value( colibri_numDatasets ) ) )
+						.x;
 
 				if( posInsideGraph.y >= _h( 0.0 ) && posInsideGraph.y <= datapoint )
-					diffuseCol.xyzw = midf4_c( 0.0f, 1.0f, 0.0f, 0.85f );
+				{
+					const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
+					diffuseCol.xyzw = lerp( bgColour, graphColour, graphColour.w );
+				}
 				/*if( posInsideGraph.y >= _h( 0.0 ) )
 				{
 					const midf diffVal = abs( datapoint - posInsideGraph.y );
@@ -125,6 +132,7 @@
 					diffuseCol.xyzw = midf4_c( 0.0f, 1.0f, 0.0f, 1.0 - val );
 				}*/
 			}
+			@end
 		}
 		else
 		{

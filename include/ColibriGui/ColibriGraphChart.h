@@ -20,7 +20,10 @@ namespace Colibri
 			/// See setDataRange().
 			float *values;
 
-			Colibri::Label       *label;
+			Colibri::Label *label;
+
+			/// This dataset's colour lives in rectangle->setColour().
+			/// But changes won't take effect until the next GraphChart::build call.
 			Colibri::CustomShape *rectangle;
 		};
 
@@ -54,10 +57,18 @@ namespace Colibri
 
 		float m_minSample;
 		float m_maxSample;
+		float m_lastMinValue;
+		float m_lastMaxValue;
 
-		std::vector<Colibri::Label> m_labels;
+		int m_labelPrecision;
+
+		std::vector<Colibri::Label *> m_labels;
 
 		Params m_params;
+
+		void positionGraphLegend();
+		void positionMarkersInLines( const float minValue, const float maxValue );
+		void positionLabels();
 
 	public:
 		GraphChart( ColibriManager *manager );
@@ -101,14 +112,26 @@ namespace Colibri
 
 		/// Direct access to data to modify it.
 		/// Call syncChart() once you're done modifying it.
-		std::vector<Column> &getColumns() { return m_columns; }
+		std::vector<GraphChart::Column> &getColumns() { return m_columns; }
 
-		const std::vector<Column> &getColumns() const { return m_columns; }
+		const std::vector<GraphChart::Column> &getColumns() const { return m_columns; }
 
 		const GraphChart::Params &getParams() const { return m_params; }
 
 		void syncChart();
 
+		/** MUST be called after setMaxValues() and before rendering.
+			Per-column colours are set via:
+			@code
+				graphChart->getColumns()[i].rectangle->
+					setColour( true, Ogre::ColourValue( 0.0f, 1.0f, 0.0f, 0.85f ) );
+			@endcode
+			and must be set before calling build().
+		@remarks
+			Changing these settings can trigger a shader recompilation.
+			You *can* call syncChart() after build().
+		@param params
+		*/
 		void build( const Params &params );
 
 		void setTransformDirty( uint32_t dirtyReason ) override;

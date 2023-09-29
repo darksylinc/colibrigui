@@ -215,6 +215,17 @@ namespace Ogre
 				toPieceStr( pieceStr, params.bgInnerColour );
 			inOutPieces[PixelShader]["colibri_bgOuterColour"] =
 				toPieceStr( pieceStr, params.bgOuterColour );
+
+			const std::vector<Colibri::GraphChart::Column> &columns = graphChart->getColumns();
+			const size_t numDatasets = columns.size();
+			setProperty( kNoTid, "colibri_numDatasets", static_cast<int32>( numDatasets ) );
+			for( size_t i = 0u; i < numDatasets; ++i )
+			{
+				pieceStr.clear();
+				IdString keyName( pieceStr.a( "colibri_datasetCol", (uint32)i ).c_str() );
+				inOutPieces[PixelShader][keyName] =
+					toPieceStr( pieceStr, columns[i].rectangle->getColour() );
+			}
 		}
 	}
 	//-----------------------------------------------------------------------------------

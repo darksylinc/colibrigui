@@ -36,7 +36,10 @@ GraphChart::GraphChart( ColibriManager *manager ) :
 	m_autoMin( false ),
 	m_autoMax( false ),
 	m_minSample( 0.0f ),
-	m_maxSample( 1.0f )
+	m_maxSample( 1.0f ),
+	m_lastMinValue( std::numeric_limits<float>::max() ),
+	m_lastMaxValue( -std::numeric_limits<float>::max() ),
+	m_labelPrecision( 2 )
 {
 	setCustomParameter( 6374, Ogre::Vector4( 1.0f ) );
 }
@@ -105,10 +108,12 @@ void GraphChart::_destroy()
 //-------------------------------------------------------------------------
 void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntriesPerColumn )
 {
-	if( numColumns > m_columns.size() )
+	const size_t oldNumColumns = m_columns.size();
+
+	if( numColumns < oldNumColumns )
 	{
-		// Destroy excess labels.
-		std::vector<Column>::iterator itor = m_columns.begin();
+		// Destroy excess widgets.
+		std::vector<Column>::iterator itor = m_columns.begin() + numColumns;
 		std::vector<Column>::iterator endt = m_columns.end();
 
 		while( itor != endt )
@@ -128,19 +133,23 @@ void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntr
 	for( size_t y = 0u; y < numColumns; ++y )
 	{
 		m_columns[y].values = &m_allValues[y * maxEntriesPerColumn];
-		m_columns[y].label = m_manager->createWidget<Label>( this );
-		m_columns[y].rectangle = m_manager->createWidget<CustomShape>( this );
 
-		m_columns[y].rectangle->setDatablock(
-			hlmsManager->getHlms( Ogre::HLMS_UNLIT )->getDefaultDatablock() );
-		m_columns[y].rectangle->setNumTriangles( 2u );
-		m_columns[y].rectangle->setQuad( 0u, Ogre::Vector2( -1.0f ), Ogre::Vector2( 2.0f ),
-										 Ogre::ColourValue::White, Ogre::Vector2::ZERO,
-										 Ogre::Vector2::UNIT_SCALE );
+		if( y >= oldNumColumns )
+		{
+			m_columns[y].label = m_manager->createWidget<Label>( this );
+			m_columns[y].rectangle = m_manager->createWidget<CustomShape>( this );
 
-		m_columns[y].label->m_gridLocation = GridLocations::CenterLeft;
-		m_columns[y].rectangle->m_gridLocation = GridLocations::CenterLeft;
-		m_columns[y].label->m_margin = 10.0f;
+			m_columns[y].rectangle->setDatablock(
+				hlmsManager->getHlms( Ogre::HLMS_UNLIT )->getDefaultDatablock() );
+			m_columns[y].rectangle->setNumTriangles( 2u );
+			m_columns[y].rectangle->setQuad( 0u, Ogre::Vector2( -1.0f ), Ogre::Vector2( 2.0f ),
+											 Ogre::ColourValue::White, Ogre::Vector2::ZERO,
+											 Ogre::Vector2::UNIT_SCALE );
+
+			m_columns[y].label->m_gridLocation = GridLocations::CenterLeft;
+			m_columns[y].rectangle->m_gridLocation = GridLocations::CenterLeft;
+			m_columns[y].label->m_margin = 10.0f;
+		}
 	}
 
 	m_labelsDirty = true;
@@ -184,8 +193,6 @@ void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntr
 		Ogre::HlmsUnlitDatablock *unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock *>( datablock );
 		unlitDatablock->setTexture( 0u, m_textureData );
 	}
-
-	syncChart();
 }
 //-------------------------------------------------------------------------
 uint32_t GraphChart::getEntriesPerColumn() const
@@ -193,6 +200,83 @@ uint32_t GraphChart::getEntriesPerColumn() const
 	if( !m_textureData )
 		return 0u;
 	return m_textureData->getWidth();
+}
+//-------------------------------------------------------------------------
+void GraphChart::positionGraphLegend()
+{
+	{
+		float labelHeight = std::numeric_limits<float>::max();
+		for( const Column &column : m_columns )
+			labelHeight = std::min( labelHeight, column.label->getSize().y * 0.33f );
+		for( const Column &column : m_columns )
+		{
+			column.rectangle->setSizeAndCellMinSize( Ogre::Vector2( labelHeight * 1.33f, labelHeight ) );
+		}
+	}
+
+	const size_t numColumns = m_columns.size();
+
+	LayoutTableSameSize rootLayout( m_manager );
+	std::vector<LayoutLine> columnLines;
+	columnLines.resize( m_columns.size(), m_manager );
+
+	for( size_t y = 0u; y < numColumns; ++y )
+	{
+		columnLines[y].m_vertical = false;
+		columnLines[y].m_expand[0] = true;
+		columnLines[y].m_expand[1] = true;
+		columnLines[y].m_proportion[0] = 1u;
+		columnLines[y].m_proportion[1] = 1u;
+		columnLines[y].addCell( m_columns[y].rectangle );
+		columnLines[y].addCell( m_columns[y].label );
+		rootLayout.addCell( &columnLines[y] );
+	}
+
+	// rootLayout.setCellSize()
+	rootLayout.layout();
+}
+//-------------------------------------------------------------------------
+void GraphChart::positionMarkersInLines( const float minValue, const float maxValue )
+{
+	const size_t numLines = m_params.numLines;
+
+	const Ogre::Vector2 graphSize = getSize();
+
+	// In virtual canvas units.
+	const float lineThickness = m_params.lineThickness;
+	const Ogre::Vector2 graphInnerSize = m_params.graphInnerSize * graphSize;
+	const Ogre::Vector2 graphInnerTopLeft =
+		graphSize * ( m_params.graphInnerTopLeft - Ogre::Vector2( 0.0f, lineThickness ) );
+
+	for( size_t i = 0u; i < numLines; ++i )
+	{
+		const float fW = float( i ) / float( numLines - 1u );
+		const float value = Ogre::Math::lerp( maxValue, minValue, fW );
+		char tmpBuffer[64];
+		Ogre::LwString valStr( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+		m_labels[i]->setText( valStr.a( Ogre::LwString::Float( value, m_labelPrecision ) ).c_str() );
+		m_labels[i]->sizeToFit();
+
+		// Honestly I can't make sense of this math ('top' and 'intervalLength' calculation).
+		// What I thought would work didn't. I arrived to this formula by trial and error. It just works.
+		const float intervalLength =
+			graphInnerSize.y * ( ( 1.0f - lineThickness ) / float( numLines - 1u ) );
+		const float top = float( i ) * intervalLength + lineThickness * 1.5f * graphInnerSize.y;
+		m_labels[i]->setTopLeft(
+			graphInnerTopLeft +
+			Ogre::Vector2( -m_labels[i]->getSize().x, top - m_labels[i]->getSize().y * 0.5f ) );
+	}
+}
+//-------------------------------------------------------------------------
+void GraphChart::positionLabels()
+{
+	if( !m_labelsDirty )
+		return;
+
+	positionGraphLegend();
+	positionMarkersInLines( m_lastMinValue, m_lastMaxValue );
+
+	m_labelsDirty = false;
 }
 //-------------------------------------------------------------------------
 void GraphChart::syncChart()
@@ -253,47 +337,51 @@ void GraphChart::syncChart()
 	// multiple write copies to the same textures are to be done to non-overlapping regions.
 	m_manager->getOgreHlmsManager()->getRenderSystem()->endCopyEncoder();
 
-	if( m_labelsDirty )
+	if( m_lastMinValue != minSample || m_lastMaxValue != maxSample )
 	{
-		{
-			float labelHeight = std::numeric_limits<float>::max();
-			for( const Column &column : m_columns )
-				labelHeight = std::min( labelHeight, column.label->getSize().y * 0.33f );
-			for( const Column &column : m_columns )
-			{
-				column.rectangle->setSizeAndCellMinSize(
-					Ogre::Vector2( labelHeight * 1.33f, labelHeight ) );
-			}
-		}
-
-		const size_t numColumns = m_columns.size();
-
-		LayoutTableSameSize rootLayout( m_manager );
-		std::vector<LayoutLine> columnLines;
-		columnLines.resize( m_columns.size(), m_manager );
-
-		for( size_t y = 0u; y < numColumns; ++y )
-		{
-			columnLines[y].m_vertical = false;
-			columnLines[y].m_expand[0] = true;
-			columnLines[y].m_expand[1] = true;
-			columnLines[y].m_proportion[0] = 1u;
-			columnLines[y].m_proportion[1] = 1u;
-			columnLines[y].addCell( m_columns[y].rectangle );
-			columnLines[y].addCell( m_columns[y].label );
-			rootLayout.addCell( &columnLines[y] );
-		}
-
-		// rootLayout.setCellSize()
-		rootLayout.layout();
+		m_lastMinValue = minSample;
+		m_lastMaxValue = maxSample;
+		m_labelsDirty = true;
 	}
+
+	positionLabels();
+}
+//-------------------------------------------------------------------------
+void GraphChart::build( const Params &params )
+{
+	m_params = params;
+
+	const size_t oldNumLabels = m_labels.size();
+	const size_t newNumLabels = m_params.numLines + 1u;
+	if( newNumLabels < oldNumLabels )
+	{
+		// Destroy excess labels.
+		std::vector<Colibri::Label *>::iterator itor = m_labels.begin() + newNumLabels;
+		std::vector<Colibri::Label *>::iterator endt = m_labels.end();
+
+		while( itor != endt )
+			m_manager->destroyWidget( *itor++ );
+	}
+	m_labels.resize( newNumLabels );
+	for( size_t i = oldNumLabels; i < newNumLabels; ++i )
+		m_labels[i] = m_manager->createWidget<Colibri::Label>( this );
+
+	Ogre::HlmsDatablock *datablock = mHlmsDatablock;
+	_setNullDatablock();
+	setDatablock( datablock );
+
+	m_labelsDirty = true;
+	syncChart();
 }
 //-------------------------------------------------------------------------
 void GraphChart::setTransformDirty( uint32_t dirtyReason )
 {
 	// Only update if our size is directly being changed, not our parent's
 	if( ( dirtyReason & ( TransformDirtyParentCaller | TransformDirtyScale ) ) == TransformDirtyScale )
+	{
 		m_labelsDirty = true;
+		positionLabels();
+	}
 
 	Widget::setTransformDirty( dirtyReason );
 }
