@@ -130,9 +130,8 @@
 					{
 						// Draw a line
 						const midf datapointNext =
-							SampleDiffuse0(
-								DiffuseTexture0, DiffuseSampler0,
-								dataUv + midf2_c( posInsideGraph.x + _h( 0.125 / 128.0 ), _h( 0.0 ) ) )
+							SampleDiffuse0( DiffuseTexture0, DiffuseSampler0,
+											dataUv + midf2_c( _h( 0.125 / 128.0 ), _h( 0.0 ) ) )
 								.x;
 
 						const midf diffToX = pow( abs( datapointNext - datapoint ), _h( 0.5 ) );
