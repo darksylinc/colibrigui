@@ -114,23 +114,36 @@
 
 			@foreach( colibri_numDatasets, n )
 			{
-				const midf datapoint =
-					SampleDiffuse0( DiffuseTexture0, DiffuseSampler0,
-									midf2_c( posInsideGraph.x, ( midf_c( @n ) + _h( 0.5 ) ) /
-																   @value( colibri_numDatasets ) ) )
-						.x;
+				const midf2 dataUv = midf2_c(
+					posInsideGraph.x, ( midf_c( @n ) + _h( 0.5 ) ) / @value( colibri_numDatasets ) );
+				const midf datapoint = SampleDiffuse0( DiffuseTexture0, DiffuseSampler0, dataUv ).x;
 
-				if( posInsideGraph.y >= _h( 0.0 ) && posInsideGraph.y <= datapoint )
-				{
-					const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
-					diffuseCol.xyzw = lerp( bgColour, graphColour, graphColour.w );
-				}
-				/*if( posInsideGraph.y >= _h( 0.0 ) )
-				{
-					const midf diffVal = abs( datapoint - posInsideGraph.y );
-					const midf val = smoothstep( 0.0, 0.01, diffVal );
-					diffuseCol.xyzw = midf4_c( 0.0f, 1.0f, 0.0f, 1.0 - val );
-				}*/
+				@property( @n == 0 )
+					if( posInsideGraph.y >= _h( 0.0 ) && posInsideGraph.y <= datapoint )
+					{
+						// Draw a full area
+						const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
+						diffuseCol.xyzw = lerp( bgColour, graphColour, graphColour.w );
+					}
+				@else
+					if( posInsideGraph.y >= _h( 0.0 ) )
+					{
+						// Draw a line
+						const midf datapointNext =
+							SampleDiffuse0(
+								DiffuseTexture0, DiffuseSampler0,
+								dataUv + midf2_c( posInsideGraph.x + _h( 0.125 / 128.0 ), _h( 0.0 ) ) )
+								.x;
+
+						const midf diffToX = pow( abs( datapointNext - datapoint ), _h( 0.5 ) );
+						const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
+						const midf diffVal = abs( datapoint - posInsideGraph.y );
+						midf val = smoothstep( _h( 0.0 ), _h( 0.2 ) + diffToX, diffVal );
+						val = ( _h( 1.0 ) - val );
+						val = saturate( _h( 2.0 ) * pow( val, _h( 80.0 ) ) );
+						diffuseCol.xyzw = lerp( diffuseCol, graphColour, graphColour.w * val );
+					}
+				@end
 			}
 			@end
 		}
