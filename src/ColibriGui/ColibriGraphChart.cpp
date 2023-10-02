@@ -231,14 +231,13 @@ void GraphChart::setDataRange( bool autoMin, bool autoMax, float minValue, float
 //-------------------------------------------------------------------------
 void GraphChart::positionGraphLegend()
 {
+	float labelHeight = std::numeric_limits<float>::max();
+	for( const Column &column : m_columns )
+		labelHeight = std::min( labelHeight, column.label->getSize().y );
+	for( const Column &column : m_columns )
 	{
-		float labelHeight = std::numeric_limits<float>::max();
-		for( const Column &column : m_columns )
-			labelHeight = std::min( labelHeight, column.label->getSize().y * 0.33f );
-		for( const Column &column : m_columns )
-		{
-			column.rectangle->setSizeAndCellMinSize( Ogre::Vector2( labelHeight * 1.33f, labelHeight ) );
-		}
+		column.rectangle->setSizeAndCellMinSize( Ogre::Vector2( labelHeight * 1.33f, labelHeight ) *
+												 0.33f );
 	}
 
 	const size_t numColumns = m_columns.size();
@@ -249,6 +248,12 @@ void GraphChart::positionGraphLegend()
 
 	std::vector<LayoutLine> columnLines;
 	columnLines.resize( m_columns.size(), m_manager );
+
+	{
+		const Ogre::Vector2 topLeftCornerSize = m_params.graphInnerTopLeft * getSize();
+		if( topLeftCornerSize.x > topLeftCornerSize.y && topLeftCornerSize.y < labelHeight )
+			rootLayout.m_numColumns = 1u;
+	}
 
 	for( size_t y = 0u; y < numColumns; ++y )
 	{
@@ -262,7 +267,6 @@ void GraphChart::positionGraphLegend()
 		rootLayout.addCell( &columnLines[y] );
 	}
 
-	// rootLayout.setCellSize()
 	rootLayout.layout();
 }
 //-------------------------------------------------------------------------
