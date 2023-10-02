@@ -98,7 +98,7 @@
 			// posInsideGraph.x is in range [0; 1.0]
 			// posInsideGraph.y is in range [-lineThickness; 1.0]
 			midf2 posInsideGraph =
-				( ( inPs.uv0 - graphStartTL ) / ( graphEndBR - graphStartTL ) );
+				( ( midf2_c( inPs.uv0 ) - graphStartTL ) / ( graphEndBR - graphStartTL ) );
 			posInsideGraph.y *= _h( 1.0 ) + lineThickness;
 			posInsideGraph.y -= lineThickness;
 
@@ -110,12 +110,12 @@
 
 			const uint num_datapoints = 1u;
 
-			const float4 bgColour = diffuseCol;
+			const midf4 bgColour = diffuseCol;
 
 			@foreach( colibri_numDatasets, n )
 			{
-				const midf2 dataUv = midf2_c(
-					posInsideGraph.x, ( midf_c( @n ) + _h( 0.5 ) ) / @value( colibri_numDatasets ) );
+				const float2 dataUv =
+					float2( posInsideGraph.x, ( @n + 0.5f ) / @value( colibri_numDatasets ) );
 				const midf datapoint = SampleDiffuse0( DiffuseTexture0, DiffuseSampler0, dataUv ).x;
 
 				@property( @n == 0 )
@@ -131,7 +131,7 @@
 						// Draw a line
 						const midf datapointNext =
 							SampleDiffuse0( DiffuseTexture0, DiffuseSampler0,
-											dataUv + midf2_c( _h( 0.125 / 128.0 ), _h( 0.0 ) ) )
+											dataUv + float2( ( 0.125f / 128.0f ), 0.0f ) )
 								.x;
 
 						const midf diffToX = pow( abs( datapointNext - datapoint ), _h( 0.5 ) );
