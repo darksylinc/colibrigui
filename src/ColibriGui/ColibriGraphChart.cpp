@@ -73,6 +73,21 @@ void GraphChart::_initialize()
 			setDatablock( datablock );
 	}
 
+	{
+		const Ogre::String defaultDatablockName( "ColibriDefaultBlankDatablock" );
+		Ogre::HlmsDatablock *refDatablock = hlmsManager->getDatablockNoDefault( defaultDatablockName );
+		if( !refDatablock )
+		{
+			Ogre::HlmsDatablock *defaultDatablock =
+				hlmsManager->getHlms( Ogre::HLMS_UNLIT )->getDefaultDatablock();
+			refDatablock = defaultDatablock->clone( defaultDatablockName );
+			Ogre::HlmsMacroblock macroblock;
+			macroblock.mDepthCheck = false;
+			macroblock.mDepthWrite = false;
+			refDatablock->setMacroblock( macroblock );
+		}
+	}
+
 	setNumTriangles( 2u );
 	setQuad( 0u, Ogre::Vector2( -1.0f ), Ogre::Vector2( 2.0f ), Ogre::ColourValue::White,
 			 Ogre::Vector2( 0.0f, 1.0f ), Ogre::Vector2( 1.0f, -1.0f ) );
@@ -130,8 +145,6 @@ void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntr
 	m_allValues.clear();
 	m_allValues.resize( numColumns * maxEntriesPerColumn, 0.0f );
 
-	Ogre::HlmsManager *hlmsManager = m_manager->getOgreHlmsManager();
-
 	for( size_t y = 0u; y < numColumns; ++y )
 	{
 		m_columns[y].values = &m_allValues[y * maxEntriesPerColumn];
@@ -141,8 +154,7 @@ void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntr
 			m_columns[y].label = m_manager->createWidget<Label>( this );
 			m_columns[y].rectangle = m_manager->createWidget<CustomShape>( this );
 
-			m_columns[y].rectangle->setDatablock(
-				hlmsManager->getHlms( Ogre::HLMS_UNLIT )->getDefaultDatablock() );
+			m_columns[y].rectangle->setDatablock( "ColibriDefaultBlankDatablock" );
 			m_columns[y].rectangle->setNumTriangles( 2u );
 			m_columns[y].rectangle->setQuad( 0u, Ogre::Vector2( -1.0f ), Ogre::Vector2( 2.0f ),
 											 Ogre::ColourValue::White, Ogre::Vector2::ZERO,
@@ -184,6 +196,8 @@ void GraphChart::setMaxValues( const uint32_t numColumns, const uint32_t maxEntr
 	m_textureData->setResolution( maxEntriesPerColumn, numColumns );
 	m_textureData->setPixelFormat( Ogre::PFG_R16_UNORM );
 	m_textureData->scheduleTransitionTo( Ogre::GpuResidency::Resident );
+
+	Ogre::HlmsManager *hlmsManager = m_manager->getOgreHlmsManager();
 
 	// Set the texture to our datablock.
 	for( size_t i = 0; i < States::NumStates; ++i )
