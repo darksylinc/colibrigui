@@ -15,6 +15,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsSamplerblock.h"
 
+#include "OgreFrameStats.h"
 #include "OgreRoot.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsPbs.h"
@@ -27,6 +28,7 @@
 #include "ColibriGui/ColibriButton.h"
 #include "ColibriGui/ColibriCheckbox.h"
 #include "ColibriGui/ColibriEditbox.h"
+#include "ColibriGui/ColibriGraphChart.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriProgressbar.h"
@@ -60,6 +62,8 @@ namespace Demo
 	Colibri::Slider *slider1 = 0;
 	Colibri::Slider *slider2 = 0;
 	Colibri::Label *sliderLabel = 0;
+
+	static Colibri::GraphChart *graphChart = 0;
 
 	Colibri::Window *overlapWindow1 = 0;
 	Colibri::Window *overlapWindow2 = 0;
@@ -154,6 +158,38 @@ namespace Demo
 
 		Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 		//layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
+
+		graphChart = colibriManager->createWidget<Colibri::GraphChart>( mainWindow );
+		graphChart->m_minSize = Ogre::Vector2( 512, 512 );
+		graphChart->setMaxValues( 2u, 128u );
+
+		graphChart->setDataRange( false, true, 0.0f, 60.0f, 10.0f );
+		graphChart->setLabelsPrecision( 0 );
+
+		graphChart->getColumns()[0].label->setText( "FPS" );
+		graphChart->getColumns()[0].label->sizeToFit();
+		graphChart->getColumns()[0].rectangle->setColour( true,
+														  Ogre::ColourValue( 0.0f, 1.0f, 0.0f, 0.85f ) );
+
+		graphChart->getColumns()[1].label->setText( "95-p" );
+		graphChart->getColumns()[1].label->sizeToFit();
+		graphChart->getColumns()[1].rectangle->setColour( true,
+														  Ogre::ColourValue( 1.0f, 0.0f, 0.0f, 0.85f ) );
+
+		graphChart->build( Colibri::GraphChart::Params() );
+		graphChart->setMarkersFontSize( colibriManager->getDefaultFontSize26d6() * 12u / 16u );
+		graphChart->setMarkersOnRight( true );
+
+		srand( 101 );
+		for( size_t i = 0u; i < graphChart->getEntriesPerColumn(); ++i )
+		{
+			//graphChart->getColumns()[0].values[i] = ( i * 65535u ) / graphChart->getEntriesPerColumn();
+			//graphChart->getColumns()[0].values[i] = ( rand() % 65536u );
+			double val = ( rand() % 65536 ) / 65535.0;
+			val = val * 0.05 + 0.5;
+			graphChart->getColumns()[0].values[i] = val;
+		}
+		graphChart->syncChart();
 
 		Colibri::RadarChart *radarChart =
 			colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
@@ -272,6 +308,7 @@ namespace Demo
 		layout->addCell( sliderLabel );
 
 		layout->addCell( radarChart );
+		layout->addCell( graphChart );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();
@@ -541,8 +578,29 @@ namespace Demo
 		float currentValue = slider1->getCurrentValueUnorm();
 		if( prevValue != currentValue )
 		{
-			sliderLabel->setText( std::to_string(currentValue) );
+			sliderLabel->setText( std::to_string( currentValue ) );
 			prevValue = currentValue;
+		}
+
+		if( graphChart )
+		{
+			std::vector<Colibri::GraphChart::Column> &columns = graphChart->getColumns();
+
+			const uint32_t lastEntry = graphChart->getEntriesPerColumn() - 1u;
+
+			memmove( &columns[0].values[0], &columns[0].values[1], lastEntry * sizeof( float ) );
+			memmove( &columns[1].values[0], &columns[1].values[1], lastEntry * sizeof( float ) );
+
+			columns[0].values[lastEntry] = 1.0f / timeSinceLast;
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+			Ogre::Root *root = mGraphicsSystem->getRoot();
+			const Ogre::FrameStats *frameStats = root->getFrameStats();
+			columns[1].values[lastEntry] = 1.0f / frameStats->getPercentile95th( true );
+#else
+			columns[1].values[lastEntry] = 0.0f;  // Not available
+#endif
+
+			graphChart->syncChart();
 		}
 
 		TutorialGameState::update( timeSinceLast );

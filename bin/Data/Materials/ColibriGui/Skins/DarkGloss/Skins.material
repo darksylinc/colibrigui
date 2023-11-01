@@ -72,3 +72,17 @@ hlms RadarChartDisabled unlit
 	diffuse 1 1 1 0.2
 	scene_blend alpha_blend
 }
+
+hlms GraphChart unlit
+{
+	depth_check off
+	cull_mode none
+	scene_blend alpha_blend
+}
+hlms GraphChartDisabled unlit
+{
+	depth_check off
+	cull_mode none
+	diffuse 1 1 1 0.2
+	scene_blend alpha_blend
+}

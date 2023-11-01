@@ -45,7 +45,7 @@
 		#define diffuseCol outColour
 	@end
 
-	@property( ogre_version < 2004000 )
+	@property( ogre_version < 3000000 )
 		#define midf_c float
 	@end
 
@@ -76,4 +76,89 @@
 	@end
 @end
 
+@end /// colibri_gui && colibri_text
+
+@property( colibri_gui && colibri_graph )
+	@piece( custom_ps_preLights )
+		@property( ogre_version < 3000000 )
+			#define _h(x) (x)
+			#define midf float
+			#define midf2 vec2
+			#define midf4 vec4
+			#define midf2_c vec2
+			#define midf4_c vec4
+		@end
+
+		// const midf2 graphStartTL = midf2_c( 0.1f, 0.1f );
+		// const midf2 graphEndBR = midf2_c( 0.9f, 0.9f );
+		// const midf intervalLength = _h( 0.2f );
+		// const midf2 intervalBlankAreaSize = midf2_c( 0.0f, 0.18f );
+		const midf2 graphStartTL = midf2_c( @insertpiece( colibri_graphStartTL ) );
+		const midf2 graphEndBR = midf2_c( @insertpiece( colibri_graphStartBR ) );
+		const midf intervalLength = _h( @insertpiece( colibri_intervalLength ) );
+		const midf2 intervalBlankAreaSize = midf2_c( @insertpiece( colibri_intervalBlankAreaSize ) );
+		const midf lineThickness = intervalLength - intervalBlankAreaSize.y;
+
+		if( inPs.uv0.x >= graphStartTL.x && inPs.uv0.x <= graphEndBR.x &&
+			inPs.uv0.y >= graphStartTL.y && inPs.uv0.y <= graphEndBR.y )
+		{
+			// Inner area of the graph.
+
+			// posInsideGraph.x is in range [0; 1.0]
+			// posInsideGraph.y is in range [-lineThickness; 1.0]
+			midf2 posInsideGraph =
+				( ( midf2_c( inPs.uv0 ) - graphStartTL ) / ( graphEndBR - graphStartTL ) );
+			posInsideGraph.y *= _h( 1.0 ) + lineThickness;
+			posInsideGraph.y -= lineThickness;
+
+			const midf stripeRegionY = mod( posInsideGraph.y, intervalLength );
+			if( stripeRegionY <= intervalBlankAreaSize.y )
+				diffuseCol.xyzw = midf4_c( @insertpiece( colibri_bgInnerColour ) );
+			else
+				diffuseCol.xyzw = midf4_c( @insertpiece( colibri_lineColour ) );
+
+			const uint num_datapoints = 1u;
+
+			const midf4 bgColour = diffuseCol;
+
+			@foreach( colibri_numDatasets, n )
+			{
+				const float2 dataUv =
+					float2( posInsideGraph.x, ( @n + 0.5f ) / @value( colibri_numDatasets ) );
+				const midf datapoint = SampleDiffuse0( DiffuseTexture0, DiffuseSampler0, dataUv ).x;
+
+				@property( @n == 0 )
+					if( posInsideGraph.y >= _h( 0.0 ) && posInsideGraph.y <= datapoint )
+					{
+						// Draw a full area
+						const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
+						diffuseCol.xyzw = lerp( bgColour, graphColour, graphColour.w );
+					}
+				@else
+					if( posInsideGraph.y >= _h( 0.0 ) )
+					{
+						// Draw a line
+						const midf datapointNext =
+							SampleDiffuse0( DiffuseTexture0, DiffuseSampler0,
+											dataUv + float2( ( 0.125f / 128.0f ), 0.0f ) )
+								.x;
+
+						const midf diffToX = pow( abs( datapointNext - datapoint ), _h( 0.5 ) );
+						const midf4 graphColour = midf4_c( @insertpiece( colibri_datasetCol@n ) );
+						const midf diffVal = abs( datapoint - posInsideGraph.y );
+						midf val = smoothstep( _h( 0.0 ), _h( 0.2 ) + diffToX, diffVal );
+						val = ( _h( 1.0 ) - val );
+						val = saturate( _h( 2.0 ) * pow( val, _h( 80.0 ) ) );
+						diffuseCol.xyzw = lerp( diffuseCol, graphColour, graphColour.w * val );
+					}
+				@end
+			}
+			@end
+		}
+		else
+		{
+			// We were in the outer area of the graph.
+			diffuseCol.xyzw = midf4_c(  @insertpiece( colibri_bgOuterColour ) );
+		}
+	@end
 @end

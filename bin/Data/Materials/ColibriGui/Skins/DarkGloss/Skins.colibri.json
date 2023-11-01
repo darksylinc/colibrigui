@@ -86,6 +86,17 @@
             "material" : "RadarChartDisabled"
         },
 
+        "GraphChart" :
+        {
+            "copy_from" : "EmptyBg",
+            "material" : "GraphChart"
+        },
+        "GraphChartDisabled" :
+        {
+            "copy_from" : "GraphChart",
+            "material" : "GraphChartDisabled"
+        },
+
         "SpinnerBtnDecrement_idle" :
         {
             "material" : "AtlasTransparent",
@@ -287,6 +298,11 @@
         {
             "all" : "RadarChart",
             "disabled" : "RadarChartDisabled"
+        },
+        "GraphChart" :
+        {
+            "all" : "GraphChart",
+            "disabled" : "GraphChartDisabled"
         }
     },
 
@@ -312,6 +328,7 @@
         "SliderHandle"          : "Button",
         "ToggleButtonUnchecked" : "Button",
         "ToggleButtonChecked"   : "ToggleButton",
-        "RadarChart"            : "RadarChart"
+        "RadarChart"            : "RadarChart",
+        "GraphChart"            : "GraphChart"
     }
 }
