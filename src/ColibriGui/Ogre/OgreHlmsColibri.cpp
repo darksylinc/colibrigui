@@ -188,6 +188,10 @@ namespace Ogre
 		{
 			setProperty( COLIBRI_NOTID "colibri_graph", 1 );
 
+			setProperty(
+				COLIBRI_NOTID "ogre_version",
+				( OGRE_VERSION_MAJOR * 1000000 + OGRE_VERSION_MINOR * 1000 + OGRE_VERSION_PATCH ) );
+
 			COLIBRI_ASSERT_HIGH( dynamic_cast<Colibri::GraphChart *>( renderable ) );
 			Colibri::GraphChart *graphChart = static_cast<Colibri::GraphChart *>( renderable );
 			const Colibri::GraphChart::Params &params = graphChart->getParams();
@@ -218,7 +222,11 @@ namespace Ogre
 
 			const std::vector<Colibri::GraphChart::Column> &columns = graphChart->getColumns();
 			const size_t numDatasets = columns.size();
-			setProperty( kNoTid, "colibri_numDatasets", static_cast<int32>( numDatasets ) );
+			setProperty(
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+				kNoTid,
+#endif
+				"colibri_numDatasets", static_cast<int32>( numDatasets ) );
 			for( size_t i = 0u; i < numDatasets; ++i )
 			{
 				pieceStr.clear();

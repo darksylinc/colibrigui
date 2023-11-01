@@ -201,8 +201,6 @@ namespace Demo
 																		 { 0.75f, 0.85f, "CRT\n11" } };
 		radarChart->setDataSeries( dataSeries, Colibri::RadarChart::LabelDisplayName );
 
-		layout->addCell( graphChart );
-
 		button0 = colibriManager->createWidget<Colibri::Button>( mainWindow );
 		button0->m_minSize = Ogre::Vector2( 350, 64 );
 		button0->getLabel()->setText( "This \uE001 is a button" );
@@ -310,6 +308,7 @@ namespace Demo
 		layout->addCell( sliderLabel );
 
 		layout->addCell( radarChart );
+		layout->addCell( graphChart );
 
 		{
 			const Colibri::LayoutCellVec &cells = layout->getCells();
@@ -585,9 +584,6 @@ namespace Demo
 
 		if( graphChart )
 		{
-			Ogre::Root *root = mGraphicsSystem->getRoot();
-			const Ogre::FrameStats *frameStats = root->getFrameStats();
-
 			std::vector<Colibri::GraphChart::Column> &columns = graphChart->getColumns();
 
 			const uint32_t lastEntry = graphChart->getEntriesPerColumn() - 1u;
@@ -596,7 +592,13 @@ namespace Demo
 			memmove( &columns[1].values[0], &columns[1].values[1], lastEntry * sizeof( float ) );
 
 			columns[0].values[lastEntry] = 1.0f / timeSinceLast;
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+			Ogre::Root *root = mGraphicsSystem->getRoot();
+			const Ogre::FrameStats *frameStats = root->getFrameStats();
 			columns[1].values[lastEntry] = 1.0f / frameStats->getPercentile95th( true );
+#else
+			columns[1].values[lastEntry] = 0.0f;  // Not available
+#endif
 
 			graphChart->syncChart();
 		}
