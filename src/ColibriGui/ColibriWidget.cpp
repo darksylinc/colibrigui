@@ -945,6 +945,8 @@ namespace Colibri
 		return m_children;
 	}
 	//-------------------------------------------------------------------------
+	size_t Widget::getNumWidgets() const { return m_numWidgets; }
+	//-------------------------------------------------------------------------
 	size_t Widget::getOffsetStartWindowChildren() const
 	{
 		const size_t windowChildrenStart = m_numWidgets;

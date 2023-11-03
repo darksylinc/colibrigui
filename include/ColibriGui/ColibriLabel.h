@@ -218,7 +218,7 @@ namespace Colibri
 		void setLineHeightScale( float lineHeightScale, float lastLineHeightScale = 1.0f );
 
 		float getLineHeightScale() const { return m_lineHeightScale; }
-		float setLastLineLineHeightScale() const { return m_lastLineHeightScale; }
+		float getLastLineLineHeightScale() const { return m_lastLineHeightScale; }
 
 		/// Name alias for setLineHeightScale()
 		void setLineSpacing( float lineHeightScale, float lastLineHeightScale )
