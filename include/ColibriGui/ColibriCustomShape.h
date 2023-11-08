@@ -30,6 +30,10 @@ namespace Colibri
 	/** @ingroup Controls
 	@class CustomShape
 		A widget used to draw arbitrary 2D shapes.
+
+		@note Due to technical reasons regarding material indexing in the GPU, CustomShapes
+		cannot be batched together with anything. Which means they break instancing.
+		Having lots of CustomShapes can cause high API overhead.
 	*/
 	class CustomShape : public Renderable
 	{
@@ -42,6 +46,11 @@ namespace Colibri
 		CustomShape( ColibriManager *manager );
 
 		void _destroy() override;
+
+		WidgetRenderType::WidgetRenderType getWidgetRenderType() const override
+		{
+			return WidgetRenderType::CustomShape;
+		}
 
 		/** Must be called first. Can be called again any time to grow or shrink the buffer.
 		@param numTriangles

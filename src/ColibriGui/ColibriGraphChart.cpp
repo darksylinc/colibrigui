@@ -43,7 +43,7 @@ GraphChart::GraphChart( ColibriManager *manager ) :
 	m_lastMaxValue( -std::numeric_limits<float>::max() ),
 	m_labelPrecision( 2 )
 {
-	setCustomParameter( 6374, Ogre::Vector4( 1.0f ) );
+	setCustomParameter( 6375, Ogre::Vector4( 1.0f ) );
 }
 //-------------------------------------------------------------------------
 void GraphChart::_initialize()

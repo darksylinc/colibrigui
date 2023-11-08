@@ -183,8 +183,14 @@ namespace Ogre
 				setProperty( COLIBRI_NOTID "use_read_only_buffer", 1 );
 		}
 
-		// See Colibri::Label
+		// See Colibri::CustomShape
 		if( customParams.find( 6374 ) != customParams.end() )
+		{
+			setProperty( COLIBRI_NOTID "colibri_custom_shape", 1 );
+		}
+
+		// See Colibri::GraphChart
+		if( customParams.find( 6375 ) != customParams.end() )
 		{
 			setProperty( COLIBRI_NOTID "colibri_graph", 1 );
 

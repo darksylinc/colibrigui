@@ -10,6 +10,7 @@ CustomShape::CustomShape( ColibriManager *manager ) :
 	m_sizeMode( CustomShapeSizeMode::Ndc )
 {
 	setVao( m_manager->getVao() );
+	setCustomParameter( 6374, Ogre::Vector4( 1.0f ) );
 
 	m_numVertices = 0;
 }

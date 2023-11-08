@@ -9,12 +9,15 @@
 	@end
 
 	uint vertexId : SV_VertexID;
-	#define gl_VertexID input.vertexId
 @end
 
 @piece( custom_vs_preExecution )
 	@property( !colibri_text )
-		uint colibriDrawId = inVs_drawId + (uint(gl_VertexID) / 54u);
+		uint colibriDrawId = inVs_drawId
+		@property( !colibri_custom_shape )
+			+ (uint(inVs_vertexId) / 54u)
+		@end
+			;
 		#undef finalDrawId
 		#define finalDrawId colibriDrawId
 	@end
@@ -27,7 +30,7 @@
 	outVs.gl_ClipDistance0[3] = input.normal.w;
 
 	@property( colibri_text )
-		uint vertId = uint(gl_VertexID) % 6u;
+		uint vertId = uint(inVs_vertexId) % 6u;
 		outVs.uvText.x = (vertId <= 1u || vertId == 5u) ? 0.0f : float( input.blendIndices.x );
 		outVs.uvText.y = (vertId == 0u || vertId >= 4u) ? 0.0f : float( input.blendIndices.y );
 		outVs.pixelsPerRow		= input.blendIndices.x;

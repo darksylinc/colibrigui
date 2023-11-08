@@ -15,7 +15,11 @@
 
 @piece( custom_vs_preExecution )
 	@property( !colibri_text )
-		uint colibriDrawId = inVs_drawId + ((uint(inVs_vertexId) - worldMaterialIdx[inVs_drawId].w) / 54u);
+		uint colibriDrawId = inVs_drawId
+		@property( !colibri_custom_shape )
+				+ ((uint(inVs_vertexId) - worldMaterialIdx[inVs_drawId].w) / 54u)
+		@end
+				;
 		#undef finalDrawId
 		#define finalDrawId colibriDrawId
 	@end

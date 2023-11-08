@@ -261,11 +261,12 @@ namespace Colibri
 				*psoCmd = CbPipelineStateObject( &hlmsCache->pso );
 				apiObject.lastHlmsCache = hlmsCache;
 
-				//Flush the Vao when changing shaders. Needed by D3D11/12 & possibly Vulkan
+				// Flush the Vao when changing shaders. Needed by D3D11/12 & possibly Vulkan
 				apiObject.lastVaoName = 0;
 			}
 
-			const bool bIsLabel = isLabel();
+			const WidgetRenderType::WidgetRenderType widgetRenderType = getWidgetRenderType();
+			const bool bIsLabel = widgetRenderType == WidgetRenderType::Label;
 			const size_t widgetType = bIsLabel ? 1u : 0u;
 
 			const uint32 firstVertex = m_currVertexBufferOffset + apiObject.basePrimCount[widgetType];
@@ -275,8 +276,21 @@ namespace Colibri
 									  firstVertex,
 									  lastHlmsCacheHash, apiObject.commandBuffer );
 
+			// Note: CustomShapes can't be chained from/to anything because they break the assumption
+			// each widget is 54 vertices; not even two CustomShapes can be instanced together.
+			// That assumption is necessary for instancing to properly address the right material.
+			//
+			// If previous widgetRenderType was WidgetRenderType::CustomShape and now we're not;
+			// then apiObject.drawCmd will be different because HlmsColibri::calculateHashForPreCreate
+			// makes sure a different shader is assigned for CustomShape and its derived classes
+			// (and fillBuffersForColibri was thus forced to add a command).
+			// Thus we will enter the if() block as intended.
+			//
+			// If the current widgetRenderType is WidgetRenderType::CustomShape then we will enter the
+			// if block too because we specifically test for it.
 			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
-				apiObject.lastVaoName != vao->getVaoName() )
+				apiObject.lastVaoName != vao->getVaoName() ||
+				widgetRenderType == WidgetRenderType::CustomShape )
 			{
 				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
 				{

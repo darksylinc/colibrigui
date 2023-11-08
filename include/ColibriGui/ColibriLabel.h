@@ -164,7 +164,10 @@ namespace Colibri
 
 		void _destroy() override;
 
-		bool isLabel() const override { return true; }
+		WidgetRenderType::WidgetRenderType getWidgetRenderType() const override
+		{
+			return WidgetRenderType::Label;
+		}
 
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)

@@ -59,6 +59,16 @@ namespace Colibri
 
 	typedef std::vector<WidgetListenerPair> WidgetListenerPairVec;
 
+	namespace WidgetRenderType
+	{
+		enum WidgetRenderType
+		{
+			Normal,
+			Label,  /// Does not include LabelBmp
+			CustomShape,
+		};
+	}
+
 	class Widget : public WidgetListener, public LayoutCell
 	{
 	protected:
@@ -268,10 +278,15 @@ namespace Colibri
 		void _setParent( Widget *parent );
 		Widget * colibri_nonnull getParent() const				{ return m_parent; }
 
-		virtual bool isRenderable() const	{ return false; }
-		virtual bool isWindow() const		{ return false; }
-		virtual bool isLabel() const		{ return false; }
-		virtual bool isLabelBmp() const		{ return false; }
+		virtual bool isRenderable() const { return false; }
+		virtual bool isWindow() const { return false; }
+		bool         isLabel() const { return getWidgetRenderType() == WidgetRenderType::Label; }
+		virtual bool isLabelBmp() const { return false; }
+
+		virtual WidgetRenderType::WidgetRenderType getWidgetRenderType() const
+		{
+			return WidgetRenderType::Normal;
+		}
 
 		/// @see	Renderable::setVisualsEnabled
 		virtual bool isVisualsEnabled() const	{ return false; }
