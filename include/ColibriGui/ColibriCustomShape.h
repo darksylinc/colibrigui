@@ -32,8 +32,8 @@ namespace Colibri
 		A widget used to draw arbitrary 2D shapes.
 
 		@note Due to technical reasons regarding material indexing in the GPU, CustomShapes
-		cannot be batched together with anything. Which means they break instancing.
-		Having lots of CustomShapes can cause high API overhead.
+		cannot instance as well as other Widgets. Having lots of CustomShapes may cause high API
+		overhead (having one CustomShape with lots of vertices is fine).
 	*/
 	class CustomShape : public Renderable
 	{

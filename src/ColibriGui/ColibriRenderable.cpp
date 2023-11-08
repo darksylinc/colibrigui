@@ -287,10 +287,10 @@ namespace Colibri
 			// Thus we will enter the if() block as intended.
 			//
 			// If the current widgetRenderType is WidgetRenderType::CustomShape then we will enter the
-			// if block too because we specifically test for it.
+			// if block too because we specifically test for it. We don't have to reset all commands,
+			// we just need to move the drawId in the vertex shader to index the right material.
 			if( apiObject.drawCmd != commandBuffer->getLastCommand() ||
-				apiObject.lastVaoName != vao->getVaoName() ||
-				widgetRenderType == WidgetRenderType::CustomShape )
+				apiObject.lastVaoName != vao->getVaoName() )
 			{
 				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
 				{
@@ -353,7 +353,8 @@ namespace Colibri
 				apiObject.drawCountPtr->baseInstance	= baseInstance;
 				apiObject.indirectDraw += sizeof( CbDrawStrip );
 			}
-			else if( apiObject.nextFirstVertex != firstVertex )
+			else if( apiObject.nextFirstVertex != firstVertex ||
+					 widgetRenderType == WidgetRenderType::CustomShape )
 			{
 				if( apiObject.drawCountPtr && apiObject.drawCountPtr->primCount == 0u )
 				{
