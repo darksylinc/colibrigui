@@ -85,7 +85,7 @@ namespace Demo
 		void flushEffectReaction( uint16_t effectReaction, uint16_t repeatCount ) override
 		{
 			using namespace Colibri;
-			switch(effectReaction)
+			switch( effectReaction )
 			{
 			case EffectReaction::NoReaction:
 				break;
