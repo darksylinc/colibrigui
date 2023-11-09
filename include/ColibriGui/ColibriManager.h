@@ -114,7 +114,7 @@ namespace Colibri
 			Bbeware if repeatCount > 1, do not play two identical SFX at the same time, you *should* add
 			some artificial delay.
 		*/
-		virtual void flushEffectReaction( uint16_t effectReaction, uint16_t repeatCount ) {}
+		virtual void flushEffectReaction( uint16_t /*effectReaction*/, uint16_t /*repeatCount*/ ) {}
 	};
 
 	namespace EffectReaction
@@ -145,6 +145,10 @@ namespace Colibri
 			/// Spinner was attempted to change (may have been clamped, or set to
 			/// a wrong direction e.g. pressed "Up" instead of left/right).
 			SpinnerChanged,
+			/// ToggleButton was toggled.
+			Toggled,
+			/// Checkbox changed.
+			Checkboxed,
 		};
 	}
 

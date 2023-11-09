@@ -81,6 +81,46 @@ namespace Demo
 		}
 
 		void freeClipboardText( char *colibri_nullable text ) override { free( text ); }
+
+		void flushEffectReaction( uint16_t effectReaction, uint16_t repeatCount ) override
+		{
+			using namespace Colibri;
+			switch(effectReaction)
+			{
+			case EffectReaction::NoReaction:
+				break;
+			case EffectReaction::Moved:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Moved\n" );
+				break;
+			case EffectReaction::PrimaryAction:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Click!\n" );
+				break;
+			case EffectReaction::NotPressable:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Stop clicking me!\n" );
+				break;
+			case EffectReaction::SliderMoved:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Sliding\n" );
+				break;
+			case EffectReaction::SpinnerChanged:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Spinning\n" );
+				break;
+			case EffectReaction::Toggled:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Toggled\n" );
+				break;
+			case EffectReaction::Checkboxed:
+				for( size_t i = 0u; i < repeatCount; ++i )
+					printf( "Checkboxed\n" );
+				break;
+			default:
+				break;
+			}
+		}
 	};
 	static ColibriLogListener g_colibriLogListener;
 	static ColibriListener g_colibriListener;

@@ -101,6 +101,8 @@ namespace Colibri
 	{
 		if( action == Action::PrimaryActionPerform )
 		{
+			m_manager->setEffectReaction( EffectReaction::Toggled );
+
 			m_currentValue = ( m_currentValue + 1u ) % ( getMaxValue() + 1u );
 			_setSkinPack( m_skinPacks[m_currentValue] );
 			if( widget != this )

@@ -27,6 +27,7 @@ namespace Colibri
 		m_clickable = true;
 		m_keyboardNavigable = true;
 		m_consumesScroll = true;
+		m_mouseReleaseTriggersPrimaryAction = false;
 
 		m_autoSetNextWidget[Borders::Left] = false;
 		m_autoSetNextWidget[Borders::Right] = false;
