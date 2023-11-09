@@ -450,7 +450,9 @@ namespace Colibri
 				else
 					--m_currentValue;
 				updateOptionLabel();
+				m_manager->setEffectReaction( EffectReaction::SpinnerChanged );
 				_callActionListeners( Action::ValueChanged );
+				m_manager->flushEffectReaction();
 			}
 			else if( widget == m_increment )
 			{
@@ -459,13 +461,17 @@ namespace Colibri
 				else
 					++m_currentValue;
 				updateOptionLabel();
+				m_manager->setEffectReaction( EffectReaction::SpinnerChanged );
 				_callActionListeners( Action::ValueChanged );
+				m_manager->flushEffectReaction();
 			}
 		}
 	}
 	//-------------------------------------------------------------------------
 	void Spinner::_notifyActionKeyMovement( Borders::Borders direction )
 	{
+		m_manager->setEffectReaction( EffectReaction::SpinnerChanged );
+
 		if( direction == Borders::Left )
 		{
 			if( m_manager->swapRTLControls() )
@@ -484,5 +490,7 @@ namespace Colibri
 			updateOptionLabel();
 			_callActionListeners( Action::ValueChanged );
 		}
+
+		m_manager->flushEffectReaction();
 	}
 }  // namespace Colibri

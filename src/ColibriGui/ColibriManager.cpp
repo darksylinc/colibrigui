@@ -69,6 +69,8 @@ namespace Colibri
 		m_primaryButtonDown( false ),
 		m_keyDirDown( Borders::NumBorders ),
 		m_keyRepeatWaitTimer( 0.0f ),
+		m_effectReaction( EffectReaction::NoReaction ),
+		m_effectReactionRepeatCount( 0u ),
 		m_keyTextInputDown( 0 ),
 		m_keyRepeatDelay( 0.5f ),
 		m_timeDelayPerKeyStroke( 0.1f ),
@@ -81,9 +83,10 @@ namespace Colibri
 		m_shaperManager( 0 ),
 		m_vertexBufferBase( 0 ),
 		m_textVertexBufferBase( 0 )
-	#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
-	,	m_fillBuffersStarted( false )
-	,	m_renderingStarted( false )
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
+		,
+		m_fillBuffersStarted( false ),
+		m_renderingStarted( false )
 	#endif
 	{
 		memset( m_defaultTextDatablock, 0, sizeof(m_defaultTextDatablock) );
@@ -501,7 +504,9 @@ namespace Colibri
 			if( m_cursorFocusedPair.widget->isPressable() &&
 				m_cursorFocusedPair.widget->mouseReleaseTriggersPrimaryAction() )
 			{
+				setEffectReaction( EffectReaction::PrimaryAction );
 				callActionListeners( m_cursorFocusedPair.widget, Action::PrimaryActionPerform );
+				flushEffectReaction();
 			}
 
 			// m_cursorFocusedPair.widget may have been destroyed by callActionListeners
@@ -547,7 +552,16 @@ namespace Colibri
 		{
 			m_keyboardFocusedPair.widget->setState( States::HighlightedButton );
 			if( m_keyboardFocusedPair.widget->isPressable() )
+			{
+				setEffectReaction( EffectReaction::PrimaryAction );
 				callActionListeners( m_keyboardFocusedPair.widget, Action::PrimaryActionPerform );
+				flushEffectReaction();
+			}
+			else
+			{
+				setEffectReaction( EffectReaction::NotPressable );
+				flushEffectReaction();
+			}
 
 			// m_cursorFocusedPair.widget may have been destroyed by callActionListeners
 			if( m_cursorFocusedPair.widget &&
@@ -651,6 +665,8 @@ namespace Colibri
 					callActionListeners( m_keyboardFocusedPair.widget, Action::Cancel );
 				}
 
+				setEffectReaction( EffectReaction::Moved );
+
 				if( !m_primaryButtonDown || !nextWidget->isPressable() )
 				{
 					nextWidget->setState( States::HighlightedButton );
@@ -673,6 +689,8 @@ namespace Colibri
 					m_keyboardFocusedPair.widget = nextWidget;
 					overrideCursorFocusWith( m_keyboardFocusedPair );
 				}
+
+				flushEffectReaction();
 			}
 			else if( !m_keyboardFocusedPair.widget->m_autoSetNextWidget[direction] )
 			{
@@ -709,6 +727,13 @@ namespace Colibri
 			window->_updateDerivedTransformOnly( -Ogre::Vector2::UNIT_SCALE, Matrix2x3::IDENTITY );
 
 		m_widgetTransformsDirty = false;
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::flushEffectReaction()
+	{
+		m_colibriListener->flushEffectReaction( m_effectReaction, m_effectReactionRepeatCount );
+		m_effectReaction = EffectReaction::NoReaction;
+		m_effectReactionRepeatCount = 0u;
 	}
 	//-------------------------------------------------------------------------
 	bool ColibriManager::setScroll( const Ogre::Vector2 &scrollAmount, bool animated )

@@ -88,7 +88,65 @@ namespace Colibri
 			call ColibriManager::update
 		*/
 		virtual void notifyCanvasOrResolutionUpdated() {}
+
+		/** Called when derived class should "react".
+
+			By reaction we're often talking about playing a sound effect, but not necessarily.
+
+			@note The user can call ColibriManager::setEffectReaction while inside
+			WidgetActionListener::notifyWidgetAction to override the default value set by ColibriManager.
+			This is useful if e.g. the widget itself was hit but conditions to proceed weren't met and a
+			different SFX should be played (like an error SFX, close SFX, or no SFX).
+			Or perhaps the widget is special (e.g. a volume slider is different from normal sliders).
+
+			@note Colibri does NOT use this value in any way. Hence you can set arbitrary values via
+			setEffectReaction(), but do not expect the return value to stick as it may change with
+			the next setKeyDirectionReleased(), etc.<br/>
+			It is the user who gives real meaning to this value.
+
+		@param effectReaction
+			See EffectReaction::EffectReaction.
+			The value may be outside range if you set it to something else via
+			ColibriManager::setEffectReaction.
+		@param repeatCount
+			The number of times the same effect has accumulated (in less than one frame) because movement
+			and key input may repeat multiple times per second.
+			Bbeware if repeatCount > 1, do not play two identical SFX at the same time, you *should* add
+			some artificial delay.
+		*/
+		virtual void flushEffectReaction( uint16_t effectReaction, uint16_t repeatCount ) {}
 	};
+
+	namespace EffectReaction
+	{
+		enum EffectReaction
+		{
+			/// Caller must do nothing.
+			NoReaction,
+			/// Caller should play the "highlight changed" sound effect.
+			Moved,
+			/// Caller should play the "PrimaryAction" sound effect.
+			PrimaryAction,
+			/// Caller wanted to play the "PrimaryAction" but the button was not pressable.
+			NotPressable,
+			/// Text was successfully inserted.
+			TextInputInserted,
+			/// Text was successfully removed.
+			TextInputRemoved,
+			/// Text was supposed to be removed, but can't (e.g. hit Backspace at the beginning).
+			TextInputRemoveFailed,
+			/// We got stuck in some non-renderable UTF character and had to clear the Editbox.
+			TextInputErrorClear,
+			/// The cursor/caret was moved but no actual text was added or removed.
+			TextInputCaretNavigation,
+			/// Slider was attempted to change (may have been clamped, or set to
+			/// a wrong direction e.g. pressed "Up" instead of left/right).
+			SliderMoved,
+			/// Spinner was attempted to change (may have been clamped, or set to
+			/// a wrong direction e.g. pressed "Up" instead of left/right).
+			SpinnerChanged,
+		};
+	}
 
 	class ColibriManager
 	{
@@ -190,6 +248,10 @@ namespace Colibri
 		bool			m_primaryButtonDown;
 		Borders::Borders m_keyDirDown;
 		float			m_keyRepeatWaitTimer;
+
+		/// See EffectReaction::EffectReaction. Note the value could be outside range.
+		uint16_t m_effectReaction;
+		uint16_t m_effectReactionRepeatCount;
 
 		uint32_t		m_keyTextInputDown;
 		uint16_t		m_keyModInputDown;
@@ -412,6 +474,35 @@ namespace Colibri
 		/// Returns the pair of window/widget that is currently
 		/// being focused via keyboard navigation
 		FocusPair getKeyboardFocusedPair() const { return m_keyboardFocusedPair; }
+
+		/** Sets what SFX should be play next, unless overriden before the next call to
+			flushEffectReaction().
+		@param effectReaction
+			See EffectReaction::EffectReaction. The value can be outside range.
+		@param repeatCount
+		*/
+		void setEffectReaction( uint16_t effectReaction, uint16_t repeatCount = 1u )
+		{
+			if( m_effectReaction == effectReaction )
+				m_effectReactionRepeatCount += repeatCount;
+			else
+			{
+				m_effectReaction = effectReaction;
+				m_effectReactionRepeatCount = repeatCount;
+			}
+		}
+
+		/**  See setEffectReaction() and see ColibriListener::flushEffectReaction.
+		@return
+			See EffectReaction::EffectReaction. The value may be outside range.
+		*/
+		uint16_t getEffectReaction() const { return m_effectReaction; }
+
+		/// See ColibriListener::flushEffectReaction.
+		uint16_t getEffectReactionRepeatCount() const { return m_effectReactionRepeatCount; }
+
+		/// Calls ColibriListener::flushEffectReaction.
+		void flushEffectReaction();
 
 		/**
 		@param animated

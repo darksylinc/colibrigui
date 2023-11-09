@@ -335,8 +335,13 @@ namespace Colibri
 				size_t glyphLength = lastGlyphStart + lastGlyphLength - firstGlyphStart;
 				if( glyphLength > 0 )
 				{
+					m_manager->setEffectReaction( EffectReaction::TextInputRemoved, glyphLength );
 					uStr.remove( static_cast<int32_t>( firstGlyphStart ),
 								 static_cast<int32_t>( glyphLength ) );
+				}
+				else
+				{
+					m_manager->setEffectReaction( EffectReaction::TextInputRemoveFailed, repetition );
 				}
 
 				// Convert back to UTF8
@@ -346,6 +351,7 @@ namespace Colibri
 				if( m_placeholder )
 					m_placeholder->setVisualsEnabled( result.empty() );
 				m_manager->callActionListeners( this, Action::ValueChanged );
+				m_manager->flushEffectReaction();
 			}
 			else if( m_label->getGlyphCount() == 0u && !m_label->getText().empty() )
 			{
@@ -356,18 +362,24 @@ namespace Colibri
 				m_label->setText( "" );
 				if( m_placeholder )
 					m_placeholder->setVisualsEnabled( true );
+				m_manager->setEffectReaction( EffectReaction::TextInputErrorClear );
 				m_manager->callActionListeners( this, Action::ValueChanged );
+				m_manager->flushEffectReaction();
 			}
 
 			showCaret();
 		}
 		else if( keyCode == KeyCode::Home )
 		{
+			m_manager->setEffectReaction( EffectReaction::TextInputCaretNavigation, repetition );
+			m_manager->flushEffectReaction();
 			m_cursorPos = 0;
 			showCaret();
 		}
 		else if( keyCode == KeyCode::End )
 		{
+			m_manager->setEffectReaction( EffectReaction::TextInputCaretNavigation, repetition );
+			m_manager->flushEffectReaction();
 			m_cursorPos = static_cast<uint32_t>( m_label->getGlyphCount() );
 			showCaret();
 		}
@@ -460,7 +472,11 @@ namespace Colibri
 		showCaret();
 
 		if( bCallActionListener )
+		{
+			m_manager->setEffectReaction( EffectReaction::TextInputInserted );
 			m_manager->callActionListeners( this, Action::ValueChanged );
+			m_manager->flushEffectReaction();
+		}
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Editbox::_getImeLocation()
@@ -510,5 +526,8 @@ namespace Colibri
 			showCaret();
 			_callActionListeners( Action::ValueChanged );
 		}
+
+		m_manager->setEffectReaction( EffectReaction::TextInputCaretNavigation );
+		m_manager->flushEffectReaction();
 	}
 }  // namespace Colibri

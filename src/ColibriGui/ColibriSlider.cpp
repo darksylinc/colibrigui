@@ -323,7 +323,9 @@ namespace Colibri
 					roundf( ( posY - fCursorOffset ) * ( fMaxValue - fMinValue ) ) + fMinValue ) );
 			}
 
+			m_manager->setEffectReaction( EffectReaction::SpinnerChanged );
 			m_manager->callActionListeners( this, Action::ValueChanged );
+			m_manager->flushEffectReaction();
 		}
 	}
 	//-------------------------------------------------------------------------
@@ -350,7 +352,9 @@ namespace Colibri
 				setCurrentValue( m_currentValue - targetDirectionAmount );
 		}
 
+		m_manager->setEffectReaction( EffectReaction::SliderMoved );
 		m_manager->callActionListeners( this, Action::ValueChanged );
+		m_manager->flushEffectReaction();
 	}
 	//-------------------------------------------------------------------------
 	void Slider::setElementsSize( const Ogre::Vector2 &handleProportion, const float lineSize,
