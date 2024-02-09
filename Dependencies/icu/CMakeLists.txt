@@ -202,6 +202,7 @@ target_compile_definitions( icucommon PUBLIC
 	#-DU_HAVE_NL_LANGINFO_CODESET=0
 	#-DU_TIMEZONE=0
 	#-DUCONFIG_NO_TRANSLITERATION=1
+	-DU_CHARSET_IS_UTF8=1
 )
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options( icucommon PRIVATE -wd4267 -wd4244 )
