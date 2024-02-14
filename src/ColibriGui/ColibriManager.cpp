@@ -37,7 +37,8 @@ namespace Colibri
 		"# Colibri Pressed Text #"
 	};
 
-	ColibriManager::ColibriManager( LogListener *logListener, ColibriListener *colibriListener ) :
+	ColibriManager::ColibriManager( LogListener *logListener, ColibriListener *colibriListener,
+									bool bSecondary ) :
 		m_numWidgets( 0 ),
 		m_numLabelsAndBmp( 0u ),
 		m_numTextGlyphs( 0u ),
@@ -87,7 +88,7 @@ namespace Colibri
 		,
 		m_fillBuffersStarted( false ),
 		m_renderingStarted( false )
-	#endif
+#endif
 	{
 		memset( m_defaultTextDatablock, 0, sizeof(m_defaultTextDatablock) );
 		memset( m_defaultSkins, 0, sizeof(m_defaultSkins) );
@@ -97,19 +98,57 @@ namespace Colibri
 
 		setCanvasSize( Ogre::Vector2( 1.0f ), Ogre::Vector2( 1600.0f, 900.0f ) );
 
-		m_skinManager = new SkinManager( this );
-
-		m_shaperManager = new ShaperManager( this );
+		if( !bSecondary )
+		{
+			m_skinManager = new SkinManager( this );
+			m_shaperManager = new ShaperManager( this );
+		}
 	}
 	//-------------------------------------------------------------------------
 	ColibriManager::~ColibriManager()
 	{
-		delete m_shaperManager;
-		m_shaperManager = 0;
+		if( isPrimary() )
+		{
+			delete m_shaperManager;
+			m_shaperManager = 0;
 
-		setOgre( 0, 0, 0 );
-		delete m_skinManager;
-		m_skinManager = 0;
+			setOgre( 0, 0, 0 );
+			delete m_skinManager;
+			m_skinManager = 0;
+		}
+		else
+		{
+			m_vao = 0;
+			m_shaperManager = 0;
+			m_skinManager = 0;
+			m_objectMemoryManager = 0;
+			setOgre( 0, 0, 0 );
+		}
+	}
+	//-------------------------------------------------------------------------
+	void ColibriManager::_setPrimary( ColibriManager *primaryManager )
+	{
+		m_shaperManager = primaryManager->m_shaperManager;
+		m_skinManager = primaryManager->m_skinManager;
+
+		m_root = primaryManager->m_root;
+		m_vaoManager = primaryManager->m_vaoManager;
+		m_sceneManager = primaryManager->m_sceneManager;
+
+		m_objectMemoryManager = primaryManager->m_objectMemoryManager;
+		m_vao = primaryManager->m_vao;
+		m_textVao = primaryManager->m_textVao;
+		m_commandBuffer = primaryManager->m_commandBuffer;
+
+		for( size_t i = 0; i < States::NumStates; ++i )
+			m_defaultTextDatablock[i] = primaryManager->m_defaultTextDatablock[i];
+	}
+	//-------------------------------------------------------------------------
+	bool ColibriManager::isPrimary() const
+	{
+		if( !m_skinManager )
+			return false;
+		return m_skinManager->isSamerOwner( this );
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::setLogListener( LogListener *logListener )
@@ -149,11 +188,6 @@ namespace Colibri
 			Ogre::ColibriOgreRenderable::destroyVao( m_vao, m_vaoManager );
 			m_vao = 0;
 		}
-		/*if( m_defaultIndexBuffer )
-		{
-			m_vaoManager->destroyIndexBuffer( m_defaultIndexBuffer );
-			m_defaultIndexBuffer = 0;
-		}*/
 		delete m_objectMemoryManager;
 		m_objectMemoryManager = 0;
 
@@ -164,7 +198,6 @@ namespace Colibri
 		if( vaoManager )
 		{
 			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
-			// m_defaultIndexBuffer = Ogre::ColibriOgreRenderable::createIndexBuffer( vaoManager );
 			m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, vaoManager );
 			m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, vaoManager );
 			m_commandBuffer = new Ogre::CommandBuffer();

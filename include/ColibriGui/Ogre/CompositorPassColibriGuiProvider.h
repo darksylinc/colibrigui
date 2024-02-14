@@ -27,6 +27,20 @@ namespace Ogre
 	public:
 		CompositorPassColibriGuiProvider( Colibri::ColibriManager *colibriManager );
 
+		/** Sets another ColibriManager. Meant to be used for temporarily setting a
+			different manager, such as secondary ones (e.g. see Colibri::OffScreenCanvas).
+
+			Don't forget to set back the primary manager when you're done creating a workspace
+			(workspace definitions do not use this pointer so they're fine).
+		@param colibriManager
+		*/
+		void _setColibriManager( Colibri::ColibriManager *colibriManager )
+		{
+			m_colibriManager = colibriManager;
+		}
+
+		Colibri::ColibriManager *getColibriManager() const { return m_colibriManager; }
+
 		/** Called from CompositorTargetDef::addPass when adding a Compositor Pass of type 'custom'
 		@param passType
 		@param customId

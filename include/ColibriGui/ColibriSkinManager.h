@@ -78,6 +78,11 @@ namespace Colibri
 	public:
 		SkinManager( ColibriManager *colibriManager );
 
+		bool isSamerOwner( const ColibriManager *colibriManager ) const
+		{
+			return m_colibriManager == colibriManager;
+		}
+
 		const SkinInfoMap &getSkins() const { return m_skins; }
 		const SkinPackMap &getSkinPacks() const { return m_skinPacks; }
 

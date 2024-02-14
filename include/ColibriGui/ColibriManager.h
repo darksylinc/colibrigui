@@ -317,7 +317,8 @@ namespace Colibri
 		void scrollToWidget( Widget *widget );
 
 	public:
-		ColibriManager( LogListener *logListener, ColibriListener *colibriListener );
+		ColibriManager( LogListener *logListener, ColibriListener *colibriListener,
+						bool bSecondary = false );
 		~ColibriManager();
 
 		void loadSkins( const char *fullPath );
@@ -325,10 +326,22 @@ namespace Colibri
 
 		ShaperManager* getShaperManager()							{ return m_shaperManager; }
 
-		void setOgre( Ogre::Root * colibri_nullable root,
-					  Ogre::VaoManager * colibri_nullable vaoManager,
-					  Ogre::SceneManager * colibri_nullable sceneManager );
+		/** This function allows to create secondary managers (i.e. for offscreen rendering)
+			while sharing resources.
+
+			@note ColibriManager must've been constructed with bSecondary = true. See ColibriManager().
+		@param primaryManager
+			The main manager who owns 'this' secondary ColibriManager.
+		*/
+		void _setPrimary( ColibriManager *primaryManager );
+
+		/// Returns whether this manager is the primary or not.
+		bool isPrimary() const;
+
+		void setOgre( Ogre::Root *colibri_nullable root, Ogre::VaoManager *colibri_nullable vaoManager,
+					  Ogre::SceneManager *colibri_nullable sceneManager );
 		Ogre::ObjectMemoryManager* getOgreObjectMemoryManager()		{ return m_objectMemoryManager; }
+		Ogre::Root                *getOgreRoot() { return m_root; }
 		Ogre::SceneManager* getOgreSceneManager()					{ return m_sceneManager; }
 		Ogre::VertexArrayObject* getVao()							{ return m_vao; }
 		Ogre::VertexArrayObject* getTextVao()						{ return m_textVao; }
