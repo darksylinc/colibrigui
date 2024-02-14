@@ -84,7 +84,11 @@ namespace Demo
 			if( action == Colibri::Action::Action::PrimaryActionPerform )
 			{
 				if( widget == orderButtonBack )
+				{
 					overlapWindow1->setZOrder( 3 );
+					// Override this button's SFX with nothing. We don't want it to make a SFX.
+					widget->getManager()->setEffectReaction( Colibri::EffectReaction::NoReaction );
+				}
 				else if( widget == orderButtonFront )
 					overlapWindow1->setZOrder( 5 );
 				else if( widget == innerToggleOrder )
@@ -94,6 +98,10 @@ namespace Demo
 					innerOverlapButton1->setZOrder( innerOverlapWindow2->getZOrder() );
 					innerOverlapWindow2->setZOrder( oldOrder );
 					innerOverlapButton2->setZOrder( oldOrder );
+
+					// Override the default "button clicked" SFX with an arbitrary sound because
+					// we thought of showcasing that this button is special and should have its own SFX.
+					widget->getManager()->setEffectReaction( 1000u );
 				}
 			}
 		}

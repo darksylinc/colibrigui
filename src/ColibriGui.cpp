@@ -82,6 +82,15 @@ namespace Demo
 
 		void freeClipboardText( char *colibri_nullable text ) override { free( text ); }
 
+		/** Overload this function to trigger sound effects (or whatever else you wish to do as
+			feedback).
+
+			@see Colibri::ColibriListener::flushEffectReaction
+		@param effectReaction
+			See Colibri::ColibriListener::flushEffectReaction documentation.
+		@param repeatCount
+			See Colibri::ColibriListener::flushEffectReaction documentation.
+		*/
 		void flushEffectReaction( uint16_t effectReaction, uint16_t repeatCount ) override
 		{
 			using namespace Colibri;
@@ -118,6 +127,19 @@ namespace Demo
 					printf( "Checkboxed\n" );
 				break;
 			default:
+				for( size_t i = 0u; i < repeatCount; ++i )
+				{
+					// Notice that effectReaction can be an arbitrary out-of-range value!
+					//
+					// You are in control of values that are not in EffectReaction.
+					// This happens whenever you call setEffectReaction() (see
+					// DemoWidgetListener::notifyWidgetAction).
+					//
+					// Colibri will not set an out-of-bounds value on its own.
+					// We are here because our DemoWidgetListener specifically set the value to 1000u.
+					if( effectReaction == 1000u )
+						printf( "Special SFX for innerToggleOrder button!\n" );
+				}
 				break;
 			}
 		}
