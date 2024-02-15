@@ -27,7 +27,6 @@ namespace Colibri
 		Ogre::TextureGpu *colibri_nullable m_canvasTexture;
 
 		void createWorkspaceDefinition();
-		void createWorkspace( Ogre::CompositorPassColibriGuiProvider *colibriCompositorProvider );
 		void destroyWorkspace();
 
 	public:
@@ -45,6 +44,17 @@ namespace Colibri
 
 		void createTexture( uint32_t width, uint32_t height,
 							Ogre::PixelFormatGpu pixelFormat = Ogre::PFG_RGBA8_UNORM_SRGB );
+
+		/** Creates a workspace (based on a programatically-created workspace definition
+			that only has one pass which is for Colibri and clears the colour to black).
+		@param colibriCompositorProvider
+			Provider so that we can temporarily swap out to the secondary ColibriManager
+			by calling Ogre::CompositorPassColibriGuiProvider_setColibriManager.
+		@param camera
+			The camera to pass to the workspace.
+		*/
+		void createWorkspace( Ogre::CompositorPassColibriGuiProvider *colibriCompositorProvider,
+							  Ogre::Camera                           *camera );
 
 		/** Updates and renders the off-screen canvas.
 		@param timeSinceLast

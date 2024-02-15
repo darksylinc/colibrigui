@@ -118,7 +118,6 @@ namespace Colibri
 		}
 		else
 		{
-			m_vao = 0;
 			m_shaperManager = 0;
 			m_skinManager = 0;
 			m_objectMemoryManager = 0;
@@ -136,8 +135,8 @@ namespace Colibri
 		m_sceneManager = primaryManager->m_sceneManager;
 
 		m_objectMemoryManager = primaryManager->m_objectMemoryManager;
-		m_vao = primaryManager->m_vao;
-		m_textVao = primaryManager->m_textVao;
+		m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, m_vaoManager );
+		m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, m_vaoManager );
 		m_commandBuffer = primaryManager->m_commandBuffer;
 
 		for( size_t i = 0; i < States::NumStates; ++i )

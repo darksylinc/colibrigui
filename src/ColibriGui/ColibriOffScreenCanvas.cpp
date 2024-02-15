@@ -68,8 +68,8 @@ void OffScreenCanvas::createWorkspaceDefinition()
 	workDef->connectExternal( 0, kOffscreenDefaultNodeName, 0 );
 }
 //-----------------------------------------------------------------------------
-void OffScreenCanvas::createWorkspace(
-	Ogre::CompositorPassColibriGuiProvider *colibriCompositorProvider )
+void OffScreenCanvas::createWorkspace( Ogre::CompositorPassColibriGuiProvider *colibriCompositorProvider,
+									   Ogre::Camera *camera )
 {
 	using namespace Ogre;
 	CompositorManager2 *compositorManager = m_secondaryManager->getOgreRoot()->getCompositorManager2();
@@ -81,8 +81,8 @@ void OffScreenCanvas::createWorkspace(
 	colibriCompositorProvider->_setColibriManager( m_secondaryManager );
 
 	m_workspace =
-		compositorManager->addWorkspace( m_secondaryManager->getOgreSceneManager(), m_canvasTexture, 0,
-										 kOffscreenDefaultWorkspaceName, false );
+		compositorManager->addWorkspace( m_secondaryManager->getOgreSceneManager(), m_canvasTexture,
+										 camera, kOffscreenDefaultWorkspaceName, false );
 
 	colibriCompositorProvider->_setColibriManager( oldValue );
 }
