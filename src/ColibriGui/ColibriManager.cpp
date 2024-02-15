@@ -188,6 +188,11 @@ namespace Colibri
 			Ogre::ColibriOgreRenderable::destroyVao( m_vao, m_vaoManager );
 			m_vao = 0;
 		}
+		if( m_textVao )
+		{
+			Ogre::ColibriOgreRenderable::destroyVao( m_textVao, m_vaoManager );
+			m_textVao = 0;
+		}
 		delete m_objectMemoryManager;
 		m_objectMemoryManager = 0;
 
