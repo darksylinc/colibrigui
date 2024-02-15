@@ -16,6 +16,18 @@ namespace Colibri
 {
 	/** @ingroup Controls
 	@class OffScreenCanvas
+		This class allows you to have an independent ColibriManager that can render to an arbitrary
+		texture that you can later display to either 3D or even in a Colibri Renderable as a widget.
+
+		You can retrieve this secondary ColibriManager via getSecondaryManager().
+		Note that you must not mix widgets from different ColibriManager
+		(i.e. use mgr1->createWidget( parentCreatedWithMgr2 )).
+
+		Use cases include:
+			1. VR with multiple 3D panels.
+			2. Independent 2D UI (e.g. minimaps).
+			3. Fake in-game UI.
+			4. Generating text that can later be displayed in 3D.
 	*/
 	class OffScreenCanvas
 	{
