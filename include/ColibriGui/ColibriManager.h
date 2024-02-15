@@ -330,6 +330,7 @@ namespace Colibri
 			while sharing resources.
 
 			@note ColibriManager must've been constructed with bSecondary = true. See ColibriManager().
+			@note The primary is assumed to have been fully initialized, including its skins and fonts.
 		@param primaryManager
 			The main manager who owns 'this' secondary ColibriManager.
 		*/

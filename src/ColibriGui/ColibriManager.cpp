@@ -139,6 +139,12 @@ namespace Colibri
 		m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, m_vaoManager );
 		m_commandBuffer = primaryManager->m_commandBuffer;
 
+		for( size_t i = 0u; i < SkinWidgetTypes::NumSkinWidgetTypes; ++i )
+		{
+			for( size_t j = 0; j < States::NumStates; ++j )
+				m_defaultSkins[i][j] = primaryManager->m_defaultSkins[i][j];
+			m_defaultSkinPackNames[i] = primaryManager->m_defaultSkinPackNames[i];
+		}
 		for( size_t i = 0; i < States::NumStates; ++i )
 			m_defaultTextDatablock[i] = primaryManager->m_defaultTextDatablock[i];
 	}
