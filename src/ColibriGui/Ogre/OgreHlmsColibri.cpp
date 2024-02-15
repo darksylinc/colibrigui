@@ -266,6 +266,8 @@ namespace Ogre
 		return false;
 	}
 	//-----------------------------------------------------------------------------------
+	void HlmsColibri::prepareRenderCommands() { uploadDirtyDatablocks(); }
+	//-----------------------------------------------------------------------------------
 	uint32 HlmsColibri::fillBuffersForColibri( const HlmsCache *cache,
 											   const QueuedRenderable &queuedRenderable, bool casterPass,
 											   uint32 baseVertex, uint32 lastCacheHash,

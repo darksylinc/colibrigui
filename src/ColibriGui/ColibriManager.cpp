@@ -1669,6 +1669,12 @@ namespace Colibri
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_fillBuffersStarted = false;
 #endif
+
+		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
+		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri*>( hlms ) );
+		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri*>( hlms );
+		hlmsColibri->prepareRenderCommands();
 	}
 	//-------------------------------------------------------------------------
 	void ColibriManager::render()

@@ -105,6 +105,8 @@ namespace Ogre
 		static bool needsReadOnlyBuffer( const RenderSystemCapabilities *caps,
 										 const VaoManager               *vaoManager );
 
+		void prepareRenderCommands();
+
 		uint32 fillBuffersForColibri( const HlmsCache *cache, const QueuedRenderable &queuedRenderable,
 									  bool casterPass, uint32 baseVertex, uint32 lastCacheHash,
 									  CommandBuffer *commandBuffer );
