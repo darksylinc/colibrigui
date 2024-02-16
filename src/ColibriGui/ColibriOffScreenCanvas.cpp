@@ -71,8 +71,8 @@ void OffScreenCanvas::createWorkspaceDefinition()
 void OffScreenCanvas::createWorkspace( Ogre::CompositorPassColibriGuiProvider *colibriCompositorProvider,
 									   Ogre::Camera *camera )
 {
-	using namespace Ogre;
-	CompositorManager2 *compositorManager = m_secondaryManager->getOgreRoot()->getCompositorManager2();
+	Ogre::CompositorManager2 *compositorManager =
+		m_secondaryManager->getOgreRoot()->getCompositorManager2();
 
 	destroyWorkspace();
 	createWorkspaceDefinition();
@@ -85,6 +85,14 @@ void OffScreenCanvas::createWorkspace( Ogre::CompositorPassColibriGuiProvider *c
 										 camera, kOffscreenDefaultWorkspaceName, false );
 
 	colibriCompositorProvider->_setColibriManager( oldValue );
+}
+//-----------------------------------------------------------------------------
+void OffScreenCanvas::setWorkspace( Ogre::CompositorWorkspace *colibri_nullable workspace,
+									bool bDestroyCurrent )
+{
+	if( bDestroyCurrent )
+		destroyWorkspace();
+	m_workspace = workspace;
 }
 //-----------------------------------------------------------------------------
 void OffScreenCanvas::destroyWorkspace()
@@ -128,6 +136,24 @@ void OffScreenCanvas::createTexture( uint32_t width, uint32_t height, Ogre::Pixe
 	m_canvasTexture->setPixelFormat( pixelFormat );
 	m_canvasTexture->_setDepthBufferDefaults( DepthBuffer::POOL_NO_DEPTH, false, PFG_NULL );
 	m_canvasTexture->scheduleTransitionTo( GpuResidency::Resident );
+}
+//-----------------------------------------------------------------------------
+Ogre::TextureGpu *OffScreenCanvas::disownCanvasTexture( const bool bCreateAnotherOne )
+{
+	Ogre::TextureGpu *retVal = m_canvasTexture;
+	if( retVal )
+	{
+		const uint32_t oldWidth = retVal->getWidth();
+		const uint32_t oldHeight = retVal->getHeight();
+		const Ogre::PixelFormatGpu oldFormat = retVal->getPixelFormat();
+
+		retVal = 0;
+
+		if( bCreateAnotherOne )
+			createTexture( oldWidth, oldHeight, oldFormat );
+	}
+
+	return retVal;
 }
 //-----------------------------------------------------------------------------
 void OffScreenCanvas::updateCanvas( const float timeSinceLast )
