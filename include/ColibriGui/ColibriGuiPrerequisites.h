@@ -2,10 +2,6 @@
 
 #pragma once
 
-// Define this macro to allow rendering more than once in the same frame.
-// The main restriction is that skip_load_store_semantics MUST be false.
-// #define COLIBRI_MULTIPASS_SUPPORT
-
 #if __clang__ && !defined( Q_CREATOR_RUN )
 	#define colibri_nullable _Nullable
 	#define colibri_nonnull _Nonnull

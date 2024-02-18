@@ -31,15 +31,16 @@ namespace Ogre
 		{
 			initialize( rtv );
 		}
-#	ifdef COLIBRI_MULTIPASS_SUPPORT
 		else
 		{
-			OGRE_EXCEPT(
-				Exception::ERR_INVALIDPARAMS,
-				"skip_load_store_semantics MUST be false when compiled with COLIBRI_MULTIPASS_SUPPORT",
-				"CompositorPassColibriGui::CompositorPassColibriGui" );
+			if( colibriManager->isMultipass() )
+			{
+				OGRE_EXCEPT(
+					Exception::ERR_INVALIDPARAMS,
+					"skip_load_store_semantics MUST be false when ColibriManager::isMultipass is true",
+					"CompositorPassColibriGui::CompositorPassColibriGui" );
+			}
 		}
-#	endif
 #endif
 		mCamera = defaultCamera;
 

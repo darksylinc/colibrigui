@@ -135,7 +135,8 @@ namespace Ogre
 		return indexBuffer;
 	}*/
 	//-----------------------------------------------------------------------------------
-	VertexArrayObject *ColibriOgreRenderable::createVao( uint32 vertexCount, VaoManager *vaoManager )
+	VertexArrayObject *ColibriOgreRenderable::createVao( uint32 vertexCount, VaoManager *vaoManager,
+														 const bool bMultiPass )
 	{
 		// Vertex declaration
 		VertexElement2Vec vertexElements;
@@ -147,13 +148,8 @@ namespace Ogre
 
 		// Create the actual vertex buffer.
 		Ogre::VertexBufferPacked *vertexBuffer = 0;
-		vertexBuffer = vaoManager->createVertexBuffer( vertexElements, vertexCount,
-#ifndef COLIBRI_MULTIPASS_SUPPORT
-													   BT_DYNAMIC_PERSISTENT,
-#else
-													   BT_DEFAULT,
-#endif
-													   0, false );
+		vertexBuffer = vaoManager->createVertexBuffer(
+			vertexElements, vertexCount, bMultiPass ? BT_DEFAULT : BT_DYNAMIC_PERSISTENT, 0, false );
 
 		VertexBufferPackedVec vertexBuffers;
 		vertexBuffers.push_back( vertexBuffer );
@@ -163,7 +159,8 @@ namespace Ogre
 		return vao;
 	}
 	//-----------------------------------------------------------------------------------
-	VertexArrayObject *ColibriOgreRenderable::createTextVao( uint32 vertexCount, VaoManager *vaoManager )
+	VertexArrayObject *ColibriOgreRenderable::createTextVao( uint32 vertexCount, VaoManager *vaoManager,
+															 const bool bMultiPass )
 	{
 		// Vertex declaration
 		VertexElement2Vec vertexElements;
@@ -176,13 +173,9 @@ namespace Ogre
 
 		// Create the actual vertex buffer.
 		Ogre::VertexBufferPacked *vertexBuffer = 0;
-		vertexBuffer = vaoManager->createVertexBuffer( vertexElements, vertexCount,
-#ifndef COLIBRI_MULTIPASS_SUPPORT
-													   Ogre::BT_DYNAMIC_PERSISTENT,
-#else
-													   Ogre::BT_DEFAULT,
-#endif
-													   0, false );
+		vertexBuffer = vaoManager->createVertexBuffer(
+			vertexElements, vertexCount, bMultiPass ? Ogre::BT_DEFAULT : Ogre::BT_DYNAMIC_PERSISTENT, 0,
+			false );
 
 		VertexBufferPackedVec vertexBuffers;
 		vertexBuffers.push_back( vertexBuffer );

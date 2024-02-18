@@ -21,7 +21,7 @@ static const char *kOffscreenDefaultWorkspaceName = "!#ColibriOffScreenCanvasWor
 
 OffScreenCanvas::OffScreenCanvas( ColibriManager *primaryManager ) :
 	m_secondaryManager( new ColibriManager( primaryManager->getLogListener(),
-											primaryManager->getColibriListener(), true ) ),
+											primaryManager->getColibriListener(), true, true ) ),
 	m_workspace( 0 ),
 	m_canvasTexture( 0 )
 {

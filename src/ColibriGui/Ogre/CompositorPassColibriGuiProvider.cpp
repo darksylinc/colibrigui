@@ -3,6 +3,7 @@
 
 #include "ColibriGui/Ogre/CompositorPassColibriGui.h"
 #include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
+#include "ColibriGui/ColibriManager.h"
 
 #include "OgreLogManager.h"
 #include "OgreScriptTranslator.h"
@@ -21,7 +22,10 @@ namespace Ogre
 		CompositorNodeDef *parentNodeDef )
 	{
 		if( customId == "colibri_gui" )
-			return OGRE_NEW CompositorPassColibriGuiDef( parentTargetDef );
+		{
+			return OGRE_NEW CompositorPassColibriGuiDef( parentTargetDef,
+														 !m_colibriManager->isMultipass() );
+		}
 
 		return 0;
 	}

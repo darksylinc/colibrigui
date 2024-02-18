@@ -35,7 +35,8 @@ namespace Ogre
 		AspectRatioMode mAspectRatioMode;
 
 	public:
-		CompositorPassColibriGuiDef( CompositorTargetDef *parentTargetDef ) :
+		CompositorPassColibriGuiDef( CompositorTargetDef *parentTargetDef,
+									 bool                 bSkipLoadStoreSemantics ) :
 			CompositorPassDef( PASS_CUSTOM, parentTargetDef ),
 			mSetsResolution( true ),
 			mAspectRatioMode( ArNone )
@@ -43,10 +44,8 @@ namespace Ogre
 			mProfilingId = "Colibri Gui";
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 3, 0, 0 )
-#	ifndef COLIBRI_MULTIPASS_SUPPORT
 			// Default behavior is different from most passes
-			mSkipLoadStoreSemantics = true;
-#	endif
+			mSkipLoadStoreSemantics = bSkipLoadStoreSemantics;
 #endif
 		}
 	};

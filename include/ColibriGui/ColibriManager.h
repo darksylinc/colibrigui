@@ -220,6 +220,8 @@ namespace Colibri
 
 		bool m_touchOnlyMode;
 
+		const bool m_multipass;
+
 		Ogre::Root *colibri_nullable                m_root;
 		Ogre::VaoManager *colibri_nullable          m_vaoManager;
 		Ogre::ObjectMemoryManager *colibri_nullable m_objectMemoryManager;
@@ -281,8 +283,11 @@ namespace Colibri
 				m_defaultSkins[SkinWidgetTypes::NumSkinWidgetTypes][States::NumStates];
 		Ogre::IdString m_defaultSkinPackNames[SkinWidgetTypes::NumSkinWidgetTypes];
 
-		UiVertex		*m_vertexBufferBase;
-		GlyphVertex		*m_textVertexBufferBase;
+		UiVertex    *m_vertexBufferBase;
+		GlyphVertex *m_textVertexBufferBase;
+
+		/// Only used when m_multipass == true
+		std::vector<uint8_t> m_multipassTmpBuffer;
 
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		bool m_fillBuffersStarted;
@@ -306,6 +311,9 @@ namespace Colibri
 	protected:
 		void checkVertexBufferCapacity();
 
+		UiVertex    *getMultipassVertexBuffer( size_t numElements, size_t textNumElements );
+		GlyphVertex *getMultipassTextVertexBuffer( size_t numElements, size_t textNumElements );
+
 		template <typename T>
 		void autosetNavigation( const std::vector<T> &container, size_t start, size_t numWidgets );
 
@@ -317,8 +325,21 @@ namespace Colibri
 		void scrollToWidget( Widget *widget );
 
 	public:
+		/**
+		@param logListener
+		@param colibriListener
+		@param multipass
+			Set this to true to allow rendering more than once in the same frame (otherwise you'll
+			get exceptions about mapping the same buffer twice in the same frame).
+
+			Recommended value for the main UI is false if you don't need it; since multipass is not
+			mobile-friendly and *might* be slower on Desktop too.
+		@param bSecondary
+			If this value is set to true, you must call _setPrimary.
+			See OffScreenCanvas's implementation.
+		*/
 		ColibriManager( LogListener *logListener, ColibriListener *colibriListener,
-						bool bSecondary = false );
+						bool multipass = false, bool bSecondary = false );
 		~ColibriManager();
 
 		void loadSkins( const char *fullPath );
@@ -338,6 +359,8 @@ namespace Colibri
 
 		/// Returns whether this manager is the primary or not.
 		bool isPrimary() const;
+
+		bool isMultipass() const { return m_multipass; }
 
 		void setOgre( Ogre::Root *colibri_nullable root, Ogre::VaoManager *colibri_nullable vaoManager,
 					  Ogre::SceneManager *colibri_nullable sceneManager );

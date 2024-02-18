@@ -22,9 +22,13 @@ namespace Ogre
 	class ColibriOgreRenderable : public MovableObject, public Renderable
 	{
 	public:
-		static VertexArrayObject* createVao( uint32 vertexCount, VaoManager *vaoManager );
-		static VertexArrayObject* createTextVao( uint32 vertexCount, VaoManager *vaoManager );
+		static VertexArrayObject *createVao( uint32 vertexCount, VaoManager *vaoManager,
+											 bool bMultiPass );
+		static VertexArrayObject *createTextVao( uint32 vertexCount, VaoManager *vaoManager,
+												 bool bMultiPass );
+
 		static void destroyVao( VertexArrayObject *vao, VaoManager *vaoManager );
+
 	protected:
 		void setVao( VertexArrayObject *vao );
 

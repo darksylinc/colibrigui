@@ -38,7 +38,7 @@ namespace Colibri
 	};
 
 	ColibriManager::ColibriManager( LogListener *logListener, ColibriListener *colibriListener,
-									bool bSecondary ) :
+									bool multipass, bool bSecondary ) :
 		m_numWidgets( 0 ),
 		m_numLabelsAndBmp( 0u ),
 		m_numTextGlyphs( 0u ),
@@ -55,6 +55,7 @@ namespace Colibri
 		m_zOrderWidgetDirty( false ),
 		m_zOrderHasDirtyChildren( false ),
 		m_touchOnlyMode( false ),
+		m_multipass( multipass ),
 		m_root( 0 ),
 		m_vaoManager( 0 ),
 		m_objectMemoryManager( 0 ),
@@ -137,8 +138,8 @@ namespace Colibri
 		m_sceneManager = primaryManager->m_sceneManager;
 
 		m_objectMemoryManager = primaryManager->m_objectMemoryManager;
-		m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, m_vaoManager );
-		m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, m_vaoManager );
+		m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, m_vaoManager, m_multipass );
+		m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, m_vaoManager, m_multipass );
 		m_commandBuffer = primaryManager->m_commandBuffer;
 
 		for( size_t i = 0u; i < SkinWidgetTypes::NumSkinWidgetTypes; ++i )
@@ -210,8 +211,8 @@ namespace Colibri
 		if( vaoManager )
 		{
 			m_objectMemoryManager = new Ogre::ObjectMemoryManager();
-			m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, vaoManager );
-			m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, vaoManager );
+			m_vao = Ogre::ColibriOgreRenderable::createVao( 6u * 9u, vaoManager, m_multipass );
+			m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, vaoManager, m_multipass );
 			m_commandBuffer = new Ogre::CommandBuffer();
 			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
 		}
@@ -1157,7 +1158,8 @@ namespace Colibri
 				const Ogre::uint32 newVertexCount =
 					std::max( requiredVertexCount, currVertexCount + ( currVertexCount >> 1u ) );
 				Ogre::ColibriOgreRenderable::destroyVao( m_vao, m_vaoManager );
-				m_vao = Ogre::ColibriOgreRenderable::createVao( newVertexCount, m_vaoManager );
+				m_vao =
+					Ogre::ColibriOgreRenderable::createVao( newVertexCount, m_vaoManager, m_multipass );
 
 				anyVaoChanged = true;
 			}
@@ -1174,7 +1176,8 @@ namespace Colibri
 				const Ogre::uint32 newVertexCount =
 					std::max( requiredVertexCount, currVertexCount + ( currVertexCount >> 1u ) );
 				Ogre::ColibriOgreRenderable::destroyVao( m_textVao, m_vaoManager );
-				m_textVao = Ogre::ColibriOgreRenderable::createTextVao( newVertexCount, m_vaoManager );
+				m_textVao = Ogre::ColibriOgreRenderable::createTextVao( newVertexCount, m_vaoManager,
+																		m_multipass );
 				anyVaoChanged = true;
 			}
 		}
@@ -1184,6 +1187,26 @@ namespace Colibri
 			for( Window *window : m_windows )
 				window->broadcastNewVao( m_vao, m_textVao );
 		}
+	}
+	//-----------------------------------------------------------------------------------
+	UiVertex *ColibriManager::getMultipassVertexBuffer( size_t numElements, size_t textNumElements )
+	{
+		const size_t totalBytesNeeded =
+			numElements * sizeof( UiVertex ) + textNumElements * sizeof( GlyphVertex );
+		if( totalBytesNeeded > m_multipassTmpBuffer.size() )
+			m_multipassTmpBuffer.resize( totalBytesNeeded );
+		return reinterpret_cast<UiVertex *>( m_multipassTmpBuffer.data() );
+	}
+	//-----------------------------------------------------------------------------------
+	GlyphVertex *ColibriManager::getMultipassTextVertexBuffer( size_t numElements,
+															   size_t textNumElements )
+	{
+		const size_t totalBytesNeeded =
+			numElements * sizeof( UiVertex ) + textNumElements * sizeof( GlyphVertex );
+		if( totalBytesNeeded > m_multipassTmpBuffer.size() )
+			m_multipassTmpBuffer.resize( totalBytesNeeded );
+		return reinterpret_cast<GlyphVertex *>( m_multipassTmpBuffer.data() +
+												numElements * sizeof( UiVertex ) );
 	}
 	//-------------------------------------------------------------------------
 	template <typename T>
@@ -1629,27 +1652,35 @@ namespace Colibri
 		Ogre::VertexBufferPacked *vertexBuffer = m_vao->getBaseVertexBuffer();
 		Ogre::VertexBufferPacked *vertexBufferText = m_textVao->getBaseVertexBuffer();
 
-#ifndef COLIBRI_MULTIPASS_SUPPORT
-		UiVertex *vertex =
-			reinterpret_cast<UiVertex *>( vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
-#else
-		std::vector<UiVertex> localVertexData;
-		localVertexData.resize( vertexBuffer->getNumElements() );
-		UiVertex *vertex = localVertexData.data();
-#endif
-		UiVertex *startOffset = vertex;
-		m_vertexBufferBase = startOffset;
+		UiVertex *vertex = 0;
+		if( !m_multipass )
+		{
+			vertex =
+				reinterpret_cast<UiVertex *>( vertexBuffer->map( 0, vertexBuffer->getNumElements() ) );
+		}
+		else
+		{
+			vertex = getMultipassVertexBuffer( vertexBuffer->getNumElements(),
+											   vertexBufferText->getNumElements() );
+		}
 
-#ifndef COLIBRI_MULTIPASS_SUPPORT
-		GlyphVertex *vertexText = reinterpret_cast<GlyphVertex *>(
-			vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
-#else
-		std::vector<GlyphVertex> localVertexText;
-		localVertexText.resize( vertexBufferText->getNumElements() );
-		GlyphVertex *vertexText = localVertexText.data();
-#endif
-		GlyphVertex *startOffsetText = vertexText;
-		m_textVertexBufferBase = startOffsetText;
+		const UiVertex *startOffset = vertex;
+		m_vertexBufferBase = vertex;
+
+		GlyphVertex *vertexText = 0;
+		if( !m_multipass )
+		{
+			vertexText = reinterpret_cast<GlyphVertex *>(
+				vertexBufferText->map( 0, vertexBufferText->getNumElements() ) );
+		}
+		else
+		{
+			vertexText = getMultipassTextVertexBuffer( vertexBuffer->getNumElements(),
+													   vertexBufferText->getNumElements() );
+		}
+
+		const GlyphVertex *startOffsetText = vertexText;
+		m_textVertexBufferBase = vertexText;
 
 		for( Window *window : m_windows )
 		{
@@ -1661,15 +1692,19 @@ namespace Colibri
 		const size_t elementsWrittenText = size_t( vertexText - startOffsetText );
 		COLIBRI_ASSERT( elementsWritten <= vertexBuffer->getNumElements() );
 		COLIBRI_ASSERT( elementsWrittenText <= vertexBufferText->getNumElements() );
-#ifndef COLIBRI_MULTIPASS_SUPPORT
-		vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
-		vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
-#else
-		if( elementsWritten > 0u )
-			vertexBuffer->upload( localVertexData.data(), 0u, elementsWritten );
-		if( elementsWrittenText > 0u )
-			vertexBufferText->upload( localVertexText.data(), 0u, elementsWrittenText );
-#endif
+
+		if( !m_multipass )
+		{
+			vertexBuffer->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWritten );
+			vertexBufferText->unmap( Ogre::UO_KEEP_PERSISTENT, 0u, elementsWrittenText );
+		}
+		else
+		{
+			if( elementsWritten > 0u )
+				vertexBuffer->upload( startOffset, 0u, elementsWritten );
+			if( elementsWrittenText > 0u )
+				vertexBufferText->upload( startOffsetText, 0u, elementsWrittenText );
+		}
 
 		m_vertexBufferBase = 0;
 		m_textVertexBufferBase = 0;
@@ -1680,8 +1715,8 @@ namespace Colibri
 
 		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
 		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
-		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri*>( hlms ) );
-		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri*>( hlms );
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri *>( hlms ) );
+		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri *>( hlms );
 		hlmsColibri->prepareRenderCommands();
 	}
 	//-------------------------------------------------------------------------
@@ -1695,8 +1730,8 @@ namespace Colibri
 		Ogre::HlmsManager *hlmsManager = m_root->getHlmsManager();
 
 		Ogre::Hlms *hlms = hlmsManager->getHlms( Ogre::HLMS_UNLIT );
-		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri*>( hlms ) );
-		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri*>( hlms );
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsColibri *>( hlms ) );
+		Ogre::HlmsColibri *hlmsColibri = static_cast<Ogre::HlmsColibri *>( hlms );
 
 		// Ideally ShapeManagers should be shared between ColibriManagers for maximum
 		// efficiency. But if they're not, we not to bind our own atlas with our glyphs
