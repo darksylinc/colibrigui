@@ -35,6 +35,7 @@ if( NOT COLIBRIGUI_LIB_ONLY )
 
 	include( CMake/Bootstrap.cmake )
 	include( CMake/Dependencies/OGRE.cmake )
+	include( CMake/Examples.cmake )
 else()
 	include( CMake/Bootstrap.cmake )
 endif()
@@ -73,25 +74,9 @@ if( COLIBRIGUI_FLEXIBILITY_LEVEL GREATER 0 )
 	add_compile_definitions(COLIBRI_FLEXIBILITY_LEVEL=${COLIBRIGUI_FLEXIBILITY_LEVEL})
 endif()
 
-if( NOT COLIBRIGUI_LIB_ONLY )
-	#add_recursive( ./src SOURCES )
-	#add_recursive( ./include HEADERS )
-
-	#add_recursive( ./src/OgreCommon/System/OSX/*.mm SOURCES )
-
-	#add_recursive would have added all .mm files, including the ios ones.
-	#We need to be able to set specifics.
-	file(GLOB_RECURSE SOURCES "src/*.cpp")
-	file(GLOB_RECURSE HEADERS "include/*.h")
-	if( APPLE )
-		file(GLOB_RECURSE MMSOURCES "src/OgreCommon/System/OSX/*.mm")
-	endif()
-
-else()
-	add_recursive( ./src/ColibriGui SOURCES )
-	add_recursive( ./include/ColibriGui HEADERS )
-	list( REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/./src/ColibriGui/iOS/Colibri_iOS.mm" )
-endif()
+add_recursive( ./src/ColibriGui SOURCES )
+add_recursive( ./include/ColibriGui HEADERS )
+list( REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/./src/ColibriGui/iOS/Colibri_iOS.mm" )
 
 if( APPLE )
 	set( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++11" )
@@ -115,15 +100,7 @@ if( APPLE )
 	endif()
 endif()
 
-if( NOT COLIBRIGUI_LIB_ONLY )
-	if( APPLE )
-		add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${MMSOURCES} ${RESOURCES} )
-	else()
-		add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
-	endif()
-else()
-	add_library( ${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS} )
-endif()
+add_library( ${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS} )
 
 target_link_libraries( ${PROJECT_NAME} icucommon ${HARFBUZZ_LIBRARIES} ${FREETYPE_LIBRARIES} ${ZLIB_LIBRARIES} sds_library )
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
@@ -153,8 +130,6 @@ if( APPLE )
 		-framework Metal
 		-framework OpenGL
 	")
-
-
 endif()
 
 if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
@@ -166,4 +141,9 @@ if( ${CMAKE_VERSION} VERSION_GREATER 3.9 )
 		set( DOXYGEN_EXTRACT_LOCAL_METHODS YES )
 		doxygen_add_docs( doxygen ${SOURCES} ${HEADERS} )
 	endif()
+endif()
+
+if( NOT COLIBRIGUI_LIB_ONLY )
+	add_subdirectory( Examples/MainDemo )
+	add_subdirectory( Examples/OffScreenCanvas3D )
 endif()

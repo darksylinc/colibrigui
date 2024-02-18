@@ -60,6 +60,7 @@ namespace Colibri
 		m_objectMemoryManager( 0 ),
 		m_sceneManager( 0 ),
 		m_vao( 0 ),
+		m_textVao( 0 ),
 		m_currIndirectBuffer( 0 ),
 		m_commandBuffer( 0 ),
 		m_allowingScrollAlways( false ),
@@ -121,6 +122,7 @@ namespace Colibri
 			m_shaperManager = 0;
 			m_skinManager = 0;
 			m_objectMemoryManager = 0;
+			m_commandBuffer = 0;
 			setOgre( 0, 0, 0 );
 		}
 	}

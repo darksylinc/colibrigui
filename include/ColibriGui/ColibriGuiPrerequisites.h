@@ -76,6 +76,7 @@ namespace Colibri
 	class LabelBmp;
 	class LayoutCell;
 	class LogListener;
+	class OffScreenCanvas;
 	class Progressbar;
 	class RadarChart;
 	class Renderable;

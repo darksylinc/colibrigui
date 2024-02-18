@@ -77,6 +77,8 @@ namespace Colibri
 		ColibriManager *getSecondaryManager() { return m_secondaryManager; }
 
 		/** Creates a texture for the canvas. Will destroy existing one if it exists.
+		@note
+			If the texture must be recreated, this implies calling destroyWorkspace().
 		@param width
 		@param height
 		@param pixelFormat
@@ -84,11 +86,40 @@ namespace Colibri
 		void createTexture( uint32_t width, uint32_t height,
 							Ogre::PixelFormatGpu pixelFormat = Ogre::PFG_RGBA8_UNORM_SRGB );
 
+		/** Sets an externally-created texture.
+			Useful if you want to set again a texture that was previously disowned
+			because you want to draw to it again.
+
+			@see OffScreenCanvas::disownCanvasTexture
+			@see OffScreenCanvas::setWorkspace
+		@note
+			setTexture() implies calling destroyWorkspace(). Make sure to unset the
+			workspace using setWorkspace() if you want to keep it alive.
+		@param texture
+			Texture to set.
+			Can be nullptr if you want to unset.
+		@param bDestroyCurrent
+			True if you want to destroy the current TextureGpu.
+			False if you don't want to destroy it (we lose all references to that texture, so
+			make sure you still have a reference to it or else it will leak).
+		*/
+		void setTexture( Ogre::TextureGpu *colibri_nullable texture, bool bDestroyCurrent = true );
+
 		/** Returns and releases m_canvasTexture. We no longer own it, and IT BECOMES THE CALLER'S
 			RESPONSABILITY TO DESTROY IT after you're done with it.
 
 			This is useful if you want to draw something with Colibri and then use it as a
 			static texture. For example, 3D text drawing.
+
+		@note
+			disownCanvasTexture() implies calling destroyWorkspace(). Make sure to unset the
+			workspace using setWorkspace() if you want to keep it alive.
+		@remarks
+			Calling this function is the same as doing:
+			@code
+				auto disownedTexture = offScreenTex->getCanvasTexture();
+				offScreenTex->setTexture( nullptr, false );
+			@endcode
 		@param bCreateAnotherOne
 			True if you want to create another texture with the exact same settings as
 			the current one we're disowning.

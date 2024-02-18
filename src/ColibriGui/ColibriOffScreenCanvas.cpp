@@ -60,6 +60,7 @@ void OffScreenCanvas::createWorkspaceDefinition()
 		static_cast<CompositorPassColibriGuiDef *>( targetDef->addPass( PASS_CUSTOM, "colibri_gui" ) );
 	passColibri->mSkipLoadStoreSemantics = false;  // We must clear the RT, we are the only pass.
 	passColibri->setAllLoadActions( LoadAction::Clear );
+	passColibri->mClearColour[0] = ColourValue( 0, 0, 0, 0 );
 	passColibri->mStoreActionDepth = StoreAction::DontCare;
 	passColibri->mStoreActionStencil = StoreAction::DontCare;
 
@@ -119,6 +120,7 @@ void OffScreenCanvas::createTexture( uint32_t width, uint32_t height, Ogre::Pixe
 
 	if( m_canvasTexture )
 	{
+		destroyWorkspace();
 		textureManager->destroyTexture( m_canvasTexture );
 		m_canvasTexture = 0;
 	}
@@ -138,16 +140,34 @@ void OffScreenCanvas::createTexture( uint32_t width, uint32_t height, Ogre::Pixe
 	m_canvasTexture->scheduleTransitionTo( GpuResidency::Resident );
 }
 //-----------------------------------------------------------------------------
+void OffScreenCanvas::setTexture( Ogre::TextureGpu *texture, bool bDestroyCurrent )
+{
+	destroyWorkspace();
+
+	if( bDestroyCurrent )
+	{
+		if( m_canvasTexture )
+		{
+			m_canvasTexture->getTextureManager()->destroyTexture( m_canvasTexture );
+			m_canvasTexture = 0;
+		}
+	}
+
+	m_canvasTexture = texture;
+}
+//-----------------------------------------------------------------------------
 Ogre::TextureGpu *OffScreenCanvas::disownCanvasTexture( const bool bCreateAnotherOne )
 {
 	Ogre::TextureGpu *retVal = m_canvasTexture;
 	if( retVal )
 	{
+		destroyWorkspace();
+
 		const uint32_t oldWidth = retVal->getWidth();
 		const uint32_t oldHeight = retVal->getHeight();
 		const Ogre::PixelFormatGpu oldFormat = retVal->getPixelFormat();
 
-		retVal = 0;
+		m_canvasTexture = 0;
 
 		if( bCreateAnotherOne )
 			createTexture( oldWidth, oldHeight, oldFormat );
@@ -163,4 +183,18 @@ void OffScreenCanvas::updateCanvas( const float timeSinceLast )
 	// m_workspace->_beginUpdate( true );
 	m_workspace->_update();
 	// m_workspace->_endUpdate( true );
+
+	// Prepare the texture for sampling (we assume that's what the user will be doing next).
+	// Otherwise using compositor's "expose" would be user hostile.
+	//
+	// This isn't the most efficient method if the user plans on calling updateCanvas() many times
+	// in a row (i.e. we won't be batching all resource transitions), but it gets the job done.
+	using namespace Ogre;
+	RenderSystem *renderSystem = m_secondaryManager->getOgreHlmsManager()->getRenderSystem();
+	BarrierSolver &solver = renderSystem->getBarrierSolver();
+
+	ResourceTransitionArray &barrier = solver.getNewResourceTransitionsArrayTmp();
+	solver.resolveTransition( barrier, m_canvasTexture, ResourceLayout::Texture, ResourceAccess::Read,
+							  1u << GPT_FRAGMENT_PROGRAM );
+	renderSystem->executeResourceTransition( barrier );
 }
