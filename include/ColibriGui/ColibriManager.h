@@ -230,6 +230,7 @@ namespace Colibri
 		Ogre::VertexArrayObject *colibri_nullable   m_textVao;
 		std::vector<Ogre::IndirectBufferPacked *>   m_indirectBuffer;
 		uint32_t                                    m_currIndirectBuffer;
+		uint32_t                                    m_lastFrameIdxUpdated;
 		Ogre::CommandBuffer *colibri_nullable       m_commandBuffer;
 		Ogre::HlmsDatablock *colibri_nullable       m_defaultTextDatablock[States::NumStates];
 

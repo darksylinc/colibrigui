@@ -25,22 +25,12 @@
 #include "SdlInputHandler.h"
 
 #include "ColibriGui/ColibriButton.h"
-#include "ColibriGui/ColibriCheckbox.h"
-#include "ColibriGui/ColibriEditbox.h"
-#include "ColibriGui/ColibriGraphChart.h"
 #include "ColibriGui/ColibriLabel.h"
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/ColibriOffScreenCanvas.h"
-#include "ColibriGui/ColibriProgressbar.h"
-#include "ColibriGui/ColibriRadarChart.h"
-#include "ColibriGui/ColibriSlider.h"
-#include "ColibriGui/ColibriSpinner.h"
-#include "ColibriGui/ColibriToggleButton.h"
 #include "ColibriGui/ColibriWindow.h"
-
-#include "ColibriGui/Layouts/ColibriLayoutLine.h"
-#include "ColibriGui/Layouts/ColibriLayoutMultiline.h"
-#include "ColibriGui/Layouts/ColibriLayoutTableSameSize.h"
+#include "ColibriGui/Text/ColibriBmpFont.h"
+#include "ColibriGui/Text/ColibriShaperManager.h"
 
 using namespace Demo;
 
@@ -65,7 +55,8 @@ OffScreenCanvas3DGameState::OffScreenCanvas3DGameState( const Ogre::String &help
 	mText3D{},
 	mNodes{},
 	mOffscreenCanvas( 0 ),
-	mLabelOffscreen( 0 )
+	mLabelOffscreen( 0 ),
+	mAccumTime( 0 )
 {
 }
 //-----------------------------------------------------------------------------------
@@ -172,7 +163,7 @@ void OffScreenCanvas3DGameState::drawTextIn3D( Ogre::Rectangle2D *rectangle, con
 //-----------------------------------------------------------------------------------
 void OffScreenCanvas3DGameState::createScene01( void )
 {
-	mCameraController = new CameraController( mGraphicsSystem, false );
+	// mCameraController = new CameraController( mGraphicsSystem, false );
 
 	Ogre::Window *window = mGraphicsSystem->getRenderWindow();
 	Colibri::ColibriManager *colibriManager = getColibriManager();
@@ -207,13 +198,14 @@ void OffScreenCanvas3DGameState::createScene01( void )
 	fullWindow->setSkin( "EmptyBg" );
 	fullWindow->setVisualsEnabled( false );
 	{
-		Colibri::Label *emojiText = colibriManager->createWidget<Colibri::Label>( fullWindow );
-		emojiText->setText(
-			"By defining a BMP font you can easily use the private area\n"
-			"to draw emoji-like icons. Big Coffe cup: \uE000 Pizza: \uE001\n"
-			"This is a new line after emojis." );
-		emojiText->sizeToFit();
-		emojiText->setTopLeft( fullWindow->getSize() - emojiText->getSize() );
+		Colibri::Label *helpText = colibriManager->createWidget<Colibri::Label>( fullWindow );
+		helpText->setText(
+			"This sample draws the UI into a secondary ColibriManager and bakes\n"
+			"the rendered result into a texture. It's not just text, Widgets can be baked too.\n"
+			"From there we create an Unlit datablock and assign the baked texture.\n"
+			"Then it's just a normal, regular 3D object." );
+		helpText->sizeToFit();
+		helpText->setTopLeft( fullWindow->getSize() - helpText->getSize() );
 	}
 
 	// Overlapping windows
@@ -232,6 +224,29 @@ void OffScreenCanvas3DGameState::createScene01( void )
 	mLabelOffscreen->setDefaultFontSize( 32.0f );
 	mLabelOffscreen->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 2.0f ) );
 
+	{
+		// We MUST wait until the emojis are loaded or else background streaming means that we may
+		// potentially render the emoji as a white rectangle. Normally this problem fixes itself when
+		// redrawing the main GUI every frame; but in this case it's going to be baked once.
+		// Thus we make sure the emojis are loaded by now.
+		//
+		// NOTE: The call to preload() should be as early as possible, so that it is likely
+		// that it's already loaded by the time we call waitForData().
+		// In this example they're together to explain they're linked together.
+		//
+		// Alternatively we could bake the white rectangle and do:
+		//	getFontTexture()->addListener( this );
+		//
+		// To listen for when the texture gets loaded. When that happens, rebake via
+		// drawTextIn3D( mText3D[2], sampleText[2], 8.0f );
+		colibriManager->getShaperManager()->getBmpFont( 0u )->getDatablock()->preload();
+		colibriManager->getShaperManager()->getBmpFont( 0u )->getFontTexture()->waitForData();
+	}
+
+	const char *sampleText[kNum3DTexts] = { "This is a test", "Multiline text\nworks too!",
+											"This one even has an emoji \uE000!" };
+
+	mGraphicsSystem->getRoot()->getRenderSystem()->startGpuDebuggerFrameCapture( 0 );
 	Ogre::SceneManager *sceneManager = mGraphicsSystem->getSceneManager();
 	for( size_t i = 0u; i < kNum3DTexts; ++i )
 	{
@@ -243,8 +258,14 @@ void OffScreenCanvas3DGameState::createScene01( void )
 		mText3D[i]->setUseIdentityProjection( false );
 		mNodes[i] = sceneManager->getRootSceneNode()->createChildSceneNode();
 		mNodes[i]->attachObject( mText3D[i] );
-		// drawTextIn3D( mText3D[i], "THIS is a teST" );
+		drawTextIn3D( mText3D[i], sampleText[i], i == 2u ? 8.0f : 4.0f );
 	}
+	mGraphicsSystem->getRoot()->getRenderSystem()->endGpuDebuggerFrameCapture( 0, false );
+
+	mNodes[0]->setPosition( Ogre::Vector3( -5, 2, 0 ) );
+	mNodes[1]->setPosition( Ogre::Vector3( 4, 3, 0 ) );
+	mNodes[1]->pitch( Ogre::Degree( -60.0f ) );
+	mNodes[2]->setPosition( Ogre::Vector3( 0, -3, 0 ) );
 
 	TutorialGameState::createScene01();
 }
@@ -319,10 +340,14 @@ void OffScreenCanvas3DGameState::update( float timeSinceLast )
 	angle += timeSinceLast;*/
 
 	// mOffscreenCanvas->updateCanvas( 0.0f );
-	drawTextIn3D( mText3D[0], "THIS is a teST", 4.0f );
+	// drawTextIn3D( mText3D[0], "THIS is a teST", 4.0f );
+	// drawTextIn3D( mText3D[2], "This one even has an emoji \uE000!", 8.0f );
 
 	mNodes[0]->roll( Ogre::Radian( -timeSinceLast * 0.35f ) );
 	mNodes[0]->yaw( Ogre::Radian( -timeSinceLast ) );
+	mNodes[2]->setScale( Ogre::Vector3( 1.0f + cosf( mAccumTime ) * 0.1f ) );
+
+	mAccumTime += timeSinceLast * 8.0f;
 
 	TutorialGameState::update( timeSinceLast );
 }

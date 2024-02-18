@@ -120,6 +120,8 @@ namespace Colibri
 
 		/// This pointer can be casted to HlmsColibriDatablock
 		Ogre::HlmsDatablock *colibri_nullable getDatablock() const { return m_datablock; }
+
+		Ogre::TextureGpu *colibri_nullable getFontTexture() const { return m_fontTexture; }
 	};
 }  // namespace Colibri
 

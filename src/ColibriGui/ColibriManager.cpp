@@ -63,6 +63,7 @@ namespace Colibri
 		m_vao( 0 ),
 		m_textVao( 0 ),
 		m_currIndirectBuffer( 0 ),
+		m_lastFrameIdxUpdated( 0u ),
 		m_commandBuffer( 0 ),
 		m_allowingScrollAlways( false ),
 		m_allowingScrollGestureWhileButtonDown( false ),
@@ -215,6 +216,8 @@ namespace Colibri
 			m_textVao = Ogre::ColibriOgreRenderable::createTextVao( 6u * 16u, vaoManager, m_multipass );
 			m_commandBuffer = new Ogre::CommandBuffer();
 			m_commandBuffer->setCurrentRenderSystem( m_sceneManager->getDestinationRenderSystem() );
+
+			m_lastFrameIdxUpdated = vaoManager->getFrameCount() - 1u;
 		}
 
 		if( m_shaperManager )
@@ -1556,7 +1559,11 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::update( float timeSinceLast )
 	{
-		m_currIndirectBuffer = 0u;
+		if( m_lastFrameIdxUpdated != m_vaoManager->getFrameCount() )
+		{
+			m_currIndirectBuffer = 0u;
+			m_lastFrameIdxUpdated = m_vaoManager->getFrameCount();
+		}
 
 		updateAllDerivedTransforms();
 

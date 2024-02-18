@@ -9,7 +9,7 @@
 
 namespace Demo
 {
-	static constexpr size_t kNum3DTexts = 1u;
+	static constexpr size_t kNum3DTexts = 3u;
 
 	class OffScreenCanvas3DGameState final : public TutorialGameState
 	{
@@ -21,6 +21,8 @@ namespace Demo
 		Colibri::Label *mLabelOffscreen;
 
 		Colibri::ColibriManager *getColibriManager();
+
+		float mAccumTime;
 
 		void drawTextIn3D( Ogre::Rectangle2D *rectangle, const char *text,
 						   float scaleInWorldUnits = 1.0f );
