@@ -1,4 +1,4 @@
-﻿#include "ColibriGui/ColibriOffScreenCanvas.h"
+#include "ColibriGui/ColibriOffScreenCanvas.h"
 
 #include "ColibriGui/ColibriManager.h"
 #include "ColibriGui/Ogre/CompositorPassColibriGuiDef.h"
@@ -91,6 +91,8 @@ void OffScreenCanvas::createWorkspace( Ogre::CompositorPassColibriGuiProvider *c
 void OffScreenCanvas::setWorkspace( Ogre::CompositorWorkspace *colibri_nullable workspace,
 									bool bDestroyCurrent )
 {
+	if( m_workspace == workspace )
+		return;
 	if( bDestroyCurrent )
 		destroyWorkspace();
 	m_workspace = workspace;
@@ -143,6 +145,9 @@ void OffScreenCanvas::createTexture( uint32_t width, uint32_t height, Ogre::Pixe
 void OffScreenCanvas::setTexture( Ogre::TextureGpu *texture, bool bDestroyCurrent )
 {
 	destroyWorkspace();
+
+	if( texture == m_canvasTexture )
+		return;
 
 	if( bDestroyCurrent )
 	{

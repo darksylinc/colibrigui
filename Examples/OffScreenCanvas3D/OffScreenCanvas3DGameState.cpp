@@ -54,8 +54,11 @@ OffScreenCanvas3DGameState::OffScreenCanvas3DGameState( const Ogre::String &help
 	TutorialGameState( helpDescription ),
 	mText3D{},
 	mNodes{},
+	mDynamicText( 0 ),
+	mDynamicNode( 0 ),
 	mOffscreenCanvas( 0 ),
 	mLabelOffscreen( 0 ),
+	mLabelDynamicOffscreen( 0 ),
 	mAccumTime( 0 )
 {
 }
@@ -86,6 +89,7 @@ void OffScreenCanvas3DGameState::drawTextIn3D( Ogre::Rectangle2D *rectangle, con
 		Ogre::HlmsMacroblock macroblock;
 		Ogre::HlmsBlendblock blendblock;
 
+		macroblock.mDepthWrite = false;
 		macroblock.mCullMode = Ogre::CULL_NONE;
 		blendblock.setBlendType( Ogre::SBT_TRANSPARENT_ALPHA );
 
@@ -95,7 +99,6 @@ void OffScreenCanvas3DGameState::drawTextIn3D( Ogre::Rectangle2D *rectangle, con
 		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsUnlitDatablock *>( datablock ) );
 		unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock *>( datablock );
 
-		// Initialize geometry or else setDatablock() will fail.
 		rectangle->setDatablock( unlitDatablock );
 	}
 	else
@@ -161,6 +164,109 @@ void OffScreenCanvas3DGameState::drawTextIn3D( Ogre::Rectangle2D *rectangle, con
 	mLabelOffscreen->setHidden( true );
 }
 //-----------------------------------------------------------------------------------
+void OffScreenCanvas3DGameState::updateDynamicTextIn3D( Ogre::Rectangle2D *rectangle, const char *text,
+														float scaleInWorldUnits )
+{
+	// drawTextIn3D() is great for one-offs (i.e. bake text once) though it also supports updating
+	// existing text by calling drawTextIn3D() on the same Rectangle2D again.
+	//
+	// However it is not efficient for updating text every frame.
+	//
+	// If we make a few assumptions, we can do efficient text update and this is what this
+	// function does. Assumptions:
+	//
+	//	1. drawTextIn3D() calculates the tightest the texture resolution based on the text string
+	//	   and the results of sizeToFit().
+	//	   If we set a fixed resolution and aspect ratio (e.g. 512x256) and center text on it,
+	//	   then we don't need to re-create textures on each call.
+	//	2. We assume the drawn string will not overflow the fixed resolution.
+
+	const Ogre::Vector2 fixedResolution( 512, 256 );
+
+	Ogre::HlmsUnlitDatablock *unlitDatablock = 0;
+
+	if( !rectangle->getDatablock() ||
+		rectangle->getDatablock()->getCreator()->getType() != Ogre::HLMS_UNLIT )
+	{
+		// Create a datablock (aka material) to hold the texture we're about to render to.
+		// We use Unlit because it's often what the user would want. But you could use PBS
+		// if you want the text to be affected by lighting (or assign the texture as emissive).
+		Ogre::Hlms *hlms = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
+
+		char tmpBuffer[64];
+		Ogre::LwString matName( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+		matName.a( "3D Text Material #", Ogre::Id::generateNewId<OffScreenCanvas3DGameState>() );
+
+		Ogre::HlmsMacroblock macroblock;
+		Ogre::HlmsBlendblock blendblock;
+
+		macroblock.mDepthWrite = false;
+		macroblock.mCullMode = Ogre::CULL_NONE;
+		blendblock.setBlendType( Ogre::SBT_TRANSPARENT_ALPHA );
+
+		Ogre::HlmsDatablock *datablock = hlms->createDatablock(
+			matName.c_str(), matName.c_str(), macroblock, blendblock, Ogre::HlmsParamVec() );
+
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsUnlitDatablock *>( datablock ) );
+		unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock *>( datablock );
+
+		mOffscreenCanvas->createTexture( uint32_t( fixedResolution.x ), uint32_t( fixedResolution.y ) );
+		unlitDatablock->setTexture( 0u, mOffscreenCanvas->getCanvasTexture() );
+
+		const float maxRes = std::max( fixedResolution.x, fixedResolution.y );
+
+		rectangle->setDatablock( unlitDatablock );
+		rectangle->setGeometry( -fixedResolution * 0.5f * scaleInWorldUnits / maxRes,
+								fixedResolution * scaleInWorldUnits / maxRes );
+		rectangle->update();
+	}
+	else
+	{
+		// We've already created this datablock. NOTE: We assume that if it's unlit then it was created
+		// by us. This may not actually be the case. OgreNext defaults datablocks to PBS so we *assume*
+		// if we see nothing or a PBS datablock, then it's using the default datablock.
+		COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsUnlitDatablock *>( rectangle->getDatablock() ) );
+		unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock *>( rectangle->getDatablock() );
+
+		// Set the texture again into the OffScreenCanvas
+		mOffscreenCanvas->setTexture( unlitDatablock->getTexture( 0u ), true );
+	}
+
+	// We must set some size here otherwise pixel-perfect snapping of Label calculations
+	// will be messed up, causing sizeToFit() to fail.
+	mOffscreenCanvas->getSecondaryManager()->setCanvasSize( fixedResolution, fixedResolution );
+
+	// Set the text and calculate its size.
+	mLabelDynamicOffscreen->setHidden( false );
+	{
+		// You don't need to set these every time, but are here for convenience.
+		mLabelDynamicOffscreen->setTextHorizAlignment( Colibri::TextHorizAlignment::Center );
+		mLabelDynamicOffscreen->setTextVertAlignment( Colibri::TextVertAlignment::Center );
+
+		// DPI affects the size of the text, which can cause the text to overflow.
+		// We want to be certain the text keeps the same size in all machines.
+		mLabelDynamicOffscreen->setDefaultFontSize(
+			32.0f * ( 96.0f / float( getColibriManager()->getShaperManager()->getDPI() ) ) );
+	}
+	mLabelDynamicOffscreen->setSize( fixedResolution );
+	mLabelDynamicOffscreen->setText( text );
+
+	// Set the window to match to avoid getting clipped.
+	mLabelDynamicOffscreen->getParent()->setSize( fixedResolution );
+
+	mOffscreenCanvas->createWorkspace(
+		static_cast<ColibriGuiGraphicsSystem *>( mGraphicsSystem )->getColibriCompoProvider(),
+		mGraphicsSystem->getCamera() );
+
+	// Render the text.
+	mOffscreenCanvas->updateCanvas( 0.0f );
+
+	mOffscreenCanvas->disownCanvasTexture( false );
+
+	// We hide this label in case we'd want to render other unrelated things.
+	mLabelDynamicOffscreen->setHidden( true );
+}
+//-----------------------------------------------------------------------------------
 void OffScreenCanvas3DGameState::createScene01( void )
 {
 	// mCameraController = new CameraController( mGraphicsSystem, false );
@@ -224,6 +330,9 @@ void OffScreenCanvas3DGameState::createScene01( void )
 	mLabelOffscreen->setDefaultFontSize( 32.0f );
 	mLabelOffscreen->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 2.0f ) );
 
+	mLabelDynamicOffscreen = secondaryManager->createWidget<Colibri::Label>( offscreenRoot );
+	mLabelDynamicOffscreen->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 2.0f ) );
+
 	{
 		// We MUST wait until the emojis are loaded or else background streaming means that we may
 		// potentially render the emoji as a white rectangle. Normally this problem fixes itself when
@@ -246,7 +355,6 @@ void OffScreenCanvas3DGameState::createScene01( void )
 	const char *sampleText[kNum3DTexts] = { "This is a test", "Multiline text\nworks too!",
 											"This one even has an emoji \uE000!" };
 
-	mGraphicsSystem->getRoot()->getRenderSystem()->startGpuDebuggerFrameCapture( 0 );
 	Ogre::SceneManager *sceneManager = mGraphicsSystem->getSceneManager();
 	for( size_t i = 0u; i < kNum3DTexts; ++i )
 	{
@@ -260,7 +368,18 @@ void OffScreenCanvas3DGameState::createScene01( void )
 		mNodes[i]->attachObject( mText3D[i] );
 		drawTextIn3D( mText3D[i], sampleText[i], i == 2u ? 8.0f : 4.0f );
 	}
-	mGraphicsSystem->getRoot()->getRenderSystem()->endGpuDebuggerFrameCapture( 0, false );
+
+	{
+		mDynamicText = OGRE_NEW Ogre::Rectangle2D(
+			Ogre::Id::generateNewId<Ogre::MovableObject>(),
+			&sceneManager->_getEntityMemoryManager( Ogre::SCENE_DYNAMIC ), sceneManager );
+		mDynamicText->initialize( Ogre::BT_DEFAULT, Ogre::Rectangle2D::GeometryFlagQuad );
+		mDynamicText->setUseIdentityView( false );
+		mDynamicText->setUseIdentityProjection( false );
+		mDynamicNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+		mDynamicNode->attachObject( mDynamicText );
+		updateDynamicTextIn3D( mDynamicText, "Init", 8.0f );
+	}
 
 	mNodes[0]->setPosition( Ogre::Vector3( -5, 2, 0 ) );
 	mNodes[1]->setPosition( Ogre::Vector3( 4, 3, 0 ) );
@@ -274,6 +393,10 @@ void OffScreenCanvas3DGameState::destroyScene()
 {
 	if( mLabelOffscreen )
 	{
+		mDynamicNode->getParentSceneNode()->removeAndDestroyChild( mDynamicNode );
+		OGRE_DELETE mDynamicText;
+		mDynamicText = 0;
+
 		// Traverse & remove in LIFO order for faster shutdown.
 		for( size_t i = kNum3DTexts; i--; )
 		{
@@ -282,9 +405,11 @@ void OffScreenCanvas3DGameState::destroyScene()
 			mText3D[i] = 0;
 		}
 
-		// Destroy the OffScreen's root window (which also destroys mLabelOffscreen).
+		// Destroy the OffScreen's root window
+		// (which also destroys mLabelOffscreen & mLabelDynamicOffscreen).
 		mOffscreenCanvas->getSecondaryManager()->destroyWidget( mLabelOffscreen->getParent() );
 		mLabelOffscreen = 0;
+		mLabelDynamicOffscreen = 0;
 
 		delete mOffscreenCanvas;  // We MUST delete the OffScreenCanvas before the main ColibriManager.
 		mOffscreenCanvas = 0;
@@ -333,19 +458,18 @@ void OffScreenCanvas3DGameState::update( float timeSinceLast )
 			SDL_SetTextInputRect( &rect );
 	}
 
-	/*static float angle = 0;
-	Ogre::Matrix3 rotMat;
-	rotMat.FromEulerAnglesXYZ( Ogre::Degree( 0 ), Ogre::Radian( 0 ), Ogre::Radian( angle ) );
-	button->setOrientation( rotMat );
-	angle += timeSinceLast;*/
-
-	// mOffscreenCanvas->updateCanvas( 0.0f );
-	// drawTextIn3D( mText3D[0], "THIS is a teST", 4.0f );
-	// drawTextIn3D( mText3D[2], "This one even has an emoji \uE000!", 8.0f );
+	{
+		char tmpBuffer[64];
+		Ogre::LwString matName( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
+		matName.a( "Accum time: ", Ogre::LwString::Float( mAccumTime, 2 ) );
+		updateDynamicTextIn3D( mDynamicText, matName.c_str(), 1.0f );
+	}
 
 	mNodes[0]->roll( Ogre::Radian( -timeSinceLast * 0.35f ) );
 	mNodes[0]->yaw( Ogre::Radian( -timeSinceLast ) );
 	mNodes[2]->setScale( Ogre::Vector3( 1.0f + cosf( mAccumTime ) * 0.1f ) );
+
+	mDynamicNode->setPosition( cosf( mAccumTime / 4.0f ), 0.0f, sinf( mAccumTime / 4.0f ) );
 
 	mAccumTime += timeSinceLast * 8.0f;
 

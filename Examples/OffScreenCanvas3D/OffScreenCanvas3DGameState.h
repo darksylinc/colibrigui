@@ -16,9 +16,13 @@ namespace Demo
 		Ogre::Rectangle2D *mText3D[kNum3DTexts];
 		Ogre::SceneNode *mNodes[kNum3DTexts];
 
+		Ogre::Rectangle2D *mDynamicText;
+		Ogre::SceneNode *mDynamicNode;
+
 		Colibri::OffScreenCanvas *mOffscreenCanvas;
 
 		Colibri::Label *mLabelOffscreen;
+		Colibri::Label *mLabelDynamicOffscreen;
 
 		Colibri::ColibriManager *getColibriManager();
 
@@ -26,6 +30,9 @@ namespace Demo
 
 		void drawTextIn3D( Ogre::Rectangle2D *rectangle, const char *text,
 						   float scaleInWorldUnits = 1.0f );
+
+		void updateDynamicTextIn3D( Ogre::Rectangle2D *rectangle, const char *text,
+									float scaleInWorldUnits = 1.0f );
 
 		void generateDebugText( float timeSinceLast, Ogre::String &outText ) override;
 
