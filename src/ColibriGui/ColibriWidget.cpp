@@ -173,7 +173,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Widget::_destroy()
 	{
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_destructionStarted = true;
+#endif
 
 		setWidgetNavigationDirty();
 
@@ -225,8 +227,9 @@ namespace Colibri
 
 			m_listeners.clear();
 		}
-
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_destructionStarted = false;
+#endif
 	}
 	//-------------------------------------------------------------------------
 	void Widget::_setParent( Widget *parent )

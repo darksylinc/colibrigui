@@ -504,17 +504,17 @@ COLIBRI_ASSUME_NONNULL_END
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_LOW
 #	define COLIBRI_ASSERT_LOW COLIBRI_ASSERT
 #else
-	#define COLIBRI_ASSERT_LOW do { COLIBRI_UNUSED(condition); } while(0)
+	#define COLIBRI_ASSERT_LOW( condition ) ( (void)0 )
 #endif
 
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 	#define COLIBRI_ASSERT_MEDIUM COLIBRI_ASSERT
 #else
-	#define COLIBRI_ASSERT_MEDIUM do { COLIBRI_UNUSED(condition); } while(0)
+	#define COLIBRI_ASSERT_MEDIUM( condition ) ( (void)0 )
 #endif
 
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_HIGH
 	#define COLIBRI_ASSERT_HIGH COLIBRI_ASSERT
 #else
-	#define COLIBRI_ASSERT_HIGH do { COLIBRI_UNUSED(condition); } while(0)
+	#define COLIBRI_ASSERT_HIGH( condition ) ( (void)0 )
 #endif

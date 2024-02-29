@@ -61,7 +61,9 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void Window::_destroy()
 	{
+#if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
 		m_destructionStarted = true;
+#endif
 		setWindowNavigationDirty();
 
 		if( m_parent )
