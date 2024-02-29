@@ -497,8 +497,6 @@ COLIBRI_ASSUME_NONNULL_END
 #	else
 #		define COLIBRIGUI_DEBUG COLIBRIGUI_DEBUG_LOW
 #	endif
-#else
-#	define COLIBRIGUI_DEBUG COLIBRIGUI_DEBUG_NONE
 #endif
 
 #include "ColibriGui/ColibriAssert.h"
