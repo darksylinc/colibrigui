@@ -63,6 +63,7 @@ void OffScreenCanvas::createWorkspaceDefinition()
 	passColibri->mClearColour[0] = ColourValue( 0, 0, 0, 0 );
 	passColibri->mStoreActionDepth = StoreAction::DontCare;
 	passColibri->mStoreActionStencil = StoreAction::DontCare;
+	passColibri->mProfilingId = "OffScreenCanvas Colibri";
 
 	CompositorWorkspaceDef *workDef =
 		compositorManager->addWorkspaceDefinition( kOffscreenDefaultWorkspaceName );

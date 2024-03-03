@@ -145,5 +145,6 @@ endif()
 
 if( NOT COLIBRIGUI_LIB_ONLY )
 	add_subdirectory( Examples/MainDemo )
+	add_subdirectory( Examples/OffScreenCanvas2D )
 	add_subdirectory( Examples/OffScreenCanvas3D )
 endif()

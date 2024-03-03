@@ -346,7 +346,7 @@ void OffScreenCanvas3DGameState::createScene01( void )
 		// Alternatively we could bake the white rectangle and do:
 		//	getFontTexture()->addListener( this );
 		//
-		// To listen for when the texture gets loaded. When that happens, rebake via
+		// to listen for when the texture gets loaded. When that happens, rebake via
 		// drawTextIn3D( mText3D[2], sampleText[2], 8.0f );
 		colibriManager->getShaperManager()->getBmpFont( 0u )->getDatablock()->preload();
 		colibriManager->getShaperManager()->getBmpFont( 0u )->getFontTexture()->waitForData();
