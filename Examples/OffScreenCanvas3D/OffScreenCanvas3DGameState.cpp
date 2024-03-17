@@ -400,9 +400,18 @@ void OffScreenCanvas3DGameState::destroyScene()
 		// Traverse & remove in LIFO order for faster shutdown.
 		for( size_t i = kNum3DTexts; i--; )
 		{
+			Ogre::HlmsDatablock *datablock = mText3D[i]->getDatablock();
 			mNodes[i]->getParentSceneNode()->removeAndDestroyChild( mNodes[i] );
 			OGRE_DELETE mText3D[i];
 			mText3D[i] = 0;
+
+			// Free material & texture we created per mText3D or else they'll leak.
+			COLIBRI_ASSERT_HIGH( dynamic_cast<Ogre::HlmsUnlitDatablock *>( datablock ) );
+			Ogre::HlmsUnlitDatablock *unlitDatablock =
+				static_cast<Ogre::HlmsUnlitDatablock *>( datablock );
+			Ogre::TextureGpu *texture = unlitDatablock->getTexture( 0u );
+			datablock->getCreator()->destroyDatablock( datablock->getName() );
+			texture->getTextureManager()->destroyTexture( texture );
 		}
 
 		// Destroy the OffScreen's root window

@@ -105,6 +105,8 @@ void OffScreenCanvas2DGameState::setCustomTextureToSkin( Colibri::Renderable *wi
 //-----------------------------------------------------------------------------------
 void OffScreenCanvas2DGameState::destroyLinkedResources( Ogre::TextureGpu *texture )
 {
+	// We take the advantage that in setCustomTextureToSkin we created the
+	// texture and material with the same name.
 	Ogre::Hlms *hlmsUnlit = mGraphicsSystem->getRoot()->getHlmsManager()->getHlms( Ogre::HLMS_UNLIT );
 	const Ogre::String materialName = texture->getNameStr();
 	try
@@ -207,6 +209,8 @@ void OffScreenCanvas2DGameState::destroyScene()
 	{
 		mOffscreenCanvas->getSecondaryManager()->destroyWindow( mOffscreenRootWindow );
 		mOffscreenRootWindow = 0;
+		// Because we never called mOffscreenCanvas->disownCanvasTexture, mOffscreenCanvas owns
+		// the TextureGpu and it will be destroyed when we do `delete mOffscreenCanvas`.
 		destroyLinkedResources( mOffscreenCanvas->getCanvasTexture() );
 
 		delete mOffscreenCanvas;  // We MUST delete the OffScreenCanvas before the main ColibriManager.
