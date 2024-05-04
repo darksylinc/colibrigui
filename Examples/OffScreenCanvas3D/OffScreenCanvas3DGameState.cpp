@@ -334,6 +334,7 @@ void OffScreenCanvas3DGameState::createScene01( void )
 	mLabelDynamicOffscreen->setShadowOutline( true, Ogre::ColourValue::Black, Ogre::Vector2( 2.0f ) );
 
 	{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 		// We MUST wait until the emojis are loaded or else background streaming means that we may
 		// potentially render the emoji as a white rectangle. Normally this problem fixes itself when
 		// redrawing the main GUI every frame; but in this case it's going to be baked once.
@@ -350,6 +351,7 @@ void OffScreenCanvas3DGameState::createScene01( void )
 		// drawTextIn3D( mText3D[2], sampleText[2], 8.0f );
 		colibriManager->getShaperManager()->getBmpFont( 0u )->getDatablock()->preload();
 		colibriManager->getShaperManager()->getBmpFont( 0u )->getFontTexture()->waitForData();
+#endif
 	}
 
 	const char *sampleText[kNum3DTexts] = { "This is a test", "Multiline text\nworks too!",

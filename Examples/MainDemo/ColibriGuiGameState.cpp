@@ -167,6 +167,7 @@ void ColibriGuiGameState::createScene01( void )
 	Colibri::LayoutLine *layout = new Colibri::LayoutLine( colibriManager );
 	// layout->addCell( &Colibri::LayoutSpacer::c_DefaultBlankSpacer );
 
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	graphChart = colibriManager->createWidget<Colibri::GraphChart>( mainWindow );
 	graphChart->m_minSize = Ogre::Vector2( 512, 512 );
 	graphChart->setMaxValues( 2u, 128u );
@@ -198,6 +199,7 @@ void ColibriGuiGameState::createScene01( void )
 		graphChart->getColumns()[0].values[i] = val;
 	}
 	graphChart->syncChart();
+#endif
 
 	Colibri::RadarChart *radarChart = colibriManager->createWidget<Colibri::RadarChart>( mainWindow );
 	radarChart->m_minSize = Ogre::Vector2( 512, 512 );
@@ -314,7 +316,9 @@ void ColibriGuiGameState::createScene01( void )
 	layout->addCell( sliderLabel );
 
 	layout->addCell( radarChart );
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	layout->addCell( graphChart );
+#endif
 
 	{
 		const Colibri::LayoutCellVec &cells = layout->getCells();

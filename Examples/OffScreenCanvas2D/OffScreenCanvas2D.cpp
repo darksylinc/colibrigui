@@ -11,6 +11,10 @@ namespace Demo
 										 GraphicsSystem **outGraphicsSystem,
 										 GameState **outLogicGameState, LogicSystem **outLogicSystem )
 	{
+#if OGRE_VERSION < OGRE_MAKE_VERSION( 2, 3, 0 )
+		OGRE_EXCEPT( Ogre::Exception::ERR_NOT_IMPLEMENTED, "This sample requires OgreNext 2.3 or newer",
+					 "MainEntryPoints::createSystems" );
+#endif
 		OffScreenCanvas2DGameState *gfxGameState =
 			new OffScreenCanvas2DGameState( "OffScreen Canvas 2D Demo" );
 

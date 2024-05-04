@@ -382,10 +382,12 @@ void GraphChart::syncChart()
 	stagingTexture->upload( textureBox, m_textureData, 0u );
 	textureManager->removeStagingTexture( stagingTexture );
 
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	// Workaround OgreNext bug where calling syncChart() multiple times in a row causes Vulkan
 	// race conditions because it doesn't place barriers to protect each copy as it assumes
 	// multiple write copies to the same textures are to be done to non-overlapping regions.
 	m_manager->getOgreHlmsManager()->getRenderSystem()->endCopyEncoder();
+#endif
 
 	if( m_lastMinValue != minSample || m_lastMaxValue != maxSample )
 	{

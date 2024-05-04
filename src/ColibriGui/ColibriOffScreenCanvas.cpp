@@ -58,7 +58,9 @@ void OffScreenCanvas::createWorkspaceDefinition()
 
 	CompositorPassColibriGuiDef *passColibri =
 		static_cast<CompositorPassColibriGuiDef *>( targetDef->addPass( PASS_CUSTOM, "colibri_gui" ) );
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	passColibri->mSkipLoadStoreSemantics = false;  // We must clear the RT, we are the only pass.
+#endif
 	passColibri->setAllLoadActions( LoadAction::Clear );
 	passColibri->mClearColour[0] = ColourValue( 0, 0, 0, 0 );
 	passColibri->mStoreActionDepth = StoreAction::DontCare;
@@ -190,6 +192,7 @@ void OffScreenCanvas::updateCanvas( const float timeSinceLast )
 	m_workspace->_update();
 	// m_workspace->_endUpdate( true );
 
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 2, 3, 0 )
 	// Prepare the texture for sampling (we assume that's what the user will be doing next).
 	// Otherwise using compositor's "expose" would be user hostile.
 	//
@@ -203,4 +206,5 @@ void OffScreenCanvas::updateCanvas( const float timeSinceLast )
 	solver.resolveTransition( barrier, m_canvasTexture, ResourceLayout::Texture, ResourceAccess::Read,
 							  1u << GPT_FRAGMENT_PROGRAM );
 	renderSystem->executeResourceTransition( barrier );
+#endif
 }
