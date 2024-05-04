@@ -1688,6 +1688,12 @@ namespace Colibri
 		}
 
 		m_minSize = m_size;
+
+		if( m_rasterPrivateArea )
+		{
+			m_rasterPrivateArea->setSize( m_size );
+			populateRasterPrivateArea();
+		}
 	}
 	//-------------------------------------------------------------------------
 	void Label::setTransformDirty( uint32_t dirtyReason )
