@@ -241,7 +241,12 @@ namespace Colibri
 
 		for( size_t i = 0; i < glyphCount; ++i )
 		{
-			if( glyphInfo[i].codepoint == 0 )
+			// Some fonts map newline to codepoint 0. If that's the case, we must not attempt
+			// to use a replacement font because that may succeed & map to a non-0 codepoint.
+			// Otherwise that causes unwanted inconsistent line heights.
+			const bool bIsNewline = utf16Str[glyphInfo[i].cluster] == L'\n';
+
+			if( glyphInfo[i].codepoint == 0 && !bIsNewline )
 			{
 				if( !substituteIfNotFound )
 				{
@@ -324,8 +329,6 @@ namespace Colibri
 				}
 			}
 
-			// Newlines are codepoint == 0
-			// if( i < glyphCount && glyphInfo[i].codepoint != 0 )
 			if( i < glyphCount )
 			{
 				const size_t cluster = glyphInfo[i].cluster;
@@ -388,7 +391,7 @@ namespace Colibri
 					else
 						shapedGlyph.clusterLength = uint32_t( stringLength - glyphInfo[i].cluster );
 				}
-				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
+				shapedGlyph.isNewline = bIsNewline;
 				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' ' ||   //
 											utf16Str[cluster] == L'\t' ||  //
 											utf16Str[cluster] == L'.' ||   //
