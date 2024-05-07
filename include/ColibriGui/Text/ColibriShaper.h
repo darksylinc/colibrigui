@@ -6,13 +6,13 @@
 
 #include "hb.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 COLIBRI_ASSUME_NONNULL_BEGIN
 
-typedef struct FT_FaceRec_*  FT_Face;
-typedef struct FT_LibraryRec_  *FT_Library;
+typedef struct FT_FaceRec_    *FT_Face;
+typedef struct FT_LibraryRec_ *FT_Library;
 
 #ifdef __ANDROID__
 struct AAsset;
@@ -27,15 +27,15 @@ namespace Colibri
 		Ogre::Vector2 offset;
 		/// The caret position at which this shape should be placed at. Calculated by Label.
 		/// It's in physical pixels i.e. valid range [0; ColibriManager::getHalfWindowResolution() * 2)
-		Ogre::Vector2 caretPos;
-		bool isNewline;
-		bool isWordBreaker;
-		bool isRtl : 1;
-		bool isPrivateArea : 1;
-		bool isTab;
-		uint32_t richTextIdx;
-		uint32_t clusterStart;
-		uint32_t clusterLength;
+		Ogre::Vector2      caretPos;
+		bool               isNewline;
+		bool               isWordBreaker;
+		bool               isRtl : 1;
+		bool               isPrivateArea : 1;
+		bool               isTab;
+		uint32_t           richTextIdx;
+		uint32_t           clusterStart;
+		uint32_t           clusterLength;
 		CachedGlyph const *glyph;
 	};
 	typedef std::vector<ShapedGlyph> ShapedGlyphVec;
@@ -43,24 +43,24 @@ namespace Colibri
 	class Shaper
 	{
 	protected:
-		hb_script_t		m_script;
-		FT_Face			m_ftFont;
-		hb_language_t	m_hbLanguage;
-		hb_font_t		*m_hbFont;
-		hb_buffer_t		*m_buffer;
+		hb_script_t   m_script;
+		FT_Face       m_ftFont;
+		hb_language_t m_hbLanguage;
+		hb_font_t    *m_hbFont;
+		hb_buffer_t  *m_buffer;
 
 		std::vector<hb_feature_t> m_features;
 
-		FT_Library		m_library;
-		ShaperManager	*m_shaperManager;
+		FT_Library     m_library;
+		ShaperManager *m_shaperManager;
 
 #ifdef __ANDROID__
 		AAsset *colibri_nullable m_asset;
-		FT_StreamRec *              m_stream;
+		FT_StreamRec            *m_stream;
 #endif
 
-		FontSize	m_ptSize; //Font size in points
-		uint16_t	m_fontIdx;
+		FontSize m_ptSize;  // Font size in points
+		uint16_t m_fontIdx;
 
 		/// See setUseCodepoint0ForRaster()
 		bool m_useCodepoint0ForRaster;
@@ -71,15 +71,14 @@ namespace Colibri
 										 bool &bOutHasPrivateUse );
 
 	public:
-		Shaper( hb_script_t script, const char *fontLocation,
-				const std::string &language,
+		Shaper( hb_script_t script, const char *fontLocation, const std::string &language,
 				ShaperManager *shaperManager );
 		~Shaper();
 
 		void setFeatures( const std::vector<hb_feature_t> &features );
 		void addFeatures( const hb_feature_t &feature );
 
-		void setFontSize( FontSize ptSize );
+		void     setFontSize( FontSize ptSize );
 		FontSize getFontSize() const;
 
 		/** When raster fonts are used, we need to fetch a dummy glyph to base our parameters
@@ -104,7 +103,7 @@ namespace Colibri
 							 uint32_t richTextIdx, uint32_t clusterOffset, ShapedGlyphVec &outShapes,
 							 bool &bOutHasPrivateUse, bool substituteIfNotFound );
 
-		bool operator < ( const Shaper &other ) const;
+		bool operator<( const Shaper &other ) const;
 
 		static const hb_feature_t LigatureOff;
 		static const hb_feature_t LigatureOn;
@@ -113,6 +112,6 @@ namespace Colibri
 		static const hb_feature_t CligOff;
 		static const hb_feature_t CligOn;
 	};
-}
+}  // namespace Colibri
 
 COLIBRI_ASSUME_NONNULL_END

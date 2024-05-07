@@ -8,12 +8,13 @@
 #include "OgreLwString.h"
 
 #include "ft2build.h"
+
 #include "freetype/freetype.h"
 
 #include "hb-ft.h"
 
-#include "utf16.h"
 #include "uscript.h"
+#include "utf16.h"
 
 #ifdef __ANDROID__
 #	include "AndroidFreeTypeApk.inc"
@@ -32,12 +33,10 @@ namespace Colibri
 	*/
 	static int force_ucs2_charmap( FT_Face ftf )
 	{
-		for(int i = 0; i < ftf->num_charmaps; i++)
+		for( int i = 0; i < ftf->num_charmaps; i++ )
 		{
-			if ((  (ftf->charmaps[i]->platform_id == 0)
-				&& (ftf->charmaps[i]->encoding_id == 3))
-			   || ((ftf->charmaps[i]->platform_id == 3)
-				&& (ftf->charmaps[i]->encoding_id == 1)))
+			if( ( ( ftf->charmaps[i]->platform_id == 0 ) && ( ftf->charmaps[i]->encoding_id == 3 ) ) ||
+				( ( ftf->charmaps[i]->platform_id == 3 ) && ( ftf->charmaps[i]->encoding_id == 1 ) ) )
 			{
 				return FT_Set_Charmap( ftf, ftf->charmaps[i] );
 			}
@@ -45,16 +44,16 @@ namespace Colibri
 		return -1;
 	}
 
-	static const hb_tag_t KernTag = HB_TAG('k', 'e', 'r', 'n'); // kerning operations
-	static const hb_tag_t LigaTag = HB_TAG('l', 'i', 'g', 'a'); // standard ligature substitution
-	static const hb_tag_t CligTag = HB_TAG('c', 'l', 'i', 'g'); // contextual ligature substitution
+	static const hb_tag_t KernTag = HB_TAG( 'k', 'e', 'r', 'n' );  // kerning operations
+	static const hb_tag_t LigaTag = HB_TAG( 'l', 'i', 'g', 'a' );  // standard ligature substitution
+	static const hb_tag_t CligTag = HB_TAG( 'c', 'l', 'i', 'g' );  // contextual ligature substitution
 
 	const hb_feature_t Shaper::LigatureOff = { LigaTag, 0, 0, std::numeric_limits<unsigned int>::max() };
-	const hb_feature_t Shaper::LigatureOn  = { LigaTag, 1, 0, std::numeric_limits<unsigned int>::max() };
-	const hb_feature_t Shaper::KerningOff  = { KernTag, 0, 0, std::numeric_limits<unsigned int>::max() };
-	const hb_feature_t Shaper::KerningOn   = { KernTag, 1, 0, std::numeric_limits<unsigned int>::max() };
-	const hb_feature_t Shaper::CligOff     = { CligTag, 0, 0, std::numeric_limits<unsigned int>::max() };
-	const hb_feature_t Shaper::CligOn      = { CligTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+	const hb_feature_t Shaper::LigatureOn = { LigaTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+	const hb_feature_t Shaper::KerningOff = { KernTag, 0, 0, std::numeric_limits<unsigned int>::max() };
+	const hb_feature_t Shaper::KerningOn = { KernTag, 1, 0, std::numeric_limits<unsigned int>::max() };
+	const hb_feature_t Shaper::CligOff = { CligTag, 0, 0, std::numeric_limits<unsigned int>::max() };
+	const hb_feature_t Shaper::CligOn = { CligTag, 1, 0, std::numeric_limits<unsigned int>::max() };
 
 	Shaper::Shaper( hb_script_t script, const char *fontLocation, const std::string &language,
 					ShaperManager *shaperManager ) :
@@ -99,10 +98,11 @@ namespace Colibri
 		{
 			LogListener *log = m_shaperManager->getLogListener();
 			char tmpBuffer[512];
-			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+			Ogre::LwString errorMsg(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
 
 			errorMsg.clear();
-			errorMsg.a( "[Freetype2 error] Could not open font ", fontLocation, " errorCode: ",
+			errorMsg.a( "[Freetype2 error] Could not open font ", fontLocation, " errorCode: ",  //
 						errorCode, " Desc: ", ShaperManager::getErrorMessage( errorCode ) );
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
@@ -127,11 +127,12 @@ namespace Colibri
 		{
 			LogListener *log = m_shaperManager->getLogListener();
 			char tmpBuffer[512];
-			Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof(tmpBuffer) ) );
+			Ogre::LwString errorMsg(
+				Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
 
 			errorMsg.clear();
-			errorMsg.a( "[Freetype2 error] Error while closing font handle", " errorCode: ",
-						errorCode, " Desc: ", ShaperManager::getErrorMessage( errorCode ) );
+			errorMsg.a( "[Freetype2 error] Error while closing font handle", " errorCode: ", errorCode,
+						" Desc: ", ShaperManager::getErrorMessage( errorCode ) );
 			log->log( errorMsg.c_str(), LogSeverity::Fatal );
 		}
 
@@ -141,15 +142,9 @@ namespace Colibri
 #endif
 	}
 	//-------------------------------------------------------------------------
-	void Shaper::setFeatures( const std::vector<hb_feature_t> &features )
-	{
-		m_features = features;
-	}
+	void Shaper::setFeatures( const std::vector<hb_feature_t> &features ) { m_features = features; }
 	//-------------------------------------------------------------------------
-	void Shaper::addFeatures( const hb_feature_t &feature )
-	{
-		m_features.push_back( feature );
-	}
+	void Shaper::addFeatures( const hb_feature_t &feature ) { m_features.push_back( feature ); }
 	//-------------------------------------------------------------------------
 	void Shaper::setFontSize( FontSize ptSize )
 	{
@@ -160,20 +155,19 @@ namespace Colibri
 		{
 			const FT_UInt deviceHdpi = m_shaperManager->getDPI();
 			const FT_UInt deviceVdpi = m_shaperManager->getDPI();
-			FT_Error errorCode = FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize.value26d6,
-												   deviceHdpi, deviceVdpi );
+			FT_Error errorCode =
+				FT_Set_Char_Size( m_ftFont, 0, (FT_F26Dot6)ptSize.value26d6, deviceHdpi, deviceVdpi );
 			if( colibri_unlikely( errorCode ) )
 			{
 				LogListener *log = m_shaperManager->getLogListener();
 				char tmpBuffer[512];
-				Ogre::LwString errorMsg( Ogre::LwString::FromEmptyPointer( tmpBuffer,
-																		   sizeof(tmpBuffer) ) );
+				Ogre::LwString errorMsg(
+					Ogre::LwString::FromEmptyPointer( tmpBuffer, sizeof( tmpBuffer ) ) );
 
 				errorMsg.clear();
 				errorMsg.a( "[Freetype2 error] Could set font size to ",
-							Ogre::LwString::Float( ptSize.asFloat(), 2 ),
-							". errorCode: ", errorCode, " Desc: ",
-							ShaperManager::getErrorMessage( errorCode ) );
+							Ogre::LwString::Float( ptSize.asFloat(), 2 ), ". errorCode: ", errorCode,
+							" Desc: ", ShaperManager::getErrorMessage( errorCode ) );
 				log->log( errorMsg.c_str(), LogSeverity::Error );
 			}
 			else if( colibri_likely( m_hbFont != 0 ) )
@@ -181,14 +175,11 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
-	FontSize Shaper::getFontSize() const
-	{
-		return m_ptSize;
-	}
+	FontSize Shaper::getFontSize() const { return m_ptSize; }
 	//-------------------------------------------------------------------------
 	void Shaper::setUseCodepoint0ForRaster( bool useCodepoint0ForRaster )
 	{
-		m_useCodepoint0ForRaster = useCodepoint0ForRaster ;
+		m_useCodepoint0ForRaster = useCodepoint0ForRaster;
 	}
 	//-------------------------------------------------------------------------
 	bool Shaper::getUseCodepoint0ForRaster() const { return m_useCodepoint0ForRaster; }
@@ -204,9 +195,9 @@ namespace Colibri
 		const ShaperManager::ShaperVec &shapers = m_shaperManager->getShapers();
 
 		ShaperManager::ShaperVec::const_iterator itor = shapers.begin() + 1u;
-		ShaperManager::ShaperVec::const_iterator end  = shapers.end();
+		ShaperManager::ShaperVec::const_iterator endt = shapers.end();
 
-		while( itor != end && outShapes.size() == currentSize )
+		while( itor != endt && outShapes.size() == currentSize )
 		{
 			if( *itor != this )
 			{
@@ -248,14 +239,14 @@ namespace Colibri
 		hb_glyph_info_t *glyphInfo = hb_buffer_get_glyph_infos( m_buffer, &glyphCount );
 		hb_glyph_position_t *glyphPos = hb_buffer_get_glyph_positions( m_buffer, &glyphCount );
 
-		for( size_t i=0; i<glyphCount; ++i )
+		for( size_t i = 0; i < glyphCount; ++i )
 		{
 			if( glyphInfo[i].codepoint == 0 )
 			{
 				if( !substituteIfNotFound )
 				{
-					//Abort rendering this sequence if we're a substitute font
-					//and don't know what this character is.
+					// Abort rendering this sequence if we're a substitute font
+					// and don't know what this character is.
 					if( dir != HB_DIRECTION_RTL )
 						numWrittenCodepoints = glyphInfo[i].cluster - glyphInfo[0].cluster;
 					else
@@ -279,17 +270,20 @@ namespace Colibri
 				{
 					firstCluster = glyphInfo[i].cluster;
 					if( i + numUnknownGlyphs < glyphCount )
-						clusterLength = glyphInfo[i+numUnknownGlyphs].cluster - glyphInfo[i].cluster;
+						clusterLength = glyphInfo[i + numUnknownGlyphs].cluster - glyphInfo[i].cluster;
 					else
 						clusterLength = stringLength - glyphInfo[i].cluster;
 				}
 				else
 				{
-					firstCluster = glyphInfo[i+numUnknownGlyphs-1u].cluster;
+					firstCluster = glyphInfo[i + numUnknownGlyphs - 1u].cluster;
 					if( i > 0 )
-						clusterLength = glyphInfo[i-1u].cluster - glyphInfo[i+numUnknownGlyphs-1u].cluster;
+					{
+						clusterLength =
+							glyphInfo[i - 1u].cluster - glyphInfo[i + numUnknownGlyphs - 1u].cluster;
+					}
 					else
-						clusterLength = stringLength - glyphInfo[i+numUnknownGlyphs-1u].cluster;
+						clusterLength = stringLength - glyphInfo[i + numUnknownGlyphs - 1u].cluster;
 				}
 
 				size_t replacedCodepoints = renderWithSubstituteFont(
@@ -303,12 +297,12 @@ namespace Colibri
 					if( dir != HB_DIRECTION_RTL )
 					{
 						const size_t nextUnknownCluster = firstCluster + replacedCodepoints;
-						for( size_t j=i + numUnknownGlyphs; --j>i; )
+						for( size_t j = i + numUnknownGlyphs; --j > i; )
 						{
 							if( nextUnknownCluster >= glyphInfo[j].cluster )
 							{
-								//j can never be 0 because --j is executed first,
-								//and if i == 0, then 0 > 0 will exit the loop
+								// j can never be 0 because --j is executed first,
+								// and if i == 0, then 0 > 0 will exit the loop
 								i = j;
 								break;
 							}
@@ -316,9 +310,9 @@ namespace Colibri
 					}
 					else
 					{
-						const size_t nextUnknownCluster = firstCluster + clusterLength - 1u -
-														  replacedCodepoints;
-						for( size_t j=i; j<i + numUnknownGlyphs; ++j )
+						const size_t nextUnknownCluster =
+							firstCluster + clusterLength - 1u - replacedCodepoints;
+						for( size_t j = i; j < i + numUnknownGlyphs; ++j )
 						{
 							if( nextUnknownCluster <= glyphInfo[j].cluster )
 							{
@@ -367,11 +361,11 @@ namespace Colibri
 				shapedGlyph.caretPos = Ogre::Vector2::ZERO;
 				shapedGlyph.clusterStart = glyphInfo[i].cluster + clusterOffset;
 
-				//Multiple glyphs may be used to render the same cluster.
-				//We need to find the next glyph that renders the next cluster
+				// Multiple glyphs may be used to render the same cluster.
+				// We need to find the next glyph that renders the next cluster
 				if( dir != HB_DIRECTION_RTL )
 				{
-					size_t nextIdx = i+1u;
+					size_t nextIdx = i + 1u;
 					while( nextIdx < glyphCount && glyphInfo[nextIdx].cluster == glyphInfo[i].cluster )
 						++nextIdx;
 
@@ -382,10 +376,10 @@ namespace Colibri
 				}
 				else
 				{
-					//We're counting on the fact that if i == 0 or
-					//glyphInfo[0].cluster == glyphInfo[i].cluster then prevIdx will underflow
-					//and thus prevIdx < glyphCount won't be true.
-					size_t prevIdx = i-1u;
+					// We're counting on the fact that if i == 0 or
+					// glyphInfo[0].cluster == glyphInfo[i].cluster then prevIdx will underflow
+					// and thus prevIdx < glyphCount won't be true.
+					size_t prevIdx = i - 1u;
 					while( prevIdx < glyphCount && glyphInfo[prevIdx].cluster == glyphInfo[i].cluster )
 						--prevIdx;
 
@@ -395,21 +389,21 @@ namespace Colibri
 						shapedGlyph.clusterLength = uint32_t( stringLength - glyphInfo[i].cluster );
 				}
 				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
-				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' '	||
-											utf16Str[cluster] == L'\t'	||
-											utf16Str[cluster] == L'.'	||
-											utf16Str[cluster] == L';'	||
+				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' ' ||   //
+											utf16Str[cluster] == L'\t' ||  //
+											utf16Str[cluster] == L'.' ||   //
+											utf16Str[cluster] == L';' ||   //
 											utf16Str[cluster] == L',';
 
-				//Ensure whitespace has zero offset, otherwise it messes up Right & Bottom alignment
+				// Ensure whitespace has zero offset, otherwise it messes up Right & Bottom alignment
 				if( utf16Str[cluster] == L' ' || utf16Str[cluster] == L'\t' )
 					shapedGlyph.offset = Ogre::Vector2::ZERO;
 
 				{
-					//Ask ICU if this character correspond to a language we can
-					//break by single letters (e.g. CJK characters, Thai)
-					//Word breaking is actually very complex, so we just assume
-					//these languages can be broken at any character
+					// Ask ICU if this character correspond to a language we can
+					// break by single letters (e.g. CJK characters, Thai)
+					// Word breaking is actually very complex, so we just assume
+					// these languages can be broken at any character
 					uint32_t utf32Char;
 					U16_GET_UNSAFE( utf16Str, cluster, utf32Char );
 					UErrorCode ignoredError = U_ZERO_ERROR;
@@ -430,8 +424,5 @@ namespace Colibri
 		return numWrittenCodepoints;
 	}
 	//-------------------------------------------------------------------------
-	bool Shaper::operator < ( const Shaper &other ) const
-	{
-		return this->m_script < other.m_script;
-	}
-}
+	bool Shaper::operator<( const Shaper &other ) const { return this->m_script < other.m_script; }
+}  // namespace Colibri
