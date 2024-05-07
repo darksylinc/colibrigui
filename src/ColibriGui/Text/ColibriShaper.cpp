@@ -389,7 +389,7 @@ namespace Colibri
 					else
 						shapedGlyph.clusterLength = uint32_t( stringLength - glyphInfo[i].cluster );
 				}
-				shapedGlyph.isNewline = utf16Str[glyphInfo[i].cluster] == L'\n';
+				shapedGlyph.isNewline = utf16Str[cluster] == L'\n';
 				shapedGlyph.isWordBreaker = utf16Str[cluster] == L' ' ||   //
 											utf16Str[cluster] == L'\t' ||  //
 											utf16Str[cluster] == L'.' ||   //
