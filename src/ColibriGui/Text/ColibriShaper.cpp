@@ -309,7 +309,7 @@ namespace Colibri
 							{
 								//j can never be 0 because --j is executed first,
 								//and if i == 0, then 0 > 0 will exit the loop
-								i = j - 1u;
+								i = j;
 								break;
 							}
 						}
@@ -322,7 +322,7 @@ namespace Colibri
 						{
 							if( nextUnknownCluster <= glyphInfo[j].cluster )
 							{
-								i = j + 1u;
+								i = j;
 								break;
 							}
 						}
