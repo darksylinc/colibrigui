@@ -229,6 +229,12 @@ namespace Colibri
 		/// Looks and returns the next non-disabled widget. Nullptr if there is none
 		Widget *colibri_nullable getNextKeyboardNavigableWidget( const Borders::Borders direction );
 
+	public:
+		/// Returns whatever is set in m_nextWidget. Unless you have a specific reason to know this,
+		/// use getNextKeyboardNavigableWidget() instead.
+		Widget *colibri_nullable _getNextWidget( const Borders::Borders direction );
+
+	protected:
 		virtual void stateChanged( States::States newState ) {}
 
 		enum TransformDirtyReason

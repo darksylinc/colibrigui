@@ -150,6 +150,12 @@ namespace Colibri
 		return nextWidget;
 	}
 	//-------------------------------------------------------------------------
+	Widget *colibri_nullable Widget::_getNextWidget( const Borders::Borders direction )
+	{
+		COLIBRI_ASSERT_LOW( direction < Borders::NumBorders );
+		return m_nextWidget[direction];
+	}
+	//-------------------------------------------------------------------------
 	void Widget::setDebugName( const std::string &debugName )
 	{
 #if COLIBRIGUI_DEBUG >= COLIBRIGUI_DEBUG_MEDIUM
