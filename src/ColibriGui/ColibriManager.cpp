@@ -826,6 +826,36 @@ namespace Colibri
 		return false;
 	}
 	//-------------------------------------------------------------------------
+	bool ColibriManager::setKeyScroll( const Ogre::Vector2 &scrollAmount, bool animated )
+	{
+		Window *window = m_keyboardFocusedPair.window;
+		if( window )
+		{
+			if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->consumesScroll() )
+			{
+				// If the widget focused by the cursor consumes the scroll, just update and leave.
+				updateWidgetsFocusedByCursor();
+				return true;
+			}
+
+			const Ogre::Vector2 oldNextScroll = window->getNextScroll();
+
+			if( animated )
+			{
+				window->setScrollAnimated( oldNextScroll + scrollAmount, true );
+			}
+			else
+			{
+				window->setScrollImmediate( oldNextScroll + scrollAmount );
+			}
+
+			// If is possible the button we were highlighting is no longer behind the cursor
+			updateWidgetsFocusedByCursor();
+		}
+
+		return false;
+	}
+	//-------------------------------------------------------------------------
 	void ColibriManager::setTextEdit( const char *text, int32_t selectStart, int32_t selectLength )
 	{
 		if( m_keyboardFocusedPair.widget )

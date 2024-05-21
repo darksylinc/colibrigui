@@ -551,9 +551,23 @@ namespace Colibri
 			If true the scroll will be animated.
 		@return
 			True if the scroll was consumed by a widget.
-			False otherwise
+			False otherwise.
 		*/
 		bool setScroll( const Ogre::Vector2 &scrollAmount, bool animated = true );
+
+		/** Same as setScroll() but works on the window focused by keyboard instead of cursor.
+
+			This is useful for gamepad navigation as many games like to assign
+			window scrolling to the right thumbstick.
+		@param scrollAmount
+			Amount to scroll.
+		@param animated
+			If true the scroll will be animated.
+		@return
+			True if the scroll was consumed by a widget.
+			False otherwise.
+		*/
+		bool setKeyScroll( const Ogre::Vector2 &scrollAmount, bool animated = true );
 
 		/// For understanding these params, see SDL_TextEditingEvent
 		void setTextEdit( const char *text, int32_t selectStart, int32_t selectLength );
