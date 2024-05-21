@@ -455,6 +455,12 @@ namespace Colibri
 		bool getKeyboardNavigable() const				{ return m_keyboardNavigable; }
 		/// Returns whether the widget is actually navigable
 		bool isKeyboardNavigable() const;
+		/// Same as isKeyboardNavigable() but ignores if the widgets is Disabled.
+		///
+		/// Needed by ColibriManager::autosetNavigation. When Disabled, widgets are still considered
+		/// for auto navigation, as Widget::getNextKeyboardNavigableWidget can properly jump to the
+		/// next non-disabled widget.
+		bool _isKeyboardNavigableForAutoset() const;
 
 		/// @copydoc m_childrenClickable
 		void setClickableChildren( bool clickableChildren );

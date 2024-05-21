@@ -581,6 +581,8 @@ namespace Colibri
 		return m_keyboardNavigable && (!m_hidden && m_currentState != States::Disabled);
 	}
 	//-------------------------------------------------------------------------
+	bool Widget::_isKeyboardNavigableForAutoset() const { return m_keyboardNavigable && !m_hidden; }
+	//-------------------------------------------------------------------------
 	void Widget::setClickableChildren( bool clickableChildren )
 	{
 		m_childrenClickable = clickableChildren;

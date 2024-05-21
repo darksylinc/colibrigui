@@ -1230,7 +1230,7 @@ namespace Colibri
 			Widget *widget = *itor;
 			for( size_t i = 0; i < 4u; ++i )
 			{
-				if( widget->isKeyboardNavigable() && widget->m_autoSetNextWidget[i] )
+				if( widget->_isKeyboardNavigableForAutoset() && widget->m_autoSetNextWidget[i] )
 					widget->setNextWidget( 0, static_cast<Borders::Borders>( i ) );
 			}
 			++itor;
@@ -1243,7 +1243,7 @@ namespace Colibri
 		{
 			Widget *widget = *itor;
 
-			if( widget->isKeyboardNavigable() )
+			if( widget->_isKeyboardNavigableForAutoset() )
 			{
 				Widget *closestSiblings[Borders::NumBorders] = { 0, 0, 0, 0 };
 				float closestSiblingDistances[Borders::NumBorders] = {
@@ -1256,7 +1256,7 @@ namespace Colibri
 				{
 					Widget *widget2 = *it2;
 
-					if( widget2->isKeyboardNavigable() )
+					if( widget2->_isKeyboardNavigableForAutoset() )
 					{
 						const Ogre::Vector2 cornerToCorner[4] = {
 							widget2->m_position - widget->m_position,
