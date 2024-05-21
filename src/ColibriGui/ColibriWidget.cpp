@@ -536,7 +536,7 @@ namespace Colibri
 			++itor;
 		}
 
-		if( action == Action::PrimaryActionPerform )
+		if( action == Action::PrimaryActionPerform || action == Action::ValueChanged )
 		{
 			// Tell the window we were the last one to perform a primary action
 			Widget *firstKeyboardNavigableParent = getFirstKeyboardNavigableParent();
