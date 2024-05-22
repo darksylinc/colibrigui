@@ -163,8 +163,8 @@ namespace Colibri
 				topLeft =
 					( ( topLeft + bottomRight ) - Ogre::Vector2( bmpGlyph.width, bmpGlyph.height ) ) *
 					0.5f;
-				bmpGlyph.xoffset = static_cast<uint16_t>( topLeft.x );
-				bmpGlyph.yoffset = static_cast<uint16_t>( topLeft.y );
+				bmpGlyph.xoffset = static_cast<int16_t>( topLeft.x );
+				bmpGlyph.yoffset = static_cast<int16_t>( topLeft.y );
 				++itor;
 			}
 		}

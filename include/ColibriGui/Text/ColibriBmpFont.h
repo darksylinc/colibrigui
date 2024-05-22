@@ -22,8 +22,8 @@ namespace Colibri
 		uint16_t y;
 		uint16_t width;
 		uint16_t height;
-		uint16_t xoffset;
-		uint16_t yoffset;
+		int16_t  xoffset;
+		int16_t  yoffset;
 		uint16_t xadvance;
 		/// This only applies to BmpChar::width and BmpChar::height. Used when the resolution
 		/// in the atlas bmp does not match the size it intends to be rendered at.
@@ -36,8 +36,8 @@ namespace Colibri
 	{
 		bool           isNewline;
 		bool           isTab;
-		uint16_t       xoffset;
-		uint16_t       yoffset;
+		int16_t        xoffset;
+		int16_t        yoffset;
 		uint16_t       width;
 		uint16_t       height;
 		BmpChar const *bmpChar;

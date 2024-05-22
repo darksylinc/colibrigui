@@ -145,8 +145,8 @@ namespace Colibri
 				bmpChar.y = sds::toU16withDefault( settings["y"] );
 				bmpChar.width = sds::toU16withDefault( settings["width"] );
 				bmpChar.height = sds::toU16withDefault( settings["height"] );
-				bmpChar.xoffset = sds::toU16withDefault( settings["xoffset"] );
-				bmpChar.yoffset = sds::toU16withDefault( settings["yoffset"] );
+				bmpChar.xoffset = static_cast<int16_t>( sds::toU16withDefault( settings["xoffset"] ) );
+				bmpChar.yoffset = static_cast<int16_t>( sds::toU16withDefault( settings["yoffset"] ) );
 				bmpChar.xadvance = sds::toU16withDefault( settings["xadvance"] );
 
 				// Colibri extensions
@@ -166,7 +166,8 @@ namespace Colibri
 
 		if( !m_chars.empty() )
 		{
-			m_emptyChar.height = m_chars.back().yoffset + m_chars.back().height;
+			COLIBRI_ASSERT_LOW( m_chars.back().yoffset + m_chars.back().height >= 0 );
+			m_emptyChar.height = static_cast<uint16_t>( m_chars.back().yoffset + m_chars.back().height );
 			m_emptyChar.xadvance = m_chars.back().xadvance;
 		}
 	}
