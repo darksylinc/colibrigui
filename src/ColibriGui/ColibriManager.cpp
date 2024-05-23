@@ -831,13 +831,6 @@ namespace Colibri
 		Window *window = m_keyboardFocusedPair.window;
 		if( window )
 		{
-			if( m_keyboardFocusedPair.widget && m_keyboardFocusedPair.widget->consumesScroll() )
-			{
-				// If the widget focused by the cursor consumes the scroll, just update and leave.
-				updateWidgetsFocusedByCursor();
-				return true;
-			}
-
 			const Ogre::Vector2 oldNextScroll = window->getNextScroll();
 
 			if( animated )
