@@ -55,7 +55,8 @@ namespace Colibri
 	void Button::sizeToFit( float maxAllowedWidth, TextHorizAlignment::TextHorizAlignment newHorizPos,
 							TextVertAlignment::TextVertAlignment newVertPos, States::States baseState )
 	{
-		m_label->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
+		if( m_label )
+			m_label->sizeToFit( maxAllowedWidth, newHorizPos, newVertPos, baseState );
 		Ogre::Vector2 maxSize( calculateChildrenSize() + getBorderCombined() );
 		if( m_label )
 		{
