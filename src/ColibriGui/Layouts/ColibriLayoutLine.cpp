@@ -35,6 +35,7 @@ namespace Colibri
 
 		if( !bVertical )
 		{
+			// cellSize does NOT include margins, so we must always add halfMargin.x.
 			switch( gridLoc )
 			{
 			case GridLocations::TopLeft:
@@ -51,10 +52,11 @@ namespace Colibri
 			case GridLocations::TopRight:
 			case GridLocations::CenterRight:
 			case GridLocations::BottomRight:
-				topLeft.x = accumOffset + (cellSize - finalCellSize.x) - halfMargin.x;
+				topLeft.x = accumOffset + (cellSize - finalCellSize.x) + halfMargin.x;
 				break;
 			}
 
+			// maxOtherSize DOES include margin, so we must sometimes subtract halfMargin.y.
 			switch( gridLoc )
 			{
 			case GridLocations::TopLeft:
@@ -77,6 +79,7 @@ namespace Colibri
 		}
 		else
 		{
+			// cellSize does NOT include margins, so we must always add halfMargin.y.
 			switch( gridLoc )
 			{
 			case GridLocations::TopLeft:
@@ -93,10 +96,11 @@ namespace Colibri
 			case GridLocations::BottomLeft:
 			case GridLocations::Bottom:
 			case GridLocations::BottomRight:
-				topLeft.y = accumOffset + (cellSize - finalCellSize.y) - halfMargin.y;
+				topLeft.y = accumOffset + (cellSize - finalCellSize.y) + halfMargin.y;
 				break;
 			}
 
+			// maxOtherSize DOES include margin, so we must sometimes subtract halfMargin.y.
 			switch( gridLoc )
 			{
 			case GridLocations::TopLeft:
