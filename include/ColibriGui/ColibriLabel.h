@@ -169,6 +169,10 @@ namespace Colibri
 			return WidgetRenderType::Label;
 		}
 
+		void setLinebreakMode( LinebreakMode::LinebreakMode linebreakMode );
+
+		LinebreakMode::LinebreakMode getLinebreakMode() const;
+
 		/// Aligns the text horizontally relative to the widget's m_size
 		/// Requires recalculating glyphs (i.e. same as setText)
 		void setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment );

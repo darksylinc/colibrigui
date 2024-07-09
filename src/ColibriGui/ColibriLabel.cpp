@@ -170,6 +170,18 @@ namespace Colibri
 		}
 	}
 	//-------------------------------------------------------------------------
+	void Label::setLinebreakMode( LinebreakMode::LinebreakMode linebreakMode )
+	{
+		if( m_linebreakMode != linebreakMode )
+		{
+			m_linebreakMode = linebreakMode;
+			for( size_t i = 0; i < States::NumStates; ++i )
+				flagDirty( static_cast<States::States>( i ) );
+		}
+	}
+	//-------------------------------------------------------------------------
+	LinebreakMode::LinebreakMode Label::getLinebreakMode() const { return m_linebreakMode; }
+	//-------------------------------------------------------------------------
 	void Label::setTextHorizAlignment( TextHorizAlignment::TextHorizAlignment horizAlignment )
 	{
 		if( m_horizAlignment != horizAlignment )
