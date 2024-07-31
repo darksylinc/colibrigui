@@ -137,10 +137,14 @@ namespace Colibri
 		}
 		else
 		{
-			parentDerivedTL = m_parent->m_derivedTopLeft +
-							  m_parent->m_clipBorderTL * invCanvasSize2x;
-			parentDerivedBR = m_parent->m_derivedBottomRight -
-							  m_parent->m_clipBorderBR * invCanvasSize2x;
+			parentDerivedTL = m_parent->m_derivedTopLeft;
+			parentDerivedBR = m_parent->m_derivedBottomRight;
+
+			if( !m_ignoreParentClipBorder )
+			{
+				parentDerivedTL += m_parent->m_clipBorderTL * invCanvasSize2x;
+				parentDerivedBR -= m_parent->m_clipBorderBR * invCanvasSize2x;
+			}
 
 			parentDerivedTL.makeCeil( m_parent->m_accumMinClipTL );
 			parentDerivedBR.makeFloor( m_parent->m_accumMaxClipBR );

@@ -27,13 +27,14 @@ namespace Colibri
 	Renderable::Renderable( ColibriManager *manager ) :
 		Widget( manager ),
 		ColibriOgreRenderable( Ogre::Id::generateNewId<Ogre::ColibriOgreRenderable>(),
-							   manager->getOgreObjectMemoryManager(),
-							   manager->getOgreSceneManager(), 0u, manager ),
+							   manager->getOgreObjectMemoryManager(), manager->getOgreSceneManager(), 0u,
+							   manager ),
 		m_overrideSkinColour( false ),
 		m_colour( Ogre::ColourValue::White ),
 		m_numVertices( 6u * 9u ),
 		m_currVertexBufferOffset( 0 ),
-		m_visualsEnabled( true )
+		m_visualsEnabled( true ),
+		m_ignoreParentClipBorder( false )
 	{
 		m_zOrder = _wrapZOrderInternalId( 0 );
 		memset( m_stateInformation, 0, sizeof( m_stateInformation ) );

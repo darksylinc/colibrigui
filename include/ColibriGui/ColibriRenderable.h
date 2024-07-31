@@ -108,7 +108,18 @@ namespace Colibri
 		uint32_t			m_numVertices;
 		uint32_t			m_currVertexBufferOffset;
 
-		bool				m_visualsEnabled;
+		bool m_visualsEnabled;
+
+	public:
+		/// When false (default), behaves normally.
+		///
+		/// When true, the widget will be clipped against its parent's full size (i.e. Widget::getSize)
+		/// instead of its inner size (i.e. Widget::getSizeAfterClipping).
+		/// This is useful if you want to put an overlay effect over the button.
+		///
+		/// PUBLIC VARIABLE. This variable can be altered directly.
+		/// Changes are reflected immediately.
+		bool m_ignoreParentClipBorder;
 
 	public:
 		/// @copydoc Widget::addChildrenCommands
