@@ -1479,12 +1479,19 @@ namespace Colibri
 		return rt;
 	}
 	//-------------------------------------------------------------------------
+	const RichTextVec &Label::getRichText( States::States state ) const
+	{
+		if( state == States::NumStates )
+			state = m_currentState;
+		return m_richText[state];
+	}
+	//-------------------------------------------------------------------------
 	size_t Label::getGlyphCount( States::States state ) const
 	{
 		if( state == States::NumStates )
 			state = m_currentState;
 
-		return m_shapes[m_currentState].size();
+		return m_shapes[state].size();
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 Label::getCaretTopLeft( size_t glyphIdx, FontSize &ptSize, uint16_t &outFontIdx ) const

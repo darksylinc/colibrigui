@@ -322,6 +322,10 @@ namespace Colibri
 		/// Returns a newly constructed RichText filled with default values
 		RichText getDefaultRichText() const;
 
+		/// It's rare to actually need to call this.
+		/// The most useful case is when you want to clone an existing label.
+		const RichTextVec &getRichText( States::States state = States::NumStates ) const;
+
 		/** Returns the number of shapes/glyphs used by the current text from the selected state.
 			Not to be confused with Label::getMaxNumGlyphs, which is used for rendering.
 		@param state
