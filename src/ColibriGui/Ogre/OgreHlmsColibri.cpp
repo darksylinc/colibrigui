@@ -77,16 +77,24 @@ namespace Ogre
 		HlmsUnlit( dataFolder, libraryFolders ),
 		mGlyphAtlasBuffer( 0 )
 	{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+		mReservedTexSlots = 1u;
+#else
 		mTexUnitSlotStart = 3u;
 		mSamplerUnitSlotStart = 3u;
+#endif
 	}
 	HlmsColibri::HlmsColibri( Archive *dataFolder, ArchiveVec *libraryFolders, HlmsTypes type,
 							  const String &typeName ) :
 		HlmsUnlit( dataFolder, libraryFolders, type, typeName ),
 		mGlyphAtlasBuffer( 0 )
 	{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+		mReservedTexSlots = 1u;
+#else
 		mTexUnitSlotStart = 3u;
 		mSamplerUnitSlotStart = 3u;
+#endif
 	}
 	//-----------------------------------------------------------------------------------
 	HlmsColibri::~HlmsColibri() {}
@@ -426,7 +434,11 @@ namespace Ogre
 				if( datablock->mSamplersDescSet )
 				{
 					// Bind samplers
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+					size_t texUnit = mTexUnitSlotStart;
+#else
 					size_t texUnit = mSamplerUnitSlotStart;
+#endif
 					*commandBuffer->addCommand<CbSamplers>() =
 						CbSamplers( (uint16)texUnit, datablock->mSamplersDescSet );
 					mLastDescSampler = datablock->mSamplersDescSet;
