@@ -34,33 +34,45 @@ set( ZLIB_INCLUDE_DIRS
 	${PROJECT_BINARY_DIR}/Dependencies/zlib
 	${CMAKE_CURRENT_SOURCE_DIR}/zlib CACHE INTERNAL "" FORCE )
 
-# Setup Harfbuzz <-> Freetype2 interoperability.
-# Freetype depends on Harfbuzz to provide better auto-hinting (optional). However,
-# in order for this to work, Harfbuzz defines a few interop functions and for that,
-# it depends on Freetype.
-# In other words Freetype depends on Harfbuzz, Harfbuzz depends on Freetype.
-# It's a chicken and egg problem, which happens to work as long as both libs
-# are static (or if compiled together, then compiled as a single dll, or
-# compiled multiple times iteratively until both dependencies are met).
-set( HB_HAVE_FREETYPE YES )
-set( FREETYPE_FOUND YES CACHE INTERNAL "" FORCE )
-set( FREETYPE_LIBRARY freetype CACHE INTERNAL "" FORCE )
-set( FREETYPE_LIBRARIES freetype CACHE INTERNAL "" FORCE )
-set( FREETYPE_INCLUDE_DIRS
-	${PROJECT_BINARY_DIR}/Dependencies/freetype2/include/freetype/config
-	${CMAKE_CURRENT_SOURCE_DIR}/freetype2/include CACHE INTERNAL "" FORCE )
-add_subdirectory( harfbuzz )
-set( HARFBUZZ_FOUND YES CACHE INTERNAL "" FORCE )
-set( HARFBUZZ_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/harfbuzz/src CACHE INTERNAL "" FORCE )
-set( HARFBUZZ_LIBRARY harfbuzz CACHE INTERNAL "" FORCE )
-set( HARFBUZZ_LIBRARIES harfbuzz CACHE INTERNAL "" FORCE )
+if( NOT COLIBRIGUI_USE_SYSTEM_LIBS )
+	# Setup Harfbuzz <-> Freetype2 interoperability.
+	# Freetype depends on Harfbuzz to provide better auto-hinting (optional). However,
+	# in order for this to work, Harfbuzz defines a few interop functions and for that,
+	# it depends on Freetype.
+	# In other words Freetype depends on Harfbuzz, Harfbuzz depends on Freetype.
+	# It's a chicken and egg problem, which happens to work as long as both libs
+	# are static (or if compiled together, then compiled as a single dll, or
+	# compiled multiple times iteratively until both dependencies are met).
+	set( HB_HAVE_FREETYPE YES )
+	set( FREETYPE_FOUND YES CACHE INTERNAL "" FORCE )
+	set( FREETYPE_LIBRARY freetype CACHE INTERNAL "" FORCE )
+	set( FREETYPE_LIBRARIES freetype CACHE INTERNAL "" FORCE )
+	set( FREETYPE_INCLUDE_DIRS
+		${PROJECT_BINARY_DIR}/Dependencies/freetype2/include/freetype/config
+		${CMAKE_CURRENT_SOURCE_DIR}/freetype2/include CACHE INTERNAL "" FORCE )
+	add_subdirectory( harfbuzz )
+	set( HARFBUZZ_FOUND YES CACHE INTERNAL "" FORCE )
+	set( HARFBUZZ_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/harfbuzz/src CACHE INTERNAL "" FORCE )
+	set( HARFBUZZ_LIBRARY harfbuzz CACHE INTERNAL "" FORCE )
+	set( HARFBUZZ_LIBRARIES harfbuzz CACHE INTERNAL "" FORCE )
 
-set( DISABLE_FORCE_DEBUG_POSTFIX 1 )
-set( WITH_ZLIB OFF )
-set( WITH_BZip2 OFF )
-set( WITH_PNG OFF )
-set( WITH_HarfBuzz OFF )
-set( SKIP_INSTALL_ALL YES )
-add_subdirectory( freetype2 )
+	set( DISABLE_FORCE_DEBUG_POSTFIX 1 )
+	set( WITH_ZLIB OFF )
+	set( WITH_BZip2 OFF )
+	set( WITH_PNG OFF )
+	set( WITH_HarfBuzz OFF )
+	set( SKIP_INSTALL_ALL YES )
+	add_subdirectory( freetype2 )
+else()
+	# Just assume they're there, on Ubuntu.
+	# TODO: Make this more robust if the same solution is needed for other OS/distros.
+	set( HARFBUZZ_INCLUDE_DIRS /usr/include/harfbuzz CACHE INTERNAL "" FORCE )
+	set( FREETYPE_INCLUDE_DIRS /usr/include/freetype2 CACHE INTERNAL "" FORCE )
+
+	set( HARFBUZZ_LIBRARY harfbuzz CACHE INTERNAL "" FORCE )
+	set( HARFBUZZ_LIBRARIES harfbuzz CACHE INTERNAL "" FORCE )
+	set( FREETYPE_LIBRARY freetype CACHE INTERNAL "" FORCE )
+	set( FREETYPE_LIBRARIES freetype CACHE INTERNAL "" FORCE )
+endif()
 
 add_subdirectory( sds_library )
