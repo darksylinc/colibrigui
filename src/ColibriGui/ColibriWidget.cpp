@@ -842,23 +842,26 @@ namespace Colibri
 		{
 			WidgetVec *breadthFirst = m_manager->m_breadthFirst;
 
-			breadthFirst[2].insert( breadthFirst[2].end(), m_children.begin(),
+			breadthFirst[3].insert( breadthFirst[3].end(), m_children.begin(),
 									m_children.begin() + ptrdiff_t( m_numNonRenderables ) );
-			breadthFirst[3].insert( breadthFirst[3].end(),
+			breadthFirst[4].insert( breadthFirst[4].end(),
 									m_children.begin() + ptrdiff_t( m_numNonRenderables ),
+									m_children.begin() + ptrdiff_t( m_numWidgets ) );
+			breadthFirst[5].insert( breadthFirst[5].end(),
+									m_children.begin() + ptrdiff_t( m_numWidgets ),  //
 									m_children.end() );
 
 			if( !collectingBreadthFirst )
 			{
-				//If we're here, this widget is the first in the hierarchy we found to be
-				//using breadth first. So it's the one executing it and all children will
-				//collect, and thus all children will use breadth first.
-				//Siblings to this widget may be using depth first instead,
-				//or may also become executers.
-				while( !breadthFirst[2].empty() || !breadthFirst[3].empty() )
+				// If we're here, this widget is the first in the hierarchy we found to be
+				// using breadth first. So it's the one executing it and all children will
+				// collect, and thus all children will use breadth first.
+				// Siblings to this widget may be using depth first instead,
+				// or may also become executers.
+				while( !breadthFirst[3].empty() || !breadthFirst[4].empty() || !breadthFirst[5].empty() )
 				{
-					breadthFirst[0].swap( breadthFirst[2] );
-					breadthFirst[1].swap( breadthFirst[3] );
+					breadthFirst[0].swap( breadthFirst[3] );
+					breadthFirst[1].swap( breadthFirst[4] );
 
 					WidgetVec::const_iterator itor = breadthFirst[0].begin();
 					WidgetVec::const_iterator end  = breadthFirst[0].end();
@@ -882,6 +885,27 @@ namespace Colibri
 
 					breadthFirst[0].clear();
 					breadthFirst[1].clear();
+
+					// Nothing was accumulated by our children anymore. We're done rendering everything
+					// except the windows we've encountered (including whatever they contain).
+					// Our windows may add more to breadthFirst[0] [1] or [2].
+					if( breadthFirst[3].empty() && breadthFirst[4].empty() )
+					{
+						breadthFirst[2].swap( breadthFirst[5] );
+
+						itor = breadthFirst[2].begin();
+						end  = breadthFirst[2].end();
+
+						while( itor != end )
+						{
+							COLIBRI_ASSERT_HIGH( dynamic_cast<Renderable*>( *itor ) );
+							Renderable *asRenderable = static_cast<Renderable*>( *itor );
+							asRenderable->_addCommands( apiObject, true );
+							++itor;
+						}
+
+						breadthFirst[2].clear();
+					}
 				}
 			}
 		}
