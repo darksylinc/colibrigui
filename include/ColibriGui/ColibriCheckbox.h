@@ -154,7 +154,7 @@ namespace Colibri
 						TextVertAlignment::TextVertAlignment   newVertPos = TextVertAlignment::Top,
 						States::States                         baseState = States::NumStates );
 
-		void setTransformDirty( uint32_t dirtyReason ) final;
+		void setTransformDirty( uint32_t dirtyReason ) override;
 
 		void notifyWidgetAction( Widget *widget, Action::Action action ) override;
 	};
