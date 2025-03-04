@@ -41,7 +41,7 @@ namespace Colibri
 		m_shadowColour( Ogre::ColourValue::Black ),
 		m_shadowDisplace( 1.0f ),
 		m_defaultColour( m_colour ),
-		m_backgroundSize( Ogre::Vector2::ZERO ),
+		m_backgroundMargin( Ogre::Vector2::ZERO ),
 		m_defaultBackgroundColour( Ogre::ColourValue( 0.0f, 0.0f, 0.0f, 0.5f ) ),
 		m_defaultFontSize( m_manager->getDefaultFontSize26d6() ),
 		m_defaultFont( 0 ),
@@ -1096,7 +1096,7 @@ namespace Colibri
 				float prevCaretY = 0;
 
 				const uint32_t backgroundColour = itRichText->backgroundRgba32;
-				const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundSize;
+				const Ogre::Vector2 backgroundDisplacement = invWindowRes * m_backgroundMargin;
 
 				float lineHeight = 0;
 				float mostTop = std::numeric_limits<float>::max();

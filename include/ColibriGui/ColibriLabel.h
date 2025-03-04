@@ -65,13 +65,25 @@ namespace Colibri
 	protected:
 		bool m_shadowOutline;
 		Ogre::ColourValue m_shadowColour;
-		Ogre::Vector2 m_shadowDisplace;
+		Ogre::Vector2     m_shadowDisplace;
 
 		Ogre::ColourValue m_defaultColour;
-		Ogre::Vector2 m_backgroundSize;
+
+	public:
+		/// Grows (or shrinks, if negative) the text's background (i.e. RichText::noBackground == false).
+		/// This margin is not accounted by getSize(), thus large numbers may cause visual glitches.
+		/// Multi-line text doesn't look good if m_backgroundMargin.y > 0.
+		/// This feature quickly solves basic problems. If you need a more advanced robust solution,
+		/// parent this Label to a Renderable with a dark background skin instead.
+		///
+		/// PUBLIC VARIABLE. This variable can be altered directly.
+		/// Changes are reflected immediately.
+		Ogre::Vector2 m_backgroundMargin;
+
+	protected:
 		Ogre::ColourValue m_defaultBackgroundColour;
-		FontSize m_defaultFontSize;
-		uint16_t m_defaultFont;
+		FontSize          m_defaultFontSize;
+		uint16_t          m_defaultFont;
 
 		float m_lineHeightScale;
 		float m_lastLineHeightScale;
