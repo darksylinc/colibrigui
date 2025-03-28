@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 2.8.0...4.0.0)
 project(harfbuzz)
 
 enable_testing()
