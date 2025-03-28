@@ -25,7 +25,11 @@ namespace Colibri
 {
 	static LogListener DefaultLogListener;
 	static ColibriListener DefaultColibriListener;
-	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX, Ogre::HlmsPso() );
+	static const Ogre::HlmsCache c_dummyCache( 0, Ogre::HLMS_MAX,
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+											   Ogre::HLMS_CACHE_FLAGS_NONE,
+#endif
+											   Ogre::HlmsPso() );
 
 	const std::string ColibriManager::c_defaultTextDatablockNames[States::NumStates] =
 	{

@@ -35,9 +35,8 @@ THE SOFTWARE.
 #endif
 
 #if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
-#	define COLIBRI_STUB_ENTRY_ARG_DECL , HlmsCache *reservedStubEntry
-#	define COLIBRI_STUB_ENTRY_ARG , reservedStubEntry
-#	define COLIBRI_TID_ARG , tid
+#	define COLIBRI_STUB_ENTRY_ARG_DECL , HlmsCache *reservedStubEntry, uint64 deadline
+#	define COLIBRI_STUB_ENTRY_ARG , reservedStubEntry, deadline
 #	define COLIBRI_TID_ARG_DECL , const size_t tid
 #	define COLIBRI_TID_ARG , tid
 #else
