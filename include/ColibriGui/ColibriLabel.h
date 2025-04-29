@@ -261,6 +261,8 @@ namespace Colibri
 		void setTextColour( const Ogre::ColourValue &colour, size_t richTextTextIdx = (size_t)-1,
 							States::States forState = States::NumStates );
 
+		const Ogre::ColourValue &getDefaultTextColour() const { return m_defaultColour; }
+
 		/** Enables a shadow of the text behind each character, for highlighting or
 			making the text easier to read, specially against backgrounds of the same
 			colour as the text.
