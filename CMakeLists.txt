@@ -43,7 +43,7 @@ endif()
 add_subdirectory( Dependencies )
 
 if( NOT COLIBRIGUI_LIB_ONLY )
-	setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES )
+	setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES, FALSE, FALSE )
 else()
 	include_directories( "${OGRE_SOURCE}/OgreMain/include" )
 	include_directories( "${OGRE_BINARIES}/include" )
