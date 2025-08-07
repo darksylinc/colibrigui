@@ -46,11 +46,11 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 LayoutSpacer::getCellSize() const
 	{
-		return Ogre::Vector2::ZERO;
+		return m_minSize;
 	}
 	//-------------------------------------------------------------------------
 	Ogre::Vector2 LayoutSpacer::getCellMinSize() const
 	{
-		return Ogre::Vector2::ZERO;
+		return m_minSize;
 	}
 }
