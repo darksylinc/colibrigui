@@ -303,7 +303,7 @@ namespace Colibri
 
 		Ogre::Vector2 progressSize = frameSize * progressFraction;
 		if( m_displayType == Basic )
-			progressSize -= m_layers[frameLayer]->getBorderCombined();
+			progressSize = ( frameSize - m_layers[frameLayer]->getBorderCombined() ) * progressFraction;
 
 		m_layers[progressLayer]->setSize( progressSize );
 
