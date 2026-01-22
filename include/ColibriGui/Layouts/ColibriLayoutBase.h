@@ -37,6 +37,11 @@ namespace Colibri
 
 	public:
 		bool m_preventScrolling;
+		/// When set, this Layout will ignore the global ColibriManager::swapRTLControls setting.
+		/// This does not spread to child layouts.
+		///
+		/// PUBLIC VARIABLE. This variable can be altered directly.
+		bool m_ignoreRTLSwap;
 
 	protected:
 		void tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells );

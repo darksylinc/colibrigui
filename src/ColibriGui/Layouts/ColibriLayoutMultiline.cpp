@@ -26,6 +26,19 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void LayoutMultiline::clearCells() { m_cells.clear(); }
 	//-------------------------------------------------------------------------
+	void LayoutMultiline::reverseCellsForRTL( const size_t numCellsPerLine )
+	{
+		if( !m_manager->swapRTLControls() || m_vertical || m_ignoreRTLSwap )
+			return;
+
+		const size_t numCells = m_cells.size();
+		for( size_t i = 0u; i < numCells; i += numCellsPerLine )
+		{
+			const size_t endCell = std::min( i + numCellsPerLine, numCells );
+			std::reverse( m_cells.begin() + i, m_cells.begin() + endCell );
+		}
+	}
+	//-------------------------------------------------------------------------
 	inline Ogre::Vector2 LayoutMultiline::getTopLeft( bool bVertical,
 													  GridLocations::GridLocations gridLoc,
 													  float accumOffset, float cellSize,
@@ -167,6 +180,8 @@ namespace Colibri
 		const size_t numLines = std::max<size_t>( m_numLines, 1u );
 		const Ogre::Real fNumLines = Ogre::Real( numLines );
 		const size_t numCellsPerLine = Ogre::alignToNextMultiple( m_cells.size(), numLines ) / numLines;
+
+		reverseCellsForRTL( numCellsPerLine );
 
 		if( m_cells.size() % numLines )
 		{
@@ -471,6 +486,8 @@ namespace Colibri
 		m_currentSize.makeCeil( oldSize );
 		if( m_adjustableWindow )
 			syncToWindowSize();
+
+		reverseCellsForRTL( numCellsPerLine );
 
 		tellChildrenToUpdateLayout( m_cells );
 

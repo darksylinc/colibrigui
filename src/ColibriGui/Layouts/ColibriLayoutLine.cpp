@@ -164,6 +164,9 @@ namespace Colibri
 
 		const bool bVertical = m_vertical;
 
+		if( m_manager->swapRTLControls() && !bVertical && !m_ignoreRTLSwap )
+			std::reverse( m_cells.begin(), m_cells.end() );
+
 		std::vector<float> cellSizes;
 		cellSizes.resize( m_cells.size(), 0.0f );
 		std::vector<size_t> freeCells;
@@ -421,6 +424,9 @@ namespace Colibri
 		m_currentSize.makeCeil( oldSize );
 		if( m_adjustableWindow )
 			syncToWindowSize();
+
+		if( m_manager->swapRTLControls() && !bVertical && !m_ignoreRTLSwap )
+			std::reverse( m_cells.begin(), m_cells.end() );
 
 		tellChildrenToUpdateLayout( m_cells );
 

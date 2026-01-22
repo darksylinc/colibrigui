@@ -81,6 +81,8 @@ namespace Colibri
 		if( m_cells.empty() )
 			return;
 
+		const bool bSwapRtl = m_manager->swapRTLControls() && !m_ignoreRTLSwap;
+
 		const size_t numCells	= m_cells.size();
 		const size_t numColumns	= m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
 		const size_t numRows	= !m_transpose ? std::max( m_numColumns, (size_t)1u ) : getNumRows();
@@ -132,9 +134,12 @@ namespace Colibri
 		//Now apply sizes and offsets
 		for( size_t y=0; y<numRows; ++y )
 		{
-			for( size_t x=0; x<numColumns; ++x )
+			for( size_t x = 0u; x < numColumns; ++x )
 			{
-				const size_t idx = m_transpose ? (y * numColumns + x) :  (x * numRows + y);
+				const size_t idx = bSwapRtl
+									   ? ( m_transpose ? ( y * numColumns + numColumns - x - 1u )
+													   : ( ( numColumns - x - 1u ) * numRows + y ) )
+									   : ( m_transpose ? ( y * numColumns + x ) : ( x * numRows + y ) );
 				if( idx >= numCells )
 					continue;
 

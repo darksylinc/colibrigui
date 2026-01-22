@@ -26,7 +26,8 @@ namespace Colibri
 	*/
 	class LayoutMultiline : public LayoutBase
 	{
-		LayoutCellVec	m_cells;
+		LayoutCellVec m_cells;
+
 	public:
 		/// True to layout all cells in the first line as a column
 		/// There will 'm_numLines' columns.
@@ -86,6 +87,8 @@ namespace Colibri
 
 		size_t m_numLines;
 
+		void reverseCellsForRTL( const size_t numCellsPerLine );
+
 		/** Returns the top left location for the widget that is inside the cell
 		@remarks
 			This doc assumes m_vertical = false for explaining variables.
@@ -116,12 +119,13 @@ namespace Colibri
 												const Ogre::Vector2 &halfMargin );
 
 		Ogre::Vector2 getBiggestMargin( size_t columnIdx ) const;
+
 		void calculateCurrentSize();
 
 	public:
 		LayoutMultiline( ColibriManager *colibriManager );
 
-		const LayoutCellVec& getCells() const;
+		const LayoutCellVec &getCells() const;
 
 		void addCell( LayoutCell *cell );
 		void clearCells();

@@ -191,20 +191,27 @@ namespace Colibri
 		m_currentValue = Ogre::Math::Clamp( m_currentValue, m_minValue, m_maxValue );
 		m_optionLabel->setText( this->getCurrentValueStr() );
 
-		if( m_currentValue == m_minValue )
-			m_decrement->setHidden( true );
-		else
 		{
-			m_decrement->setHidden( false );
-			m_decrement->setState( m_currentState );
-		}
+			Button *decrement = m_decrement;
+			Button *increment = m_increment;
+			if( m_manager->swapRTLControls() )
+				std::swap( decrement, increment );
 
-		if( m_currentValue == m_maxValue )
-			m_increment->setHidden( true );
-		else
-		{
-			m_increment->setHidden( false );
-			m_increment->setState( m_currentState );
+			if( m_currentValue == m_minValue )
+				decrement->setHidden( true );
+			else
+			{
+				decrement->setHidden( false );
+				decrement->setState( m_currentState );
+			}
+
+			if( m_currentValue == m_maxValue )
+				increment->setHidden( true );
+			else
+			{
+				increment->setHidden( false );
+				increment->setState( m_currentState );
+			}
 		}
 
 		const Ogre::Vector2 sizeAfterClipping = getSizeAfterClipping();
