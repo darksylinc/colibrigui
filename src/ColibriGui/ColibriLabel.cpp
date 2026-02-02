@@ -136,6 +136,7 @@ namespace Colibri
 		else
 		{
 			m_rasterPrivateArea->setHidden( privateAreaGlyphs->empty() );
+			const size_t prevNumGlyphs = m_rasterPrivateArea->m_shapes.size();
 			m_rasterPrivateArea->m_shapes.clear();
 
 			const States::States currentState = m_currentState;
@@ -167,6 +168,10 @@ namespace Colibri
 				bmpGlyph.yoffset = static_cast<int16_t>( topLeft.y );
 				++itor;
 			}
+
+			const size_t currNumGlyphs = m_rasterPrivateArea->m_shapes.size();
+			if( currNumGlyphs > prevNumGlyphs )
+				m_manager->_notifyNumGlyphsBmpIsDirty();
 		}
 	}
 	//-------------------------------------------------------------------------
