@@ -24,6 +24,21 @@
 
 namespace Colibri
 {
+	// PUA: Private User Area.
+	// Unicode defines them as strong LTR. But since we're treating them more like emojis,
+	// they need to be weaker. We should be using U_OTHER_NEUTRAL on PUA, but for some reason
+	// it stops working when we do that. However U_EUROPEAN_NUMBER works like a charm.
+	static UCharDirection PUAClassCallback( const void *context, UChar32 c )
+	{
+		// Check if the character is in the PUA range
+		if( c >= 0xE000 && c <= 0xF8FF )
+		{
+			return U_EUROPEAN_NUMBER;  // Treat as Neutral, just like emojis.
+		}
+		// Fallback to default behavior for everything else.
+		return u_charDirection( c );
+	}
+
 	ShaperManager::ShaperManager( ColibriManager *colibriManager ) :
 		m_ftLibrary( 0 ),
 		m_colibriManager( colibriManager ),
@@ -55,6 +70,9 @@ namespace Colibri
 
 		m_bidi = ubidi_open();
 		ubidi_orderParagraphsLTR( m_bidi, 1 );
+
+		UErrorCode errorCode2 = U_ZERO_ERROR;
+		ubidi_setClassCallback( m_bidi, PUAClassCallback, nullptr, nullptr, nullptr, &errorCode2 );
 	}
 	//-------------------------------------------------------------------------
 	ShaperManager::~ShaperManager()
