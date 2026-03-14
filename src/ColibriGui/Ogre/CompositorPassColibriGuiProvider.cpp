@@ -36,6 +36,12 @@ namespace Ogre
 															   const RenderTargetViewDef *rtvDef,
 															   SceneManager *sceneManager )
 	{
+#if OGRE_VERSION >= OGRE_MAKE_VERSION( 4, 0, 0 )
+		// Not created by us.
+		if( definition->getCustomId() != IdString( "colibri_gui" ).getU32Value() )
+			return 0;
+#endif
+
 		COLIBRI_ASSERT( dynamic_cast<const CompositorPassColibriGuiDef *>( definition ) );
 		const CompositorPassColibriGuiDef *colibriGuiDef =
 			static_cast<const CompositorPassColibriGuiDef *>( definition );
