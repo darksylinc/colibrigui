@@ -187,7 +187,8 @@ namespace Colibri
 			accumOffset.y += biggestSize.y;
 		}
 
-		m_currentSize = biggestSize * Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) );
+		m_currentSize = biggestSize * Ogre::Vector2( Ogre::Real( numColumns ), Ogre::Real( numRows ) ) +
+						layoutMargin;
 		if( m_adjustableWindow )
 			syncToWindowSize();
 
