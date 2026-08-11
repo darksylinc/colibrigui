@@ -1511,8 +1511,14 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void ColibriManager::scrollToWidget( Widget *widget )
 	{
-		// Only scroll if the immediate parent is a window.
+		// Find the first parent window so we can scroll.
 		Window *parentWindow = widget->getParent()->getAsWindow();
+		while( !parentWindow && widget )
+		{
+			widget = widget->getParent();
+			parentWindow = widget->getParent()->getAsWindow();
+		}
+
 		if( parentWindow )
 		{
 			// Ensure the widget is up to date. The window is implicitly going to be updated.
