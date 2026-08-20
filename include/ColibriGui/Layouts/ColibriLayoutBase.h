@@ -85,6 +85,16 @@ namespace Colibri
 		void setCellSize( const Ogre::Vector2 &size ) final;
 		void setCellSize( const Ogre::Vector2 &size, const Ogre::Vector2 &hardSize ) final;
 		Ogre::Vector2 getCellSize() const override;
+
+		/** Debug dump of the layout tree structure
+		@remarks
+			This function ignores anything performance sensitive and uses C++ RTTI and whatever
+			tool is at our disposal to print debug information. It can also perform excessive
+			allocation.
+		@param outStr
+			Output string to write to
+		*/
+		void debugDump( std::string &outStr );
 	};
 }
 
