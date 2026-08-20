@@ -100,6 +100,8 @@ namespace Colibri
 		void addCell( LayoutCell *cell );
 		void clearCells();
 
+		const LayoutCellVec& getCells() const { return m_cells; }
+
 		/// Moves and resizes all cells to be layed out as either a row or a column.
 		void layout();
 

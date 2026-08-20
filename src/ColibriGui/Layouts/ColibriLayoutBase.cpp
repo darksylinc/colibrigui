@@ -106,7 +106,8 @@ namespace Colibri
 			return &line->getCells();
 		if( const LayoutMultiline *multiline = dynamic_cast<const LayoutMultiline *>( cell ) )
 			return &multiline->getCells();
-		// LayoutTableSameSize doesn't have a public getCells() method
+		if( const LayoutTableSameSize *table = dynamic_cast<const LayoutTableSameSize *>( cell ) )
+			return &table->getCells();
 		return nullptr;
 	}
 	//-------------------------------------------------------------------------
