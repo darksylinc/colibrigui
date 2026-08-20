@@ -22,14 +22,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void LayoutBase::tellChildrenToUpdateLayout( const LayoutCellVec &childrenCells )
 	{
-		LayoutCellVec::const_iterator itor = childrenCells.begin();
-		LayoutCellVec::const_iterator end = childrenCells.end();
-
-		while( itor != end )
-		{
-			( *itor )->notifyLayoutUpdated();
-			++itor;
-		}
+		for( LayoutCell *cell : childrenCells )
+			cell->notifyLayoutUpdated();
 	}
 	//-------------------------------------------------------------------------
 	void LayoutBase::syncFromWindowSize()
@@ -73,14 +67,8 @@ namespace Colibri
 	//-------------------------------------------------------------------------
 	void LayoutBase::setMarginToAllCells( const LayoutCellVec &cells, const Ogre::Vector2 &margin )
 	{
-		LayoutCellVec::const_iterator itor = cells.begin();
-		LayoutCellVec::const_iterator endt = cells.end();
-
-		while( itor != endt )
-		{
-			( *itor )->m_margin = margin;
-			++itor;
-		}
+		for( LayoutCell *cell : cells )
+			cell->m_margin = margin;
 	}
 	//-------------------------------------------------------------------------
 	void LayoutBase::setCellOffset( const Ogre::Vector2 &topLeft )
@@ -164,22 +152,20 @@ namespace Colibri
 		if( const LayoutLine *line = dynamic_cast<const LayoutLine *>( cell ) )
 		{
 			return "[LayoutLine m_vertical=" + Ogre::StringConverter::toString( line->m_vertical ) +
-				   " | " + posInfo + " | " + sizeInfo +
-				   " | " + minInfo + (hardMaxInfo.empty() ? "" : " | " + hardMaxInfo) + "]";
+				   " | " + posInfo + " | " + sizeInfo + " | " + minInfo +
+				   ( hardMaxInfo.empty() ? "" : " | " + hardMaxInfo ) + "]";
 		}
 		else if( const LayoutMultiline *multiline = dynamic_cast<const LayoutMultiline *>( cell ) )
 		{
 			return "[LayoutMultiline m_vertical=" +
-				   Ogre::StringConverter::toString( multiline->m_vertical ) + " | " + posInfo +
-				   " | " + sizeInfo + " | " + minInfo +
-				   (hardMaxInfo.empty() ? "" : " | " + hardMaxInfo) + "]";
+				   Ogre::StringConverter::toString( multiline->m_vertical ) + " | " + posInfo + " | " +
+				   sizeInfo + " | " + minInfo + ( hardMaxInfo.empty() ? "" : " | " + hardMaxInfo ) + "]";
 		}
 		else if( const LayoutTableSameSize *table = dynamic_cast<const LayoutTableSameSize *>( cell ) )
 		{
 			return "[LayoutTableSameSize m_numCols=" +
-				   Ogre::StringConverter::toString( table->m_numColumns ) + " | " + posInfo +
-				   " | " + sizeInfo + " | " + minInfo +
-				   (hardMaxInfo.empty() ? "" : " | " + hardMaxInfo) + "]";
+				   Ogre::StringConverter::toString( table->m_numColumns ) + " | " + posInfo + " | " +
+				   sizeInfo + " | " + minInfo + ( hardMaxInfo.empty() ? "" : " | " + hardMaxInfo ) + "]";
 		}
 		else if( const Widget *widget = dynamic_cast<const Widget *>( cell ) )
 		{
@@ -187,18 +173,18 @@ namespace Colibri
 			const std::string &debugName = widget->_getDebugName();
 
 			if( !debugName.empty() )
-				return "[Colibri::" + typeName + " | " + debugName + " | " + posInfo + " | " +
-					   sizeInfo + " | " + minInfo + "]";
+				return "[Colibri::" + typeName + " | " + debugName + " | " + posInfo + " | " + sizeInfo +
+					   " | " + minInfo + "]";
 			return "[Colibri::" + typeName + " | " + posInfo + " | " + sizeInfo + " | " + minInfo + "]";
 		}
 		else if( dynamic_cast<const LayoutSpacer *>( cell ) )
 		{
 			return "[LayoutSpacer | " + posInfo + " | " + sizeInfo +
-				   (minInfo.empty() ? "" : " | " + minInfo) + "]";
+				   ( minInfo.empty() ? "" : " | " + minInfo ) + "]";
 		}
 		return "[LayoutCell | " + posInfo + " | " + sizeInfo +
-			   (minInfo.empty() ? "" : " | " + minInfo) +
-			   (hardMaxInfo.empty() ? "" : " | " + hardMaxInfo) + "]";
+			   ( minInfo.empty() ? "" : " | " + minInfo ) +
+			   ( hardMaxInfo.empty() ? "" : " | " + hardMaxInfo ) + "]";
 	}
 	//-------------------------------------------------------------------------
 	/// Helper to dump a layout cell recursively
