@@ -403,6 +403,7 @@ namespace Colibri
 			}
 
 			finalCellSize.makeCeil( cellMinSize );
+			finalCellSize.makeFloor( hardCellSize );
 
 			const Ogre::Vector2 halfMargin = cell->m_margin * (0.5f * marginFactor);
 
