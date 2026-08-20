@@ -148,6 +148,8 @@ namespace Colibri
 			// Also include getCellMinSize() for consistency
 			minInfo += ", getCellMinSize=" + Ogre::StringConverter::toString( cell->getCellMinSize() );
 
+			posInfo = "pos=" + Ogre::StringConverter::toString( layout->m_topLeft );
+
 			// For layout cells, size shows the min size (since actual size not available)
 			sizeInfo = "size=" + Ogre::StringConverter::toString( cell->getCellMinSize() );
 		}
