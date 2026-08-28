@@ -411,6 +411,39 @@ There are three layout classes:
 
 ---
 
+### Layout Cell Order Important
+
+When using ColibriGui layouts (`LayoutLine`, `LayoutTableSameSize`, etc.):
+
+1. **Layout Cell Order is Preserved**: When you call `rootLayout.addCell()` multiple times, the order is preserved in rendering
+2. **Use Pointers for Multiple Layout Types**: If you use different layout types conditionally (e.g., `LayoutLine` for one mode, `LayoutTableSameSize` for another), you can use a `LayoutBase*` pointer:
+
+```cpp
+Colibri::LayoutLine lineLayout( colibriManager );
+Colibri::LayoutTableSameSize tableLayout( colibriManager );
+Colibri::LayoutBase* buttonsLayout = &lineLayout;
+
+if( mode == SomeMode )
+{
+    lineLayout.m_vertical = false;
+    // Add cells to lineLayout...
+}
+else
+{
+    tableLayout.m_numColumns = 2u;
+    // Add cells to tableLayout...
+    buttonsLayout = &tableLayout;
+}
+
+// Now addCell() order is consistent
+rootLayout.addCell( mLabel );
+rootLayout.addCell( buttonsLayout );  // Works for both layouts
+```
+
+This ensures the label always appears before the buttons, regardless of which layout is used. You can't simply call `rootLayout.addCell( &lineLayout )` and `rootLayout.addCell( &tableLayout )` before `rootLayout.addCell( mLabel )` because that would alter the original order. Of course, if the label was originally called last, then you could do that. But you must not alter the order unless that is intended. In that sense, treat Layouts like CSS.
+
+---
+
 ## Text & Internationalization
 
 ### Reading Directions
